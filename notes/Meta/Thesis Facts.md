@@ -1,5 +1,7 @@
 # Thesis Facts
 
+[TOC]
+
 * Phase 1 (proposal + initial work) 15 EC, 11 weeks
 * Phase 2 (execution) 25 EC, 18 weeks
 * Research project:
@@ -13,6 +15,9 @@
 
 ## Phase 1 
 
+* Topic:
+  * Based on Track
+  * Expertise
 * Write a good and clear proposal
   * Be clear in what the RQs are
   * What the approach will be
@@ -21,6 +26,10 @@
 * Invest a lot in literature study
 * Build initial infrastructure for experimental work
 * Write concrete execution plan for phase 2
+* Application:
+  * Osiris Student:
+    * My Cases -> Start Case and then Reserach Project GSNS
+  * Need 4 weeks from the start
 
 ### Proposal TOC
 
@@ -41,3 +50,12 @@
 * Timetable and planning
   * What will you do with the remainder of the thesis?
   * Give a timetable for what should be done
+
+## Part 2
+
+* Meet regularly (2 to 4 weeks)
+  * Show everything
+* Options:
+  * Self-contained thesis (40-80 pages)
+  * Paper with appendix
+* 
