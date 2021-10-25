@@ -8,3 +8,14 @@ sync-to-notion:
 
 sync-to-local:
 	notionsci sync markdown pages 0642b7dd4fee4acf8e48e45b67faad2b ./references
+
+sync: sync-to-notion sync-to-local
+
+commit:
+	git add -A
+	git commit -m "Autocommit changes on $(date)"
+	$(MAKE) push
+
+push:
+	git push origin master
+	git push mirror master
