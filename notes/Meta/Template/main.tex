@@ -1,0 +1,52 @@
+\documentclass[acmsmall,nonacm]{acmart}
+
+\usepackage{booktabs} % For formal tables
+
+\usepackage[ruled]{algorithm2e} % For algorithms
+\renewcommand{\algorithmcfname}{ALGORITHM}
+\SetAlFnt{\small}
+\SetAlCapFnt{\small}
+\SetAlCapNameFnt{\small}
+\SetAlCapHSkip{0pt}
+\IncMargin{-\parindent}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+\begin{document}
+
+$if(title)$
+\title{$title$}
+$endif$
+$if(author)$
+\subtitle{By $author$}
+$endif$
+
+
+\author{Egor Dmitriev}
+\affiliation{%
+  \institution{Utrecht Univeristy}
+  \country{The Netherlands}}
+\email{e.dmitriev@students.uu.nl}
+
+
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+\maketitle
+
+\renewcommand{\shortauthors}{$author.name$}
+
+
+
+
+$body$
+
+
+
+
+\end{document} 
