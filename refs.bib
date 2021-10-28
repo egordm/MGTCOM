@@ -1,4 +1,20 @@
 
+@article{abu-el-haijaWatchYourStep2018,
+  title = {Watch {{Your Step}}: Learning {{Node Embeddings}} via {{Graph Attention}}},
+  shorttitle = {Watch {{Your Step}}},
+  author = {{Abu-El-Haija}, Sami and Perozzi, Bryan and {Al-Rfou}, Rami and Alemi, Alex},
+  year = {2018},
+  month = sep,
+  journal = {arXiv:1710.09599 [cs, stat]},
+  eprint = {1710.09599},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Graph embedding methods represent nodes in a continuous vector space, preserving information from the graph (e.g. by sampling random walks). There are many hyper-parameters to these methods (such as random walk length) which have to be manually tuned for every graph. In this paper, we replace random walk hyper-parameters with trainable parameters that we automatically learn via backpropagation. In particular, we learn a novel attention model on the power series of the transition matrix, which guides the random walk to optimize an upstream objective. Unlike previous approaches to attention models, the method that we propose utilizes attention parameters exclusively on the data (e.g. on the random walk), and not used by the model for inference. We experiment on link prediction tasks, as we aim to produce embeddings that best-preserve the graph structure, generalizing to unseen information. We improve state-of-the-art on a comprehensive suite of real world datasets including social, collaboration, and biological networks. Adding attention to random walks can reduce the error by 20\% to 45\% on datasets we attempted. Further, our learned attention parameters are different for every graph, and our automatically-found values agree with the optimal choice of hyper-parameter if we manually tune existing methods.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio2,Statistics - Machine Learning,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/NNKLCN8M/Abu-El-Haija et al_2018_Watch Your Step.pdf;/home/egordm/Documents/Research/Reference/storage/VH9LCXBM/1710.html}
+}
+
 @inproceedings{cavallariLearningCommunityEmbedding2017,
   title = {Learning {{Community Embedding}} with {{Community Detection}} and {{Node Embedding}} on {{Graphs}}},
   booktitle = {Proceedings of the 2017 {{ACM}} on {{Conference}} on {{Information}} and {{Knowledge Management}}},
@@ -14,6 +30,24 @@
   langid = {english},
   keywords = {prio9,unread},
   file = {/home/egordm/Documents/Research/Reference/storage/H4GMWPTE/Cavallari et al_2017_Learning Community Embedding with Community Detection and Node Embedding on.pdf}
+}
+
+@article{dakicheTrackingCommunityEvolution2019,
+  title = {Tracking Community Evolution in Social Networks: A Survey},
+  shorttitle = {Tracking Community Evolution in Social Networks},
+  author = {Dakiche, Narimene and {Benbouzid-Si Tayeb}, Fatima and Slimani, Yahya and Benatchba, Karima},
+  year = {2019},
+  month = may,
+  journal = {Information Processing \& Management},
+  volume = {56},
+  number = {3},
+  pages = {1084--1102},
+  issn = {0306-4573},
+  doi = {10.1016/j.ipm.2018.03.005},
+  abstract = {This paper presents a survey of previous studies done on the problem of tracking community evolution over time in dynamic social networks. This problem is of crucial importance in the field of social network analysis. The goal of our paper is to classify existing methods dealing with the issue. We propose a classification of various methods for tracking community evolution in dynamic social networks into four main approaches using as a criterion the functioning principle: the first one is based on independent successive static detection and matching; the second is based on dependent successive static detection; the third is based on simultaneous study of all stages of community evolution; finally, the fourth and last one concerns methods working directly on temporal networks. Our paper starts by giving basic concepts about social networks, community structure and strategies for evaluating community detection methods. Then, it describes the different approaches, and exposes the strengths as well as the weaknesses of each.},
+  langid = {english},
+  keywords = {Community evolution,Dynamic community detection,Dynamic network,prio5,Social network,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/BGF5S9MR/S0306457317305551.html}
 }
 
 @article{faniUserCommunityDetection2020,
@@ -32,6 +66,66 @@
   file = {/home/egordm/Documents/Research/Reference/storage/L2G4I5AG/Fani et al_2020_User community detection via embedding of social network structure and temporal.pdf}
 }
 
+@inproceedings{greeneTrackingEvolutionCommunities2010,
+  title = {Tracking the {{Evolution}} of {{Communities}} in {{Dynamic Social Networks}}},
+  booktitle = {2010 {{International Conference}} on {{Advances}} in {{Social Networks Analysis}} and {{Mining}}},
+  author = {Greene, Derek and Doyle, D{\'o}nal and Cunningham, P{\'a}draig},
+  year = {2010},
+  month = aug,
+  pages = {176--183},
+  doi = {10.1109/ASONAM.2010.17},
+  abstract = {Real-world social networks from a variety of domains can naturally be modelled as dynamic graphs. However, approaches to detecting communities have largely focused on identifying communities in static graphs. Recently, researchers have begun to consider the problem of tracking the evolution of groups of users in dynamic scenarios. Here we describe a model for tracking the progress of communities over time in a dynamic network, where each community is characterised by a series of significant evolutionary events. This model is used to motivate a community-matching strategy for efficiently identifying and tracking dynamic communities. Evaluations on synthetic graphs containing embedded events demonstrate that this strategy can successfully track communities over time in volatile networks. In addition, we describe experiments exploring the dynamic communities detected in a real mobile operator network containing millions of users.},
+  keywords = {Benchmark testing,Communities,community finding,dynamic networks,Heuristic algorithms,Merging,Mobile communication,Partitioning algorithms,prio4,social network analysis,Social network services,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/79L3I688/Greene et al_2010_Tracking the Evolution of Communities in Dynamic Social Networks.pdf;/home/egordm/Documents/Research/Reference/storage/5RVCMN8U/5562773.html}
+}
+
+@article{groverNode2vecScalableFeature2016,
+  title = {Node2vec: Scalable {{Feature Learning}} for {{Networks}}},
+  shorttitle = {Node2vec},
+  author = {Grover, Aditya and Leskovec, Jure},
+  year = {2016},
+  month = jul,
+  journal = {arXiv:1607.00653 [cs, stat]},
+  eprint = {1607.00653},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Prediction tasks over nodes and edges in networks require careful effort in engineering features used by learning algorithms. Recent research in the broader field of representation learning has led to significant progress in automating prediction by learning the features themselves. However, present feature learning approaches are not expressive enough to capture the diversity of connectivity patterns observed in networks. Here we propose node2vec, an algorithmic framework for learning continuous feature representations for nodes in networks. In node2vec, we learn a mapping of nodes to a low-dimensional space of features that maximizes the likelihood of preserving network neighborhoods of nodes. We define a flexible notion of a node's network neighborhood and design a biased random walk procedure, which efficiently explores diverse neighborhoods. Our algorithm generalizes prior work which is based on rigid notions of network neighborhoods, and we argue that the added flexibility in exploring neighborhoods is the key to learning richer representations. We demonstrate the efficacy of node2vec over existing state-of-the-art techniques on multi-label classification and link prediction in several real-world networks from diverse domains. Taken together, our work represents a new way for efficiently learning state-of-the-art task-independent representations in complex networks.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio3,Statistics - Machine Learning,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/AEQN6HVT/Grover_Leskovec_2016_node2vec.pdf;/home/egordm/Documents/Research/Reference/storage/CG6XISUF/1607.html}
+}
+
+@article{hamiltonInductiveRepresentationLearning2018,
+  title = {Inductive {{Representation Learning}} on {{Large Graphs}}},
+  author = {Hamilton, William L. and Ying, Rex and Leskovec, Jure},
+  year = {2018},
+  month = sep,
+  journal = {arXiv:1706.02216 [cs, stat]},
+  eprint = {1706.02216},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Low-dimensional embeddings of nodes in large graphs have proved extremely useful in a variety of prediction tasks, from content recommendation to identifying protein functions. However, most existing approaches require that all nodes in the graph are present during training of the embeddings; these previous approaches are inherently transductive and do not naturally generalize to unseen nodes. Here we present GraphSAGE, a general, inductive framework that leverages node feature information (e.g., text attributes) to efficiently generate node embeddings for previously unseen data. Instead of training individual embeddings for each node, we learn a function that generates embeddings by sampling and aggregating features from a node's local neighborhood. Our algorithm outperforms strong baselines on three inductive node-classification benchmarks: we classify the category of unseen nodes in evolving information graphs based on citation and Reddit post data, and we show that our algorithm generalizes to completely unseen graphs using a multi-graph dataset of protein-protein interactions.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio2,Statistics - Machine Learning,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/IRLHCRZT/Hamilton et al_2018_Inductive Representation Learning on Large Graphs.pdf;/home/egordm/Documents/Research/Reference/storage/T4ZBKLY9/1706.html}
+}
+
+@article{kazemiRepresentationLearningDynamic2020,
+  title = {Representation {{Learning}} for {{Dynamic Graphs}}: A {{Survey}}},
+  shorttitle = {Representation {{Learning}} for {{Dynamic Graphs}}},
+  author = {Kazemi, Seyed Mehran and Goel, Rishab and Jain, Kshitij and Kobyzev, Ivan and Sethi, Akshay and Forsyth, Peter and Poupart, Pascal},
+  year = {2020},
+  month = apr,
+  journal = {arXiv:1905.11485 [cs, stat]},
+  eprint = {1905.11485},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Graphs arise naturally in many real-world applications including social networks, recommender systems, ontologies, biology, and computational finance. Traditionally, machine learning models for graphs have been mostly designed for static graphs. However, many applications involve evolving graphs. This introduces important challenges for learning and inference since nodes, attributes, and edges change over time. In this survey, we review the recent advances in representation learning for dynamic graphs, including dynamic knowledge graphs. We describe existing models from an encoder-decoder perspective, categorize these encoders and decoders based on the techniques they employ, and analyze the approaches in each category. We also review several prominent applications and widely used datasets and highlight directions for future research.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,prio2,Statistics - Machine Learning,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/ZSVE7WAW/Kazemi et al_2020_Representation Learning for Dynamic Graphs.pdf;/home/egordm/Documents/Research/Reference/storage/DPV9QU2Z/1905.html}
+}
+
 @article{kimCommunityDetectionMultiLayer2015,
   title = {Community {{Detection}} in {{Multi}}-{{Layer Graphs}}: A {{Survey}}},
   shorttitle = {Community {{Detection}} in {{Multi}}-{{Layer Graphs}}},
@@ -47,6 +141,22 @@
   abstract = {Community detection, also known as graph clustering, has been extensively studied in the literature. The goal of community detection is to partition vertices in a complex graph into densely-connected components socalled communities. In recent applications, however, an entity is associated with multiple aspects of relationships, which brings new challenges in community detection. The multiple aspects of interactions can be modeled as a multi-layer graph comprised of multiple interdependent graphs, where each graph represents an aspect of the interactions. Great efforts have therefore been made to tackle the problem of community detection in multi-layer graphs. In this survey, we provide readers with a comprehensive understanding of community detection in multi-layer graphs and compare the state-of-the-art algorithms with respect to their underlying properties.},
   keywords = {prio0,unread},
   file = {/home/egordm/Documents/Research/Reference/storage/XN9N6HX9/Kim_Lee_2015_Community Detection in Multi-Layer Graphs.pdf}
+}
+
+@article{liDISCOInfluenceMaximization2019,
+  title = {{{DISCO}}: Influence {{Maximization Meets Network Embedding}} and {{Deep Learning}}},
+  shorttitle = {{{DISCO}}},
+  author = {Li, Hui and Xu, Mengting and Bhowmick, Sourav S. and Sun, Changsheng and Jiang, Zhongyuan and Cui, Jiangtao},
+  year = {2019},
+  month = jun,
+  journal = {arXiv:1906.07378 [cs]},
+  eprint = {1906.07378},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
+  abstract = {Since its introduction in 2003, the influence maximization (IM) problem has drawn significant research attention in the literature. The aim of IM is to select a set of k users who can influence the most individuals in the social network. The problem is proven to be NP-hard. A large number of approximate algorithms have been proposed to address this problem. The state-of-the-art algorithms estimate the expected influence of nodes based on sampled diffusion paths. As the number of required samples have been recently proven to be lower bounded by a particular threshold that presets tradeoff between the accuracy and efficiency, the result quality of these traditional solutions is hard to be further improved without sacrificing efficiency. In this paper, we present an orthogonal and novel paradigm to address the IM problem by leveraging deep learning models to estimate the expected influence. Specifically, we present a novel framework called DISCO that incorporates network embedding and deep reinforcement learning techniques to address this problem. Experimental study on real-world networks demonstrates that DISCO achieves the best performance w.r.t efficiency and influence spread quality compared to state-of-the-art classical solutions. Besides, we also show that the learning model exhibits good generality.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio3,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/V3U57YNW/Li et al_2019_DISCO.pdf;/home/egordm/Documents/Research/Reference/storage/JQGMQ2IU/1906.html}
 }
 
 @article{liuDeepLearningCommunity2020,
@@ -78,8 +188,39 @@
   abstract = {Networks evolve continuously over time with the addition, deletion, and changing of links and nodes. Although many networks contain this type of temporal information, the majority of research in network representation learning has focused on static snapshots of the graph and has largely ignored the temporal dynamics of the network. In this work, we describe a general framework for incorporating temporal information into network embedding methods. The framework gives rise to methods for learning time-respecting embeddings from continuous-time dynamic networks. Overall, the experiments demonstrate the effectiveness of the proposed framework and dynamic network embedding approach as it achieves an average gain of 11.9\% across all methods and graphs. The results indicate that modeling temporal dependencies in graphs is important for learning appropriate and meaningful network representations.},
   isbn = {978-1-4503-5640-4},
   langid = {english},
-  keywords = {prio9,unread},
+  keywords = {prio9,read},
   file = {/home/egordm/Documents/Research/Reference/storage/2MRF83PM/Nguyen et al_2018_Continuous-Time Dynamic Network Embeddings.pdf}
+}
+
+@article{perozziDeepWalkOnlineLearning2014,
+  title = {{{DeepWalk}}: Online {{Learning}} of {{Social Representations}}},
+  shorttitle = {{{DeepWalk}}},
+  author = {Perozzi, Bryan and {Al-Rfou}, Rami and Skiena, Steven},
+  year = {2014},
+  month = aug,
+  journal = {Proceedings of the 20th ACM SIGKDD international conference on Knowledge discovery and data mining},
+  eprint = {1403.6652},
+  eprinttype = {arxiv},
+  pages = {701--710},
+  doi = {10.1145/2623330.2623732},
+  abstract = {We present DeepWalk, a novel approach for learning latent representations of vertices in a network. These latent representations encode social relations in a continuous vector space, which is easily exploited by statistical models. DeepWalk generalizes recent advancements in language modeling and unsupervised feature learning (or deep learning) from sequences of words to graphs. DeepWalk uses local information obtained from truncated random walks to learn latent representations by treating walks as the equivalent of sentences. We demonstrate DeepWalk's latent representations on several multi-label network classification tasks for social networks such as BlogCatalog, Flickr, and YouTube. Our results show that DeepWalk outperforms challenging baselines which are allowed a global view of the network, especially in the presence of missing information. DeepWalk's representations can provide \$F\_1\$ scores up to 10\% higher than competing methods when labeled data is sparse. In some experiments, DeepWalk's representations are able to outperform all baseline methods while using 60\% less training data. DeepWalk is also scalable. It is an online learning algorithm which builds useful incremental results, and is trivially parallelizable. These qualities make it suitable for a broad class of real world applications such as network classification, and anomaly detection.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,H.2.8,I.2.6,I.5.1,prio3,unread}
+}
+
+@article{sankarDynamicGraphRepresentation2019,
+  title = {Dynamic {{Graph Representation Learning}} via {{Self}}-{{Attention Networks}}},
+  author = {Sankar, Aravind and Wu, Yanhong and Gou, Liang and Zhang, Wei and Yang, Hao},
+  year = {2019},
+  month = jun,
+  journal = {arXiv:1812.09430 [cs, stat]},
+  eprint = {1812.09430},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Learning latent representations of nodes in graphs is an important and ubiquitous task with widespread applications such as link prediction, node classification, and graph visualization. Previous methods on graph representation learning mainly focus on static graphs, however, many real-world graphs are dynamic and evolve over time. In this paper, we present Dynamic Self-Attention Network (DySAT), a novel neural architecture that operates on dynamic graphs and learns node representations that capture both structural properties and temporal evolutionary patterns. Specifically, DySAT computes node representations by jointly employing self-attention layers along two dimensions: structural neighborhood and temporal dynamics. We conduct link prediction experiments on two classes of graphs: communication networks and bipartite rating networks. Our experimental results show that DySAT has a significant performance gain over several different state-of-the-art graph embedding baselines.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio2,Statistics - Machine Learning,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/H9BHSQ8A/Sankar et al_2019_Dynamic Graph Representation Learning via Self-Attention Networks.pdf;/home/egordm/Documents/Research/Reference/storage/GWLQJFTM/1812.html}
 }
 
 @article{suComprehensiveSurveyCommunity2021,
@@ -113,6 +254,25 @@
   file = {/home/egordm/Documents/Research/Reference/storage/Q95C8ZTH/Wang et al_2021_Heterogeneous Graph Attention Network.pdf}
 }
 
+@article{wuComprehensiveSurveyGraph2021,
+  title = {A {{Comprehensive Survey}} on {{Graph Neural Networks}}},
+  author = {Wu, Zonghan and Pan, Shirui and Chen, Fengwen and Long, Guodong and Zhang, Chengqi and Yu, Philip S.},
+  year = {2021},
+  month = jan,
+  journal = {IEEE Transactions on Neural Networks and Learning Systems},
+  volume = {32},
+  number = {1},
+  eprint = {1901.00596},
+  eprinttype = {arxiv},
+  pages = {4--24},
+  issn = {2162-237X, 2162-2388},
+  doi = {10.1109/TNNLS.2020.2978386},
+  abstract = {Deep learning has revolutionized many machine learning tasks in recent years, ranging from image classification and video processing to speech recognition and natural language understanding. The data in these tasks are typically represented in the Euclidean space. However, there is an increasing number of applications where data are generated from non-Euclidean domains and are represented as graphs with complex relationships and interdependency between objects. The complexity of graph data has imposed significant challenges on existing machine learning algorithms. Recently, many studies on extending deep learning approaches for graph data have emerged. In this survey, we provide a comprehensive overview of graph neural networks (GNNs) in data mining and machine learning fields. We propose a new taxonomy to divide the state-of-the-art graph neural networks into four categories, namely recurrent graph neural networks, convolutional graph neural networks, graph autoencoders, and spatial-temporal graph neural networks. We further discuss the applications of graph neural networks across various domains and summarize the open source codes, benchmark data sets, and model evaluation of graph neural networks. Finally, we propose potential research directions in this rapidly growing field.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,prio2,read,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/NDVQRATJ/Wu et al_2021_A Comprehensive Survey on Graph Neural Networks.pdf;/home/egordm/Documents/Research/Reference/storage/8S5ZPWFD/1901.html}
+}
+
 @article{yangHeterogeneousNetworkRepresentation2020,
   title = {Heterogeneous {{Network Representation Learning}}: A {{Unified Framework}} with {{Survey}} and {{Benchmark}}},
   shorttitle = {Heterogeneous {{Network Representation Learning}}},
@@ -128,6 +288,22 @@
   langid = {english},
   keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio9,unread},
   file = {/home/egordm/Documents/Research/Reference/storage/H3H8GVWY/Yang et al_2020_Heterogeneous Network Representation Learning.pdf}
+}
+
+@article{zhouDynamicNetworkEmbedding2018,
+  title = {Dynamic {{Network Embedding}} by {{Modeling Triadic Closure Process}}},
+  author = {Zhou, Lekui and Yang, Yang and Ren, Xiang and Wu, Fei and Zhuang, Yueting},
+  year = {2018},
+  month = apr,
+  journal = {Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume = {32},
+  number = {1},
+  issn = {2374-3468},
+  abstract = {Network embedding, which aims to learn the low-dimensional representations of vertices, is an important task and has attracted considerable research efforts recently. In real world, networks, like social network and biological networks, are dynamic and evolving over time. However, almost all the existing network embedding methods focus on static networks while ignore network dynamics. In this paper, we present a novel representation learning approach, DynamicTriad, to preserve both structural information and evolution patterns of a given network. The general idea of our approach is to impose triad, which is a group of three vertices and is one of the basic units of networks. In particular, we model how a closed triad, which consists of three vertices connected with each other, develops from an open triad that has two of three vertices not connected with each other. This triadic closure process is a fundamental mechanism in the formation and evolution of networks, thereby makes our model being able to capture the network dynamics and to learn representation vectors for each vertex at different time steps. Experimental results on three real-world networks demonstrate that,  compared with several state-of-the-art techniques, DynamicTriad achieves substantial gains in several application scenarios. For example, our approach can effectively be applied and help to identify telephone frauds in a mobile network, and to predict whether a user will repay her loans or not in a loan network.},
+  copyright = {Copyright (c)},
+  langid = {english},
+  keywords = {prio3,Triad Closure Process,unread},
+  file = {/home/egordm/Documents/Research/Reference/storage/P7GJTZ8B/Zhou et al_2018_Dynamic Network Embedding by Modeling Triadic Closure Process.pdf}
 }
 
 
