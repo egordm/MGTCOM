@@ -3,7 +3,7 @@
 coffee: notes-to-pdf sync commit
 
 notes:
-	typora notes
+	typora notes &
 
 notes-to-pdf:
 	@echo "Converting Notes to PDF"

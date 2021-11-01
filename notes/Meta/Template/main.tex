@@ -1,6 +1,7 @@
 \documentclass[acmsmall,nonacm]{acmart}
 
 \usepackage{booktabs} % For formal tables
+\usepackage{longtable}
 
 \usepackage[ruled]{algorithm2e} % For algorithms
 \renewcommand{\algorithmcfname}{ALGORITHM}
@@ -18,6 +19,8 @@
 
 $if(title)$
 \title{$title$}
+$else$
+\title{Could not detect title}
 $endif$
 $if(author)$
 \subtitle{By $author$}
@@ -49,4 +52,4 @@ $body$
 
 
 
-\end{document} 
+\end{document}
