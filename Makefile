@@ -28,7 +28,7 @@ sync: sync-to-notion sync-to-local
 
 commit:
 	git add -A
-	git commit -m "Autocommit changes on $($$(date))"
+	git commit -m "Autocommit changes on $(shell date -R)"
 	$(MAKE) push
 
 push:
