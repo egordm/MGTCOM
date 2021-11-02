@@ -1,5 +1,5 @@
 ---
-title: 
+title: ""
 author: 
 creator: Egor Dmitriev (6100120)
 ---
