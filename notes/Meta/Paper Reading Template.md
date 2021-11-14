@@ -1,7 +1,7 @@
 ---
 title: ""
-author: 
-creator: Egor Dmitriev (6100120)
+author: ""
+creator: "Egor Dmitriev (6100120)"
 ---
 
 # Paper Name - Author 

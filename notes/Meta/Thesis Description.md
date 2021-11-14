@@ -8,9 +8,11 @@ creator: Egor Dmitriev (6100120)
 
 ## Description
 
-Recent developments in big data and graph representation learning have allowed researchers to make breakthroughs in social network analysis and identification of communities. While opening a lot of opportunities for research, such approaches are highly limited to snaphots of rapidly evolving social networks. 
+Recent developments in big data and graph representation learning have allowed researchers to make breakthroughs in social network analysis and the identification of communities. While opening a lot of research opportunities, such approaches are highly limited to snapshots of rapidly evolving social networks. 
 
-Relying on novel research of dynamic graph representation learning, goal of my thesis project is to build a framework for community detection and representation in evolving heterogenous networks. To verify the merit of the proposed framework, it will be evalutated against baselines on static heterogenous graphs, and analysed against gathered twitter dataset on covid measures (citation needed).
+Relying on novel research of dynamic graph representation learning, the goal of my thesis project is to build a framework for community detection and representation in evolving heterogeneous networks. To verify the merit of the proposed framework, it will be evaluated against baselines on static heterogeneous graphs, and analyzed against gathered twitter dataset on covid measures (citation needed).
+
+The challenges addressed in this project include but are not limited to the fact that the covered subjects are still novel and under active research. Because of that, there is still no clear consensus for definitions of some important structures such as temporal communities and dynamic networks. Over the course of the project, their definitions need to be thoroughly researched and compiled from related works and the to be solved problem. The nature of networks containing multimodal data in form of node types, edge types, and temporal differences also needs to be addressed and solved appropriately. Finally, the dynamic nature of the communities needs to be explored as these communities may emerge, grow, split and fade over time.
 
 ## Outline
 

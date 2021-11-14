@@ -20,7 +20,7 @@ def uphead(key, value, format, meta):
     # print(value, file=sys.stderr)
     if html.tag == 'img':
         style_match = re.search(r'zoom:(.*)%', html.attrib.get('style', ''))
-        scale = (float(style_match.group(1)) if style_match else 30) / 100 * 0.8
+        scale = (float(style_match.group(1)) if style_match else 30) / 100 * 0.7
         image_path = os.path.join(os.getenv('PANDOC_PREFIX'), html.attrib.get('src', ''))
         size = (96, 96)
         if os.path.exists(image_path):
