@@ -10,8 +10,8 @@ creator: "Egor Dmitriev (6100120)"
 ## General Info
 
 * Start Date: 15-11-2021 (15 Nov 2021) w46
-* End date Part 1 (11w): 31-01-2022 (28 Jan 2022) w5
-* End date Part 2 (18w): 06-06-2022 (06 Jun 2022) w23 +- 1w to ac
+* End date Part 1 (11w): 7-02-2022 (7 Feb 2022) w6
+* End date Part 2 (18w): 13-06-2022 (13 Jun 2022) w24 +- 1w to ac
 * Supervisor: Chekol, Mel (Cheko001)
 * Second Examiner: Wang, Shihan (Wang0133)
 * Number of credits part 1: 15
@@ -40,7 +40,7 @@ Agreements between students and supervisors:
 
 * Total number of hours available for supervision: 12
 * Planning/timing of the supervision (e.g. ‘weekly meetings’): Biweekly meetings
-* Agreed student work load (e.g. full time, 4 days/week, etc.): fulltime
+* Agreed student work load (e.g. full time, 4 days/week, etc.): full time
 * Student absence (holidays, courses, etc.): Fri 31st Dec (rest of the holidays fall on weekends)
 * Supervisor absence (holidays, conferences, etc.): No holidays planned yet
 * Presentations to be held: Thesis Defense
