@@ -33,7 +33,7 @@ The challenges addressed in this project include but are not limited to the fact
     * In this case community consists of twitter users, tweets and hashtags
     * Community is distribution covering the entity space (semantically representing interests)
     * Community is dynamic over time and may evolve covering a different part of the entity space
-  * Define “interest group” / “subcommunity” / “topic”? (a narrow definiton of community which doen’t evolve over time)
+  * Define “topic”? (a narrow definiton of community which doen’t evolve over time)
   * Evolving: Graph data increases but does not decrease (absence of event edges)
   * Dynamic: Graph data increae and decreases (presence of dynamic edges)
 * **Challenges**:
