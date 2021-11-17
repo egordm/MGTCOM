@@ -1,4 +1,5 @@
 ---
+type: paper
 title: "ANGEL: efficient, and effective, node-centric community discovery in static and dynamic networks"
 author: "Rossetti et al"
 creator: "Egor Dmitriev (6100120)"

@@ -1,4 +1,5 @@
 ---
+type: paper
 title: "Heterogeneous Graph Attention Network"
 author: "Wang et al."
 creator: Egor Dmitriev (6100120)

@@ -1,4 +1,5 @@
 ---
+type: paper
 title: Continuous-Time Dynamic Network Embeddings
 author: Nguyen et al.
 creator: Egor Dmitriev (6100120)

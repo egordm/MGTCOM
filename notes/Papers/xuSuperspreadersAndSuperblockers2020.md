@@ -1,4 +1,5 @@
 ---
+type: paper
 title: "Superspreaders and superblockers based community evolution tracking in dynamic social networks"
 author: "Xu et al."
 creator: "Egor Dmitriev (6100120)"

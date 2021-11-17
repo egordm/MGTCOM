@@ -1,4 +1,5 @@
 ---
+type: paper
 title: "Tracking community evolution in social networks: A survey"
 author: "Dakiche et al."
 creator: Egor Dmitriev (6100120)

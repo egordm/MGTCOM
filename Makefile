@@ -1,22 +1,16 @@
 .PHONY: notes
 
-coffee: notes-to-pdf sync commit
+coffee: notes-to-pdf slides-to-pdf sync commit
 
 notes:
 	typora notes &
 
 notes-to-pdf:
-	@echo "Converting Notes to PDF"
-	@for f in ./notes/**/*.md; do \
-		if [[ ! -f $${f/md/pdf} || "$${f}" -nt "$${f/md/pdf}" ]]; then \
-		  if grep -q -E "title: .+" "$${f}"; then \
-		    echo "Converting $${f} to pdf"; \
-		    RF=$$(realpath "$$f"); \
-		    sh -c "cd ./notes/Meta/Template && ./to_pdf.sh '$${RF}'"; \
-		  fi; \
-		fi; \
-	done
+	bash ./scripts/notes_to_pdf.sh
 
+slides-to-pdf:
+	bash ./scripts/slides_to_pdf.sh
+	
 sync-to-notion:
 	notionsci sync zotero collections e1a32bedcda443deb60e20fc5bc2b2e0
 	notionsci sync zotero refs e1a32bedcda443deb60e20fc5bc2b2e0
@@ -34,3 +28,13 @@ commit:
 push:
 	git push origin master
 	# git push mirror master
+
+present:
+	pympress "$(filter-out $@,$(MAKECMDGOALS))"
+# 	pympress $(SLIDES)
+
+activate:
+	conda activate INFOMDIS
+	
+%:
+    @:

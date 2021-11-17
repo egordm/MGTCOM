@@ -1,4 +1,5 @@
 ---
+type: paper
 title: A Comprehensive Survey on Graph Neural Networks
 author: Wu et al.
 creator: Egor Dmitriev (6100120)

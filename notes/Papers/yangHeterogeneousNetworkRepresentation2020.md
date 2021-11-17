@@ -1,4 +1,5 @@
 ---
+type: paper
 title: "Heterogeneous Network Representation Learning: A Unified Framework with Survey and Benchmark"
 author: Yang et al.
 creator: Egor Dmitriev (6100120)

@@ -1,4 +1,5 @@
 ---
+type: paper
 title: "Community Discovery in Dynamic Networks: A Survey"
 author: "Rossetti et al"
 creator: "Egor Dmitriev (6100120)"

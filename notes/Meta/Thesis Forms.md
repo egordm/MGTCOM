@@ -1,8 +1,8 @@
 ---
+type: paper
 title: "Research Project GSNS Application Form"
 author: ""
 creator: "Egor Dmitriev (6100120)"
-
 ---
 
 # Research Project GSNS Application Form (Part 1)

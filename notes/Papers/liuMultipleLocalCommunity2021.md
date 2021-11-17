@@ -1,4 +1,5 @@
 ---
+type: paper
 title: "Multiple Local Community Detection via High-Quality Seed Identification over Both Static and Dynamic Networks"
 author: "Liu et al."
 creator: "Egor Dmitriev (6100120)"
