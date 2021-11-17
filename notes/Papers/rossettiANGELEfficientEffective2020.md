@@ -40,11 +40,31 @@ Our approach is primarily designed for social networks analysis and belongs to a
 
 ## Outline / Structure
 
-- ...
+- Node Labeling $O (n + m)$ (Raghavan et al. 2007)
+  - Initialize the labels at all nodes in the network. For a given node $x$, $C_{x}(0)=x$
+  - Set $t = 1$
+  - Arrange the nodes in the network in a random order and set it to $X$
+  - For each $x \in X$ chosen in that specific order, let $C_{x}(t)=f\left(C_{x_{\mathrm{ia}}}(t), \ldots, C_{x_{i \mathrm{~m}}}(t), C_{x_{i(m+1)}}(t-1), \ldots, C_{x_{i k}}(t-1)\right)$. $f$ here returns the label occurring with the highest frequency among neighbors and ties are broken uniformly randomly.
+  - If every node has a label that the maximum number of their neighbors have, then stop the algorithm. Else, set $t=t+1$ and go to (3)
+- Community Matching: 
+  - Don’t make use of the Jaccard similarity – a widely adopted strategy to address this kind of approaches
+  - Each node has multiple labels
+    - The ratio of nodes in it that already belongs to $y$ w.r.t. the size of $x$:
+      - Ratio is greater than (or equal to) a given threshold, the merge is applied and the node label updated
+  - We assume that each node at time t carries three sets of labels
+    - The identifiers of the communities it currently belongs to $t$
+    - The identifiers of the communities it was part of at $t − 1$
+    - he identifiers of the communities it will be associated to at $t + 1$
+  - Event detection:
+    - Birth (B): a community born at time t if there are no network substructures at t − 1 that can be matched with it
+    - Merge: two or more communities at time t merge iff they are matched to the same network substructure at t + 1
+    - Split (S): a community at t splits if it is matched to multiple network substructures at t + 1
+    - Continue (C): a community at t remains the same at t + 1;
+    - Death (D): a community dies at t if it is not matched with any network substructure at t + 1.
 
 ## Evaluation
 
-- ...
+- $\Psi(\mathcal{A}, \mathcal{B})=\mathcal{A} \cap \mathcal{B}-(\mathcal{A}-\mathcal{B})$: Quality metric to relate discovered events $A$ to ground truth ones $B$
 
 ## Code
 
