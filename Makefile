@@ -33,4 +33,4 @@ commit:
 
 push:
 	git push origin master
-	git push mirror master
+	# git push mirror master
