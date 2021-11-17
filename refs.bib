@@ -46,7 +46,7 @@
   doi = {10.1016/j.ipm.2018.03.005},
   abstract = {This paper presents a survey of previous studies done on the problem of tracking community evolution over time in dynamic social networks. This problem is of crucial importance in the field of social network analysis. The goal of our paper is to classify existing methods dealing with the issue. We propose a classification of various methods for tracking community evolution in dynamic social networks into four main approaches using as a criterion the functioning principle: the first one is based on independent successive static detection and matching; the second is based on dependent successive static detection; the third is based on simultaneous study of all stages of community evolution; finally, the fourth and last one concerns methods working directly on temporal networks. Our paper starts by giving basic concepts about social networks, community structure and strategies for evaluating community detection methods. Then, it describes the different approaches, and exposes the strengths as well as the weaknesses of each.},
   langid = {english},
-  keywords = {class1,Community evolution,Dynamic community detection,Dynamic network,prio5,Social network,unread},
+  keywords = {class1,Community evolution,Dynamic community detection,Dynamic network,prio5,read,Social network},
   file = {/home/egordm/Documents/Research/Reference/storage/9LSB7MU7/Dakiche et al_2019_Tracking community evolution in social networks.pdf;/home/egordm/Documents/Research/Reference/storage/BGF5S9MR/S0306457317305551.html}
 }
 
@@ -72,7 +72,7 @@
   issn = {03064573},
   doi = {10.1016/j.ipm.2019.102056},
   langid = {english},
-  keywords = {class1,prio9,unread},
+  keywords = {class1,prio9,read},
   file = {/home/egordm/Documents/Research/Reference/storage/LJ5NXEYX/1-s2.0-S030645731830997X-main.pdf}
 }
 
@@ -85,7 +85,7 @@
   pages = {176--183},
   doi = {10.1109/ASONAM.2010.17},
   abstract = {Real-world social networks from a variety of domains can naturally be modelled as dynamic graphs. However, approaches to detecting communities have largely focused on identifying communities in static graphs. Recently, researchers have begun to consider the problem of tracking the evolution of groups of users in dynamic scenarios. Here we describe a model for tracking the progress of communities over time in a dynamic network, where each community is characterised by a series of significant evolutionary events. This model is used to motivate a community-matching strategy for efficiently identifying and tracking dynamic communities. Evaluations on synthetic graphs containing embedded events demonstrate that this strategy can successfully track communities over time in volatile networks. In addition, we describe experiments exploring the dynamic communities detected in a real mobile operator network containing millions of users.},
-  keywords = {Benchmark testing,class1,Communities,community finding,dynamic networks,Heuristic algorithms,Merging,Mobile communication,Partitioning algorithms,prio4,social network analysis,Social network services,unread},
+  keywords = {Benchmark testing,class1,Communities,community finding,dropped,Dynamic networks,Heuristic algorithms,Merging,Mobile communication,Partitioning algorithms,prio4,social network analysis,Social network services},
   file = {/home/egordm/Documents/Research/Reference/storage/79L3I688/Greene et al_2010_Tracking the Evolution of Communities in Dynamic Social Networks.pdf;/home/egordm/Documents/Research/Reference/storage/5RVCMN8U/5562773.html}
 }
 
@@ -132,7 +132,7 @@
   primaryclass = {cs, stat},
   abstract = {Graphs arise naturally in many real-world applications including social networks, recommender systems, ontologies, biology, and computational finance. Traditionally, machine learning models for graphs have been mostly designed for static graphs. However, many applications involve evolving graphs. This introduces important challenges for learning and inference since nodes, attributes, and edges change over time. In this survey, we review the recent advances in representation learning for dynamic graphs, including dynamic knowledge graphs. We describe existing models from an encoder-decoder perspective, categorize these encoders and decoders based on the techniques they employ, and analyze the approaches in each category. We also review several prominent applications and widely used datasets and highlight directions for future research.},
   archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning,prio2,Statistics - Machine Learning,unread},
+  keywords = {class2,Computer Science - Machine Learning,prio2,Statistics - Machine Learning,unread},
   file = {/home/egordm/Documents/Research/Reference/storage/ZSVE7WAW/Kazemi et al_2020_Representation Learning for Dynamic Graphs.pdf;/home/egordm/Documents/Research/Reference/storage/DPV9QU2Z/1905.html}
 }
 
@@ -264,7 +264,7 @@
   primaryclass = {cs, stat},
   abstract = {Learning latent representations of nodes in graphs is an important and ubiquitous task with widespread applications such as link prediction, node classification, and graph visualization. Previous methods on graph representation learning mainly focus on static graphs, however, many real-world graphs are dynamic and evolve over time. In this paper, we present Dynamic Self-Attention Network (DySAT), a novel neural architecture that operates on dynamic graphs and learns node representations that capture both structural properties and temporal evolutionary patterns. Specifically, DySAT computes node representations by jointly employing self-attention layers along two dimensions: structural neighborhood and temporal dynamics. We conduct link prediction experiments on two classes of graphs: communication networks and bipartite rating networks. Our experimental results show that DySAT has a significant performance gain over several different state-of-the-art graph embedding baselines.},
   archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio2,Statistics - Machine Learning,unread},
+  keywords = {class3,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio2,Statistics - Machine Learning,unread},
   file = {/home/egordm/Documents/Research/Reference/storage/H9BHSQ8A/Sankar et al_2019_Dynamic Graph Representation Learning via Self-Attention Networks.pdf;/home/egordm/Documents/Research/Reference/storage/GWLQJFTM/1812.html}
 }
 
@@ -281,11 +281,6 @@
   archiveprefix = {arXiv},
   keywords = {class3,Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio0,unread},
   file = {/home/egordm/Documents/Research/Reference/storage/MI4XTGQR/Su et al_2021_A Comprehensive Survey on Community Detection with Deep Learning.pdf;/home/egordm/Documents/Research/Reference/storage/HMBU6YYP/2105.html}
-}
-
-@misc{UtrechtUniversitySign,
-  title = {Utrecht {{University}} - {{Sign}} In},
-  howpublished = {https://login.uu.nl/nidp/saml2/sso?SigAlg=http\%3A\%2F\%2Fwww.w3.org\%2F2001\%2F04\%2Fxmldsig-more\%23rsa-sha256\&Signature=pBJTaGoQ07p7o\%2BXe6GYADm3sy6YarvpfuYzXn3UtTubcJwKjy7AROXEHLGYdE07W3Ez8o6uyKEgLoP3MIDGQOrV1PR2Mi8aVg9epW4qz3h1DJevO8ecn9Fq4UXLKftG7\%2FPXCFkv54RKQ6R7c\%2FlU2dLVwz29v9l72CN4Dsr9bHsMeHkI2WAvcO3HWx5uN\%2B0D7TQxt6wQ5E9\%2BR11ea7h\%2Fbzh6wHf1bWhd54zY8Dt8QXRutSg6sql7rpND1TMZOtTYICAEzmP\%2Fd1Vugy5pj5axyhp\%2FDIi0WWcMCHF6kUBFgZllL\%2BKERusGWS\%2BtrprfnOUI0Ywtz5NFL0uPzBJgpOxESkQ\%3D\%3D\&SAMLRequest=jVJdb\%2BIwEPwrkd9DSK4taAVIHFR3SBwgPvrQl8rYG7CU2DnvhvLz6wTa4\%2BFaVfLL7njGs\%2BMdkCyLCsY1H\%2B0a\%2F9ZIHJ3LwhK0wFDU3oKTZAisLJGAFWzGf\%2BaQdbpQecdOuULcUL5mSCL0bJwV0Ww6FMvF43z5a7Z40V0tda5VrHIt47vuvhfLu6wf7\%2FPej\%2F193s\%2FSXl9ET\%2BgpcIciSAUBohpnllhaDq1ulsZpOA\%2FbLIO0B2n6LKKVdyej0S\%2BCk6HYWXNqJBgNRzv2qI4sommY2VjJrfKRuSJIksIdjO3UdccWiTW6SprZsoTItaLt2D\%2BN1cYevp54f7lE8Hu7XcWr5WYrovF7ChNnqS7Rb9CfjMLdev7PgSPjDV0tXIrGw9WIVJSUuRSjQVNDm4UffY9bIkstWTYCg\%2BSWP7hsw3URULdrEUwynjmauLKSQamJCc9S8fvjt7cmRfjiNeajJpP2fQjpgQqoDxSoAvzqvIayLtjkoeX81cN\%2FZS7YJ5Y\%2B0Nv1Hb0B\&RelayState=https\%3A\%2F\%2Fosi-auth-server-prd1.osiris-link.nl\%2Fsamlagent\%2Fendpoint\%3BOSIRIS-STUDENT-MFA}
 }
 
 @article{wangHeterogeneousGraphAttention2021,
@@ -367,7 +362,7 @@
   abstract = {Network embedding, which aims to learn the low-dimensional representations of vertices, is an important task and has attracted considerable research efforts recently. In real world, networks, like social network and biological networks, are dynamic and evolving over time. However, almost all the existing network embedding methods focus on static networks while ignore network dynamics. In this paper, we present a novel representation learning approach, DynamicTriad, to preserve both structural information and evolution patterns of a given network. The general idea of our approach is to impose triad, which is a group of three vertices and is one of the basic units of networks. In particular, we model how a closed triad, which consists of three vertices connected with each other, develops from an open triad that has two of three vertices not connected with each other. This triadic closure process is a fundamental mechanism in the formation and evolution of networks, thereby makes our model being able to capture the network dynamics and to learn representation vectors for each vertex at different time steps. Experimental results on three real-world networks demonstrate that,  compared with several state-of-the-art techniques, DynamicTriad achieves substantial gains in several application scenarios. For example, our approach can effectively be applied and help to identify telephone frauds in a mobile network, and to predict whether a user will repay her loans or not in a loan network.},
   copyright = {Copyright (c)},
   langid = {english},
-  keywords = {prio3,Triad Closure Process,unread},
+  keywords = {class2,prio3,Triad Closure Process,unread},
   file = {/home/egordm/Documents/Research/Reference/storage/P7GJTZ8B/Zhou et al_2018_Dynamic Network Embedding by Modeling Triadic Closure Process.pdf}
 }
 
