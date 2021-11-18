@@ -6,7 +6,7 @@ author: "Egor Dmitriev"
 institute: "Utrecht University"
 topic: "dynamic networks"
 handout: true
-section-titles: false
+section-titles: true
 toc: true
 biblio-style: abbrvnat
 ---
@@ -200,9 +200,11 @@ biblio-style: abbrvnat
 
 * [@faniUserCommunityDetection2020]
 * Content on the social network are often reflective of issues in the real world **topics discussed on the network constantly change** and hence users’ interests towards these topics
-* Combine both Temporal Social Content $\mathcal{D}=(\mathbb{U}, \mathbb{M}, \mathrm{T})$  and Social Network Connections $\mathcal{G}=(\mathbb{U}, \mathbb{A})$
-  * Model communities **based on topics of interest**
+* Social Network Connections $\mathcal{G}=(\mathbb{U}, \mathbb{A})$
   * Primarily based on the **homophily** principle
+  * Explicit social connection does not necessarily indicate user interest similarity
+* Combine both Temporal Social Content $\mathcal{D}=(\mathbb{U}, \mathbb{M}, \mathrm{T})$ 
+  * Model communities **based on topics of interest**
 
 ::: notes
 
@@ -238,13 +240,52 @@ biblio-style: abbrvnat
 * Community detection:
   * Construct a weighted graph: $\mathrm{G}=(\mathbb{U}, \mathbb{E}, w)$
   * Leverage the Louvain Method (LM)
-  * 
 * Remarks:
   * Users end up in one community per users
+  * Consider negative sampling
 
 ::: notes
 
 - With as weights the user embedding **dot products**
+- 
+
+:::
+
+## Vehicle Trajectory Clustering Based on Dynamic Representation Learning of Internet of Vehicles
+
+* [@wangVehicleTrajectoryClustering2020]
+* Vehicle trajectory clustering aims to regroup similar vehicle trajectories together into different groups
+* Challenge:  As the location of vehicles is constantly changing, the vehicle social network is a dynamic network
+* Social Network is contructed from trajectories:
+  * Discretize vehicle positions using a Grid
+  * Given vehicle n at time $t$ , connect $k$ closest vehicles
+
+::: notes
+
+- Vehicle trajectory clustering aims to regroup similar vehicle trajectories together into different groups
+  - Extract relevant information in order to, for instance, calculate the optimal path from one position to another, detect abnormal behavior, monitor the traffic flow in a city, and predict the next position of an object
+  - The road networks of different city regions may be totally different
+  - Vehicle may present totally different trajectories over different time periods of a day
+  - Meanwhile, the patterns on weekdays and weekends may also different.
+
+:::
+
+## Vehicle Trajectory Clustering Based on Dynamic Representation Learning of Internet of Vehicles
+
+* Authors propose: DynWalks
+  * Performs truncated random walks of length $l$  
+  * **performs random walks on selected nodes** 
+    * Embedding vectors of other nodes remains unchanged
+* Calculate vehicle representations using Skip-Gram Negative Sampling
+* Finally clustering is done:
+  * K-means, K-medoids, GMM
+  * For each timestep
+
+::: notes
+
+- Performs truncated random walks with length $l$ on each selected node for $r$ times
+- By using a silding window with length w + 1 + w to slide on each random walk sequence
+- 
 
 :::
 
@@ -257,7 +298,6 @@ biblio-style: abbrvnat
 - Classical ML Methods:
   - liuMultipleLocalCommunity2021(unread)
 - Deep Learning Based Methods
-  - faniUserCommunityDetection2020
   - wangVehicleTrajectoryClustering2020
 - Related Tasks
 
