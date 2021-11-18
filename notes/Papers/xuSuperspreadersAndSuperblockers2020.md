@@ -39,8 +39,7 @@ creator: "Egor Dmitriev (6100120)"
 
 ## Definitions
 
-* Community structure: i.e., groups of nodes with a higher within-group connection den-
-  sity and a sparser connectivity across different groups 
+* Community structure: i.e., groups of nodes with a higher within-group connection density and a sparser connectivity across different groups 
 
 ## Outline / Structure
 

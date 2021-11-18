@@ -1,12 +1,12 @@
 ---
 type: paper
-title: "Multiple Local Community Detection via High-Quality Seed Identification over Both Static and Dynamic Networks"
+title: "Deep Learning for Community Detection: Progress, Challenges and Opportunities"
 author: "Liu et al."
 creator: "Egor Dmitriev (6100120)"
 
 ---
 
-# Multiple Local Community Detection via High-Quality Seed Identification over Both Static and Dynamic Networks - Liu et al. 
+# Deep Learning for Community Detection: Progress, Challenges and Opportunities - Liu et al. 
 
 
 

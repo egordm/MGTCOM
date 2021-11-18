@@ -504,34 +504,31 @@ $body$
 $if(has-frontmatter)$
 \backmatter
 $endif$
+
 $if(natbib)$
 $if(bibliography)$
-$if(biblio-title)$
 $if(has-chapters)$
-\renewcommand\bibname{$biblio-title$}
+\renewcommand\bibname{References}
 $else$
-\renewcommand\refname{$biblio-title$}
-$endif$
+\renewcommand\refname{References}
 $endif$
 $if(beamer)$
-\begin{frame}[allowframebreaks]{$biblio-title$}
-  \bibliographytrue
+\begin{frame}[allowframebreaks]{References}
 $endif$
   \bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
 $if(beamer)$
 \end{frame}
 $endif$
+$endif$
+$endif$
 
-$endif$
-$endif$
 $if(biblatex)$
 $if(beamer)$
-\begin{frame}[allowframebreaks]{$biblio-title$}
-  \bibliographytrue
+\begin{frame}[allowframebreaks]{References}
   \printbibliography[heading=none]
 \end{frame}
 $else$
-\printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
+  \printbibliography[title=References]
 $endif$
 
 $endif$
