@@ -1,5 +1,5 @@
 ---
-type: slides
+type: backup
 title: "Literature Presentation"
 subtitle: "Community Detection through Representation learning in Evolving Heterogenous Networks"
 author: "Egor Dmitriev"
@@ -286,6 +286,41 @@ biblio-style: abbrvnat
 
 - Performs truncated random walks with length $l$ on each selected node for $r$ times
 - By using a silding window with length w + 1 + w to slide on each random walk sequence
+
+:::
+
+# Deep Community Detection
+
+## Deep Learning for Community Detection: Progress, Challenges and Opportunities
+
+* [@liuDeepLearningCommunity2020]
+* Challenges:
+  * An Unknown Number of Communities
+  * Network Heterogeneity
+  * Large-scale Networks
+* [Bhatia and Rani, 2018]
+  * Clusters are formed by restructuring graph 
+  * DeCom finds the number of clusters by analyzing the structure of the network (PageRank)
+  * Clusters are refined using GAE by optimizing for modularity
+* [@cavallariLearningCommunityEmbedding2017]
+  * Suboptimal: community detection is independent of its node embedding
+  * Communities are seen as distributions over the embeddings
+  * Introduces two step process
+    * Contruct initial embeddings
+    * Refine embeddings and the community distributions (GMM) alternatingly
+
+::: notes
+
+- This survey does not look at Dynamic Networks
+- An Unknown Number of Communities:
+  - [Bhatia and Rani, 2018] based on random walk-based personalized PageRank. However, this type of method cannot guarantee that every node in the network is assigned to a community
+- Network Heterogeneity:
+  - Network heterogeneity refers to networks that contain significantly different types of entities and relationships, which means the strategies used for homogeneous networks do not necessarily work. 
+- Large-scale Networks:
+  - Today, large-scale networks can contain millions of nodes, edges, and structural patterns and can also be highly dynamic, as networks like Facebook and Twitter demonstrate.
+- GAE: Graph Auto Encoders
+- [@cavallariLearningCommunityEmbedding2017]
+  - uses a unified objective where embedding and community distributions are refined
 
 :::
 
