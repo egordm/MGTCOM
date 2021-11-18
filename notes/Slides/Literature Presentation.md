@@ -17,7 +17,7 @@ biblio-style: abbrvnat
 
 * [@rossettiCommunityDiscoveryDynamic2018] and [@dakicheTrackingCommunityEvolution2019]
 * Categorize methods on problem of tracking community evolution 
-* Introduce a common definition for evolving communities
+* Define Community as a group of densely connected nodes
 * Compile events/properies for analysis of evolving communities
 
 ## Evolving Communities
@@ -297,3 +297,4 @@ biblio-style: abbrvnat
   * Utilize deep representation
   * Use representation vectors for clustering
   * Explore multimodal settings
+* The definition of community may be different when taking addit data into account
