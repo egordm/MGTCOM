@@ -190,7 +190,6 @@ biblio-style: abbrvnat
   * It is based on the assumption that there exist some highly connected nodes, called hubs, which will group people around them. So, in the first step, the proposed algorithm detects these hubs by the node degree and assigns to all non-hub elements the closest hub as a cluster label, then iteratively changes the resultant clustering by applying changes: adding or removing nodes or edges
 - [@xuSuperspreadersSuperblockersBased2020]
   * A dynamic network snapshot is totally re-partitioned once the error accumulation degree of incremental clustering exceeds a pre-defined threshold
-  * 
 
 :::
 
@@ -281,33 +280,56 @@ biblio-style: abbrvnat
   * K-means, K-medoids, GMM
   * For each timestep
 
+
+
 ::: notes
 
 - Performs truncated random walks with length $l$ on each selected node for $r$ times
 - By using a silding window with length w + 1 + w to slide on each random walk sequence
-- 
+
+:::
+
+# Deep Community Detection
+
+## Deep Learning for Community Detection: Progress, Challenges and Opportunities
+
+* [@liuDeepLearningCommunity2020]
+* Challenges:
+  * An Unknown Number of Communities
+  * Network Heterogeneity
+  * Large-scale Networks
+* [Bhatia and Rani, 2018]
+  * DeCom finds the number of clusters by analyzing the structure of the network
+  * Intial clusters are found using PageRank
+  * Clusters are refined using GAE by optimizing for modularity
+* [cavallariLearningCommunityEmbedding2017]
+  * Suboptimal: community detection is independent of its node embedding
+  * Communities are seen as distributions over the embeddings
+  * Introduces two step process
+    * Contruct initial embeddings
+    * Refine embeddings and the community distributions (GMM) alternatingly
+
+
+
+::: notes
+
+- An Unknown Number of Communities:
+  - [Bhatia and Rani, 2018] based on random walk-based personalized PageRank. However, this type of method cannot guarantee that every node in the network is assigned to a community
+- Network Heterogeneity:
+  - Network heterogeneity refers to networks that contain significantly different types of entities and relationships, which means the strategies used for homogeneous networks do not necessarily work. 
+- Large-scale Networks:
+  - Today, large-scale networks can contain millions of nodes, edges, and structural patterns and can also be highly dynamic, as networks like Facebook and Twitter demonstrate.
+- GAE: Graph Auto Encoders
+- [@cavallariLearningCommunityEmbedding2017]
+  - uses a unified objective where embedding and community distributions are refined
 
 :::
 
 # Conclusion
 
+## Conclusion
 
-
-## Review Order
-
-- Classical ML Methods:
-  - liuMultipleLocalCommunity2021(unread)
-- Deep Learning Based Methods
-  - wangVehicleTrajectoryClustering2020
-- Related Tasks
-
-
-
-::: notes
-
-This is my note.
-
-- It can contain Markdown
-- like this list
-
-:::
+* There are still few methods that 
+  * Utilize deep representation
+  * Use representation vectors for clustering
+  * Explore multimodal settings
