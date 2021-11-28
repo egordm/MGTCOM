@@ -1,5 +1,5 @@
 ---
-type:
+type: paper
 title: "Learning Community Embedding with Community Detection and Node Embedding on Graphs"
 author: "Cavallari et al."
 creator: Egor Dmitriev (6100120)
