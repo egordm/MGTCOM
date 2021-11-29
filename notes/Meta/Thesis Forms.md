@@ -11,7 +11,7 @@ creator: "Egor Dmitriev (6100120)"
 
 * Start Date: 15-11-2021 w46
 * End date Part 1 (11w): 24-01-2022 w6
-* End date Part 2 (18w): 13-06-2022 (13 Jun 2022) w24 +- 1w to ac
+* End date Part 2 (18w): 13-06-2022 (13 Jun 2022) w24
 * Supervisor: Chekol, Mel (Cheko001)
 * Second Examiner: Wang, Shihan (Wang0133)
 * Number of credits part 1: 15

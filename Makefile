@@ -10,7 +10,7 @@ notes-to-pdf:
 
 slides-to-pdf:
 	bash ./scripts/slides_to_pdf.sh
-	
+
 sync-to-notion:
 	notionsci sync zotero collections e1a32bedcda443deb60e20fc5bc2b2e0
 	notionsci sync zotero refs e1a32bedcda443deb60e20fc5bc2b2e0
@@ -27,7 +27,7 @@ commit:
 
 push:
 	git push origin master
-	# git push mirror master
+	git push mirror master
 
 present:
 	pympress "$(filter-out $@,$(MAKECMDGOALS))"
@@ -35,6 +35,6 @@ present:
 
 activate:
 	conda activate INFOMDIS
-	
+
 %:
     @:
