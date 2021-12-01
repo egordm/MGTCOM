@@ -1,0 +1,22 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j:4.2.7-community
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - neo4j-data:/data
+      - ./data:/var/lib/neo4j/import
+    #      - ./conf:/conf
+    #      - ./logs:/logs
+    #      - ./plugins:/plugins
+    environment:
+      - NEO4J_dbms_memory_pagecache_size=8G
+      - NEO4J_dbms.memory.heap.initial_size=8G
+      - NEO4J_dbms_memory_heap_max__size=8G
+      - NEO4J_AUTH=neo4j/test
+      - NEO4JLABS_PLUGINS=["apoc","bloom","graph-data-science"]
+
+volumes:
+  neo4j-data:
