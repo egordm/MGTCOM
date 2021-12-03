@@ -40,5 +40,8 @@ present:
 activate:
 	conda activate INFOMDIS
 
+update:
+	git submodule foreach git pull origin master
+	
 %:
     @:
