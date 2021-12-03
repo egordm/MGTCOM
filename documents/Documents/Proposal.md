@@ -8,9 +8,8 @@ author:
   country: "The Netherlands"
   email: "e.dmitriev@students.uu.nl"
 topic: "dynamic networks, community detection"
-handout: true
+bibliography: ../refs.bib
 toc: true
-biblio-style: plainnat
 abstract: |
   | Recent developments in big data and graph representation learning have allowed researchers to make breakthroughs in social network analysis and the identification of communities. While opening a lot of research opportunities, such approaches are highly limited to snapshots of rapidly evolving social networks. This, in fact, is a great simplification of the real-world situation which is always evolving and expanding by the user and/or machine interactions.
   |
@@ -78,13 +77,11 @@ The *link-based* (referred to as classic) community detection methods intuitivel
 
 Unfortunately, in most cases link-based methods fall short to identity communities of similar individuals. This is mainly due to two facts: (i) many similar individuals in a social network are not explicitly connected together, (ii) an explicit connection does not necessarily indicate similarity, but may explained by sociological processes such as conformity, friendship or kinship [@diehlRelationshipIdentificationSocial2007; @faniUserCommunityDetection2020].
 
-Because of this and with succes of deep learning based methods, the more recent works define communities as a distribution over $d$-dimensional space which may span over both topological as well as content-based features [@cavallariLearningCommunityEmbedding2017]. Similarly, also hybrid methods are introduced which combine link-based approach with content representation learning methods [@faniUserCommunityDetection2020].
+Because of this, and with success of (deep learning) representation based methods, the more recent works define communities as a distribution over $d$-dimensional space which may span over both topological as well as content-based features [@cavallariLearningCommunityEmbedding2017]. Similarly, also hybrid methods are introduced which combine link-based approach with content representation learning methods [@faniUserCommunityDetection2020].
 
 A more general definition is introduced in [@cosciaClassificationCommunityDiscovery2011] to create an underlying concept generalizing all variants found in the literature. In link-based methods, a direct connection is considered as a particular and very important kind of action, while newer methods also consider content or interest overlap.
 
 > *Definition (Community). A community in a complex network is a set of entities that share some closely correlated sets of actions with the other entities of the community.* 
-
-
 
 * TODO: Content Based Methods: (similarity idea)
   * Modeled communities **based on topics of interest** through a community-user-topic generative process
@@ -141,7 +138,9 @@ Another way to evaluate and compare different CD algorithms without knowing grou
 
 In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches by proving that they introduce severe theoretical and practical problems. For one, they prove the no free lunch theorem for CD, ie. they prove that algorithmic biases that improve performance on one class of networks must reduce performance on others. Therefore, there can be no algorithm that is optimal for all possible community detection tasks, as quality of communities may differ by the optimized metrics. Additionally, they demonstrate that when a CD algorithm fails, the poor performance is indistinguishable from any of the three alternative possibilities: (i) the metadata is irrelevant to the network structure, (ii) the metadata and communities capture different aspects of network structure, (iii) the network itself lacks structure. Therefore, which community is optimal should depend on it’s subsequent use cases and not a single measure.
 
-### Evaluation of Deep Based methods
+* Todo: lead into “subsequent” use cases and representation based methods
+
+### Evaluation of Representation methods
 
 * Explore Recommendation / Link prediction task
   * 
@@ -166,12 +165,12 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [Enron](https://www.cs.cmu.edu/~./enron/)                    | Includes: Persons, Email Categories, Sentiment, Email Content |
 | [KIT](https://i11www.iti.kit.edu/en/projects/spp1307/emaildata) (dead) |                                                              |
-| [Weibo](http://www.wise2012.cs.ucy.ac.cy/challenge.html)     | Includes: Persons, Tweets, Followers; Excludes: Tweet Content |
-| [Digg](https://www.isi.edu/~lerman/downloads/digg2009.html)  | Includes: Persons, Stores, Followers, Votes; Excludes: Content |
-| [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html) | Includes: Persons, Votes; Excludes: Content                  |
+| [Weibo](http://www.wise2012.cs.ucy.ac.cy/challenge.html)     | Includes: Persons, Tweets, Followers; **Excludes: Tweet Content** |
+| [Digg](https://www.isi.edu/~lerman/downloads/digg2009.html)  | Includes: Persons, Stores, Followers, Votes; **Excludes: Content** |
+| [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html) | Includes: Persons, Votes; **Excludes: Content**              |
 | [IMDB](https://paperswithcode.com/dataset/imdb-binary)       | Actor movie network; Content is implicitly defined           |
 | [WIKI-RFA](https://snap.stanford.edu/data/wiki-RfA.html)     | Network of Voters and Votees. Links are votes and vote comments |
-| [FB-wosn](http://socialnetworks.mpi-sws.org/data-wosn2009.html) | User friendship links and User posts on users walls; Excludes: Content |
+| [FB-wosn](http://socialnetworks.mpi-sws.org/data-wosn2009.html) | User friendship links and User posts on users walls; **Excludes: Content** |
 | [TweetUM](https://wis.st.ewi.tudelft.nl/research/tweetum/) (dead) | Twitter Tweets, User Profiles and Followers; Includes: Content |
 | [Reddit Pushift](https://arxiv.org/abs/2001.08435)           | User Submissions and Posts on Subreddits; With timestamps    |
 | [Bitcoin Trust Network](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html) | Network Nodes and peer Ratings; With timestamps              |
@@ -196,14 +195,12 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 
 
 
-
-
 * components
 * problems with current solutions
 * datasets [@rossettiCommunityDiscoveryDynamic2018]
 * DCD is seen as the hardest problem within Social Network Analysis. Reason for this is mostly because DCD, unlike CD, also involves tracking the found communities over time which brings 
 
-* * 
+* 
 
 # Approach
 

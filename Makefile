@@ -3,11 +3,11 @@
 coffee: notes-to-pdf slides-to-pdf sync commit
 
 notes:
-	typora notes &
+	typora documents &
 	
 copy-refs:
-	cp refs.bib "notes/Meta/Template/refs.bib"
-	cp refs.bib "notes/Meta/Presentation Template/refs.bib"
+	cp refs.bib "documents/Meta/Presentation Template/refs.bib"
+	cp refs.bib "documents/refs.bib"
 
 notes-to-pdf: copy-refs
 	bash ./scripts/notes_to_pdf.sh

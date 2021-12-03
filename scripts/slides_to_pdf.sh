@@ -1,7 +1,7 @@
  #!/bin/sh
  
 echo "Converting Slides to PDF"
-for f in ./notes/**/*.md; do
+for f in ./documents/**/*.md; do
     if [[ ! -f ${f/md/pdf} || "${f}" -nt "${f/md/pdf}" ]]; then
         if grep -q -E "title: .+" "${f}"; then
             if grep -q -E "type: slides" "${f}"; then

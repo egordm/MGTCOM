@@ -7,6 +7,5 @@
 * [VCS Repo](https://git.science.uu.nl/e.dmitriev/thesis)
 
 ## Folder Structure
-* `notes` - Markdown notes about bibliography or the project
-* `proposal` - LaTeX project for writing the proposal
+* `documents` - Markdown notes about bibliography or the project
 * `references` - Autosynced citation manager references, notes and metadata
