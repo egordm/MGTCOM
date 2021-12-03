@@ -8,12 +8,6 @@ import os
 import PIL.Image
 
 def uphead(key, value, format, meta):
-  if key == 'Header':
-    if value[0] >= 2:
-        return Header(value[0] - 1, *value[1:])
-    else:
-        return Null()
-
   if key == 'Image': print(value, file=sys.stderr)
   if key == 'RawInline' and value[0] == 'html' and 'img' in value[1]:
     html = ET.fromstring(value[1])

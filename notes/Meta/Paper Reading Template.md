@@ -1,8 +1,12 @@
 ---
 type: paper
 title: ""
-author: ""
-creator: "Egor Dmitriev (6100120)"
+subtitle: "By "
+author:
+  name: "Egor Dmitriev (6100120)"
+  institute: "Utrecht University"
+  country: "The Netherlands"
+  email: "e.dmitriev@students.uu.nl"
 ---
 
 # Paper Name - Author 

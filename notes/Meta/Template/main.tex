@@ -3,6 +3,10 @@
 \usepackage{booktabs} % For formal tables
 \usepackage{longtable}
 \usepackage[utf8]{inputenc}
+\usepackage{cleveref}
+
+\usepackage[$natbiboptions$]{natbib}
+\bibliographystyle{$if(biblio-style)$$biblio-style$$else$plainnat$endif$}
 
 \usepackage[ruled]{algorithm2e} % For algorithms
 \renewcommand{\algorithmcfname}{ALGORITHM}
@@ -38,16 +42,18 @@ $if(title)$
 $else$
 \title{Could not detect title}
 $endif$
-$if(author)$
-\subtitle{By $author$}
+$if(subtitle)$
+\subtitle{$subtitle$}
 $endif$
 
-
-\author{Egor Dmitriev}
+$if(author)$
+\author{$author.name$}
 \affiliation{%
-  \institution{Utrecht Univeristy}
-  \country{The Netherlands}}
-\email{e.dmitriev@students.uu.nl}
+  \institution{$author.institute$}
+  \country{$author.country$}
+}
+\email{$author.email$}
+$endif$
 
 
 $if(abstract)$
@@ -60,12 +66,16 @@ $endif$
 
 \renewcommand{\shortauthors}{$author.name$}
 
-
+$if(toc)$
+\setcounter{tocdepth}{$toc-depth$}
+\tableofcontents
+\pagebreak
+$endif$
 
 
 $body$
 
 
-
+\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
 
 \end{document}
