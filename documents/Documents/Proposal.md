@@ -238,6 +238,26 @@ The Louvain method is a popular algorithm to detect communities in large network
     * Difficult to distinguish between instability of algorithm and evolution of the network
 * @wangCommunityEvolutionSocial2008 (core nodes / leader nodes)
   * Circumvents instability issue by studying most stable part of communities (community core nodes)
+  * Datasets:
+    * enron
+    * imdb
+    * caida
+    * apache
+  * Observations:
+    * The social network scale inflates when it evolves
+    * Members change dramatically and only a small portion exists stably
+      * Therefore only a few can be relied on
+  * Introduce algorithm CommTracker
+    * Relies heavily on core nodes
+    * Example: co-authorship community where core nodes represent famous professors
+    * Core Node Detection Algorithm
+      * Each node evaluates centrality of the nodes linked to it
+      * If a node’s weight is higher than it’s neighbors - then its centrality is increased and neighbors decreased
+        * The change value is set as difference is weight
+      * Nodes with non-negative centrality are core nodes
+    * Core-based Algorithm to track communities
+      * Define a set of rules based on presence of core nodes 
+      * To detect the evolu
 * @greeneTrackingEvolutionCommunities2010 (similarity metric based - quality function)
   * Use quality funciton to quantify similarity between communities
   * Jaccard Similarity
