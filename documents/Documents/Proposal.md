@@ -70,37 +70,19 @@ A more general definition is introduced in [@cosciaClassificationCommunityDiscov
 
 ### Representation-based Perspective
 
-Due to rapid advancements in the field of deep learning, the representation-based has become a more popular alternative to link-based methods. This approach itself stems from computational linguistics and relies heavily on the notion of *distributional semantics* which states that words that occur in similar contexts are semantically similar. In the more recent approaches, the words are represented using dense low-dimensional vectors (embeddings)
+Representation-based approach stems from the field of computation linguistics which relies heavily on the notion of *distributional semantics* which states that words that occur in similar contexts are semantically similar. Therefore the word representations are learned as dense low dimensional representation vectors (embeddings) of a word in a latent similarity space by predicting words based on their context or vice versa [@mikolovEfficientEstimationWord2013; @penningtonGloveGlobalVectors2014]. Using the learned representations similarity, clustering and other analytical metrics can be computed.
 
-Because of this, and with success of (deep learning) representation based methods, the more recent works define communities as a distribution over $d$-dimensional space which may span over both topological as well as content-based features [@cavallariLearningCommunityEmbedding2017]. Similarly, also hybrid methods are introduced which combine link-based approach with content representation learning methods [@faniUserCommunityDetection2020].
+Success of these representation learning approaches has spread much farther than just linguistics and can be applied to graph representation learning. Methods such as deepwalk [@perozziDeepWalkOnlineLearning2014], LINE [@tangLINELargescaleInformation2015] and node2vec [@groverNode2vecScalableFeature2016] use random walks to sample the neighborhood/context in a graph (analogous to sentences in linguistic methods) and output vector representations (embeddings) that maximize the likelihood of preserving topological structure of nodes within the graph. 
 
-* Representation-based approach
-  * Stems from computational linguisticts
-    * Distributinal semantics: words that occur in similar contexts are semantically similar
-    * Word representations are learned as dense low dimenstional representation vectors (embeddings) of a word in a certain space
-    * Distance is inverse to similarity
-  * Success stems beyond linguistics
-  * Similar approach is applied to Graphs representation learning
-    * Whereas previously structural information features had to be hand engineered
-      * Whereas this new approach is data driven
-      * Save a lot of time and are far more superior
-    * Methods such as node2vec, line and deepwalk use random walk or neighorhood sampling
-      * Similar to how sentences are processed
-      * Learn vector representations (embeddings)
-      * Maximize likelihood of preserving topological structure 
-    * They are easy to train in an unsupervised manner:
-      * Optimizing for homophily is a simple link predictiontion task
-    * Newer approaches introduce possibilty for fusion of different data types
-      * Graphsage and Author2vec allow usage of node and edge features
-      * @dongMetapath2vecScalableRepresentation2017, @bordesTranslatingEmbeddingsModeling2013 allow for usage of different node and edge types encoding more rich topological information
-      * @nguyenContinuousTimeDynamicNetwork2018 authors propose a way to encode temporal information into representation vectors
-      * GCN and Graph Auto Encoders explore more effective ways to represent topological neighborhood in a more general way
-  * Fulfills the above definition by expanding it with topological, temporal and contentual similarity
-    * As noted can be trained based on link prediction (Recommendation point of view)
-    * @faniUserCommunityDetection2020 explores this concept by fusing content-temporal representation and topological representationaion
-    * @cavallariLearningCommunityEmbedding2017 explore community detection by defining a unified objective for individual node representation and community representation optimizati
+Whereas previously the structural information features of graph entities had to be hand engineered, these new approaches are data driven, save a lot of time labeling the data, and yield superior feature / representation vectors. The methods can be trained to optimize for *homophily* on label prediction or in an unsupervised manner on link prediction tasks.
 
-* 
+Newer approaches introduce possibility for fusion of different data types. GraphSAGE [@hamiltonInductiveRepresentationLearning2018] and Author2Vec [@wuAuthor2VecFrameworkGenerating2020] introduce methodology to use node and edge features during representation learning process. Other approaches explore ways to leverage heterogeneous information present within the network by using *metapath* based random walks (path defined by a series of node/link types) [@dongMetapath2vecScalableRepresentation2017] or by representing and learning relations as translations within the embedding space [@bordesTranslatingEmbeddingsModeling2013]. In @nguyenContinuousTimeDynamicNetwork2018 the authors introduce a way to encode temporal information by adding chronological order constraints to various random walk algorithms. Other relevant advancements within the field include Graph Convolutional Networks (GCN) [@kipfSemiSupervisedClassificationGraph2017a] and (Variational) Graph Auto-Encoders (GAE) [@kipfVariationalGraphAutoEncoders2016] which present more effective ways to summarize and represent larger topological neighborhoods or whole networks.
+
+Various works have emerged exploring community detection using the representation learning approach. In @cavallariLearningCommunityEmbedding2017 the authors define a community as a distribution over the vector representation (embedding) space of the network (which encodes both content-based as well as topological information).  Here community detection and node representation are jointly solved by defining a unified objective and alternating their optimization steps. @faniUserCommunityDetection2020 redefine node connection proximity based on learned multi-modal embedding vectors incorporating both temporal social content as well as social network neighborhood information. As *homophiliy* is optimized, more valuable communities are found within the resulting network.
+
+* todo: this already talks about used approaches. 
+  * Better elaborate on them more and move them into approaches section
+  * 
 
 ### Dynamic Community
 
@@ -122,7 +104,7 @@ These events / transformations are often not explicitly used during the definiti
 
 Finally, is important to note that dynamic networks can differ in representation. They can be represented as either a time-series of static networks (also referred to as snapshots), or as a real time stream of edges (referred to as temporal networks). Though, it should be noted that within the context of dynamic community detection they can be seen as equivalent as the conversion between the two representations can be done in a lossless way.
 
-## Evaluation methods
+## Evaluation methods {#evaluation-methods}
 
 As described in the previous section, the definition for both community and dynamic community may be quite ambiguous. In this section we will cover how detection and tracking results can be evaluated in a lesser ambiguous setting to compare various approaches. To disambiguate the process a little, during evaluation, the resemblance/detection and matching/tracking tasks are evaluated separately.
 
@@ -165,6 +147,7 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 
 | Paper                                     | Description                                                  |
 | ----------------------------------------- | ------------------------------------------------------------ |
+| @lancichinettiBenchmarkGraphsTesting2008  | Static networks (widely used)                                |
 | @greeneTrackingEvolutionCommunities2010   | Generate Graphs based on Modularity measure                  |
 | @granellBenchmarkModelAssess2015          |                                                              |
 | @hamiltonRepresentationLearningGraphs2018 | Generate Time dependent Heterogeneous graphs using modularity optimization and multi-dependency sampling |
@@ -188,18 +171,182 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 | [Bitcoin Trust Network](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html) | Network Nodes and peer Ratings; With timestamps              |
 | [LastFM1k](http://ocelma.net/MusicRecommendationDataset/lastfm-1K.html) | User - Song Listen histories; With timestamps                |
 | [MovieLens25M](https://grouplens.org/datasets/movielens/25m/) | Users and Movie Ratings; With timestamps                     |
-
-
+| [Memetracker](https://snap.stanford.edu/data/memetracker9.html) |                                                              |
 
 ## Dynamic Community Detection Methods
 
 
 
-### Classical Methods
+### Link-based Methods
+
+#### Community Detection
+
+##### Modularity
+
+* Measures the density of links inside communities compared to links between communities
+* Range [-1/2, 1]
+
+##### Louvain Method
+
+The Louvain method is a popular algorithm to detect communities in large networks. It is a hierarchical clustering algorithm, as it recursively merges communities into single community and further executes modularity clustering on this condensed network.
+
+@blondelFastUnfoldingCommunities2008
+
+* Hierarchical algorithm
+  * Starts with each node assigned to it’s own community
+  * First small communities are found
+    * For each node $i$ change in modularity is calculated for removing $i$ from its own community
+    * And adding it to a neighbor community
+    * Modularity change can be calculated incrementally (local)
+  * Then produces condensed graph by merging communities (their nodes) into a single node
+  * Repeats this process
+* Optimizes for modularity
+  * Is a heuristic algorithm
+    * Since going through all possible assignments maximizing modularity is impractical
+* TODO: Should I go deeper into calculation?
+
+##### Label Propagation algorithm
+
+* Algorithm to find communities in graph (very fast)
+  * Uses only network structure as guide
+  * Doesn’t require any priors (metrics)
+  * Intuition:
+    * Single label quickly becomes dominant in a group of densely connected nodes
+    * But these labels have trouble crossing sparsely connected regions 
+    * Nodes that end up with same label can be considered part of  same community
+  * Algorithm:
+    * Initialize each node to their own label
+    * Propagate the labels, per iteration:
+      * Each node updates its label to one that majority of its neighbors belong
+      * Ties are broken deterministically
+    * Stops when convergence is reached, or max iter
+  * Preliminary solution can be assigned before run
+
+
+
+#### Independent Community Detection and Matching
+
+* (Instant Optimal Communities Discovery)
+  * Works in two stages:
+    * CD methods are applied directly to each snapshot  (identify stage)
+    * Then the communities are matched between the snapshots (match stage)
+  * Advantages:
+    * Use of unmodified CD algorithms (built on top of exisiting work)
+    * Highly parallelizable
+  * Disadvantage:
+    * Instability of community detection algorithms (may give **very** different results if network changes)
+    * Difficult to distinguish between instability of algorithm and evolution of the network
+* @wangCommunityEvolutionSocial2008 (core nodes / leader nodes)
+  * Circumvents instability issue by studying most stable part of communities (community core nodes)
+* @greeneTrackingEvolutionCommunities2010 (similarity metric based - quality function)
+  * Use quality funciton to quantify similarity between communities
+  * Jaccard Similarity
+  * MOSES: for CD
+* @sunMatrixBasedCommunity2015 ()
+  * Louvain algorithm for CD
+  * Use correlation matrix for community matching
+    * relation between t and t+1
+  * Defined rules to detect evolution events based on matrix
+* @rossettiANGELEfficientEffective2020 
+
+#### Dependent Community Detection
+
+* Dependent Community Detection / Temporal Trade-Off Communities Discovery
+  * Use snapshots to detect communtities
+  * To detect communities in current snapshot, rely on communities from the previous
+  * Advantage:
+    * Introduces temporal smoothness (fixes the instability problem mostly)
+    * Does not diverge from the usual CD definition (search at each timestep)
+  * Disadvantage:
+    * Not parallelizable
+    * Impacts long term coherence of dynamic communtities
+    * Each steps experience substantial drift compared to what a static algorithm would find
+* @heFastAlgorithmCommunity2015 (modified louvain)
+  * Modify louvain algorithm to use previous communities
+* @sunGraphScopeParameterfreeMining2007 (mdl based)
+  * FIrst step: apply MDL method to encode graph with min number of bits
+  * Divide network into multiple sequential segments
+    * Jumps between segments mark evolution over time
+  * Incrementally initialize using previous output
+* @gaoEvolutionaryCommunityDiscovery2016 (leader nodes)
+  * Propose evolutionary CD algorithm based on leader nodes
+  * Each community is a set of followers around a leader
+  * Present an updating strategy with temp info to get initial leader nodes
+  * Leader nodes ensure temporal smoothneess
+
+#### Simultaneous community detection
+
+* Simultaneous community detection / Cross-Time Community Discovery
+  * Doest consider independently the different steps of the network evolution
+  * Advantage:
+    * Doenst suffer from instability or community drift
+    * More potential to deal with slow evolution and local anomalies
+  * Disadvantage:
+    * Not based on usual principle of a unique partition with each timestep
+    * Cant handle real time community detection
+  * Approaches fall in categories:
+    * Fixed Memberships, Fixed Properties
+      * Communities can change mambers and nodes cant disappear
+      * @aynaudMultiStepCommunityDetection2011
+    * Fixed Membership, Dynamic Properties
+      * Memberships of communties cant change
+      * But they are assigned a profile based on their temporal …
+    * Evolving Membership, Fixed Properties
+      * Allow membership change along time
+      * Mostly SBM approaches
+        * properties can not change over time
+      * @ghasemianDetectabilityThresholdsOptimal2016
+    * Evolving Membership, Evolving Properties
+      * Dont impose any contraints
+      * Edges are added between existing nodes between consequent snapshots
+      * @muchaCommunityStructureTimeDependent2009
+        * Modify louvain
+
+#### Dynamic Community Detection on Temporal Networks (Evolution)
+
+* Dynamic Community Detection on Temporal Networks / Online Approach
+  * Works directly on temporal graphs
+  * Network consists of series of changes
+  * Algorithms are iterative
+    * Find communties once
+    * Then update them
+* @zakrzewskaTrackingLocalCommunities2016 (leader nodes - rule based)
+  * Dynamic set expandion
+  * Indrementally update community
+    * 1st step: initial community finding
+    * iteration: new nodes are added
+    * Fitness score is used to assign nodes to communtities
+* @xieLabelRankStabilizedLabel2013 (label propagation)
+  * LabelRankT - based on LabelRank (label propagation) algorithm
+  * When network is updated, label of changed nodes are re-initialized
+* @guoDynamicCommunityDetection2016 (based on distance dynamics)
+  * Based on distance dynamics
+  * Increments can be treated as network disturbance
+  * Uses candidate set to pick pick ROI
+    * Changes are made in communties
+    * Distances are updated
+
+#### Tacking Instability
+
+* Temporal Smoothing:
+  * Smoothing by bootstrap
+  * Explicit smoothing: In definition
+  * Implicit:
+    * Reuse previous communities as seeds
+    * Locally update communities
+  * Global smoothing: search for communities by examining all steps of evolution
+
+
 
 
 
 ### Deep Methods
+
+#### Graph Augmentation Based
+
+* Add additional links to the graph
+  * Yoonsuk Kang
+* Change distances within the graph
 
 
 

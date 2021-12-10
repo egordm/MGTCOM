@@ -1,6 +1,6 @@
 ---
 type: paper
-title: ""
+title: "Paper Reading Template"
 subtitle: "By "
 author:
   name: "Egor Dmitriev (6100120)"

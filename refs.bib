@@ -15,6 +15,18 @@
   file = {/home/egordm/Documents/Research/Reference/storage/NNKLCN8M/Abu-El-Haija et al_2018_Watch Your Step.pdf;/home/egordm/Documents/Research/Reference/storage/VH9LCXBM/1710.html}
 }
 
+@inproceedings{ankerstOPTICSOrderingPoints1999,
+  title = {{{OPTICS}}: {{Ordering Points To Identify}} the {{Clustering Structure}}},
+  shorttitle = {{{OPTICS}}},
+  author = {Ankerst, Mihael and Breunig, Markus M. and Kriegel, Hans-peter and Sander, J{\"o}rg},
+  year = {1999},
+  pages = {49--60},
+  publisher = {{ACM Press}},
+  abstract = {Cluster analysis is a primary method for database mining. It is either used as a stand-alone tool to get insight into the distribution of a data set, e.g. to focus further analysis and data processing, or as a preprocessing step for other algorithms operating on the detected clusters. Almost all of the well-known clustering algorithms require input parameters which are hard to determine but have a significant influence on the clustering result. Furthermore, for many real-data sets there does not even exist a global parameter setting for which the result of the clustering algorithm describes the intrinsic clustering structure accurately. We introduce a new algorithm for the purpose of cluster analysis which does not produce a clustering of a data set explicitly; but instead creates an augmented ordering of the database representing its density-based clustering structure. This cluster-ordering contains information which is equivalent to the density-based clusterings corresponding to a broad range of parameter settings. It is a versatile basis for both automatic and interactive cluster analysis. We show how to automatically and efficiently extract not only `traditional ' clustering information (e.g. representative points, arbitrary shaped clusters), but also the intrinsic clustering structure. For medium sized data sets, the cluster-ordering can be represented graphically and for very large data sets, we introduce an appropriate visualization technique. Both are suitable for interactive exploration of the intrinsic clustering structure offering additional insights into the distribution and correlation of the data.},
+  keywords = {No Prior},
+  file = {/home/egordm/Documents/Research/Reference/storage/WJXBNK9M/Ankerst et al_1999_OPTICS.pdf;/home/egordm/Documents/Research/Reference/storage/TBJTRAMT/summary.html}
+}
+
 @article{asurEventbasedFrameworkCharacterizing2009,
   title = {An Event-Based Framework for Characterizing the Evolutionary Behavior of Interaction Graphs},
   author = {Asur, Sitaram and Parthasarathy, Srinivasan and Ucar, Duygu},
@@ -29,6 +41,17 @@
   abstract = {Interaction graphs are ubiquitous in many fields such as bioinformatics, sociology and physical sciences. There have been many studies in the literature targeted at studying and mining these graphs. However, almost all of them have studied these graphs from a static point of view. The study of the evolution of these graphs over time can provide tremendous insight on the behavior of entities, communities and the flow of information among them. In this work, we present an event-based characterization of critical behavioral patterns for temporally varying interaction graphs. We use nonoverlapping snapshots of interaction graphs and develop a framework for capturing and identifying interesting events from them. We use these events to characterize complex behavioral patterns of individuals and communities over time. We show how semantic information can be incorporated to reason about community-behavior events. We also demonstrate the application of behavioral patterns for the purposes of modeling evolution, link prediction and influence maximization. Finally, we present a diffusion model for evolving networks, based on our framework.},
   keywords = {diffusion of innovations,Dynamic interaction networks,evolutionary analysis},
   file = {/home/egordm/Documents/Research/Reference/storage/EQ95K2BM/Asur et al_2009_An event-based framework for characterizing the evolutionary behavior of.pdf}
+}
+
+@inproceedings{aynaudMultiStepCommunityDetection2011,
+  title = {Multi-{{Step Community Detection}} and {{Hierarchical Time Segmentation}} in {{Evolving Networks}}},
+  booktitle = {Fifth {{SNA-KDD Workshop Social Network Mining}} and {{Analysis}}, in Conjunction with the 17th {{ACM SIGKDD International Conference}} on {{Knowledge Discovery}} and {{Data Mining}} ({{KDD}} 2011)},
+  author = {Aynaud, Thomas and Guillaume, Jean-Loup},
+  year = {2011},
+  month = aug,
+  address = {{San Diego, CA, United States}},
+  abstract = {Many complex systems composed of interacting objects like social networks or the web can be modeled as graphs. They can usually be divided in dense sub-graphs with few links between them, called communities and detecting this un-derlying community structure may have a major impact in the understanding of these systems. We focus here on evolving graphs, for which the usual approach is to represent the state of the system at different time steps and to compute communities independently on the graph obtained at each time step.  We propose in this paper to use a different framework: instead of detecting communities on each time step, we detect a unique decomposition in communities that is relevant for (almost) every time step during a given period called the time window. We propose a definition of this new decomposition and two algorithms to detect it quickly. We validate both the approach and the algorithms on three evolving networks of different kinds showing that the quality loss at each time step is very low despite the constraint of maximization on several time steps. Since the time window length is a crucial parameter of our technique, we also propose an unsupervised hierarchical clustering algorithm to build automatically a hierarchical time segmentation into time windows. This clustering relies on a new similarity measure based on community structure. We show that it is very efficient in detecting meaningful windows.},
+  file = {/home/egordm/Documents/Research/Reference/storage/W7RTIH48/hal-01286941.html}
 }
 
 @article{bazziFrameworkConstructionGenerative2020,
@@ -48,6 +71,24 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Social and Information Networks,Condensed Matter - Statistical Mechanics,Nonlinear Sciences - Adaptation and Self-Organizing Systems,Physics - Physics and Society,Statistics - Methodology},
   file = {/home/egordm/Documents/Research/Reference/storage/LS3H4SSM/Bazzi et al_2020_A Framework for the Construction of Generative Models for Mesoscale Structure.pdf;/home/egordm/Documents/Research/Reference/storage/3YVEDZZ2/1608.html}
+}
+
+@article{blondelFastUnfoldingCommunities2008,
+  title = {Fast Unfolding of Communities in Large Networks},
+  author = {Blondel, Vincent D. and Guillaume, Jean-Loup and Lambiotte, Renaud and Lefebvre, Etienne},
+  year = {2008},
+  month = oct,
+  journal = {Journal of Statistical Mechanics: Theory and Experiment},
+  volume = {2008},
+  number = {10},
+  pages = {P10008},
+  publisher = {{IOP Publishing}},
+  issn = {1742-5468},
+  doi = {10.1088/1742-5468/2008/10/P10008},
+  abstract = {We propose a simple method to extract the community structure of large networks. Our method is a heuristic method that is based on modularity optimization. It is shown to outperform all other known community detection methods in terms of computation time. Moreover, the quality of the communities detected is very good, as measured by the so-called modularity. This is shown first by identifying language communities in a Belgian mobile phone network of 2 million customers and by analysing a web graph of 118 million nodes and more than one billion links. The accuracy of our algorithm is also verified on ad hoc modular networks.},
+  langid = {english},
+  keywords = {Theory: Louvain Method},
+  file = {/home/egordm/Documents/Research/Reference/storage/KFJ62LJK/Blondel et al_2008_Fast unfolding of communities in large networks.pdf}
 }
 
 @inproceedings{bordesTranslatingEmbeddingsModeling2013,
@@ -213,6 +254,39 @@
   file = {/home/egordm/Documents/Research/Reference/storage/LJ5NXEYX/1-s2.0-S030645731830997X-main.pdf}
 }
 
+@inproceedings{gaoEvolutionaryCommunityDiscovery2016,
+  title = {Evolutionary Community Discovery in Dynamic Networks Based on Leader Nodes},
+  booktitle = {2016 {{International Conference}} on {{Big Data}} and {{Smart Computing}} ({{BigComp}})},
+  author = {Gao, Wenhao and Luo, Wenjian and Bu, Chenyang},
+  year = {2016},
+  month = jan,
+  pages = {53--60},
+  issn = {2375-9356},
+  doi = {10.1109/BIGCOMP.2016.7425801},
+  abstract = {Evolutionary community discovery is a hot research topic which clusters the dynamic or temporal network. The communities detected in dynamic network should get reasonable partition for the current data while simultaneously not deviate drastically from the previous ones. In this paper, the evolutionary community discovery algorithm based on leader nodes (EvoLeaders) is proposed to cluster the dynamic network. Compared with the static community discovery algorithm based on leader nodes (the Top Leaders algorithm), experimental results over two real-world datasets demonstrate that the EvoLeaders is more suitable for dynamic scenarios.},
+  keywords = {Clustering algorithms,community discovery,Current measurement,dynamic network,Heuristic algorithms,History,leader nodes,Merging,Partitioning algorithms,Social network services},
+  file = {/home/egordm/Documents/Research/Reference/storage/FL7YEW7F/7425801.html}
+}
+
+@article{ghasemianDetectabilityThresholdsOptimal2016,
+  title = {Detectability Thresholds and Optimal Algorithms for Community Structure in Dynamic Networks},
+  author = {Ghasemian, Amir and Zhang, Pan and Clauset, Aaron and Moore, Cristopher and Peel, Leto},
+  year = {2016},
+  month = jul,
+  journal = {Physical Review X},
+  volume = {6},
+  number = {3},
+  eprint = {1506.06179},
+  eprinttype = {arxiv},
+  pages = {031005},
+  issn = {2160-3308},
+  doi = {10.1103/PhysRevX.6.031005},
+  abstract = {We study the fundamental limits on learning latent community structure in dynamic networks. Specifically, we study dynamic stochastic block models where nodes change their community membership over time, but where edges are generated independently at each time step. In this setting (which is a special case of several existing models), we are able to derive the detectability threshold exactly, as a function of the rate of change and the strength of the communities. Below this threshold, we claim that no algorithm can identify the communities better than chance. We then give two algorithms that are optimal in the sense that they succeed all the way down to this limit. The first uses belief propagation (BP), which gives asymptotically optimal accuracy, and the second is a fast spectral clustering algorithm, based on linearizing the BP equations. We verify our analytic and algorithmic results via numerical simulation, and close with a brief discussion of extensions and open questions.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,Condensed Matter - Disordered Systems and Neural Networks,Physics - Data Analysis Statistics and Probability,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/MJPG6DIZ/Ghasemian et al_2016_Detectability thresholds and optimal algorithms for community structure in.pdf;/home/egordm/Documents/Research/Reference/storage/F3XYPPXN/1506.html}
+}
+
 @article{godwinVeryDeepGraph2021,
   title = {Very {{Deep Graph Neural Networks Via Noise Regularisation}}},
   author = {Godwin, Jonathan and Schaarschmidt, Michael and Gaunt, Alexander and {Sanchez-Gonzalez}, Alvaro and Rubanova, Yulia and Veli{\v c}kovi{\'c}, Petar and Kirkpatrick, James and Battaglia, Peter},
@@ -276,6 +350,19 @@
   file = {/home/egordm/Documents/Research/Reference/storage/AEQN6HVT/Grover_Leskovec_2016_node2vec.pdf;/home/egordm/Documents/Research/Reference/storage/CG6XISUF/1607.html}
 }
 
+@inproceedings{guoDynamicCommunityDetection2016,
+  title = {Dynamic Community Detection Based on Distance Dynamics},
+  booktitle = {2016 {{IEEE}}/{{ACM International Conference}} on {{Advances}} in {{Social Networks Analysis}} and {{Mining}} ({{ASONAM}})},
+  author = {Guo, Qian and Zhang, Lei and Wu, Bin and Zeng, Xuelin},
+  year = {2016},
+  month = aug,
+  pages = {329--336},
+  doi = {10.1109/ASONAM.2016.7752254},
+  abstract = {Dynamic community detection has been of great significance on analyzing network structure and community evolution. Among state-of-the-art methods, incremental algorithms based on modularity have been used widely, for the fully utilization of both current and historical information. Unfortunately, they are difficult to uncover small community due to problem called ``resolution limit'' and also sensitive to the sequence of network increments' arrival. In this paper, we propose a novel dynamic community detection algorithm based on distance dynamics, which detects community in near-linear time. Meanwhile, the proposed algorithm overcomes the shortcomings of traditional methods by replacing modularity with local interaction model. In a sense, it is assumed that increments can be treated as disturbance of network. It can be limited to a certain ``local area'' by disturbing factor. Experiments show that the proposed algorithm has achieved well balance between efficiency and effectiveness both in synthetic and real world networks.},
+  keywords = {Algorithm design and analysis,Communications technology,Detection algorithms,dynamic community detection,dynamic network,Heuristic algorithms,Image edge detection,network evolution,Partitioning algorithms,Sensitivity},
+  file = {/home/egordm/Documents/Research/Reference/storage/ASCW6HE7/7752254.html}
+}
+
 @article{hamiltonInductiveRepresentationLearning2018,
   title = {Inductive {{Representation Learning}} on {{Large Graphs}}},
   author = {Hamilton, William L. and Ying, Rex and Leskovec, Jure},
@@ -305,6 +392,17 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks},
   file = {/home/egordm/Documents/Research/Reference/storage/7ZTHPMDW/Hamilton et al_2018_Representation Learning on Graphs.pdf;/home/egordm/Documents/Research/Reference/storage/KQ2S2M95/1709.html}
+}
+
+@article{heFastAlgorithmCommunity2015,
+  title = {A Fast Algorithm for Community Detection in Temporal Network},
+  author = {He, Jialin and Chen, Duanbing},
+  year = {2015},
+  month = jul,
+  journal = {Physica A: Statistical Mechanics and its Applications},
+  volume = {429},
+  doi = {10.1016/j.physa.2015.02.069},
+  abstract = {Many complex systems can be investigated using the framework of temporal networks, which consist of nodes and edges that vary in time. The community structure in temporal network contributes to the understanding of evolving process of entities in complex system. The traditional method on dynamic community detection for each time step is independent of that for other time steps. It has low efficiency for ignoring historic community information. In this paper, we present a fast algorithm for dynamic community detection in temporal network, which takes advantage of community information at previous time step and improves efficiency while maintaining the quality. Experimental studies on real and synthetic temporal networks show that the CPU running time of our method improves as much as 69\% over traditional one.}
 }
 
 @inproceedings{karatasReviewSocialBot2017,
@@ -362,6 +460,55 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
   file = {/home/egordm/Documents/Research/Reference/storage/WQH4DSEG/Kipf_Welling_2017_Semi-Supervised Classification with Graph Convolutional Networks.pdf;/home/egordm/Documents/Research/Reference/storage/5GQZXT9A/1609.html}
+}
+
+@article{kipfSemiSupervisedClassificationGraph2017a,
+  title = {Semi-{{Supervised Classification}} with {{Graph Convolutional Networks}}},
+  author = {Kipf, Thomas N. and Welling, Max},
+  year = {2017},
+  month = feb,
+  journal = {arXiv:1609.02907 [cs, stat]},
+  eprint = {1609.02907},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {We present a scalable approach for semi-supervised learning on graph-structured data that is based on an efficient variant of convolutional neural networks which operate directly on graphs. We motivate the choice of our convolutional architecture via a localized first-order approximation of spectral graph convolutions. Our model scales linearly in the number of graph edges and learns hidden layer representations that encode both local graph structure and features of nodes. In a number of experiments on citation networks and on a knowledge graph dataset we demonstrate that our approach outperforms related methods by a significant margin.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/64EKI7D3/Kipf_Welling_2017_Semi-Supervised Classification with Graph Convolutional Networks.pdf;/home/egordm/Documents/Research/Reference/storage/INKT7SS6/1609.html}
+}
+
+@article{kipfVariationalGraphAutoEncoders2016,
+  title = {Variational {{Graph Auto-Encoders}}},
+  author = {Kipf, Thomas N. and Welling, Max},
+  year = {2016},
+  month = nov,
+  journal = {arXiv:1611.07308 [cs, stat]},
+  eprint = {1611.07308},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {We introduce the variational graph auto-encoder (VGAE), a framework for unsupervised learning on graph-structured data based on the variational auto-encoder (VAE). This model makes use of latent variables and is capable of learning interpretable latent representations for undirected graphs. We demonstrate this model using a graph convolutional network (GCN) encoder and a simple inner product decoder. Our model achieves competitive results on a link prediction task in citation networks. In contrast to most existing models for unsupervised learning on graph-structured data and link prediction, our model can naturally incorporate node features, which significantly improves predictive performance on a number of benchmark datasets.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/JUFR6W66/Kipf_Welling_2016_Variational Graph Auto-Encoders.pdf;/home/egordm/Documents/Research/Reference/storage/6FJWYDA6/1611.html}
+}
+
+@article{lancichinettiBenchmarkGraphsTesting2008,
+  title = {Benchmark Graphs for Testing Community Detection Algorithms},
+  author = {Lancichinetti, Andrea and Fortunato, Santo and Radicchi, Filippo},
+  year = {2008},
+  month = oct,
+  journal = {Physical Review E},
+  volume = {78},
+  number = {4},
+  eprint = {0805.4770},
+  eprinttype = {arxiv},
+  pages = {046110},
+  issn = {1539-3755, 1550-2376},
+  doi = {10.1103/PhysRevE.78.046110},
+  abstract = {Community structure is one of the most important features of real networks and reveals the internal organization of the nodes. Many algorithms have been proposed but the crucial issue of testing, i.e. the question of how good an algorithm is, with respect to others, is still open. Standard tests include the analysis of simple artificial graphs with a built-in community structure, that the algorithm has to recover. However, the special graphs adopted in actual tests have a structure that does not reflect the real properties of nodes and communities found in real networks. Here we introduce a new class of benchmark graphs, that account for the heterogeneity in the distributions of node degrees and of community sizes. We use this new benchmark to test two popular methods of community detection, modularity optimization and Potts model clustering. The results show that the new benchmark poses a much more severe test to algorithms than standard benchmarks, revealing limits that may not be apparent at a first analysis.},
+  archiveprefix = {arXiv},
+  keywords = {Physics - Computational Physics,Physics - Physics and Society},
+  file = {/home/egordm/Documents/Research/Reference/storage/SH2YKTRN/Lancichinetti et al_2008_Benchmark graphs for testing community detection algorithms.pdf;/home/egordm/Documents/Research/Reference/storage/GHSS94FR/0805.html}
 }
 
 @article{lancichinettiDetectingOverlappingHierarchical2009,
@@ -481,6 +628,36 @@
   file = {/home/egordm/Documents/Research/Reference/storage/X2K55HZC/Ma et al_2020_Community-aware dynamic network embedding by using deep autoencoder.pdf}
 }
 
+@article{mikolovEfficientEstimationWord2013,
+  title = {Efficient {{Estimation}} of {{Word Representations}} in {{Vector Space}}},
+  author = {Mikolov, Tomas and Chen, Kai and Corrado, Greg and Dean, Jeffrey},
+  year = {2013},
+  month = sep,
+  journal = {arXiv:1301.3781 [cs]},
+  eprint = {1301.3781},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
+  abstract = {We propose two novel model architectures for computing continuous vector representations of words from very large data sets. The quality of these representations is measured in a word similarity task, and the results are compared to the previously best performing techniques based on different types of neural networks. We observe large improvements in accuracy at much lower computational cost, i.e. it takes less than a day to learn high quality word vectors from a 1.6 billion words data set. Furthermore, we show that these vectors provide state-of-the-art performance on our test set for measuring syntactic and semantic word similarities.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Computation and Language},
+  file = {/home/egordm/Documents/Research/Reference/storage/UXCAHK4N/Mikolov et al_2013_Efficient Estimation of Word Representations in Vector Space.pdf;/home/egordm/Documents/Research/Reference/storage/NPVY5MPG/1301.html}
+}
+
+@article{minSurveyClusteringDeep2018,
+  title = {A {{Survey}} of {{Clustering With Deep Learning}}: {{From}} the {{Perspective}} of {{Network Architecture}}},
+  shorttitle = {A {{Survey}} of {{Clustering With Deep Learning}}},
+  author = {Min, Erxue and Guo, Xifeng and Liu, Qiang and Zhang, Gen and Cui, Jianjing and Long, Jun},
+  year = {2018},
+  journal = {IEEE Access},
+  volume = {6},
+  pages = {39501--39514},
+  issn = {2169-3536},
+  doi = {10.1109/ACCESS.2018.2855437},
+  abstract = {Clustering is a fundamental problem in many data-driven application domains, and clustering performance highly depends on the quality of data representation. Hence, linear or non-linear feature transformations have been extensively used to learn a better data representation for clustering. In recent years, a lot of works focused on using deep neural networks to learn a clustering-friendly representation, resulting in a significant increase of clustering performance. In this paper, we give a systematic survey of clustering with deep learning in views of architecture. Specifically, we first introduce the preliminary knowledge for better understanding of this field. Then, a taxonomy of clustering with deep learning is proposed and some representative methods are introduced. Finally, we propose some interesting future opportunities of clustering with deep learning and give some conclusion remarks.},
+  keywords = {Clustering,Clustering algorithms,Clustering methods,data representation,deep learning,Gallium nitride,Machine learning,network architecture,Network architecture,Neural networks,Neurons},
+  file = {/home/egordm/Documents/Research/Reference/storage/P87GXZU3/Min et al_2018_A Survey of Clustering With Deep Learning.pdf;/home/egordm/Documents/Research/Reference/storage/M7669FR8/8412085.html}
+}
+
 @article{mosadeghUsingSocialNetwork2011,
   title = {Using {{Social Network Paradigm}} for {{Developing}} a {{Conceptual Framework}} in {{CRM}}},
   author = {Mosadegh, Mohammad and Behboudi, Mehdi},
@@ -492,6 +669,26 @@
   doi = {10.52283/NSWRCA.AJBMR.20110104A06},
   abstract = {This study develops a conceptual framework for applying social networks in usual CRM models. Recent changing in customer relationship theme and putting new media and network-based paradigm into practice makes it imperative to find how social networks affect CRMs. Accordingly, this study explains the role of social networks in customer relationship management by using its analysis, tools and aspects of this concepts based on CRM models. We have provided a SCRM framework that is based on usual CRM models and incorporates Social networks and its tools, methods and analysis. The framework is combination of Social networks concept and traditional CRM concepts.},
   file = {/home/egordm/Documents/Research/Reference/storage/BURRBSC3/Mosadegh_Behboudi_2011_Using Social Network Paradigm for Developing a Conceptual Framework in CRM.pdf}
+}
+
+@book{mrabahDeepClusteringDynamic2019,
+  title = {Deep {{Clustering}} with a {{Dynamic Autoencoder}}},
+  author = {Mrabah, Nairouz and Khan, Naimul and Ksantini, Riadh},
+  year = {2019},
+  month = jan,
+  abstract = {In unsupervised learning, there is no obvious straightforward loss function which can capture the major factors of variations and similarities. Since natural systems have smooth dynamics, an opportunity is lost if an unsupervised loss function remains static during the training process. The absence of concrete supervision suggests that smooth complex dynamics should be integrated as a substitute to the classical static loss functions to better make use of the gradual and uncertain knowledge acquired through self-supervision. In this paper, we propose Dynamic Autoencoder (DynAE), a new model for deep clustering that allows to solve a clustering-reconstruction trade-off by gradually and smoothly eliminating the reconstruction objective in favor of a construction one while preserving the space topology. Experimental evaluations on benchmark datasets show that our approach achieves state-of-the-art results compared to all the other autoencoder-based clustering methods.},
+  file = {/home/egordm/Documents/Research/Reference/storage/PG3PIEMY/Mrabah et al_2019_Deep Clustering with a Dynamic Autoencoder.pdf}
+}
+
+@article{muchaCommunityStructureTimeDependent2009,
+  title = {Community {{Structure}} in {{Time-Dependent}}, {{Multiscale}}, and {{Multiplex Networks}}},
+  author = {Mucha, Peter J. and Richardson, Thomas and Macon, Kevin and Porter, Mason A. and Onnela, Jukka-Pekka},
+  year = {2009},
+  month = nov,
+  doi = {10.1126/science.1184819},
+  abstract = {Network science is an interdisciplinary endeavor, with methods and applications drawn from across the natural, social, and information sciences. A prominent problem in network science is the algorithmic detection of tightly-connected groups of nodes known as communities. We developed a generalized framework of network quality functions that allowed us to study the community structure of arbitrary multislice networks, which are combinations of individual networks coupled through links that connect each node in one network slice to itself in other slices. This framework allows one to study community structure in a very general setting encompassing networks that evolve over time, have multiple types of links (multiplexity), and have multiple scales.},
+  langid = {english},
+  file = {/home/egordm/Documents/Research/Reference/storage/I7UDH5BC/Mucha et al_2009_Community Structure in Time-Dependent, Multiscale, and Multiplex Networks.pdf;/home/egordm/Documents/Research/Reference/storage/LBJ97WN7/0911.html}
 }
 
 @article{newmanFastAlgorithmDetecting2004,
@@ -562,6 +759,19 @@
   file = {/home/egordm/Documents/Research/Reference/storage/BW8FFYWG/Peel et al_The ground truth about metadata and community detection in networks.pdf}
 }
 
+@inproceedings{penningtonGloveGlobalVectors2014,
+  title = {Glove: {{Global Vectors}} for {{Word Representation}}},
+  shorttitle = {Glove},
+  booktitle = {{{EMNLP}}},
+  author = {Pennington, Jeffrey and Socher, Richard and Manning, Christopher},
+  year = {2014},
+  month = jan,
+  volume = {14},
+  pages = {1532--1543},
+  doi = {10.3115/v1/D14-1162},
+  file = {/home/egordm/Documents/Research/Reference/storage/P82Q4NYR/Pennington et al_2014_Glove.pdf}
+}
+
 @article{perozziDeepWalkOnlineLearning2014,
   title = {{{DeepWalk}}: {{Online Learning}} of {{Social Representations}}},
   shorttitle = {{{DeepWalk}}},
@@ -576,6 +786,36 @@
   abstract = {We present DeepWalk, a novel approach for learning latent representations of vertices in a network. These latent representations encode social relations in a continuous vector space, which is easily exploited by statistical models. DeepWalk generalizes recent advancements in language modeling and unsupervised feature learning (or deep learning) from sequences of words to graphs. DeepWalk uses local information obtained from truncated random walks to learn latent representations by treating walks as the equivalent of sentences. We demonstrate DeepWalk's latent representations on several multi-label network classification tasks for social networks such as BlogCatalog, Flickr, and YouTube. Our results show that DeepWalk outperforms challenging baselines which are allowed a global view of the network, especially in the presence of missing information. DeepWalk's representations can provide \$F\_1\$ scores up to 10\% higher than competing methods when labeled data is sparse. In some experiments, DeepWalk's representations are able to outperform all baseline methods while using 60\% less training data. DeepWalk is also scalable. It is an online learning algorithm which builds useful incremental results, and is trivially parallelizable. These qualities make it suitable for a broad class of real world applications such as network classification, and anomaly detection.},
   archiveprefix = {arXiv},
   keywords = {class3,Computer Science - Machine Learning,Computer Science - Social and Information Networks,H.2.8,I.2.6,I.5.1,prio3,unread}
+}
+
+@article{renDeepDensitybasedImage2020,
+  title = {Deep Density-Based Image Clustering},
+  author = {Ren, Yazhou and Wang, Ni and Li, Mingxia and Xu, Zenglin},
+  year = {2020},
+  month = jun,
+  journal = {Knowledge-Based Systems},
+  volume = {197},
+  pages = {105841},
+  issn = {0950-7051},
+  doi = {10.1016/j.knosys.2020.105841},
+  abstract = {Recently, deep clustering, which is able to perform feature learning that favors clustering tasks via deep neural networks, has achieved remarkable performance in image clustering applications. However, the existing deep clustering algorithms generally need the number of clusters in advance, which is usually unknown in real-world tasks. In addition, the initial cluster centers in the learned feature space are generated by k-means. This only works well on spherical clusters and probably leads to unstable clustering results. In this paper, we propose a two-stage deep density-based image clustering (DDC) framework to address these issues. The first stage is to train a deep convolutional autoencoder (CAE) to extract low-dimensional feature representations from high-dimensional image data, and then apply t-SNE to further reduce the data to a 2-dimensional space favoring density-based clustering algorithms. In the second stage, we propose a novel density-based clustering technique for the 2-dimensional embedded data to automatically recognize an appropriate number of clusters with arbitrary shapes. Concretely, a number of local clusters are generated to capture the local structures of clusters, and then are merged via their density relationship to form the final clustering result. Experiments demonstrate that the proposed DDC achieves comparable or even better clustering performance than state-of-the-art deep clustering methods, even though the number of clusters is not given.},
+  langid = {english},
+  keywords = {Deep clustering,Density-based clustering,Feature learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/DNU4ALS9/Ren et al_2020_Deep density-based image clustering.pdf}
+}
+
+@article{roselinIntelligentAnomalyDetection2021,
+  title = {Intelligent {{Anomaly Detection}} for {{Large Network Traffic With Optimized Deep Clustering}} ({{ODC}}) {{Algorithm}}},
+  author = {Roselin, Annie Gilda and Nanda, Priyadarsi and Nepal, Surya and He, Xiangjian},
+  year = {2021},
+  journal = {IEEE Access},
+  volume = {9},
+  pages = {47243--47251},
+  issn = {2169-3536},
+  doi = {10.1109/ACCESS.2021.3068172},
+  abstract = {The availability of an enormous amount of unlabeled datasets drives the anomaly detection research towards unsupervised machine learning algorithms. Deep clustering algorithms for anomaly detection gain significant research attention in this era. We propose an intelligent anomaly detection for extensive network traffic analysis with an Optimized Deep Clustering (ODC) algorithm. Firstly, ODC does the optimization of the deep AutoEncoder algorithm by tuning the hyperparameters. Thereby we can achieve a reduced reconstruction error rate from the deep AutoEncoder. Secondly, ODC feeds the optimized deep AutoEncoder's latent view to the BIRCH clustering algorithm to detect the known and unknown malicious network traffic without human intervention. Unlike other deep clustering algorithms, ODC does not require to specify the number of clusters needed to analyze the network traffic dataset. We experiment ODC algorithm with the CoAP off-path dataset obtained from our testbed and the MNIST dataset to compare our algorithm's accuracy with state-of-art clustering algorithms. The evaluation results show ODC deep clustering method outperforms the existing deep clustering methods for anomaly detection.},
+  keywords = {anomaly detection,Anomaly detection,Australia,AutoEncoders,BIRCH clustering,Clustering algorithms,Clustering methods,Deep learning,Heuristic algorithms,latent space view,Machine learning algorithms,No Prior,regularization,Training},
+  file = {/home/egordm/Documents/Research/Reference/storage/X79WNVVN/Roselin et al_2021_Intelligent Anomaly Detection for Large Network Traffic With Optimized Deep.pdf;/home/egordm/Documents/Research/Reference/storage/P2E9FADD/9383226.html}
 }
 
 @article{rossettiANGELEfficientEffective2020,
@@ -691,6 +931,37 @@
   file = {/home/egordm/Documents/Research/Reference/storage/MI4XTGQR/Su et al_2021_A Comprehensive Survey on Community Detection with Deep Learning.pdf;/home/egordm/Documents/Research/Reference/storage/HMBU6YYP/2105.html}
 }
 
+@inproceedings{sunGraphScopeParameterfreeMining2007,
+  title = {{{GraphScope}}: Parameter-Free Mining of Large Time-Evolving Graphs},
+  shorttitle = {{{GraphScope}}},
+  booktitle = {Proceedings of the 13th {{ACM SIGKDD}} International Conference on {{Knowledge}} Discovery and Data Mining},
+  author = {Sun, Jimeng and Faloutsos, Christos and Papadimitriou, Spiros and Yu, Philip S.},
+  year = {2007},
+  month = aug,
+  series = {{{KDD}} '07},
+  pages = {687--696},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/1281192.1281266},
+  abstract = {How can we find communities in dynamic networks of socialinteractions, such as who calls whom, who emails whom, or who sells to whom? How can we spot discontinuity time-points in such streams of graphs, in an on-line, any-time fashion? We propose GraphScope, that addresses both problems, using information theoretic principles. Contrary to the majority of earlier methods, it needs no user-defined parameters. Moreover, it is designed to operate on large graphs, in a streaming fashion. We demonstrate the efficiency and effectiveness of our GraphScope on real datasets from several diverse domains. In all cases it produces meaningful time-evolving patterns that agree with human intuition.},
+  isbn = {978-1-59593-609-7},
+  keywords = {graphs,MDL,mining,streams},
+  file = {/home/egordm/Documents/Research/Reference/storage/IFPL2WDC/Sun et al_2007_GraphScope.pdf}
+}
+
+@inproceedings{sunMatrixBasedCommunity2015,
+  title = {Matrix {{Based Community Evolution Events Detection}} in {{Online Social Networks}}},
+  booktitle = {2015 {{IEEE International Conference}} on {{Smart City}}/{{SocialCom}}/{{SustainCom}} ({{SmartCity}})},
+  author = {Sun, Yang and Tang, Junhua and Pan, Li and Li, Jianhua},
+  year = {2015},
+  month = dec,
+  pages = {465--470},
+  doi = {10.1109/SmartCity.2015.114},
+  abstract = {In recent years, the evolution of online social networks has become an important research topic in online social network analysis. An important approach to this problem is to detect community evolution events so as to understand the evolution of the whole network. Considering the huge amount of data in large social networks, an efficient and scalable community evolution detection algorithm is necessary. In this paper, we focus on community evolution events detection in dynamic social networks. First, we divide the Facebook and DBLP data set into a series of snapshots and apply the Louvain algorithm to find the communities in each snapshot. Then, we propose a light weight evolution events detection algorithm to find the community evolution patterns between adjacent snapshots, which statistically show the evolution trend of the entire network. Simulation results show that our algorithm can effectively detect the community evolution events in online social networks.},
+  keywords = {Correlation,Detection algorithms,Event detection,Facebook,Heuristic algorithms,Merging},
+  file = {/home/egordm/Documents/Research/Reference/storage/6Q6S54DQ/7463768.html}
+}
+
 @inproceedings{tamimiLiteratureSurveyDynamic2015,
   title = {Literature Survey on Dynamic Community Detection and Models of Social Networks},
   booktitle = {2015 {{International Conference}} on {{Wireless Networks}} and {{Mobile Communications}} ({{WINCOM}})},
@@ -702,6 +973,39 @@
   abstract = {In this paper, we realize a literature survey on the issue of community detection over time, first we present some basic concepts about networks modeled as graphs, then we state in an non exhaustive way the research fields arising from social networks. We present some of the existing models and methods to track communities over time. Community detection in networks is a prevailing subject in the area of social network analysis. There exist numerous methods and algorithms in the literature that have been dealing with that issue.},
   keywords = {Adaptation models,Analytical models,community detection,Data models,dynamic network,Heuristic algorithms,Hidden Markov models,models of networks,Numerical models,social network,Social network services,static network},
   file = {/home/egordm/Documents/Research/Reference/storage/Q84WRPF7/Tamimi_Kamili_2015_Literature survey on dynamic community detection and models of social networks.pdf;/home/egordm/Documents/Research/Reference/storage/55732CPX/7381332.html}
+}
+
+@article{tangLINELargescaleInformation2015,
+  title = {{{LINE}}: {{Large-scale Information Network Embedding}}},
+  shorttitle = {{{LINE}}},
+  author = {Tang, Jian and Qu, Meng and Wang, Mingzhe and Zhang, Ming and Yan, Jun and Mei, Qiaozhu},
+  year = {2015},
+  month = may,
+  journal = {Proceedings of the 24th International Conference on World Wide Web},
+  eprint = {1503.03578},
+  eprinttype = {arxiv},
+  pages = {1067--1077},
+  doi = {10.1145/2736277.2741093},
+  abstract = {This paper studies the problem of embedding very large information networks into low-dimensional vector spaces, which is useful in many tasks such as visualization, node classification, and link prediction. Most existing graph embedding methods do not scale for real world information networks which usually contain millions of nodes. In this paper, we propose a novel network embedding method called the "LINE," which is suitable for arbitrary types of information networks: undirected, directed, and/or weighted. The method optimizes a carefully designed objective function that preserves both the local and global network structures. An edge-sampling algorithm is proposed that addresses the limitation of the classical stochastic gradient descent and improves both the effectiveness and the efficiency of the inference. Empirical experiments prove the effectiveness of the LINE on a variety of real-world information networks, including language networks, social networks, and citation networks. The algorithm is very efficient, which is able to learn the embedding of a network with millions of vertices and billions of edges in a few hours on a typical single machine. The source code of the LINE is available online.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/7JKXPAI8/Tang et al_2015_LINE.pdf;/home/egordm/Documents/Research/Reference/storage/7QT4QVLM/1503.html}
+}
+
+@article{wangCommunityEvolutionSocial2008,
+  title = {Community {{Evolution}} of {{Social Network}}: {{Feature}}, {{Algorithm}} and {{Model}}},
+  shorttitle = {Community {{Evolution}} of {{Social Network}}},
+  author = {Wang, Yi and Wu, Bin and Du, Nan},
+  year = {2008},
+  month = apr,
+  journal = {arXiv:0804.4356 [physics]},
+  eprint = {0804.4356},
+  eprinttype = {arxiv},
+  primaryclass = {physics},
+  abstract = {Researchers have devoted themselves to exploring static features of social networks and further discovered many representative characteristics, such as power law in the degree distribution and assortative value used to differentiate social networks from nonsocial ones. However, people are not satisfied with these achievements and more and more attention has been paid on how to uncover those dynamic characteristics of social networks, especially how to track community evolution effectively. With these interests, in the paper we firstly display some basic but dynamic features of social networks. Then on its basis, we propose a novel core-based algorithm of tracking community evolution, CommTracker, which depends on core nodes to establish the evolving relationships among communities at different snapshots. With the algorithm, we discover two unique phenomena in social networks and further propose two representative coefficients: GROWTH and METABOLISM by which we are also able to distinguish social networks from nonsocial ones from the dynamic aspect. At last, we have developed a social network model which has the capabilities of exhibiting two necessary features above.},
+  archiveprefix = {arXiv},
+  keywords = {Physics - Data Analysis Statistics and Probability,Physics - Physics and Society},
+  file = {/home/egordm/Documents/Research/Reference/storage/F94XS3G7/Wang et al_2008_Community Evolution of Social Network.pdf;/home/egordm/Documents/Research/Reference/storage/89ZDAIA6/0804.html}
 }
 
 @article{wangHeterogeneousGraphAttention2021,
@@ -732,6 +1036,22 @@
   abstract = {With the widely used Internet of Things, 5G, and smart city technologies, we are able to acquire a variety of vehicle trajectory data. These trajectory data are of great significance which can be used to extract relevant information in order to, for instance, calculate the optimal path from one position to another, detect abnormal behavior, monitor the traffic flow in a city, and predict the next position of an object. One of the key technology is to cluster vehicle trajectory. However, existing methods mainly rely on manually designed metrics which may lead to biased results. Meanwhile, the large scale of vehicle trajectory data has become a challenge because calculating these manually designed metrics will cost more time and space. To address these challenges, we propose to employ network representation learning to achieve accurate vehicle trajectory clustering. Specifically, we first construct the k-nearest neighbor-based internet of vehicles in a dynamic manner. Then we learn the low-dimensional representations of vehicles by performing dynamic network representation learning on the constructed network. Finally, using the learned vehicle vectors, vehicle trajectories are clustered with machine learning methods. Experimental results on the real-word dataset show that our method achieves the best performance compared against baseline methods.},
   keywords = {class1,prio7,read},
   file = {/home/egordm/Documents/Research/Reference/storage/W7GNJI4C/Wang et al_2020_Vehicle Trajectory Clustering Based on Dynamic Representation Learning of.pdf}
+}
+
+@article{wuAuthor2VecFrameworkGenerating2020,
+  title = {{{Author2Vec}}: {{A Framework}} for {{Generating User Embedding}}},
+  shorttitle = {{{Author2Vec}}},
+  author = {Wu, Xiaodong and Lin, Weizhe and Wang, Zhilin and Rastorgueva, Elena},
+  year = {2020},
+  month = mar,
+  journal = {arXiv:2003.11627 [cs, stat]},
+  eprint = {2003.11627},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Online forums and social media platforms provide noisy but valuable data every day. In this paper, we propose a novel end-to-end neural network-based user embedding system, Author2Vec. The model incorporates sentence representations generated by BERT (Bidirectional Encoder Representations from Transformers) with a novel unsupervised pre-training objective, authorship classification, to produce better user embedding that encodes useful user-intrinsic properties. This user embedding system was pre-trained on post data of 10k Reddit users and was analyzed and evaluated on two user classification benchmarks: depression detection and personality classification, in which the model proved to outperform traditional count-based and prediction-based methods. We substantiate that Author2Vec successfully encoded useful user attributes and the generated user embedding performs well in downstream classification tasks without further finetuning.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Computation and Language,Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/EUVALNAG/Wu et al_2020_Author2Vec.pdf;/home/egordm/Documents/Research/Reference/storage/DLKVYUAX/2003.html}
 }
 
 @article{wuComprehensiveSurveyGraph2021,
@@ -772,6 +1092,22 @@
   file = {/home/egordm/Documents/Research/Reference/storage/ZZA22TDK/Wu et al_2021_SageDy.pdf}
 }
 
+@article{xieLabelRankStabilizedLabel2013,
+  title = {{{LabelRank}}: {{A Stabilized Label Propagation Algorithm}} for {{Community Detection}} in {{Networks}}},
+  shorttitle = {{{LabelRank}}},
+  author = {Xie, Jierui and Szymanski, Boleslaw K.},
+  year = {2013},
+  month = mar,
+  journal = {arXiv:1303.0868 [physics]},
+  eprint = {1303.0868},
+  eprinttype = {arxiv},
+  primaryclass = {physics},
+  abstract = {An important challenge in big data analysis nowadays is detection of cohesive groups in large-scale networks, including social networks, genetic networks, communication networks and so. In this paper, we propose LabelRank, an efficient algorithm detecting communities through label propagation. A set of operators is introduced to control and stabilize the propagation dynamics. These operations resolve the randomness issue in traditional label propagation algorithms (LPA), stabilizing the discovered communities in all runs of the same network. Tests on real-world networks demonstrate that LabelRank significantly improves the quality of detected communities compared to LPA, as well as other popular algorithms.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Social and Information Networks,Physics - Physics and Society},
+  file = {/home/egordm/Documents/Research/Reference/storage/VTVQ3M7K/Xie_Szymanski_2013_LabelRank.pdf;/home/egordm/Documents/Research/Reference/storage/EQQMTG2N/1303.html}
+}
+
 @article{xuSuperspreadersSuperblockersBased2020,
   title = {Superspreaders and Superblockers Based Community Evolution Tracking in Dynamic Social Networks},
   author = {Xu, Zhiou and Rui, Xiaobin and He, Jing and Wang, Zhixiao and Hadzibeganovic, Tarik},
@@ -803,6 +1139,39 @@
   langid = {english},
   keywords = {class3,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio9,read},
   file = {/home/egordm/Documents/Research/Reference/storage/H3H8GVWY/Yang et al_2020_Heterogeneous Network Representation Learning.pdf}
+}
+
+@article{zakrzewskaTrackingLocalCommunities2016,
+  title = {Tracking Local Communities in Streaming Graphs with a Dynamic Algorithm},
+  author = {Zakrzewska, Anita and Bader, David A.},
+  year = {2016},
+  month = aug,
+  journal = {Social Network Analysis and Mining},
+  volume = {6},
+  number = {1},
+  pages = {65},
+  issn = {1869-5469},
+  doi = {10.1007/s13278-016-0374-5},
+  abstract = {A variety of massive datasets, such as social networks and biological data, are represented as graphs that reveal underlying connections, trends, and anomalies. Community detection is the task of discovering dense groups of vertices in a graph. Its one specific form is seed set expansion, which finds the best local community for a given set of seed vertices. Greedy, agglomerative algorithms, which are commonly used in seed set expansion, have been previously designed only for a static, unchanging graph. However, in many applications, new data are constantly produced, and vertices and edges are inserted and removed from a graph. We present an algorithm for dynamic seed set expansion, which maintains a local community over time by incrementally updating as the underlying graph changes. We show that our dynamic algorithm outputs high-quality communities that are similar to those found when using a standard static algorithm. It works well both when beginning with an already existing graph and in the fully streaming case when starting with no data. The dynamic approach is also faster than re-computation when low latency updates are needed.},
+  langid = {english},
+  file = {/home/egordm/Documents/Research/Reference/storage/QGDF5JGK/Zakrzewska_Bader_2016_Tracking local communities in streaming graphs with a dynamic algorithm.pdf}
+}
+
+@article{zhangBIRCHEfficientData1996,
+  title = {{{BIRCH}}: An Efficient Data Clustering Method for Very Large Databases},
+  shorttitle = {{{BIRCH}}},
+  author = {Zhang, Tian and Ramakrishnan, Raghu and Livny, Miron},
+  year = {1996},
+  month = jun,
+  journal = {ACM SIGMOD Record},
+  volume = {25},
+  number = {2},
+  pages = {103--114},
+  issn = {0163-5808},
+  doi = {10.1145/235968.233324},
+  abstract = {Finding useful patterns in large datasets has attracted considerable interest recently, and one of the most widely studied problems in this area is the identification of clusters, or densely populated regions, in a multi-dimensional dataset. Prior work does not adequately address the problem of large datasets and minimization of I/O costs.This paper presents a data clustering method named BIRCH (Balanced Iterative Reducing and Clustering using Hierarchies), and demonstrates that it is especially suitable for very large databases. BIRCH incrementally and dynamically clusters incoming multi-dimensional metric data points to try to produce the best quality clustering with the available resources (i.e., available memory and time constraints). BIRCH can typically find a good clustering with a single scan of the data, and improve the quality further with a few additional scans. BIRCH is also the first clustering algorithm proposed in the database area to handle "noise" (data points that are not part of the underlying pattern) effectively.We evaluate BIRCH's time/space efficiency, data input order sensitivity, and clustering quality through several experiments. We also present a performance comparisons of BIRCH versus CLARANS, a clustering method proposed recently for large datasets, and show that BIRCH is consistently superior.},
+  keywords = {No Prior},
+  file = {/home/egordm/Documents/Research/Reference/storage/5N3BW77S/Zhang et al_1996_BIRCH.pdf}
 }
 
 @article{zhouDynamicNetworkEmbedding2018,
