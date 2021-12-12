@@ -82,7 +82,9 @@ Various works have emerged exploring community detection using the representatio
 
 * todo: this already talks about used approaches. 
   * Better elaborate on them more and move them into approaches section
-  * 
+  * Move this section into a larger section
+    * split and elaborate on CD methods
+  
 
 ### Dynamic Community
 
@@ -137,9 +139,43 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 ### Evaluation of Representation methods
 
 * Explore Recommendation / Link prediction task
-  * 
-
-
+  * @faniUserCommunityDetection2020
+    * Compare against Static Content Based CD Algorithms
+    * Content Based Community Detection
+    * Compare against Static Link Based CD Algorithms
+    * Compare against Multimodal Based CD Algorithms
+    * Problems:
+      * Absence of ground truth communities
+      * Modularity cant be used - based  on explicit links betwene users (structural)
+        * Doesnt account for content at all
+    * Solutions: Application level evaluation 
+      * A user community detection method is considered to have better quality iff its output communities improve an underlying application
+      * **News recommendation** (in time)
+        * Curate dataset of news articles mentioned by users (user mention means user interest)
+        * Methodology: 
+          * Detect communities and assign them a topic of interest at a time
+          * Topic is average of user interests
+          * All news articles are ranked based on their similarity with the overall topic (in time)
+          * Each member in community is recommended the ranked list 
+        * Metrics: (stadard info retreval metrics)
+          * Precision at rank $k$ ($P_k$)
+            * $\mathrm{P}_{k}=\frac{1}{|\mathrm{U}|} \sum_{u \in \mathbb{U}} \frac{t p_{u}}{k}$
+            * $u$ is user
+          * Mean Reciprocal Rank (MRR)
+            * $\mathrm{MRR}=\frac{1}{|\mathbb{U}|} \sum_{u \in \mathbb{U}} \frac{1}{\operatorname{rank}_{u}}$
+            * First position correct result occurs in list
+          * Success at rank $k$ ($S_k$)
+            * Probability that at least one correct item is within a top-k list
+            * $\mathrm{S}_{k}=\frac{1}{|\mathbb{U}|} \sum_{u \in \mathcal{U}}\left(\operatorname{rank}_{u} \leq k\right)$
+            * 
+      * **User Prediction**
+        * Goal: Predict which users posted a news article $a$ at time $t$
+        * Methodology:
+          * Find closest community to the article in terms of interest at time $t$ (cosine sim)
+          * Members of community are predicted users
+        * Same reasoning as news prediction
+        * Metrics (classificiation metrics)
+          * Precision, Recall, F-measure
 
 ## Datasets
 
@@ -367,8 +403,8 @@ The Louvain method is a popular algorithm to detect communities in large network
 * Add additional links to the graph
   * Yoonsuk Kang
 * Change distances within the graph
-
-
+* @faniUserCommunityDetection2020
+  * 
 
 ## Graph Representation Learning
 
