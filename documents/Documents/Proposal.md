@@ -44,6 +44,8 @@ As noted earlier, meta topological features may be used to differentiate between
 
 Finally, a more common issue is that there is no common definition for a community structure. Within networks it is usually described in terms of membership assignment, while in more content-based settings communities are described in terms of distributions over topics which usually represent interest areas. The first definition only accounts for disjoint communities, while second is too vague as there may also be overlapping and hierarchical communities.
 
+* In contrast to k-means clustering tasks, the amount of communities is unknown
+
 # Literature review
 
 The problem of dynamic community detection was noticed quite early on in within the SNA community and a considerable amount of research have been made in order to provide a comprehensive analysis of the network. While the said research was mostly focused on discovery of communities using topologically-based features and node connectivity, the covered methods did research the limitations and challenges posed by a temporal context. 
@@ -139,7 +141,6 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 ### Evaluation of Representation methods
 
 * Explore Recommendation / Link prediction task
-
 * @faniUserCommunityDetection2020
   * Compare against Static Content Based CD Algorithms
   * Content Based Community Detection
@@ -177,7 +178,6 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
       * Same reasoning as news prediction
       * Metrics (classificiation metrics)
         * Precision, Recall, F-measure
-  
 * @wangVehicleTrajectoryClustering2020
 
   * Use taxi dataset with license plates
@@ -199,14 +199,18 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
       * $B_k$ is covariance matrix between the clusters
       * $W_k$ is covariance matrix between the data in the cluster
       * $tr$ is trace of the matrix
-
 * @mrabahRethinkingGraphAutoEncoder2021
 
   * Accuracy:
   * NMI
   * ARI:
-
-  https://paperswithcode.com/method/ensemble-clustering
+* @huangInformationFusionOriented2022
+  * Based on link prediction or friend recommendation
+  * Precision
+  * Recall
+  * F-score
+  * normalized discounted cumulative gain (nDCG)
+  * mean reciprocal rank (MRR)
 
 ## Datasets
 
@@ -239,6 +243,7 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 | [LastFM1k](http://ocelma.net/MusicRecommendationDataset/lastfm-1K.html) | User - Song Listen histories; With timestamps                |
 | [MovieLens25M](https://grouplens.org/datasets/movielens/25m/) | Users and Movie Ratings; With timestamps                     |
 | [Memetracker](https://snap.stanford.edu/data/memetracker9.html) |                                                              |
+| [Rumor Detection](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0168344) | Rumor Detection over Varying Time Windows; Twitter data; With timestamps |
 
 ## Dynamic Community Detection Methods
 
@@ -425,16 +430,80 @@ The Louvain method is a popular algorithm to detect communities in large network
 
 
 
+#### Evolutionary Clustering Methods
+
+* Is kinda an alternative approach - but is still link based since modularity is optimized
+* @yinMultiobjectiveEvolutionaryClustering2021
+  * Look at the problem from an Evolutionary Clustering Perspective
+    * Evolutionary as in Evolutionary Algorithms
+    * Goal: detect community structure at the current time under guidance of one obtained immediately in the past
+      * Fit observed data well
+      * And keep historical consistency
+  * Solve major drawbacks:
+    * Absence of error correction - which may lead to result-drifting and error accumulation
+    * NP-hardness of modularity based community detection
+    * If initial community structure is not accurate, or the following - this may lead to the “result drift” and “error accumulation”
+  * Propose DYN-MODPSO
+    * Combine traditional evolutionary clustering with particle swarm algorithm
+    * Propose a strategy to detect initial clustering - with insight of future ones
+    * A new way to generate diverse population of individuals
+  * Use previous work DYN-MOGA
+    * Which introduces Multi-Objective optimization 
+      * (Trade-off between - Both objectives are competitive)
+      * Accuracy in current time step (CS - Community Score)
+      * Similarity of two communities in consecutive steps (NMI - Similarity of two partitions)
+  * Algorithm:
+    * Initialization Phase:
+      * De redundant random walk to initialize the initial population (with diverse individuals)
+      * Random walk: 
+        * Used to approximate probability of two nodes being linked
+        * Then probability is sorted and is split on (based on Q metric optimizing modularity)
+      * Represent as binary string encoding
+    * Search Phase:
+      * Particle swarm optimization - preserving global historically best positions
+        * Already given initial swarms / clusterings
+        * Identifies best positions for different nodes - and uses swarm velocity to interpolate between them
+      * Builds good baseline clusterings
+    * Crossover & Mutation Phase:
+      * Uses custom operators MICO and NBM+ to improve global convergence
+        * Cross-over operators - combining multiple individuals (parents)
+      * Applies specific operators to maximize NMI of CS
+  * Results:
+    * Seems to perform well and be fast?
+
 
 
 ### Deep Methods
+
+* * 
 
 #### Graph Augmentation Based
 
 * Add additional links to the graph
   * Yoonsuk Kang
 * Change distances within the graph
-* @faniUserCommunityDetection2020
+* Community Detection
+  * @kangCommunityReinforcementEffective2021
+    * 
+  * @huangInformationFusionOriented2022
+    * Their own made dataset: https://github.com/MingqingHuang-SHU/HRTCD
+    * Not really graph augmenting?
+    * See (Rumor Detection) dataset also
+  * @luberCommunityDetectionHashtagGraphsSemiSupervised2021
+    * short
+  * @jiaCommunityGANCommunityDetection2019
+    * has code
+  * @rozemberczkiGEMSECGraphEmbedding2019
+    * hh
+* Dynamic Community Detection
+  * @faniUserCommunityDetection2020
+  * 
+  * @wangEvolutionaryAutoencoderDynamic2020
+* General Strategy:
+  * Represent
+  * Recluster
+    * Construct a new graph using deep based distances, and use Link Based CD
+    * Cluster with a clustering algorithm
   * 
 
 ## Graph Representation Learning
@@ -446,7 +515,13 @@ The Louvain method is a popular algorithm to detect communities in large network
 * datasets [@rossettiCommunityDiscoveryDynamic2018]
 * DCD is seen as the hardest problem within Social Network Analysis. Reason for this is mostly because DCD, unlike CD, also involves tracking the found communities over time which brings 
 
-* 
+
+
+
+## Interesing Resources
+
+* Consensus Clustering
+* Spectral Clustering
 
 # Approach
 

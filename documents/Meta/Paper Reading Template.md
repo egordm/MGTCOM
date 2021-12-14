@@ -9,43 +9,39 @@ author:
   email: "e.dmitriev@students.uu.nl"
 ---
 
-# Paper Name - Author 
-
-
-
-## Goals
+# Goals
 
 - ...
 
-## Preliminaries
+# Preliminaries
 
 - ...
 
-## Challenges
+# Challenges
 
 - ...
 
-## Previous Work / Citations
+# Previous Work / Citations
 
 - ...
 - **This Work:** ...
 
-## Definitions
+# Definitions
 
 * …
 
-## Outline / Structure
+# Outline / Structure
 
 - ...
 
-## Evaluation
+# Evaluation
 
 - ...
 
-## Code
+# Code
 
 - ...
 
-## Resources
+# Resources
 
 - ...
