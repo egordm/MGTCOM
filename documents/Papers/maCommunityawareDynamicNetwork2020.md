@@ -155,14 +155,12 @@ author:
     - TCGA, ca-cit-HepTh 
     -  soc-wiki-elec  - Wikipedia Adminitrat
     - football
-- Baselines:
+- Baselines: - Mainly Dynamic Network Embedding models
   - SDNE - structural deep autoencoder  for static networks
   - M-NMF - modularized nonnegative matrix factorization (NMF)
-  - SAGE - GraphSAGE how!? - wrong citation?
+  - SAGE - GraphSAGE - not 
   - DynGEM - It uses a deep autoencoder to solve the DNE problem in dynamic networks
-    - Deep embedding method for dynamic graphs - thus no DCD eval
   - Dyn2vecAE - Capturing network dynamics using dynamic graph representation learning
-    - Doesnt do anything with DCD
 - Criteria:
   - **Network reconstruction**:  It is used to test the performance of NE methods on reconstructing the link structures of networks
     - Average reconstruction precision (pr)

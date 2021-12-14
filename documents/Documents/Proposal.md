@@ -141,6 +141,7 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 ### Evaluation of Representation methods
 
 * Explore Recommendation / Link prediction task
+
 * @faniUserCommunityDetection2020
   * Compare against Static Content Based CD Algorithms
   * Content Based Community Detection
@@ -178,32 +179,60 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
       * Same reasoning as news prediction
       * Metrics (classificiation metrics)
         * Precision, Recall, F-measure
+  
 * @wangVehicleTrajectoryClustering2020
 
   * Use taxi dataset with license plates
   * Compare to other deep GNN - they only learn static representation
   * Metrics:
-    * Silhouette Coefficient (SC) - range [-1, 1]
+    * **Silhouette Coefficient** (SC) - range [-1, 1]
       * $S(i)=\frac{b(i)-a(i)}{\max \{a(i), b(i)\}}$
       * $a$ avg distance between node and neighbors in cluster
       * $b$ is min val of avg distances between node and other clusters
-    * Davies-Bouldin Index (DBI)
+    * **Davies-Bouldin Index** (DBI)
       * $D B I=\frac{1}{N} \sum_{i=1}^{N} \max _{j \neq i}\left(\frac{\overline{S_{i}}+\overline{S_{j}}}{\left\|w_{i}-w_{j}\right\|_{2}}\right)$
       * $\bar{S_i}$: avg distance of nodes in cluster $i$ to centroid of cluster $i$
       * $w_i$ is the centroid of cluster $w_i$
       * It is the ratio of the sum of the average distance to the distance between the centers of mass of the two clusters
       * The closer the clustering result is with the inner cluster, and the farther the different clusters, the better the result
-    * Calinski-Harabaz Index (CHI): Ratio of the between-cluster variance and within-cluster variance
+    * **Calinski-Harabaz Index** (CHI): Ratio of the between-cluster variance and within-cluster variance
       * $C H I=\frac{\operatorname{tr}\left(B_{k}\right)}{\operatorname{tr}\left(W_{k}\right)} \frac{m-k}{k-1}$
       * $m$ number of nodes, $k$ number of clusters, 
       * $B_k$ is covariance matrix between the clusters
       * $W_k$ is covariance matrix between the data in the cluster
       * $tr$ is trace of the matrix
+  
+* @maCommunityawareDynamicNetwork2020
+
+  * Use both synthetic and real world datasets
+  * Use not perse community detection baselines
+  * Define auxilary helper tasks in context of *community aware* **Deep Network Embedding**:
+    * **Network Reconstruction**: Evaluates model on ability of reconstructing link structures of the network
+      * Average reconstruction precision is measured
+      * This is done for each timestamp
+      * For each node, the nearest embedding neighbors are used as predicted links
+    * **Link Prediction**:
+      * Prediction of existence of links between nodes in the next timestamps
+      * Based on representation in the current timestamp
+    * **Network Stabilization**: evaluates preformance of DNE on stabilization of embedding
+      * dynamic network should have similar evolutionary patterns in both the learned low-dimensional representation and the
+        network representation over time
+      * evaluates the evolution ratio of the low-dimensional node representations to the network representations at $a$ th timestamp
+      * $p_{s}^{a}=\frac{\left(\left\|\mathrm{H}^{a+1}-\mathrm{H}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}^{a+1}-\mathrm{A}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}^{a}\right\|_{2}^{2}} .$
+    * **Community Stabilization**:  evaluates stability of communities in dynamic networks on the embedded low-dimensional representations
+      * Evaluates communty evolution ratio to network representation evolution between subsequent timestamps
+      * Lower values point to more stable communities and are better
+      * $p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q$
+
+  * Network is first fine-tuned on each of the tasks
+  * Note: the evalution is at graph level since their methods are spectral GAE based
+
 * @mrabahRethinkingGraphAutoEncoder2021
 
   * Accuracy:
   * NMI
   * ARI:
+  
 * @huangInformationFusionOriented2022
   * Based on link prediction or friend recommendation
   * Precision
@@ -211,6 +240,8 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
   * F-score
   * normalized discounted cumulative gain (nDCG)
   * mean reciprocal rank (MRR)
+  
+* 
 
 ## Datasets
 
@@ -538,9 +569,27 @@ The Louvain method is a popular algorithm to detect communities in large network
 * Dynamic Community Detection
 
   * @maCommunityawareDynamicNetwork2020 (use as baseline)
-    * 
+    * Define communities in terms of large and small scale communities
+    * They propose a method for dynamic *community aware* network representation learning
+      * By creating a unified objective optimizing stability of communities, temporal stability and structure representation
+      * Uses both first-order as well as second order proximity for node representation learning
+    * They define community representations as average of their members
+      * Adopt a stacked autoencoder to learn low-dimensional (generic) representations of nodes
+    * They define loss in terms of:
+      * Reconstruction Error: How well the graph can be reconstructed from the representation
+      * Local structure preservation: Preservation of homophiliy - connected nodes are similar
+      * Community evolution preservation: Preservation of smoothness of communities in time at multiple granularity levels
+    * The communities are initialized using classical methods:
+      * First large communities are detected using Genlouvin (fast and doesnt require priors)
+      * Then small scale communities are detected using k-means by defining a max community size $w$
+        * Which provides more fine tuned communities
+    * Using the initial embeddings the temporal embeddings are optimized 
+      * Done by optimizing all at once - therefore maintaining the stability
+      * And use of the mentioned combined objective
+    * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
+      *  Therefore the actual quality of communities remains to be known
   * @faniUserCommunityDetection2020
-  * 
+    * 
   * @wangEvolutionaryAutoencoderDynamic2020
   * 
   * @wangVehicleTrajectoryClustering2020
