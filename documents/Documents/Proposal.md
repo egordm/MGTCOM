@@ -477,14 +477,51 @@ The Louvain method is a popular algorithm to detect communities in large network
 
 * * 
 
-#### Graph Augmentation Based
-
 * Add additional links to the graph
   * Yoonsuk Kang
+  
 * Change distances within the graph
+
 * Community Detection
   * @kangCommunityReinforcementEffective2021
-    * 
+    * Present a **Community Reinforcement** approach
+
+      * Is CD algorithm agnostic
+
+        * Shown in experiments - therefore the graph itself benefits
+      * Reinforces the Graph by
+      
+        * Creating inter-community edges
+        * Deleting intra-community edges
+        * Determines the appropriate amount of reinforcement a graph needs
+      * Which helps the dense inter-community and sparse intra-community property of the graph
+        * Can effectively turn difficult-to-detect community situation into that of easy-to-detect communities
+      * Challenges:
+        * Needs to be  unsupervised (doesn't need community annotations to work)
+        * Appropriate amount of reinforcement needs to be determined (otherwise noise is introduced)
+        * Needs to be fast, checking every possible edge is infeasible
+      * Methodology:
+        * Edge Addition / Deletion
+          * Based on node similarity of connected pairs
+            * Similar nodes are likely to be in a community (intra edges)
+            * Dissimilar ones are less likely to be in a community (inter edges)
+          * Employ graph embedding to generate topological embeddings
+            * Adamic/Adar (local link-based)
+            * SimRank (gloabl link-based)
+            * Node2vec graph embedding based
+          * Predict similarities and bucket them
+            * Use similarity buckets to select intra and inter edges - and to tune the model
+            * Buckets are selected on how well they predict current edges
+        * Detect the right amount of addition
+          * Use a gradual reinforcement strategy by generating a series of graphs (adding top x inter and removing intra edges)
+          * Pick the best graph using a scoring function (modularity)
+          * Simply run CD over the graph and see
+        * Reducing comutational overhead
+          * Using a greedy similarity computation
+          * Prefer nodes which are likely to be in same community of inter similarity detection
+      * Tests results on:
+        * Synthetic Graphs: LFR
+        * Real world graphs: Cora, Siteseer, DBLP, Email
   * @huangInformationFusionOriented2022
     * Their own made dataset: https://github.com/MingqingHuang-SHU/HRTCD
     * Not really graph augmenting?
@@ -495,10 +532,17 @@ The Louvain method is a popular algorithm to detect communities in large network
     * has code
   * @rozemberczkiGEMSECGraphEmbedding2019
     * hh
+  
 * Dynamic Community Detection
+
+  * @maCommunityawareDynamicNetwork2020
+  * 
   * @faniUserCommunityDetection2020
   * 
   * @wangEvolutionaryAutoencoderDynamic2020
+  * 
+  * @wangVehicleTrajectoryClustering2020
+
 * General Strategy:
   * Represent
   * Recluster
