@@ -568,7 +568,7 @@ The Louvain method is a popular algorithm to detect communities in large network
   
 * Dynamic Community Detection
 
-  * @maCommunityawareDynamicNetwork2020 (use as baseline)
+  * @maCommunityawareDynamicNetwork2020 (use as baseline?)
     * Define communities in terms of large and small scale communities
     * They propose a method for dynamic *community aware* network representation learning
       * By creating a unified objective optimizing stability of communities, temporal stability and structure representation
@@ -588,8 +588,24 @@ The Louvain method is a popular algorithm to detect communities in large network
       * And use of the mentioned combined objective
     * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
       *  Therefore the actual quality of communities remains to be known
-  * @faniUserCommunityDetection2020
-    * 
+  * @faniUserCommunityDetection2020 (use as baseline?)
+    * Propose a new method of identifying user communities through multimodal feature learning:
+      * learn user embeddings based on their **temporal content similarity**
+        * Base on topics of interest
+        * Users are considered like-minded if they are interested in similar topics at similar times
+        * Learn embeddings using a context modelling approach
+      * learn user embeddings based on their **social network connections**
+        * Use GNN which works as a skip-gram like approach by generating context using random walks
+      * **interpolate** temporal content-based embeddings and social link-based embeddings
+    * Then they use these multimodal embeddings to detect dynamic communities\
+      * Communities are detected on a modified graph 
+        * Weights are set given embedding similarity
+        * Communities are detected using louvain methods
+      * Then test their approach on specific tasks such as
+      * News recommendation
+      * User for content prediction
+    * Note: **This approach detects static communities**
+      * But the communities implicitly take time into account
   * @wangEvolutionaryAutoencoderDynamic2020
   * 
   * @wangVehicleTrajectoryClustering2020
