@@ -1,10 +1,10 @@
 .PHONY: notes
 
-coffee: notes-to-pdf slides-to-pdf sync commit
+coffee: pdf sync commit
 
 notes:
 	typora documents &
-	
+
 copy-refs:
 	cp refs.bib "documents/Meta/Presentation Template/refs.bib"
 	cp refs.bib "documents/refs.bib"
@@ -14,6 +14,8 @@ notes-to-pdf: copy-refs
 
 slides-to-pdf: copy-refs
 	bash ./scripts/slides_to_pdf.sh
+
+pdf: notes-to-pdf slides-to-pdf
 
 sync-to-notion:
 	notionsci sync zotero collections e1a32bedcda443deb60e20fc5bc2b2e0
@@ -42,6 +44,6 @@ activate:
 
 update:
 	git submodule foreach git pull origin master
-	
+
 %:
     @:

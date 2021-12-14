@@ -216,12 +216,14 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 
 ### Synthetic
 
-| Paper                                     | Description                                                  |
-| ----------------------------------------- | ------------------------------------------------------------ |
-| @lancichinettiBenchmarkGraphsTesting2008  | Static networks (widely used)                                |
-| @greeneTrackingEvolutionCommunities2010   | Generate Graphs based on Modularity measure                  |
-| @granellBenchmarkModelAssess2015          |                                                              |
-| @hamiltonRepresentationLearningGraphs2018 | Generate Time dependent Heterogeneous graphs using modularity optimization and multi-dependency sampling |
+| Paper                                              | Description                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------ |
+| @lancichinettiBenchmarkGraphsTesting2008           | Static networks (widely used)                                |
+| @greeneTrackingEvolutionCommunities2010            | Generate Graphs based on Modularity measure                  |
+| @granellBenchmarkModelAssess2015                   |                                                              |
+| @hamiltonRepresentationLearningGraphs2018          | Generate Time dependent Heterogeneous graphs using modularity optimization and multi-dependency sampling |
+| SYN - @ghalebiDynamicNetworkModel2019              |                                                              |
+| SBM - @lancichinettiBenchmarksTestingCommunity2009 | extracted from the dynamic Stochastic Block Model            |
 
 
 
@@ -235,7 +237,7 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 | [Digg](https://www.isi.edu/~lerman/downloads/digg2009.html)  | Includes: Persons, Stores, Followers, Votes; **Excludes: Content** |
 | [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html) | Includes: Persons, Votes; **Excludes: Content**              |
 | [IMDB](https://paperswithcode.com/dataset/imdb-binary)       | Actor movie network; Content is implicitly defined           |
-| [WIKI-RFA](https://snap.stanford.edu/data/wiki-RfA.html)     | Network of Voters and Votees. Links are votes and vote comments |
+| [WIKI-RFA](https://snap.stanford.edu/data/wiki-RfA.html)     | Wikipedia Adminitrator Election; Network of Voters and Votees. Links are votes and vote comments |
 | [FB-wosn](http://socialnetworks.mpi-sws.org/data-wosn2009.html) | User friendship links and User posts on users walls; **Excludes: Content** |
 | [TweetUM](https://wis.st.ewi.tudelft.nl/research/tweetum/) (dead) | Twitter Tweets, User Profiles and Followers; Includes: Content |
 | [Reddit Pushift](https://arxiv.org/abs/2001.08435)           | User Submissions and Posts on Subreddits; With timestamps    |
@@ -535,8 +537,8 @@ The Louvain method is a popular algorithm to detect communities in large network
   
 * Dynamic Community Detection
 
-  * @maCommunityawareDynamicNetwork2020
-  * 
+  * @maCommunityawareDynamicNetwork2020 (use as baseline)
+    * 
   * @faniUserCommunityDetection2020
   * 
   * @wangEvolutionaryAutoencoderDynamic2020

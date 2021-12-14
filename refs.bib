@@ -284,6 +284,21 @@
   file = {/home/egordm/Documents/Research/Reference/storage/FL7YEW7F/7425801.html}
 }
 
+@article{ghalebiDynamicNetworkModel2019,
+  title = {Dynamic {{Network Model}} from {{Partial Observations}}},
+  author = {Ghalebi, Elahe and Mirzasoleiman, Baharan and Grosu, Radu and Leskovec, Jure},
+  year = {2019},
+  month = feb,
+  journal = {arXiv:1805.10616 [cs, stat]},
+  eprint = {1805.10616},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Can evolving networks be inferred and modeled without directly observing their nodes and edges? In many applications, the edges of a dynamic network might not be observed, but one can observe the dynamics of stochastic cascading processes (e.g., information diffusion, virus propagation) occurring over the unobserved network. While there have been efforts to infer networks based on such data, providing a generative probabilistic model that is able to identify the underlying time-varying network remains an open question. Here we consider the problem of inferring generative dynamic network models based on network cascade diffusion data. We propose a novel framework for providing a non-parametric dynamic network model--based on a mixture of coupled hierarchical Dirichlet processes-- based on data capturing cascade node infection times. Our approach allows us to infer the evolving community structure in networks and to obtain an explicit predictive distribution over the edges of the underlying network--including those that were not involved in transmission of any cascade, or are likely to appear in the future. We show the effectiveness of our approach using extensive experiments on synthetic as well as real-world networks.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning,Synthetic},
+  file = {/home/egordm/Documents/Research/Reference/storage/9E3N8GQF/Ghalebi et al_2019_Dynamic Network Model from Partial Observations.pdf;/home/egordm/Documents/Research/Reference/storage/VRCU8BZY/1805.html}
+}
+
 @article{ghasemianDetectabilityThresholdsOptimal2016,
   title = {Detectability Thresholds and Optimal Algorithms for Community Structure in Dynamic Networks},
   author = {Ghasemian, Amir and Zhang, Pan and Clauset, Aaron and Moore, Cristopher and Peel, Leto},
@@ -590,6 +605,25 @@
   file = {/home/egordm/Documents/Research/Reference/storage/SH2YKTRN/Lancichinetti et al_2008_Benchmark graphs for testing community detection algorithms.pdf;/home/egordm/Documents/Research/Reference/storage/GHSS94FR/0805.html}
 }
 
+@article{lancichinettiBenchmarksTestingCommunity2009,
+  title = {Benchmarks for Testing Community Detection Algorithms on Directed and Weighted Graphs with Overlapping Communities},
+  author = {Lancichinetti, Andrea and Fortunato, Santo},
+  year = {2009},
+  month = jul,
+  journal = {Physical Review E},
+  volume = {80},
+  number = {1},
+  eprint = {0904.3940},
+  eprinttype = {arxiv},
+  pages = {016118},
+  issn = {1539-3755, 1550-2376},
+  doi = {10.1103/PhysRevE.80.016118},
+  abstract = {Many complex networks display a mesoscopic structure with groups of nodes sharing many links with the other nodes in their group and comparatively few with nodes of different groups. This feature is known as community structure and encodes precious information about the organization and the function of the nodes. Many algorithms have been proposed but it is not yet clear how they should be tested. Recently we have proposed a general class of undirected and unweighted benchmark graphs, with heterogenous distributions of node degree and community size. An increasing attention has been recently devoted to develop algorithms able to consider the direction and the weight of the links, which require suitable benchmark graphs for testing. In this paper we extend the basic ideas behind our previous benchmark to generate directed and weighted networks with built-in community structure. We also consider the possibility that nodes belong to more communities, a feature occurring in real systems, like, e. g., social networks. As a practical application, we show how modularity optimization performs on our new benchmark.},
+  archiveprefix = {arXiv},
+  keywords = {Physics - Computational Physics,Physics - Physics and Society,Synthetic},
+  file = {/home/egordm/Documents/Research/Reference/storage/X6RWXZVG/Lancichinetti_Fortunato_2009_Benchmarks for testing community detection algorithms on directed and weighted.pdf;/home/egordm/Documents/Research/Reference/storage/FSC84UZV/0904.html}
+}
+
 @article{lancichinettiDetectingOverlappingHierarchical2009,
   title = {Detecting the Overlapping and Hierarchical Community Structure of Complex Networks},
   author = {Lancichinetti, Andrea and Fortunato, Santo and Kertesz, Janos},
@@ -648,6 +682,19 @@
   doi = {10.13140/RG.2.2.15207.37281},
   abstract = {Spectral clustering is one of the most popular clustering methods. However, how to balance the efficiency and effectiveness of the large-scale spectral clustering with limited computing resources has not been properly solved for a long time. In this paper, we propose a divide-and-conquer based large-scale spectral clustering method to strike a good balance between efficiency and effectiveness. In the proposed method, a divide-and-conquer based landmark selection algorithm and a novel approximate similarity matrix approach are designed to construct a sparse similarity matrix within low computational complexities. Then clustering results can be computed quickly through a bipartite graph partition process. The proposed method achieves the lower computational complexity than most existing large-scale spectral clustering. Experimental results on ten large-scale datasets have demonstrated the efficiency and effectiveness of the proposed methods. The MATLAB code of the proposed method and experimental datasets are available at https://github.com/Li- Hongmin/MyPaperWithCode.},
   file = {/home/egordm/Documents/Research/Reference/storage/ZTJUGGN5/Li et al_2021_Divide-and-conquer based Large-Scale Spectral Clustering.pdf}
+}
+
+@inproceedings{limBlackHoleRobustCommunity2016,
+  title = {{{BlackHole}}: {{Robust}} Community Detection Inspired by Graph Drawing},
+  shorttitle = {{{BlackHole}}},
+  booktitle = {2016 {{IEEE}} 32nd {{International Conference}} on {{Data Engineering}} ({{ICDE}})},
+  author = {Lim, Sungsu and Kim, Junghoon and Lee, Jae-Gil},
+  year = {2016},
+  month = may,
+  pages = {25--36},
+  doi = {10.1109/ICDE.2016.7498226},
+  abstract = {With regard to social network analysis, we concentrate on two widely-accepted building blocks: community detection and graph drawing. Although community detection and graph drawing have been studied separately, they have a great commonality, which means that it is possible to advance one field using the techniques of the other. In this paper, we propose a novel community detection algorithm for undirected graphs, called BlackHole, by importing a geometric embedding technique from graph drawing. Our proposed algorithm transforms the vertices of a graph to a set of points on a low-dimensional space whose coordinates are determined by a variant of graph drawing algorithms, following the overall procedure of spectral clustering. The set of points are then clustered using a conventional clustering algorithm to form communities. Our primary contribution is to prove that a common idea in graph drawing, which is characterized by consideration of repulsive forces in addition to attractive forces, improves the clusterability of an embedding. As a result, our algorithm has the advantages of being robust especially when the community structure is not easily detectable. Through extensive experiments, we have shown that BlackHole achieves the accuracy higher than or comparable to the state-of-the-art algorithms.},
+  keywords = {Clustering algorithms,Detection algorithms,Force,Image edge detection,Layout,Robustness,Social network services}
 }
 
 @article{liuCommunityDetectionMultiPartite2016,
@@ -980,6 +1027,21 @@
   keywords = {Community Detection,Community Detection Algorithm,Community Evaluation,Ground Truth,Normalize Mutual Information}
 }
 
+@inproceedings{rossiNetworkDataRepository2015,
+  title = {The Network Data Repository with Interactive Graph Analytics and Visualization},
+  booktitle = {Proceedings of the {{Twenty-Ninth AAAI Conference}} on {{Artificial Intelligence}}},
+  author = {Rossi, Ryan A. and Ahmed, Nesreen K.},
+  year = {2015},
+  month = jan,
+  series = {{{AAAI}}'15},
+  pages = {4292--4293},
+  publisher = {{AAAI Press}},
+  address = {{Austin, Texas}},
+  abstract = {(NR) is the first interactive data repository with a web-based platform for visual interactive analytics. Unlike other data repositories (e.g., UCI ML Data Repository, and SNAP), the network data repository (networkrepository.com) allows users to not only download, but to interactively analyze and visualize such data using our web-based interactive graph analytics platform. Users can in real-time analyze, visualize, compare, and explore data along many different dimensions. The aim of NR is to make it easy to discover key insights into the data extremely fast with little effort while also providing a medium for users to share data, visualizations, and insights. Other key factors that differentiate NR from the current data repositories is the number of graph datasets, their size, and variety. While other data repositories are static, they also lack a means for users to collaboratively discuss a particular dataset, corrections, or challenges with using the data for certain applications. In contrast, NR incorporates many social and collaborative aspects that facilitate scientific research, e.g., users can discuss each graph, post observations, and visualizations.},
+  isbn = {978-0-262-51129-2},
+  keywords = {Real World}
+}
+
 @article{rozemberczkiGEMSECGraphEmbedding2019,
   title = {{{GEMSEC}}: {{Graph Embedding}} with {{Self Clustering}}},
   shorttitle = {{{GEMSEC}}},
@@ -1040,6 +1102,27 @@
   abstract = {Analysis of criminal social graph structures can enable us to gain valuable insights into how these communities are organized. Such as, how large scale and centralized these criminal communities are currently? While these types of analysis have been completed in the past, we wanted to explore how to construct a large scale social graph from a smaller set of leaked data that included only the criminal's email addresses. We begin our analysis by constructing a 43 thousand node social graph from one thousand publicly leaked criminals' email addresses. This is done by locating Facebook profiles that are linked to these same email addresses and scraping the public social graph from these profiles. We then perform a large scale analysis of this social graph to identify profiles of high rank criminals, criminal organizations and large scale communities of criminals. Finally, we perform a manual analysis of these profiles that results in the identification of many criminally focused public groups on Facebook. This analysis demonstrates the amount of information that can be gathered by using limited data leaks.},
   keywords = {analysis,Communities,community detection,criminal networks,cybercrime,Electronic mail,Facebook,Joining processes,Manuals,Organizations,social graph},
   file = {/home/egordm/Documents/Research/Reference/storage/LV2ISNUU/Sarvari et al_2014_Constructing and Analyzing Criminal Networks.pdf;/home/egordm/Documents/Research/Reference/storage/YIAS4LR8/6957290.html}
+}
+
+@article{sekaraFundamentalStructuresDynamic2016,
+  title = {Fundamental Structures of Dynamic Social Networks},
+  author = {Sekara, Vedran and Stopczynski, Arkadiusz and Lehmann, Sune},
+  year = {2016},
+  month = sep,
+  journal = {Proceedings of the National Academy of Sciences},
+  volume = {113},
+  number = {36},
+  pages = {9977--9982},
+  publisher = {{National Academy of Sciences}},
+  issn = {0027-8424, 1091-6490},
+  doi = {10.1073/pnas.1602803113},
+  abstract = {Social systems are in a constant state of flux, with dynamics spanning from minute-by-minute changes to patterns present on the timescale of years. Accurate models of social dynamics are important for understanding the spreading of influence or diseases, formation of friendships, and the productivity of teams. Although there has been much progress on understanding complex networks over the past decade, little is known about the regularities governing the microdynamics of social networks. Here, we explore the dynamic social network of a densely-connected population of {$\sim$}1,000 individuals and their interactions in the network of real-world person-to-person proximity measured via Bluetooth, as well as their telecommunication networks, online social media contacts, geolocation, and demographic data. These high-resolution data allow us to observe social groups directly, rendering community detection unnecessary. Starting from 5-min time slices, we uncover dynamic social structures expressed on multiple timescales. On the hourly timescale, we find that gatherings are fluid, with members coming and going, but organized via a stable core of individuals. Each core represents a social context. Cores exhibit a pattern of recurring meetings across weeks and months, each with varying degrees of regularity. Taken together, these findings provide a powerful simplification of the social network, where cores represent fundamental structures expressed with strong temporal and spatial regularity. Using this framework, we explore the complex interplay between social and geospatial behavior, documenting how the formation of cores is preceded by coordination behavior in the communication networks and demonstrating that social behavior can be predicted with high precision.},
+  chapter = {Physical Sciences},
+  copyright = {\textcopyright{}  . Freely available online through the PNAS open access option.},
+  langid = {english},
+  pmid = {27555584},
+  keywords = {complex networks,computational social science,human dynamics,human mobility,social systems},
+  file = {/home/egordm/Documents/Research/Reference/storage/ED2Z8KT3/Sekara et al_2016_Fundamental structures of dynamic social networks.pdf;/home/egordm/Documents/Research/Reference/storage/9SX7SIEJ/9977.html}
 }
 
 @article{suComprehensiveSurveyCommunity2021,
