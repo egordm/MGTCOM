@@ -555,15 +555,18 @@ The Louvain method is a popular algorithm to detect communities in large network
         * Synthetic Graphs: LFR
         * Real world graphs: Cora, Siteseer, DBLP, Email
   * @huangInformationFusionOriented2022
-    * Their own made dataset: https://github.com/MingqingHuang-SHU/HRTCD
-    * Not really graph augmenting?
-    * See (Rumor Detection) dataset also
+    * Their own made dataset (rumor detection): https://github.com/MingqingHuang-SHU/HRTCD
+    * Recommendation of friends based on per user detected communities
+    * Communities are detected on per user contructed subnetworks.
+    * Approach supports multiple communities per user, but is not one of global community detection
   * @luberCommunityDetectionHashtagGraphsSemiSupervised2021
     * short
   * @jiaCommunityGANCommunityDetection2019
     * has code
   * @rozemberczkiGEMSECGraphEmbedding2019
     * hh
+  * @yangGraphClusteringDynamic2017
+    * unsupe
   
 * Dynamic Community Detection
 
