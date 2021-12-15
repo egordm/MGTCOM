@@ -280,7 +280,7 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 
 ## Dynamic Community Detection Methods
 
-
+https://github.com/FanzhenLiu/Awesome-Deep-Community-Detection
 
 ### Link-based Methods
 
@@ -509,12 +509,9 @@ The Louvain method is a popular algorithm to detect communities in large network
 ### Deep Methods
 
 * * 
-
 * Add additional links to the graph
   * Yoonsuk Kang
-  
 * Change distances within the graph
-
 * Community Detection
   * @kangCommunityReinforcementEffective2021
     * Present a **Community Reinforcement** approach
@@ -565,7 +562,6 @@ The Louvain method is a popular algorithm to detect communities in large network
     * has code
   * @rozemberczkiGEMSECGraphEmbedding2019
     * hh
-  
 * Dynamic Community Detection
 
   * @maCommunityawareDynamicNetwork2020 (use as baseline?)
@@ -588,7 +584,26 @@ The Louvain method is a popular algorithm to detect communities in large network
       * And use of the mentioned combined objective
     * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
       *  Therefore the actual quality of communities remains to be known
-  * @faniUserCommunityDetection2020 (use as baseline?)
+  * @wangEvolutionaryAutoencoderDynamic2020
+    * Approach is similar to to @maCommunityawareDynamicNetwork2020
+    * Defines a unified objective where 
+      * community characteristics
+      * previous clustering 
+      * are incorporated as a regularization term
+    * They argue that real world networks are non-linear in nature and classical approaches can not capture this
+      * Autoencoders can though
+    * Methodology:
+      * Construct a similarity matrix using Dice Coefficient (handles varying degrees well)
+      * Apply stacked (deep) autoencoders to learn the low-dimensional representation
+      * Characterizes tradeoff between two costs:
+        * Snapshot cost (SC): 
+          * Reconstruction loss
+          * Node embedding similarity (homophiliy) between connected nodes
+          * Node embedding similarity (homophiliy) between nodes in same community
+        * Temporal cost (TC)
+          * Temporal smoothnes
+      * Adopt K-means to discover community structures
+  * @faniUserCommunityDetection2020
     * Propose a new method of identifying user communities through multimodal feature learning:
       * learn user embeddings based on their **temporal content similarity**
         * Base on topics of interest
@@ -606,8 +621,7 @@ The Louvain method is a popular algorithm to detect communities in large network
       * User for content prediction
     * Note: **This approach detects static communities**
       * But the communities implicitly take time into account
-  * @wangEvolutionaryAutoencoderDynamic2020
-  * 
+  * * 
   * @wangVehicleTrajectoryClustering2020
 
 * General Strategy:

@@ -129,6 +129,8 @@ author:
 * Unified loss: $\mathbf{L}^{a}=\mathbf{L}_{g}^{a}+\alpha \cdot \mathbf{L}_{l}^{a}+\beta \cdot \mathbf{L}_{c}^{a}$
   * $\alpha$ affects the performance of our CDNE on the **prediction** tasks
   * $\beta$ has significant impacts on the **stabilization** tasks
+  * $\mathbf{L}_{l}^{a}$ and $\mathbf{L}_{c}^{a}$ are referred to as regularizers
+  * 
 
 ## Architecture
 
@@ -178,7 +180,11 @@ author:
 
 * A lot of small mistakes in the paper (as if it is a prepublication - it is not)
 * There is no source code
-* The baselines are not properly explained (the algorithms are not DCD algorithms)
+* The baselines are not DCD algorithms but Dynmic Network Embedding algorithms
+* Community memberships can’t change?
+* This, and @wangEvolutionaryAutoencoderDynamic2020
+  * Use datasets with very few nodes
+  * Possibly because of the gigantic matrices for reconst
 
 # Code
 
