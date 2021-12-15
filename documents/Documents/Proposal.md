@@ -14,8 +14,14 @@ abstract: |
   | Recent developments in big data and graph representation learning have allowed researchers to make breakthroughs in social network analysis and the identification of communities. While opening a lot of research opportunities, such approaches are highly limited to snapshots of rapidly evolving social networks. This, in fact, is a great simplification of the real-world situation which is always evolving and expanding by the user and/or machine interactions.
   |
   | Relying on novel research of dynamic graph representation learning, the goal of my thesis project is to build a framework for community detection and representation in evolving heterogeneous networks. To verify the merit of the proposed framework, it will be evaluated against baselines on static heterogeneous graphs, and analyzed against gathered twitter dataset on covid measures.
- 
+
 ---
+
+
+
+[TOC]
+
+
 
 # Introduction and Backgrounds
 
@@ -398,6 +404,44 @@ The Louvain method is a popular algorithm to detect communities in large network
   * Each community is a set of followers around a leader
   * Present an updating strategy with temp info to get initial leader nodes
   * Leader nodes ensure temporal smoothneess
+* @yinMultiobjectiveEvolutionaryClustering2021
+  * Is a genetic algorithm
+  * Look at the problem from an Evolutionary Clustering Perspective
+    * Evolutionary as in Evolutionary Algorithms
+    * Goal: detect community structure at the current time under guidance of one obtained immediately in the past
+      * Fit observed data well
+      * And keep historical consistency
+  * Solve major drawbacks:
+    * Absence of error correction - which may lead to result-drifting and error accumulation
+    * NP-hardness of modularity based community detection
+    * If initial community structure is not accurate, or the following - this may lead to the “result drift” and “error accumulation”
+  * Propose DYN-MODPSO
+    * Combine traditional evolutionary clustering with particle swarm algorithm
+    * Propose a strategy to detect initial clustering - with insight of future ones
+    * A new way to generate diverse population of individuals
+  * Use previous work DYN-MOGA
+    * Which introduces Multi-Objective optimization 
+      * (Trade-off between - Both objectives are competitive)
+      * Accuracy in current time step (CS - Community Score)
+      * Similarity of two communities in consecutive steps (NMI - Similarity of two partitions)
+  * Algorithm:
+    * Initialization Phase:
+      * De redundant random walk to initialize the initial population (with diverse individuals)
+      * Random walk: 
+        * Used to approximate probability of two nodes being linked
+        * Then probability is sorted and is split on (based on Q metric optimizing modularity)
+      * Represent as binary string encoding
+    * Search Phase:
+      * Particle swarm optimization - preserving global historically best positions
+        * Already given initial swarms / clusterings
+        * Identifies best positions for different nodes - and uses swarm velocity to interpolate between them
+      * Builds good baseline clusterings
+    * Crossover & Mutation Phase:
+      * Uses custom operators MICO and NBM+ to improve global convergence
+        * Cross-over operators - combining multiple individuals (parents)
+      * Applies specific operators to maximize NMI of CS
+  * Results:
+    * Seems to perform well and be fast?
 
 #### Simultaneous community detection
 
@@ -461,57 +505,15 @@ The Louvain method is a popular algorithm to detect communities in large network
     * Locally update communities
   * Global smoothing: search for communities by examining all steps of evolution
 
-
-
-#### Evolutionary Clustering Methods
-
-* Is kinda an alternative approach - but is still link based since modularity is optimized
-* @yinMultiobjectiveEvolutionaryClustering2021
-  * Look at the problem from an Evolutionary Clustering Perspective
-    * Evolutionary as in Evolutionary Algorithms
-    * Goal: detect community structure at the current time under guidance of one obtained immediately in the past
-      * Fit observed data well
-      * And keep historical consistency
-  * Solve major drawbacks:
-    * Absence of error correction - which may lead to result-drifting and error accumulation
-    * NP-hardness of modularity based community detection
-    * If initial community structure is not accurate, or the following - this may lead to the “result drift” and “error accumulation”
-  * Propose DYN-MODPSO
-    * Combine traditional evolutionary clustering with particle swarm algorithm
-    * Propose a strategy to detect initial clustering - with insight of future ones
-    * A new way to generate diverse population of individuals
-  * Use previous work DYN-MOGA
-    * Which introduces Multi-Objective optimization 
-      * (Trade-off between - Both objectives are competitive)
-      * Accuracy in current time step (CS - Community Score)
-      * Similarity of two communities in consecutive steps (NMI - Similarity of two partitions)
-  * Algorithm:
-    * Initialization Phase:
-      * De redundant random walk to initialize the initial population (with diverse individuals)
-      * Random walk: 
-        * Used to approximate probability of two nodes being linked
-        * Then probability is sorted and is split on (based on Q metric optimizing modularity)
-      * Represent as binary string encoding
-    * Search Phase:
-      * Particle swarm optimization - preserving global historically best positions
-        * Already given initial swarms / clusterings
-        * Identifies best positions for different nodes - and uses swarm velocity to interpolate between them
-      * Builds good baseline clusterings
-    * Crossover & Mutation Phase:
-      * Uses custom operators MICO and NBM+ to improve global convergence
-        * Cross-over operators - combining multiple individuals (parents)
-      * Applies specific operators to maximize NMI of CS
-  * Results:
-    * Seems to perform well and be fast?
-
-
-
 ### Deep Methods
 
 * * 
+
 * Add additional links to the graph
   * Yoonsuk Kang
+  
 * Change distances within the graph
+
 * Community Detection
   * @kangCommunityReinforcementEffective2021
     * Present a **Community Reinforcement** approach
@@ -562,7 +564,20 @@ The Louvain method is a popular algorithm to detect communities in large network
     * has code
   * @rozemberczkiGEMSECGraphEmbedding2019
     * hh
+  
 * Dynamic Community Detection
+
+  * @wangVehicleTrajectoryClustering2020
+    * Transform task of trajectory clustering into one of Dynamic Community Detection
+      * Discretize the trajectories by recording entity their current neigbors at each time interval 
+      * Edge streaming network is created
+    * Use representation learning to learn node their embeddings
+      * Use dyn walks to perform random walks in time dimenstion
+      * Use negative sampling to avoid the softmax cost
+    * Then use K-means to find the communities
+      * Try K-means, K-medioids and GMM (Gaussian Mixture Models)
+      * Initalize the centers at the previous timestamp centers
+    * Use quality measures to establish quality of results
 
   * @maCommunityawareDynamicNetwork2020 (use as baseline?)
     * Define communities in terms of large and small scale communities
@@ -601,7 +616,7 @@ The Louvain method is a popular algorithm to detect communities in large network
           * Node embedding similarity (homophiliy) between connected nodes
           * Node embedding similarity (homophiliy) between nodes in same community
         * Temporal cost (TC)
-          * Temporal smoothnes
+          * Temporal smoothness of node embeddings
       * Adopt K-means to discover community structures
   * @faniUserCommunityDetection2020
     * Propose a new method of identifying user communities through multimodal feature learning:
@@ -621,8 +636,6 @@ The Louvain method is a popular algorithm to detect communities in large network
       * User for content prediction
     * Note: **This approach detects static communities**
       * But the communities implicitly take time into account
-  * * 
-  * @wangVehicleTrajectoryClustering2020
 
 * General Strategy:
   * Represent
@@ -639,14 +652,6 @@ The Louvain method is a popular algorithm to detect communities in large network
 * problems with current solutions
 * datasets [@rossettiCommunityDiscoveryDynamic2018]
 * DCD is seen as the hardest problem within Social Network Analysis. Reason for this is mostly because DCD, unlike CD, also involves tracking the found communities over time which brings 
-
-
-
-
-## Interesing Resources
-
-* Consensus Clustering
-* Spectral Clustering
 
 # Approach
 
