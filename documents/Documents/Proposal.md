@@ -17,18 +17,12 @@ abstract: |
 
 ---
 
-
-
-[TOC]
-
-
-
 # Introduction and Backgrounds
 
 Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in real-world using Network and Graph Theory. These social structures usually include social media networks, economic transaction networks, knowledge networks and disease transmission networks.
 One main issue to address while studying this type of real-world events lies in identification of meaningful substructures hidden within the overall complex system. The SNA is therefore applied to extract patterns from the data usually in form of information flow,  identification of high throughput nodes and paths, and discovery of communities and clusters. In this thesis we are going to focus on the problem of community discovery.
 
-This thesis proposal is structured as follows: in this sections we are going to introduce basic concepts and challenges of Dynamic Community Detection. In +@research-questions we will describe the problem we are trying to solve as well as formulate the research questions. In +@literature-review a brief literature survey is conducted on identifying current state of the art and approaches to Community Detections. In +@approach we will elaborate on our methodology for solving the posed problem and answering the research questions. Finally, in +@planning the concrete planning for th research project is laid out.
+This thesis proposal is structured as follows: in this sections we are going to introduce basic concepts and challenges of Dynamic Community Detection. In +@research-questions we will describe the problem we are trying to solve as well as formulate the research questions. In +@literature-review a brief literature survey is conducted on identifying current state of the art and approaches to Community Detections. In +@approach we will elaborate on our methodology for solving the posed problem and answering the research questions. Finally, in +@planning the concrete planning for the research project is laid out.
 
 ## Community Detection
 
@@ -92,7 +86,6 @@ Various works have emerged exploring community detection using the representatio
   * Better elaborate on them more and move them into approaches section
   * Move this section into a larger section
     * split and elaborate on CD methods
-  
 
 ### Dynamic Community
 
@@ -102,8 +95,8 @@ This persistence across time of communities subjected to progressive changes is 
 
 Most of the works agree on two atomic transformations on the communities, including node/edge appearance and vanishing. While some such as [@pallaQuantifyingSocialGroup2007; @asurEventbasedFrameworkCharacterizing2009, @cazabetUsingDynamicCommunity2012] define a more extensive set of transformations (also referred to as events) which may be more interesting for analytical purposes:
 
-* Birth, when a new community emerges at a given time.
-* Death, when a community disappears. All nodes belonging to this community lose their membership.
+* Birth, when a new community emerges at a given time.    
+  * Death, when a community disappears. All nodes belonging to this community lose their membership.
 * Growth, when a community acquires some new members (nodes).
 * Contraction, when a community loses some of its members.
 * Merging, when several communities merge to form a new community.
@@ -146,9 +139,10 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 
 ### Evaluation of Representation methods
 
-* Explore Recommendation / Link prediction task
+Explore Recommendation / Link prediction task
 
 * @faniUserCommunityDetection2020
+  
   * Compare against Static Content Based CD Algorithms
   * Content Based Community Detection
   * Compare against Static Link Based CD Algorithms
@@ -185,9 +179,9 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
       * Same reasoning as news prediction
       * Metrics (classificiation metrics)
         * Precision, Recall, F-measure
-  
-* @wangVehicleTrajectoryClustering2020
 
+* @wangVehicleTrajectoryClustering2020
+  
   * Use taxi dataset with license plates
   * Compare to other deep GNN - they only learn static representation
   * Metrics:
@@ -207,12 +201,15 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
       * $B_k$ is covariance matrix between the clusters
       * $W_k$ is covariance matrix between the data in the cluster
       * $tr$ is trace of the matrix
-  
-* @maCommunityawareDynamicNetwork2020
 
+* @maCommunityawareDynamicNetwork2020
+  
   * Use both synthetic and real world datasets
+  
   * Use not perse community detection baselines
+  
   * Define auxilary helper tasks in context of *community aware* **Deep Network Embedding**:
+    
     * **Network Reconstruction**: Evaluates model on ability of reconstructing link structures of the network
       * Average reconstruction precision is measured
       * This is done for each timestamp
@@ -229,60 +226,60 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
       * Evaluates communty evolution ratio to network representation evolution between subsequent timestamps
       * Lower values point to more stable communities and are better
       * $p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q$
-
+  
   * Network is first fine-tuned on each of the tasks
+  
   * Note: the evalution is at graph level since their methods are spectral GAE based
 
 * @mrabahRethinkingGraphAutoEncoder2021
-
+  
   * Accuracy:
   * NMI
   * ARI:
-  
+
 * @huangInformationFusionOriented2022
+  
   * Based on link prediction or friend recommendation
   * Precision
   * Recall
   * F-score
   * normalized discounted cumulative gain (nDCG)
   * mean reciprocal rank (MRR)
-  
+
 * 
 
 ## Datasets
 
 ### Synthetic
 
-| Paper                                              | Description                                                  |
-| -------------------------------------------------- | ------------------------------------------------------------ |
-| @lancichinettiBenchmarkGraphsTesting2008           | Static networks (widely used)                                |
-| @greeneTrackingEvolutionCommunities2010            | Generate Graphs based on Modularity measure                  |
-| @granellBenchmarkModelAssess2015                   |                                                              |
+| Paper                                              | Description                                                                                              |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| @lancichinettiBenchmarkGraphsTesting2008           | Static networks (widely used)                                                                            |
+| @greeneTrackingEvolutionCommunities2010            | Generate Graphs based on Modularity measure                                                              |
+| @granellBenchmarkModelAssess2015                   |                                                                                                          |
 | @hamiltonRepresentationLearningGraphs2018          | Generate Time dependent Heterogeneous graphs using modularity optimization and multi-dependency sampling |
-| SYN - @ghalebiDynamicNetworkModel2019              |                                                              |
-| SBM - @lancichinettiBenchmarksTestingCommunity2009 | extracted from the dynamic Stochastic Block Model            |
-
-
+| SYN - @ghalebiDynamicNetworkModel2019              |                                                                                                          |
+| SBM - @lancichinettiBenchmarksTestingCommunity2009 | extracted from the dynamic Stochastic Block Model                                                        |
 
 ### Real World
 
-| Dataset                                                      | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Enron](https://www.cs.cmu.edu/~./enron/)                    | Includes: Persons, Email Categories, Sentiment, Email Content |
-| [KIT](https://i11www.iti.kit.edu/en/projects/spp1307/emaildata) (dead) |                                                              |
-| [Weibo](http://www.wise2012.cs.ucy.ac.cy/challenge.html)     | Includes: Persons, Tweets, Followers; **Excludes: Tweet Content** |
-| [Digg](https://www.isi.edu/~lerman/downloads/digg2009.html)  | Includes: Persons, Stores, Followers, Votes; **Excludes: Content** |
-| [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html) | Includes: Persons, Votes; **Excludes: Content**              |
-| [IMDB](https://paperswithcode.com/dataset/imdb-binary)       | Actor movie network; Content is implicitly defined           |
-| [WIKI-RFA](https://snap.stanford.edu/data/wiki-RfA.html)     | Wikipedia Adminitrator Election; Network of Voters and Votees. Links are votes and vote comments |
-| [FB-wosn](http://socialnetworks.mpi-sws.org/data-wosn2009.html) | User friendship links and User posts on users walls; **Excludes: Content** |
-| [TweetUM](https://wis.st.ewi.tudelft.nl/research/tweetum/) (dead) | Twitter Tweets, User Profiles and Followers; Includes: Content |
-| [Reddit Pushift](https://arxiv.org/abs/2001.08435)           | User Submissions and Posts on Subreddits; With timestamps    |
-| [Bitcoin Trust Network](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html) | Network Nodes and peer Ratings; With timestamps              |
-| [LastFM1k](http://ocelma.net/MusicRecommendationDataset/lastfm-1K.html) | User - Song Listen histories; With timestamps                |
-| [MovieLens25M](https://grouplens.org/datasets/movielens/25m/) | Users and Movie Ratings; With timestamps                     |
-| [Memetracker](https://snap.stanford.edu/data/memetracker9.html) |                                                              |
-| [Rumor Detection](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0168344) | Rumor Detection over Varying Time Windows; Twitter data; With timestamps |
+| Dataset                                                                                      | Description                                                                                      |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| [Enron](https://www.cs.cmu.edu/~./enron/)                                                    | Includes: Persons, Email Categories, Sentiment, Email Content                                    |
+| [KIT](https://i11www.iti.kit.edu/en/projects/spp1307/emaildata) (dead)                       |                                                                                                  |
+| [Weibo](http://www.wise2012.cs.ucy.ac.cy/challenge.html)                                     | Includes: Persons, Tweets, Followers; **Excludes: Tweet Content**                                |
+| [Digg](https://www.isi.edu/~lerman/downloads/digg2009.html)                                  | Includes: Persons, Stores, Followers, Votes; **Excludes: Content**                               |
+| [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html)                       | Includes: Persons, Votes; **Excludes: Content**                                                  |
+| [IMDB](https://paperswithcode.com/dataset/imdb-binary)                                       | Actor movie network; Content is implicitly defined                                               |
+| [WIKI-RFA](https://snap.stanford.edu/data/wiki-RfA.html)                                     | Wikipedia Adminitrator Election; Network of Voters and Votees. Links are votes and vote comments |
+| [FB-wosn](http://socialnetworks.mpi-sws.org/data-wosn2009.html)                              | User friendship links and User posts on users walls; **Excludes: Content**                       |
+| [TweetUM](https://wis.st.ewi.tudelft.nl/research/tweetum/) (dead)                            | Twitter Tweets, User Profiles and Followers; Includes: Content                                   |
+| [Reddit Pushift](https://arxiv.org/abs/2001.08435)                                           | User Submissions and Posts on Subreddits; With timestamps                                        |
+| [Bitcoin Trust Network](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html)            | Network Nodes and peer Ratings; With timestamps                                                  |
+| [LastFM1k](http://ocelma.net/MusicRecommendationDataset/lastfm-1K.html)                      | User - Song Listen histories; With timestamps                                                    |
+| [MovieLens25M](https://grouplens.org/datasets/movielens/25m/)                                | Users and Movie Ratings; With timestamps                                                         |
+| [Memetracker](https://snap.stanford.edu/data/memetracker9.html)                              |                                                                                                  |
+| [Rumor Detection](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0168344) | Rumor Detection over Varying Time Windows; Twitter data; With timestamps                         |
 
 ## Dynamic Community Detection Methods
 
@@ -332,8 +329,6 @@ The Louvain method is a popular algorithm to detect communities in large network
       * Ties are broken deterministically
     * Stops when convergence is reached, or max iter
   * Preliminary solution can be assigned before run
-
-
 
 #### Independent Community Detection and Matching
 
@@ -510,29 +505,39 @@ The Louvain method is a popular algorithm to detect communities in large network
 * * 
 
 * Add additional links to the graph
-  * Yoonsuk Kang
   
+  * Yoonsuk Kang
+
 * Change distances within the graph
 
 * Community Detection
+  
   * @kangCommunityReinforcementEffective2021
+    
     * Present a **Community Reinforcement** approach
-
-      * Is CD algorithm agnostic
-
-        * Shown in experiments - therefore the graph itself benefits
-      * Reinforces the Graph by
       
+      * Is CD algorithm agnostic
+        
+        * Shown in experiments - therefore the graph itself benefits
+      
+      * Reinforces the Graph by
+        
         * Creating inter-community edges
         * Deleting intra-community edges
         * Determines the appropriate amount of reinforcement a graph needs
+      
       * Which helps the dense inter-community and sparse intra-community property of the graph
+        
         * Can effectively turn difficult-to-detect community situation into that of easy-to-detect communities
+      
       * Challenges:
+        
         * Needs to be  unsupervised (doesn't need community annotations to work)
         * Appropriate amount of reinforcement needs to be determined (otherwise noise is introduced)
         * Needs to be fast, checking every possible edge is infeasible
+      
       * Methodology:
+        
         * Edge Addition / Deletion
           * Based on node similarity of connected pairs
             * Similar nodes are likely to be in a community (intra edges)
@@ -551,28 +556,63 @@ The Louvain method is a popular algorithm to detect communities in large network
         * Reducing comutational overhead
           * Using a greedy similarity computation
           * Prefer nodes which are likely to be in same community of inter similarity detection
+      
       * Tests results on:
+        
         * Synthetic Graphs: LFR
         * Real world graphs: Cora, Siteseer, DBLP, Email
+  
   * @huangInformationFusionOriented2022
+    
     * Their own made dataset (rumor detection): https://github.com/MingqingHuang-SHU/HRTCD
     * Recommendation of friends based on per user detected communities
     * Communities are detected on per user contructed subnetworks.
     * Approach supports multiple communities per user, but is not one of global community detection
-  * @luberCommunityDetectionHashtagGraphsSemiSupervised2021
-    * short
-  * @jiaCommunityGANCommunityDetection2019
-    * has code
-  * @rozemberczkiGEMSECGraphEmbedding2019
-    * hh
-  * @yangGraphClusteringDynamic2017
-    * unsupe
   
-* Dynamic Community Detection
+  * @luberCommunityDetectionHashtagGraphsSemiSupervised2021
+    
+    * short
+  
+  * @jiaCommunityGANCommunityDetection2019
+    
+    * has code
+  
+  * @rozemberczkiGEMSECGraphEmbedding2019
+    
+    * hh
+  
+  * @yangGraphClusteringDynamic2017
+    
+    * Goal: unsupervised clustering on networks with contents
+      * Propose a way to utilize deep embedding for graph clustering
+    * Simultaneously solve node representation problem and find optimal clustering in a e2e manner
+      * Jointly learns embeddings $X$ and soft clustering $q_i \in Q$
+      * $\sum_k q_{ik}$: probablility of node $v_i$ belonging to $k$th cluster
+      * $K$ is known a-priori
+    * Employ Deep Denoise Autoencoder (DAE) - good for features with high-dimensional sparse noisy inputs
+    * Use stable influence propagation technique (for computing embeddings)
+      * Use a transition matrix for a single step embedding propagation
+      * Because:
+        * Random walk requires more tuning
+        * Their transition matrix is very similar to a spectral method (symmetric Laplacian matrix)
+        * Influence propagation is like kipf and welling - doenst require matrix decomposition
+      * Embedding loss: \mathcal{J}_{1}=\sum_{i=1}^{n} l\left(\mathrm{a}_{i}, \tilde{\mathrm{a}}_{i}\right)
+    * Introduce GRACE cluster module:
+      * Computes soft clustering $Q$ from: $q_{i k}=\frac{\left(1+\left\|\mathbf{x}_{i}-\mathbf{u}_{k}\right\|^{2}\right)^{-1}}{\sum_{j}\left(1+\left\|\mathbf{x}_{i}-\mathbf{u}_{j}\right\|^{2}\right)^{-1}}$
+      * Learn clustering results by learning distribuition $P$ where $p_{i k}=\frac{q_{i k}^{2} / f_{k}}{\sum_{j} q_{i j}^{2} / f_{j}}$
+        * and $f_{k}=\sum_{i} q_{i k}$ total number of nodes softly assigned to $k$th cluster
+      * Clustering Loss: $\mathcal{J}_{2}=K L(\mathcal{P} \| Q)=\sum_{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
+      * Training is done in alternating steps:
+        * Macrostep: Compute: $P$ and fix it
+        * $S$ Microsteps: Update node embeddings $S$ and cluster centers $U$
+          * Tries to make $Q$ catch up with $P$ 
 
+* Dynamic Community Detection
+  
   * @wangVehicleTrajectoryClustering2020
+    
     * Transform task of trajectory clustering into one of Dynamic Community Detection
-      * Discretize the trajectories by recording entity their current neigbors at each time interval 
+      * discretion the trajectories by recording entity their current neigbors at each time interval 
       * Edge streaming network is created
     * Use representation learning to learn node their embeddings
       * Use dyn walks to perform random walks in time dimenstion
@@ -581,8 +621,9 @@ The Louvain method is a popular algorithm to detect communities in large network
       * Try K-means, K-medioids and GMM (Gaussian Mixture Models)
       * Initalize the centers at the previous timestamp centers
     * Use quality measures to establish quality of results
-
+  
   * @maCommunityawareDynamicNetwork2020 (use as baseline?)
+    
     * Define communities in terms of large and small scale communities
     * They propose a method for dynamic *community aware* network representation learning
       * By creating a unified objective optimizing stability of communities, temporal stability and structure representation
@@ -601,14 +642,16 @@ The Louvain method is a popular algorithm to detect communities in large network
       * Done by optimizing all at once - therefore maintaining the stability
       * And use of the mentioned combined objective
     * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
-      *  Therefore the actual quality of communities remains to be known
+      * Therefore the actual quality of communities remains to be known
+  
   * @wangEvolutionaryAutoencoderDynamic2020
+    
     * Approach is similar to to @maCommunityawareDynamicNetwork2020
     * Defines a unified objective where 
       * community characteristics
       * previous clustering 
       * are incorporated as a regularization term
-    * They argue that real world networks are non-linear in nature and classical approaches can not capture this
+    * **They argue that real world networks are non-linear** in nature and **classical approaches can not capture this**
       * Autoencoders can though
     * Methodology:
       * Construct a similarity matrix using Dice Coefficient (handles varying degrees well)
@@ -621,7 +664,9 @@ The Louvain method is a popular algorithm to detect communities in large network
         * Temporal cost (TC)
           * Temporal smoothness of node embeddings
       * Adopt K-means to discover community structures
+  
   * @faniUserCommunityDetection2020
+    
     * Propose a new method of identifying user communities through multimodal feature learning:
       * learn user embeddings based on their **temporal content similarity**
         * Base on topics of interest
@@ -641,15 +686,18 @@ The Louvain method is a popular algorithm to detect communities in large network
       * But the communities implicitly take time into account
 
 * General Strategy:
+  
   * Represent
+  
   * Recluster
+    
     * Construct a new graph using deep based distances, and use Link Based CD
+    
     * Cluster with a clustering algorithm
-  * 
+    
+    * 
 
 ## Graph Representation Learning
-
-
 
 * components
 * problems with current solutions
@@ -658,11 +706,6 @@ The Louvain method is a popular algorithm to detect communities in large network
 
 # Approach
 
-
-
-
-
 # Planning
 
 abc
-

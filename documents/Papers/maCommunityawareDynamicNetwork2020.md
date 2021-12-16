@@ -180,7 +180,7 @@ author:
 
 * A lot of small mistakes in the paper (as if it is a prepublication - it is not)
 * There is no source code
-* The baselines are not DCD algorithms but Dynmic Network Embedding algorithms
+* The baselines are not DCD algorithms but Dynamic Network Embedding algorithms
 * Community memberships can’t change?
 * This, and @wangEvolutionaryAutoencoderDynamic2020
   * Use datasets with very few nodes
