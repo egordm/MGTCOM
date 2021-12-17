@@ -575,7 +575,7 @@ The Louvain method is a popular algorithm to detect communities in large network
   
   * @jiaCommunityGANCommunityDetection2019
     
-    * has code
+    * Has some info in related work to extend on graph representation learning
   
   * @rozemberczkiGEMSECGraphEmbedding2019
     

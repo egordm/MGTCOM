@@ -4,33 +4,33 @@
 
 * AGM: Affiliation Graph Model: a generative model $B(V, C, M, \{p_c\})$ for graphs
   
-  * Given a set of nodes: $V$
+   * Given a set of nodes: $V$
   
-  * Given a set of communities (nodes): $C$
+   * Given a set of communities (nodes): $C$
   
-  * Given a set of community memberships: $M$
-    
-    * Set of edges representing $V \rightarrow C$ assignments
-    
-    * ${p_c}$ model parameters (probability matrix)
+   * Given a set of community memberships: $M$
+     
+      * Set of edges representing $V \rightarrow C$ assignments
+     
+      * ${p_c}$ model parameters (probability matrix)
 
 * Can model variety of community structures: (all have distinct characteristics in $M$)
   
-  * Non-overlapping
+   * Non-overlapping
   
-  * Overlapping
+   * Overlapping
   
-  * Nested
+   * Nested
 
 <img title="" src="file:///home/egordm/.config/marktext/images/e6924506e5e832b3b33cdf66df5b512a05008f6a.png" alt="Screenshot_20211217_120759.png" data-align="left" width="793">
 
 * AGM: generates links for each pair of nodes in community $A$ with probability $p_a$
   
-  * Overall edge probability: $P(u, v) = 1 - \Pi_{c\in M_u \cap M_v}(1- p_c)$
-    
-    * More communities in common, means higher probability
+   * Overall edge probability: $P(u, v) = 1 - \Pi_{c\in M_u \cap M_v}(1- p_c)$
+     
+      * More communities in common, means higher probability
   
-  * If no overlap, then $P(u, v) = \epsilon$
+   * If no overlap, then $P(u, v) = \epsilon$
 
 <img title="" src="file:///home/egordm/.config/marktext/images/25f876eb7bc9a151bfb52bbed248ccfbe1f7e622.png" alt="Screenshot_20211217_121439.png" width="707" data-align="left">
 
@@ -40,47 +40,46 @@
 
 * Given a Graph find model $F$ that may have generated the graph
   
-  * Affiliation Graph $M$
+   * Affiliation Graph $M$
   
-  * Number of Communities $C$
+   * Number of Communities $C$
   
-  * Parameters $p_c$
+   * Parameters $p_c$
 
 * Graph Fitting:
   
-  * Max likelihood estimation
-    
-    * Take a probability matrix
-    
-    * Take a graph adjacency matrix
-    
-    * Compare the two by likelihood $P(G|F)$
-      
-      * Edges in graph should have high probability
-      
-      * Edges not in graph should have low probability
+   * Max likelihood estimation
+     
+      * Take a probability matrix
+     
+      * Take a graph adjacency matrix
+     
+      * Compare the two by likelihood $P(G|F)$
+        
+         * Edges in graph should have high probability
+        
+         * Edges not in graph should have low probability
   
-  * Efficiently Compute $P(G|F)$ (argmax)
-    
-    * Relax AGM: Memberships now have strengths $F_uC$ (non-negative membership strength)
-    
-    * Probability of $u$ and $v$ connecting through community $C$: $P_{C}(u, v)=1-\exp \left(-F_{u C} \cdot F_{v C}\right)$
-    
-    * Probability of u and v connecting: $P(u, v)=1-\prod_{C \in \Gamma}\left(1-P_{C}(u, v)\right) = 1 - exp(\mathbf{F_u^T F_v^T})$
-    
-    * Write as log likelihood: $log(P(G|F))$
-    
-    * Then use gradient descent to make small steps in $F$ for find optimal
-    
-    * Naive ascent is slow:
-      
-      * One can precompute prob of edges to node not existing (for whole graph)
-      
-      * Then depending on node just subtract away existing edges (much faster)
+   * Efficiently Compute $P(G|F)$ (argmax)
+     
+      * Relax AGM: Memberships now have strengths $F_uC$ (non-negative membership strength)
+     
+      * Probability of $u$ and $v$ connecting through community $C$: $P_{C}(u, v)=1-\exp \left(-F_{u C} \cdot F_{v C}\right)$
+     
+      * Probability of u and v connecting: $P(u, v)=1-\prod_{C \in \Gamma}\left(1-P_{C}(u, v)\right) = 1 - exp(\mathbf{F_u^T F_v^T})$
+     
+      * Write as log likelihood: $log(P(G|F))$
+     
+      * Then use gradient descent to make small steps in $F$ for find optimal
+     
+      * Naive ascent is slow:
+        
+         * One can precompute prob of edges to node not existing (for whole graph)
+        
+         * Then depending on node just subtract away existing edges (much faster)
 
 * Whole method is called BigCLAM
 
 ## Resources
 
 * [CS224W: Machine Learning with Graphs | 2021 | Lecture 13.4 - Detecting Overlapping Communities - YouTube](https://www.youtube.com/watch?v=SHcVHrsgj8w&list=PLoROMvodv4rPLKxIpqhjhPgdQy7imNkDn&index=40)
-* 
