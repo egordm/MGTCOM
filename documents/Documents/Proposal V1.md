@@ -1,5 +1,5 @@
 ---
-type: paper
+type: none
 title: "Community Detection through Representation learning in Evolving Heterogenous Networks"
 subtitle: "A Master’s Thesis proposal"
 author:
@@ -96,7 +96,7 @@ This persistence across time of communities subjected to progressive changes is 
 Most of the works agree on two atomic transformations on the communities, including node/edge appearance and vanishing. While some such as [@pallaQuantifyingSocialGroup2007; @asurEventbasedFrameworkCharacterizing2009, @cazabetUsingDynamicCommunity2012] define a more extensive set of transformations (also referred to as events) which may be more interesting for analytical purposes:
 
 * Birth, when a new community emerges at a given time.    
-  * Death, when a community disappears. All nodes belonging to this community lose their membership.
+* Death, when a community disappears. All nodes belonging to this community lose their membership.
 * Growth, when a community acquires some new members (nodes).
 * Contraction, when a community loses some of its members.
 * Merging, when several communities merge to form a new community.
@@ -142,7 +142,6 @@ In [@peelGroundTruthMetadata] the authors criticize these evaluation approaches 
 Explore Recommendation / Link prediction task
 
 * @faniUserCommunityDetection2020
-  
   * Compare against Static Content Based CD Algorithms
   * Content Based Community Detection
   * Compare against Static Link Based CD Algorithms
@@ -179,9 +178,7 @@ Explore Recommendation / Link prediction task
       * Same reasoning as news prediction
       * Metrics (classificiation metrics)
         * Precision, Recall, F-measure
-
 * @wangVehicleTrajectoryClustering2020
-  
   * Use taxi dataset with license plates
   * Compare to other deep GNN - they only learn static representation
   * Metrics:
@@ -190,7 +187,7 @@ Explore Recommendation / Link prediction task
       * $a$ avg distance between node and neighbors in cluster
       * $b$ is min val of avg distances between node and other clusters
     * **Davies-Bouldin Index** (DBI)
-      * $D B I=\frac{1}{N} \sum_{i=1}^{N} \max _{j \neq i}\left(\frac{\overline{S_{i}}+\overline{S_{j}}}{\left\|w_{i}-w_{j}\right\|_{2}}\right)$
+      * $D B I=\frac{1}{N} \sum_{i=1}^{N} \max_{j \neq i}\left(\frac{\overline{S_{i}}+\overline{S_{j}}}{\left\|w_{i}-w_{j}\right\|_{2}}\right)$
       * $\bar{S_i}$: avg distance of nodes in cluster $i$ to centroid of cluster $i$
       * $w_i$ is the centroid of cluster $w_i$
       * It is the ratio of the sum of the average distance to the distance between the centers of mass of the two clusters
@@ -201,15 +198,10 @@ Explore Recommendation / Link prediction task
       * $B_k$ is covariance matrix between the clusters
       * $W_k$ is covariance matrix between the data in the cluster
       * $tr$ is trace of the matrix
-
 * @maCommunityawareDynamicNetwork2020
-  
   * Use both synthetic and real world datasets
-  
   * Use not perse community detection baselines
-  
   * Define auxilary helper tasks in context of *community aware* **Deep Network Embedding**:
-    
     * **Network Reconstruction**: Evaluates model on ability of reconstructing link structures of the network
       * Average reconstruction precision is measured
       * This is done for each timestamp
@@ -226,27 +218,21 @@ Explore Recommendation / Link prediction task
       * Evaluates communty evolution ratio to network representation evolution between subsequent timestamps
       * Lower values point to more stable communities and are better
       * $p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q$
-  
   * Network is first fine-tuned on each of the tasks
-  
   * Note: the evalution is at graph level since their methods are spectral GAE based
-
 * @mrabahRethinkingGraphAutoEncoder2021
-  
   * Accuracy:
   * NMI
   * ARI:
-
 * @huangInformationFusionOriented2022
-  
   * Based on link prediction or friend recommendation
   * Precision
   * Recall
   * F-score
   * normalized discounted cumulative gain (nDCG)
   * mean reciprocal rank (MRR)
-
-* 
+    
+    
 
 ## Datasets
 
@@ -502,42 +488,25 @@ The Louvain method is a popular algorithm to detect communities in large network
 
 ### Deep Methods
 
-* * 
-
 * Add additional links to the graph
-  
   * Yoonsuk Kang
-
 * Change distances within the graph
-
 * Community Detection
-  
   * @kangCommunityReinforcementEffective2021
-    
     * Present a **Community Reinforcement** approach
-      
       * Is CD algorithm agnostic
-        
         * Shown in experiments - therefore the graph itself benefits
-      
       * Reinforces the Graph by
-        
         * Creating inter-community edges
         * Deleting intra-community edges
         * Determines the appropriate amount of reinforcement a graph needs
-      
       * Which helps the dense inter-community and sparse intra-community property of the graph
-        
         * Can effectively turn difficult-to-detect community situation into that of easy-to-detect communities
-      
       * Challenges:
-        
         * Needs to be  unsupervised (doesn't need community annotations to work)
         * Appropriate amount of reinforcement needs to be determined (otherwise noise is introduced)
         * Needs to be fast, checking every possible edge is infeasible
-      
       * Methodology:
-        
         * Edge Addition / Deletion
           * Based on node similarity of connected pairs
             * Similar nodes are likely to be in a community (intra edges)
@@ -556,27 +525,19 @@ The Louvain method is a popular algorithm to detect communities in large network
         * Reducing comutational overhead
           * Using a greedy similarity computation
           * Prefer nodes which are likely to be in same community of inter similarity detection
-      
       * Tests results on:
-        
         * Synthetic Graphs: LFR
         * Real world graphs: Cora, Siteseer, DBLP, Email
-  
   * @huangInformationFusionOriented2022
-    
     * Their own made dataset (rumor detection): https://github.com/MingqingHuang-SHU/HRTCD
     * Recommendation of friends based on per user detected communities
     * Communities are detected on per user contructed subnetworks.
     * Approach supports multiple communities per user, but is not one of global community detection
-  
   * @luberCommunityDetectionHashtagGraphsSemiSupervised2021
-    
     * Not really focused on community detection
     * More focused on enhancing topic modelling using community detection
     * Communities are from Hashtag graphs which help encode structural / content-based information of the tweets in context of other tweets
-  
   * @jiaCommunityGANCommunityDetection2019
-    
     * Has some info in related work to extend on graph representation learning
     * Solves issue of detecting overlapping communities:
       * K-means and Gaussian Mixture Model cant do that
@@ -602,9 +563,7 @@ The Louvain method is a popular algorithm to detect communities in large network
         * In this case, extended to motif generation (edge is a 2-clique)
           * The affiliation is defined now in form of a motif in community
       * Amount of communities are chosen by hyperparameter tuning
-  
   * @rozemberczkiGEMSECGraphEmbedding2019
-    
     * Learns clustering (centers) simultaneously with computing embeddings
     * Objective functions includes: 
       * Term to embed around the origin
@@ -618,9 +577,7 @@ The Louvain method is a popular algorithm to detect communities in large network
       * Makes algorithm more robust to changes in hyperparameters
     * Evaluate cluster quality by modularity
     * Evaluate embeddings by genre prediction / recommendation
-  
   * @yangGraphClusteringDynamic2017
-    
     * Goal: unsupervised clustering on networks with contents
       * Propose a way to utilize deep embedding for graph clustering
     * Simultaneously solve node representation problem and find optimal clustering in a e2e manner
@@ -644,11 +601,8 @@ The Louvain method is a popular algorithm to detect communities in large network
         * Macrostep: Compute: $P$ and fix it
         * $S$ Microsteps: Update node embeddings $S$ and cluster centers $U$
           * Tries to make $Q$ catch up with $P$ 
-
 * Dynamic Community Detection
-  
   * @wangVehicleTrajectoryClustering2020
-    
     * Transform task of trajectory clustering into one of Dynamic Community Detection
       * discretion the trajectories by recording entity their current neigbors at each time interval 
       * Edge streaming network is created
@@ -659,9 +613,7 @@ The Louvain method is a popular algorithm to detect communities in large network
       * Try K-means, K-medioids and GMM (Gaussian Mixture Models)
       * Initalize the centers at the previous timestamp centers
     * Use quality measures to establish quality of results
-  
   * @maCommunityawareDynamicNetwork2020 (use as baseline?)
-    
     * Define communities in terms of large and small scale communities
     * They propose a method for dynamic *community aware* network representation learning
       * By creating a unified objective optimizing stability of communities, temporal stability and structure representation
@@ -681,9 +633,7 @@ The Louvain method is a popular algorithm to detect communities in large network
       * And use of the mentioned combined objective
     * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
       * Therefore the actual quality of communities remains to be known
-  
   * @wangEvolutionaryAutoencoderDynamic2020
-    
     * Approach is similar to to @maCommunityawareDynamicNetwork2020
     * Defines a unified objective where 
       * community characteristics
@@ -702,9 +652,7 @@ The Louvain method is a popular algorithm to detect communities in large network
         * Temporal cost (TC)
           * Temporal smoothness of node embeddings
       * Adopt K-means to discover community structures
-  
   * @faniUserCommunityDetection2020
-    
     * Propose a new method of identifying user communities through multimodal feature learning:
       * learn user embeddings based on their **temporal content similarity**
         * Base on topics of interest
@@ -722,9 +670,7 @@ The Louvain method is a popular algorithm to detect communities in large network
       * User for content prediction
     * Note: **This approach detects static communities**
       * But the communities implicitly take time into account
-
 * General Strategy:
-  
   * Represent
   * Recluster
     * Construct a new graph using deep based distances, and use Link Based CD

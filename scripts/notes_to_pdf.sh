@@ -2,7 +2,6 @@
 
 SCRIPT_DIR="$(realpath $(dirname "$0"))"
 
- 
 echo "Converting Notes to PDF"
 for f in ./documents/**/*.md; do
     if [[ ! -f ${f/md/pdf} || "${f}" -nt "${f/md/pdf}" ]]; then

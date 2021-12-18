@@ -9,13 +9,16 @@ copy-refs:
 	cp refs.bib "documents/Meta/Presentation Template/refs.bib"
 	cp refs.bib "documents/refs.bib"
 
+documents-to-pdf: copy-refs
+	bash ./scripts/documents_to_pdf.sh
+
 notes-to-pdf: copy-refs
 	bash ./scripts/notes_to_pdf.sh
 
 slides-to-pdf: copy-refs
 	bash ./scripts/slides_to_pdf.sh
 
-pdf: notes-to-pdf slides-to-pdf
+pdf: notes-to-pdf documents-to-pdf slides-to-pdf
 
 sync-to-notion:
 	notionsci sync zotero collections e1a32bedcda443deb60e20fc5bc2b2e0
