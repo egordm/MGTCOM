@@ -214,5 +214,3 @@
 %   * Uses candidate set to pick pick ROI
 %     * Changes are made in communties
 %     * Distances are updated
-
-

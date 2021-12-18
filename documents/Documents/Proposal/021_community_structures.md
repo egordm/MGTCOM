@@ -27,17 +27,11 @@ This persistence across time of communities subjected to progressive changes is 
 Most of the works agree on two atomic transformations on the communities, including node/edge appearance and vanishing. While some such as [@pallaQuantifyingSocialGroup2007; @asurEventbasedFrameworkCharacterizing2009, @cazabetUsingDynamicCommunity2012] define a more extensive set of transformations (also referred to as events) which may be more interesting for analytical purposes:
 
 * Birth, when a new community emerges at a given time. 
-
 * Death, when a community disappears. All nodes belonging to this community lose their membership.
-
 * Growth, when a community acquires some new members (nodes).
-
 * Contraction, when a community loses some of its members.
-
 * Merging, when several communities merge to form a new community.
-
 * Splitting, when a community is divided into several new ones.
-
 * Resurgence, when a community disappears for a period and reappears.
   
   

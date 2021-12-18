@@ -18,5 +18,3 @@ Newer approaches introduce possibility for fusion of different data types. Graph
 %     * split and elaborate on CD methods
 
 
-
-
