@@ -571,7 +571,9 @@ The Louvain method is a popular algorithm to detect communities in large network
   
   * @luberCommunityDetectionHashtagGraphsSemiSupervised2021
     
-    * short
+    * Not really focused on community detection
+    * More focused on enhancing topic modelling using community detection
+    * Communities are from Hashtag graphs which help encode structural / content-based information of the tweets in context of other tweets
   
   * @jiaCommunityGANCommunityDetection2019
     
