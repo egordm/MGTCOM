@@ -297,7 +297,7 @@ techniques related to Graph Representation Learning in
 \cref{graph-representation-learning}. Then, we provide an overview of
 the current state-of-the-art approaches for Community Detection and
 Dynamic Community Detection tasks in \cref{link-based-approaches} and
-+\citet{repesentation-based-approaches}. Finally, we discuss the ways to
+\cref{representation-based-approaches}. Finally, we discuss the ways to
 evaluate the said algorithms in \cref{evaluation} and the datasets
 available in \cref{datasets}.
 
@@ -308,22 +308,23 @@ available in \cref{datasets}.
 \subsubsection{Communities}\label{communities}}
 
 Communities in real-world networks can be of different kinds: disjoint
-(think of students belonging to different educational institutions),
-overlapping (person having membership in different social groups) and
-hierarchical (components of a car). One of the main reasons behind the
-complexity of CD is the unclear definition what a community actually is.
+(students belonging to different educational institutions), overlapping
+(person having membership in different social groups) and hierarchical
+(components of a car). One of the main reasons behind the complexity of
+CD is that there is not one unique definition what a community actually
+is.
 
-The \emph{link-based} (referred to as classic) community detection
+The \emph{link-based} (also referred to as classic) community detection
 methods intuitively describe communities as groups of nodes within a
 graph, such that the intra-group connections are denser than the
-intergroup ones. This definition is primarily based on the
+inter-group ones. This definition is primarily based on the
 \emph{homophily} principle, which refers to the assumption that similar
 individuals are those that are densely connected together. Therefore,
 these kind of methods look for sub-graph structures such as cliques and
 components that identify connectedness within the graph structure to
 represent the communities.
 
-Unfortunately, in most cases link-based methods fall short to identity
+Unfortunately, in most cases link-based methods fall short to identify
 communities of similar individuals. This is mainly due to two facts: (i)
 many similar individuals in a social network are not explicitly
 connected together, (ii) an explicit connection does not necessarily
@@ -333,18 +334,18 @@ conformity, friendship or kinship
 
 A more general definition is introduced in
 \citep{cosciaClassificationCommunityDiscovery2011} to create an
-underlying concept generalizing all variants found in the literature. In
-link-based methods, a direct connection is considered as a particular
-and very important kind of action, while newer methods also consider
-content or interest overlap.
+underlying concept generalizing all variants found in the literature
+(+\citet{thm:community}). In link-based methods, a direct connection is
+considered as a particular and very important kind of action, while
+newer methods also consider content or interest overlap.
 
-\protect\hypertarget{thm:id}{}{Community}
-
-\begin{quote}
+\begin{description}
+\tightlist
+\item[\protect\hypertarget{thm:community}{}{Community}]
 A community in a complex network is a set of entities that share some
 closely correlated sets of actions with the other entities of the
 community.
-\end{quote}
+\end{description}
 
 \hypertarget{dynamic-communities}{%
 \subsubsection{Dynamic Communities}\label{dynamic-communities}}
