@@ -576,10 +576,46 @@ The Louvain method is a popular algorithm to detect communities in large network
   * @jiaCommunityGANCommunityDetection2019
     
     * Has some info in related work to extend on graph representation learning
+    * Solves issue of detecting overlapping communities:
+      * K-means and Gaussian Mixture Model cant do that
+    * Proposes CommunityGAN:
+      * Solves graph representation learning and community detection jointly
+      * Embeddings indicate the membership strength of vertices to communities
+      * Make use of Affiliation Graph Model AGM for community (detection) assignment
+      * Uses GAN structure to:
+        * Generate most likely vertext subset $s$ to compose a specified kind of motif
+          * "Graph AGM" motif generation model
+        * Discriminate whether vertex subset $s$ is a real motif or not
+        * Motif = in this case is an $n$-clique
+      * Study motif distribution among ground truth communities to analyse how they impact quality of detected communities
+    * Methodology:
+      * Define a method to efficiently random walk such cliques / motifs
+      * Generator tries to learn $p_{true}(m|v_c)$  as preference distribution of motifs containing $v_c$ vs all the motifs
+        * To be able to generate most likely motifs (vertex subsets) similar to real motifs covering $v_c$
+      * Discriminator tries to learn probability of a vertex subset being a real motif
+        * Tries to discriminate between ground truth motifs and not
+      * AGM: 
+        * Can define a measure to check whether two nodes are affiliated through a specific (or any) community
+        * Usually applied for edge generation
+        * In this case, extended to motif generation (edge is a 2-clique)
+          * The affiliation is defined now in form of a motif in community
+      * Amount of communities are chosen by hyperparameter tuning
   
   * @rozemberczkiGEMSECGraphEmbedding2019
     
-    * hh
+    * Learns clustering (centers) simultaneously with computing embeddings
+    * Objective functions includes: 
+      * Term to embed around the origin
+      * Term to force nodes with similar sampled neighborhoods to be embedded close
+      * Term to force nodes to be close to the nearest cluster (weighted by clustering coefficient)
+    * Weights are randomly initialized
+    * Clustering coefficient is annealed (changes overtime)
+    * Uses negative sampling to avoid huge cost of softmax
+    * Adds regularizer "social network cost" to optimize for homophiliy
+      * weighs distance in latent space by neighborhood overlap
+      * Makes algorithm more robust to changes in hyperparameters
+    * Evaluate cluster quality by modularity
+    * Evaluate embeddings by genre prediction / recommendation
   
   * @yangGraphClusteringDynamic2017
     
@@ -688,13 +724,9 @@ The Louvain method is a popular algorithm to detect communities in large network
 * General Strategy:
   
   * Represent
-  
   * Recluster
-    
     * Construct a new graph using deep based distances, and use Link Based CD
-    
     * Cluster with a clustering algorithm
-    
     * 
 
 ## Graph Representation Learning
