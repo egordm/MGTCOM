@@ -1,6 +1,20 @@
 ## Link-based Approaches
 
+% Goals:
+% 
+% * Describe the intuition of link based approaches
+% * Cover the current state of the are
+% * Cover different approaches and problems that may arise within the link based approaches
+% * Start with community detection
+% * Expand by covering different **strategies to tackle tracking instability**
+
+
+
 ### Community Detection
+
+% 
+
+
 
 #### Modularity
 

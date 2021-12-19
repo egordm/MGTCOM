@@ -1,4 +1,4 @@
-# Introduction and Backgrounds
+# Introduction and Background
 
 Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in the real-world using Network and Graph Theory. These social structures usually include social media networks, economic transaction networks, knowledge networks, and disease transmission networks.
 

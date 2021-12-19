@@ -1,5 +1,5 @@
 
-# Introduction and Backgrounds
+# Introduction and Background
 
 Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in the real-world using Network and Graph Theory. These social structures usually include social media networks, economic transaction networks, knowledge networks, and disease transmission networks.
 
@@ -35,7 +35,7 @@ Task of community detection is often compared to clustering and graph clustering
 
 The problem of dynamic community detection was noticed quite early on within the SNA community and a considerable amount of research has been made in order to provide a comprehensive analysis of the network. While the said research was mostly focused on the discovery of communities using topologically-based features and node connectivity, the covered methods did research the limitations and challenges posed by a temporal context.
 
-In recent years, significant developments have been made in the space of deep learning. Mainly in the development of new deep learning methods capable of learning graph-structured data [@bronsteinGeometricDeepLearning2017; @hamiltonRepresentationLearningGraphs2018; @kipfSemiSupervisedClassificationGraph2017] which is fundamental for SNA. Because of this, various problems within the field have been revisited, including community detection problems. The approaches have been expanded by incorporation of more complex features, solving the problems concerning multi-modality, and introduction of unsupervised learning.
+In recent years, significant developments have been made in the space of deep learning. Mainly in the development of new deep learning methods capable of learning graph-structured data [@bronsteinGeometricDeepLearning2017; @hamiltonRepresentationLearningGraphs2018; @kipfSemiSupervisedClassificationGraph2017] which is fundamental for SNA. Because of this, various problems within the field have been revisited, including community detection problems. The approaches have been expanded by incorporation of more complex features, solving the problems concerning multi-modality, and the introduction of unsupervised learning.
 
 Despite this resurgence, the DCD problem has received little attention. Though a few efforts have been made to incorporate the deep learning methods by introducing content-based similarity dynamic, the definition of unified constraints for end-to-end learning, and usage of graph representation-based CD algorithms within a temporal context, the current state of the art leaves a lot to be desired.
 
@@ -118,11 +118,23 @@ Newer approaches introduce the possibility for the fusion of different data type
 
 
 
-
-
 ## Link-based Approaches
 
+% Goals:
+% 
+% * Describe the intuition of link based approaches
+% * Cover the current state of the are
+% * Cover different approaches and problems that may arise within the link based approaches
+% * Start with community detection
+% * Expand by covering different **strategies to tackle tracking instability**
+
+
+
 ### Community Detection
+
+% 
+
+
 
 #### Modularity
 

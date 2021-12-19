@@ -16,5 +16,3 @@ Newer approaches introduce the possibility for the fusion of different data type
 %   * Talk in more detail about more performant algorithms which we plan to use
 
 
-
-
