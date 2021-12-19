@@ -168,25 +168,24 @@ $$
 
 #### Louvain Method
 
-% The Louvain method is a popular algorithm to detect communities in large networks. It is a hierarchical clustering algorithm, as it recursively merges communities into single community and further executes modularity clustering on this condensed network.
-% 
-% @blondelFastUnfoldingCommunities2008
-% 
-% * Common algorithm for maximizing modularity
 % * Hierarchical algorithm
 %   * Starts with each node assigned to it’s own community
-%   * First small communities are found
-%     * For each node i change in modularity is calculated for removing i from its own community
-%     * And adding it to a neighbor community
-%     * Modularity change can be calculated incrementally (local)
+%     * First small communities are found
+%       * For each node i change in modularity is calculated for removing i from its own community
+%       * And adding it to a neighbor community
+%       * Modularity change can be calculated incrementally (local)
 %   * Then produces condensed graph by merging communities (their nodes) into a single node
-%   * Repeats this process
+%     * Repeats this process
+% 
 % * Optimizes for modularity
 %   * Is a heuristic algorithm
 %     * Since going through all possible assignments maximizing modularity is impractical
-% * TODO: Should I go deeper into calculation?
 
+Finding an optimal partition of a graph into communities is an NP-hard problem. This is because, while calculating the modularity score can be done in a timely manner, still all possible node to community assignments have to be considered. Therefore usually heuristic based methods such as Louvain method are usually used.
 
+Louvain method [@blondelFastUnfoldingCommunities2008] is a heuristic based hierarchical clustering algorithm. It starts by assigning each node in the graph to its own community. Then it merges these communities by checking for each node the change in modularity score produced by assigning it to a neighbor community (based on existence of a connection). Once the optimal merges are preformed, the resulting communities are grouped into single nodes and the process is repeated. 
+
+Due to the fact that modularity changes can be computed incrementally, the complexity of this method is $O(n \log n)$. Additionally due to flexibility of the modularity measure, it allows detecting communities in graphs with weighted edges.
 
 
 

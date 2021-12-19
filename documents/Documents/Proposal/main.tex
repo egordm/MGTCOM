@@ -524,7 +524,6 @@ the delta difference by how much the given graph exceeds a random graph
 as expected connectivity is determined by a random rewiring graph.
 Because, intra-community pairs are weighted lower than inter-community
 pairs the score can vary.
-\(Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}*{\text{Expected Connectivity}}\right] \overbrace{S*{v r} S_{w r}}^{\text{Community Similarity}}\)
 
 \[
 Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}_{\text{Expected Connectivity}}\right] \overbrace{S_{v r} S_{w r}}^{\text{Community Similarity}}
@@ -534,6 +533,26 @@ Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}
 
 \hypertarget{louvain-method}{%
 \paragraph{Louvain Method}\label{louvain-method}}
+
+Finding an optimal partition of a graph into communities is an NP-hard
+problem. This is because, while calculating the modularity score can be
+done in a timely manner, still all possible node to community
+assignments have to be considered. Therefore usually heuristic based
+methods such as Louvain method are usually used.
+
+Louvain method \citep{blondelFastUnfoldingCommunities2008} is a
+heuristic based hierarchical clustering algorithm. It starts by
+assigning each node in the graph to its own community. Then it merges
+these communities by checking for each node the change in modularity
+score produced by assigning it to a neighbor community (based on
+existence of a connection). Once the optimal merges are preformed, the
+resulting communities are grouped into single nodes and the process is
+repeated.
+
+Due to the fact that modularity changes can be computed incrementally,
+the complexity of this method is \(O(n \log n)\). Additionally due to
+flexibility of the modularity measure, it allows detecting communities
+in graphs with weighted edges.
 
 \hypertarget{label-propagation-algorithm}{%
 \paragraph{Label Propagation
