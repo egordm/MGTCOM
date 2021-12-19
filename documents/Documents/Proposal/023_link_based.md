@@ -3,18 +3,30 @@
 % Goals:
 % 
 % * Describe the intuition of link based approaches
+%   * Inter-connection density vs intra connection density
 % * Cover the current state of the are
 % * Cover different approaches and problems that may arise within the link based approaches
 % * Start with community detection
 % * Expand by covering different **strategies to tackle tracking instability**
 
+Link-based approaches to (Dynamic) Community Detection rely on connection strength to find communities within the network. The main criteria for communities is the assumed property that intra-group connections are denser than the inter-group ones. The networks are partitioned is such a way, that optimizes for a defined measure characterizing this property. 
+
+We start this section by covering the fundamentals of link-based community detection by introducing commonly used community quality measures and algorithms for optimizing them. Next we introduce link-based DCD problem and the unique challenges that arise as opposed to CD. Then we proceed to covering the current state of the art by describing the related works, their solutions to the said challenges and possible extensions to the problem.
+
 
 
 ### Community Detection
 
-% 
+% * Talk about basic and common CD techniques
+% * Introduce notion of modularity
 
+Different metrics exist quantifying the characteristic of *homophily* over edge strength. The most common metric is Modularity which measures the strength of division of a network into modules (communities). It's popularity stems from the fact that it is bounded and cheap to compute, though it has other problems such as resolution limit (making detecting smaller communities difficult). Other metrics that can be found in the literature include but are not limited to:
 
+* Conductance: the percentage of edges that cross the cluster border
+* Expansion: the number of edges that cross the community border
+* Internal Density: the ratio of edges within the cluster with respect to all possible edges
+* Cut Ratio and Normalized Cut: the fraction of all possible edges leaving the cluster
+* Maximum/Average ODF: the maximum/average fraction of nodes’ edges crossing the cluster border
 
 #### Modularity
 
@@ -26,12 +38,23 @@
 %     * Based on node degrees pairwise expected number of edges can be computed
 %   * It is positive if number of edges within a group exceeds expected number on basis of chance
 
+Modularity directly measures the density of links inside a graph and is therefore computed on communities (sets of nodes) individually by weighing edges based on community similarity (or exact matching). Calculation of modularity is done by aggregating for each pair of nodes the difference between the expected connectivity (amount of edges between the nodes) and the actual connectivity (existence of an edge) given their degrees (+@eq:modularity). The final result represents the delta difference by how much the given graph exceeds a random graph as expected connectivity is determined by a random rewiring graph. Because, intra-community pairs are weighted lower than inter-community pairs the score can vary. 
+
+$$
+Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}_{\text{Expected Connectivity}}\right] \overbrace{S_{v r} S_{w r}}^{\text{Community Similarity}}
+$$
+
+{#eq:modularity}
+
+
+
 #### Louvain Method
 
 % The Louvain method is a popular algorithm to detect communities in large networks. It is a hierarchical clustering algorithm, as it recursively merges communities into single community and further executes modularity clustering on this condensed network.
 % 
 % @blondelFastUnfoldingCommunities2008
 % 
+% * Common algorithm for maximizing modularity
 % * Hierarchical algorithm
 %   * Starts with each node assigned to it’s own community
 %   * First small communities are found
@@ -44,6 +67,8 @@
 %   * Is a heuristic algorithm
 %     * Since going through all possible assignments maximizing modularity is impractical
 % * TODO: Should I go deeper into calculation?
+
+
 
 
 
