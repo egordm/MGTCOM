@@ -139,7 +139,12 @@ Newer approaches introduce the possibility for the fusion of different data type
 #### Modularity
 
 % * Measures the density of links inside communities compared to links between communities
-% * Range [-1/2, 1]
+% * Value: Calculated over a set of nodes
+%   * Ranges between [-1/2, 1]
+%   * expected number of edges in computed using a configuration model concept
+%     * Edges are split into two stubs and each is randomly rewired with any other stub
+%     * Based on node degrees pairwise expected number of edges can be computed
+%   * It is positive if number of edges within a group exceeds expected number on basis of chance
 
 #### Louvain Method
 
