@@ -155,6 +155,7 @@ Different metrics exist quantifying the characteristic of *homophily* over edge 
 %     * Edges are split into two stubs and each is randomly rewired with any other stub
 %     * Based on node degrees pairwise expected number of edges can be computed
 %   * It is positive if number of edges within a group exceeds expected number on basis of chance
+%   * [Explanations of terms in equations](https://latex.org/forum/viewtopic.php?t=11318)
 
 Modularity directly measures the density of links inside a graph and is therefore computed on communities (sets of nodes) individually by weighing edges based on community similarity (or exact matching). Calculation of modularity is done by aggregating for each pair of nodes the difference between the expected connectivity (amount of edges between the nodes) and the actual connectivity (existence of an edge) given their degrees (+@eq:modularity). The final result represents the delta difference by how much the given graph exceeds a random graph as expected connectivity is determined by a random rewiring graph. Because, intra-community pairs are weighted lower than inter-community pairs the score can vary. 
 
@@ -192,70 +193,105 @@ Due to the fact that modularity changes can be computed incrementally, the compl
 #### Label Propagation algorithm
 
 % * Algorithm to find communities in graph (very fast)
-%   * Uses only network structure as guide
-%   * Doesn’t require any priors (metrics)
-%   * Intuition:
-%     * Single label quickly becomes dominant in a group of densely connected nodes
-%     * But these labels have trouble crossing sparsely connected regions
-%     * Nodes that end up with same label can be considered part of same community
-%   * Algorithm:
-%     * Initialize each node to their own label
-%     * Propagate the labels, per iteration:
-%       * Each node updates its label to one that majority of its neighbors belong
-%       * Ties are broken deterministically
-%     * Stops when convergence is reached, or max iter
-%   * Preliminary solution can be assigned before run
+% * Uses only network structure as guide
+% * Doesn’t require any priors (metrics)
+% * Intuition:
+%   * Single label quickly becomes dominant in a group of densely connected nodes
+%   * But these labels have trouble crossing sparsely connected regions
+%   * Nodes that end up with same label can be considered part of same community
+% * Algorithm:
+%   * Initialize each node to their own label
+%   * Propagate the labels, per iteration:
+%     * Each node updates its label to one that majority of its neighbors belong
+%     * Ties are broken deterministically
+%   * Stops when convergence is reached, or max iter
+% * Preliminary solution can be assigned before run
+
+Another way to sidestep the complexity issue is using the Label Propagation algorithm as it uses the network structure directly to define partitions and doesn't require any priors (quality metrics). The intuition for Label Propagation algorithm is as follows: When propagating a label through connections in the network, a single label quickly becomes dominant within a group of densely connected nodes, but these labels usually have trouble crossing sparsely connected regions.
+
+The algorithm starts by assigning each node their own label. After that, for each iteration, each node updates its label to the majority label among its neighbors where ties are broken deterministically. The algorithm stops after a fixed amount of iterations or once it has converged. An important feature of this algorithm is that a preliminary solution can be assigned before each run, therefore only updating existing membership assignments.
 
 
 
 ### Dynamic Community Detection
 
+% * Expand by covering different **strategies to tackle tracking instability**
+% * Extension to Community Detection
+%   * Adds community tracking to the equation
+%   * Instability of community detection methods becomes a problem (tracking relies on their consistency)
+% * Community Drift: 
+%   * Caused by relying on the previously found communities
+%   * Can cause avalanche of wrong detection
+
+Dynamic Community Detection can be seen as an extension to community detection by addition of Community Tracking task. Tracking relies on the coherency and stability of found communities to define their evolution through the time. The said properties are not be taken for granted and introduce new challenges when designing DCD methods. The main issue is in fact that they are competitive with each-other causing a trade-off between community coherency/quality and community temporal stability.
+
+Various strategies dealing with this trade-off are categorized by @rossettiCommunityDiscoveryDynamic2018 and @dakicheTrackingCommunityEvolution2019 where authors reach a consensus over three main groups. In the following sections we briefly introduce these strategies and describe the current state of the art in similar order. 
+
 #### Independent Community Detection and Matching
 
-% * (Instant Optimal Communities Discovery)
-%   * Works in two stages:
-%     * CD methods are applied directly to each snapshot (identify stage)
-%     * Then the communities are matched between the snapshots (match stage)
-%   * Advantages:
-%     * Use of unmodified CD algorithms (built on top of exisiting work)
-%     * Highly parallelizable
-%   * Disadvantage:
-%     * Instability of community detection algorithms (may give **very** different results if network changes)
-%     * Difficult to distinguish between instability of algorithm and evolution of the network
-% * @wangCommunityEvolutionSocial2008 (core nodes / leader nodes)
-%   * Circumvents instability issue by studying most stable part of communities (community core nodes)
-%   * Datasets:
-%     * enron
-%     * imdb
-%     * caida
-%     * apache
-%   * Observations:
-%     * The social network scale inflates when it evolves
-%     * Members change dramatically and only a small portion exists stably
-%       * Therefore only a few can be relied on
-%   * Introduce algorithm CommTracker
-%     * Relies heavily on core nodes
-%     * Example: co-authorship community where core nodes represent famous professors
-%     * Core Node Detection Algorithm
-%       * Each node evaluates centrality of the nodes linked to it
-%       * If a node’s weight is higher than it’s neighbors - then its centrality is increased and neighbors decreased
-%         * The change value is set as difference is weight
-%       * Nodes with non-negative centrality are core nodes
-%     * Core-based Algorithm to track communities
-%       * Define a set of rules based on presence of core nodes
-%       * To detect the evolu
-% * @greeneTrackingEvolutionCommunities2010 (similarity metric based - quality function)
-%   * Use quality funciton to quantify similarity between communities
-%   * Jaccard Similarity
-%   * MOSES: for CD
-% * @sunMatrixBasedCommunity2015 ()
-%   * Louvain algorithm for CD
-%   * Use correlation matrix for community matching
-%     * relation between t and t+1
-%   * Defined rules to detect evolution events based on matrix
-% * @rossettiANGELEfficientEffective2020
+% * Works in two stages:
+%   * CD methods are applied directly to each snapshot (identify stage)
+%   * Then the communities are matched between the snapshots (match stage)
+% * Advantages:
+%   * Use of unmodified CD algorithms (built on top of exisiting work)
+%   * Highly parallelizable
+% * Disadvantage:
+%   * Instability of community detection algorithms (may give **very** different results if network changes)
+%   * Difficult to distinguish between instability of algorithm and evolution of the network
+
+Also referred to as the two stage approach. Works by splitting the DCD task in two stages. The first stage applies CD directly to every snapshot of the network. Followed by the second stage matching the detected communities between the subsequent snapshots.
+
+The advantages of this approach include the fact that it allows for use of mostly unmodified CD algorithms for the first step and that it is highly parallelizable as both detection and matching steps can be applied to each snapshot independently. The main disadvantage is the instability of underlying CD algorithms which may disrupt the community matching process. Many CD methods may give a drastically different results in response to slight changes in the network. During the matching, it becomes difficult to distinguish between this algorithm instability and the evolution of the network.
 
 
+
+% @wangCommunityEvolutionSocial2008 (core nodes / leader nodes)
+% 
+% * Circumvents instability issue by studying most stable part of communities (community core nodes)
+% * Observations:
+%   * The social network scale inflates when it evolves
+%   * Members change dramatically and only a small portion exists stably
+%     * Therefore only a few can be relied on
+% * Introduce algorithm CommTracker
+%   * Relies heavily on core nodes
+%   * Example: co-authorship community where core nodes represent famous professors
+%   * Core Node Detection Algorithm
+%     * Each node evaluates centrality of the nodes linked to it
+%     * If a node’s weight is higher than it’s neighbors - then its centrality is increased and neighbors decreased
+%       * The change value is set as difference is weight
+%     * Nodes with non-negative centrality are core nodes
+%   * Core-based Algorithm to track communities
+%     * Define a set of rules based on presence of core nodes
+
+In @wangCommunityEvolutionSocial2008 the authors circumvent this instability issue by looking at most stable part of the communities, namely core/leader nodes. In their research they observe that in various datasets most of the nodes change dramatically while only a small portion of the network persists stably. To exploit this feature, algorithm CommTracker is introduced which first detects the said core nodes, and then defines rules to both extract communities as well as their evolutional events. The community members are assigned based on their connectivity relative to core nodes.
+
+
+
+%  @sunMatrixBasedCommunity2015
+% 
+% * Louvain algorithm for CD
+% * Use correlation matrix for community matching
+%   * relation between t and t+1
+% * Defined rules to detect evolution events based on matrix
+% * Read bit more about it? Though it seems to be overly focused on evolution steps
+
+
+
+
+
+% @rossettiANGELEfficientEffective2020
+% 
+% * Detects overlapping communities 
+% * Mainly improves computational complexity
+% * Use label propagation to extract overlapping fine grained communities
+%   * Very fast and has good quality
+%   * Runs label propagation for each node on the graph without said node 
+%   * Multiple communities are determined by looking at resulting communities of nodes neighbors
+%   * These communities are aggregated in a global list
+% * The resulting communities are merged into larger ones
+%   * By checking if their overlap exceeds a threshold
+
+@rossettiANGELEfficientEffective2020 proposes a way to detect overlapping communities in dynamic networks. A more robust two phase community detection method (ANGEL) is proposed to ensure stability of the found communities. The first phase, extracts and aggregates local communities for each node by applying Label Propagation on their Ego-Graph (graph with the said node removed). Because the found communities are biased due to a partial view they are merged in the second step based on their overlap yielding more stable communities with possibility of overlap. During the matching for each snapshot a step forward and backwards in time is considered where community splits and merges are detected by reusing the matching criteria of the second phase of the CD step.
 
 #### Dependent Community Detection
 
