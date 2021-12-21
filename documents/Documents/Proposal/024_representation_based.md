@@ -1,16 +1,22 @@
 ## Representation-based Approaches
 
-% * Work based on similar as link-based methods
-%   * Based on the idea of homogenity (connected nodes are similar)
+% * Work similarly as link-based methods
+%   * Based on the idea of homophily (connected nodes are similar)
 % * Instead of directly modelling based on connection
 %   * They learn an intermediate representation
 %   * Benefits is that it solves non-linearity problem real-world networks have
 %   * Representations are more robust against noise
 % * The representations are beneficial because
-%   * They can encode auxilary objectives
-%   * Multimodal features such as content
+%   * They can encode auxiliary objectives
+%   * Multi-modal features such as content
 %   * Network (meta) structure and Temporal dimension
 %   * Are naturally easy to compute similarity on
+
+The main difference between Representation-based approaches and link-based approaches is the fact that they usually don't directly model the network based on connections. Instead they learn an intermediate representation of the graph or its components to which CD detection can be applied to. While also relying on the idea of *homophily*, most of methods define additional objectives to improve community quality.
+
+The main reasoning for this is the fact that real-world networks are non-linear, meaning that there may  be no connections when then make sense and vice versa. By using deep neural networks to learn these embeddings one can address such non-linearity as they are in general very robust against noise. Other notable benefits to using representation-based approaches include the fact that they compress the data efficiently as real-world networks are very sparse. They can also represent multi-modal features, network (meta) structure and temporal dimension by defining them all in a compatible similarity space or learning mappings to this space. Finally, representations are naturally easy to compute similarity on.
+
+In this section we describe representation based approaches by first covering a number of works on CD and how their approaches can be characterized. Afterwards we cover a number of papers that extend these ideas to the DCD problem.
 
 
 
@@ -18,9 +24,11 @@
 
 #### Affiliation Graph Networks
 
+% @yangCommunityAffiliationGraphModel2012
+% 
 % AGM: Affiliation Graph Model: a generative model $B(V, C, M, \{p_c\})$ for graphs
 % 
-% * $V$ vertices, $C$ communties, $M$ community memberships,
+% * $V$ vertices, $C$ communities, $M$ community memberships,
 % * ${p_c}$ model parameters (probability matrix) representing connection probabilities
 % * Can model variety of community structures: (all have distinct characteristics in M)
 %   * Non-overlapping, Overlapping and hierarchical
@@ -40,7 +48,7 @@
 
 
 
-#### Proposed Community Detection Techniques
+#### Graph Augmentation
 
 % * @kangCommunityReinforcementEffective2021
 %   * Present a **Community Reinforcement** approach
@@ -95,6 +103,8 @@
 %   * Communities are from Hashtag graphs which help encode structural / content-based information of the tweets in context of other tweets
 
 
+
+#### Multi-objective optimization
 
 % * @rozemberczkiGEMSECGraphEmbedding2019
 %   * Learns clustering (centers) simultaneously with computing embeddings
@@ -205,6 +215,8 @@
 %   * Use quality measures to establish quality of results
 
 
+
+#### Multi-objective optimization
 
 % * @wangEvolutionaryAutoencoderDynamic2020
 %   * Approach is similar to to @maCommunityawareDynamicNetwork2020

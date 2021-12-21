@@ -558,29 +558,205 @@ in graphs with weighted edges.
 \paragraph{Label Propagation
 algorithm}\label{label-propagation-algorithm}}
 
+Another way to sidestep the complexity issue is using the Label
+Propagation algorithm as it uses the network structure directly to
+define partitions and doesn't require any priors (quality metrics). The
+intuition for Label Propagation algorithm is as follows: When
+propagating a label through connections in the network, a single label
+quickly becomes dominant within a group of densely connected nodes, but
+these labels usually have trouble crossing sparsely connected regions.
+
+The algorithm starts by assigning each node their own label. After that,
+for each iteration, each node updates its label to the majority label
+among its neighbors where ties are broken deterministically. The
+algorithm stops after a fixed amount of iterations or once it has
+converged. An important feature of this algorithm is that a preliminary
+solution can be assigned before each run, therefore only updating
+existing membership assignments.
+
 \hypertarget{dynamic-community-detection}{%
 \subsubsection{Dynamic Community
 Detection}\label{dynamic-community-detection}}
+
+Dynamic Community Detection can be seen as an extension to community
+detection by addition of Community Tracking task. Tracking relies on the
+coherency and stability of found communities to define their evolution
+through the time. The said properties are not be taken for granted and
+introduce new challenges when designing DCD methods. The main issue is
+in fact that they are competitive with each-other causing a trade-off
+between community coherency/quality and community temporal stability.
+
+Various strategies dealing with this trade-off are categorized by
+\citet{rossettiCommunityDiscoveryDynamic2018} and
+\citet{dakicheTrackingCommunityEvolution2019} where authors reach a
+consensus over three main groups. In the following sections we briefly
+introduce these strategies and describe the current state of the art in
+similar order.
 
 \hypertarget{independent-community-detection-and-matching}{%
 \paragraph{Independent Community Detection and
 Matching}\label{independent-community-detection-and-matching}}
 
+Also referred to as the two stage approach. Works by splitting the DCD
+task in two stages. The first stage applies CD directly to every
+snapshot of the network. Followed by the second stage matching the
+detected communities between the subsequent snapshots.
+
+The advantages of this approach include the fact that it allows for use
+of mostly unmodified CD algorithms for the first step and that it is
+highly parallelizable as both detection and matching steps can be
+applied to each snapshot independently. The main disadvantage is the
+instability of underlying CD algorithms which may disrupt the community
+matching process. Many CD methods may give a drastically different
+results in response to slight changes in the network. During the
+matching, it becomes difficult to distinguish between this algorithm
+instability and the evolution of the network.
+
+In \citet{wangCommunityEvolutionSocial2008} the authors circumvent this
+instability issue by looking at most stable part of the communities,
+namely core/leader nodes. In their research they observe that in various
+datasets most of the nodes change dramatically while only a small
+portion of the network persists stably. To exploit this feature,
+algorithm CommTracker is introduced which first detects the said core
+nodes, and then defines rules to both extract communities as well as
+their evolutional events. The community members are assigned based on
+their connectivity relative to core nodes.
+
+\citet{rossettiANGELEfficientEffective2020} proposes a way to detect
+overlapping communities in dynamic networks. A more robust two phase
+community detection method (ANGEL) is proposed to ensure stability of
+the found communities. The first phase, extracts and aggregates local
+communities for each node by applying Label Propagation on their
+Ego-Graph (graph with the said node removed). Because the found
+communities are biased due to a partial view of the network, they are
+merged in the second step based on their overlap yielding more stable
+communities with possibility of overlap. During the matching for each
+snapshot a step forward and backwards in time is considered where
+community splits and merges are detected by reusing the matching
+criteria of the second phase of the CD step.
+
 \hypertarget{dependent-community-detection}{%
 \paragraph{Dependent Community
 Detection}\label{dependent-community-detection}}
+
+Dependent Community Detection strategy works detecting communities in
+each snapshot based on the communities found in the previous snapshots.
+This approach introduces temporal smoothness due to the fact that the
+previous solution is reused making the matching process obsolete. Though
+as part of the described trade-off it can impact long term coherence of
+the dynamic communities. Mainly, because each step introduces a certain
+amount of error into the results (community drift) which may get
+amplified with in further iterations (error accumulation). Another
+disadvantage is the fact that the strategy has limited possibilities of
+parallelization due to its dependent nature.
+
+In order to lessen the complexity of continuous re-detection of the
+communities some algorithms process the changes incrementally by
+limiting the change to a local neighborhood. While this approach has
+many benefits, it is important to note that these algorithms face a
+problem where only applying local changes can cause communities to drift
+toward invalid ones in global context.
+
+\citet{heFastAlgorithmCommunity2015} introduce an efficient algorithm by
+modifying the Louvain method algorithm. Based on the observation that
+between consecutive timesteps only a fraction of connections change and
+do not affect communities dramatically, they argue that if all community
+nodes remain unchanged, the community also remains unchanged. With this
+in mind, they define make distinction between two types of nodes, ones
+that change connection in a snapshot transition and ones that do not.
+The former have to be recomputed, while the latter maintain their
+community label. The nodes that maintain their community are merged into
+community nodes with edges to other community nodes and changed nodes
+weighted proportionally to their real connectivity (amount of edges when
+ungrouped). This simplified graph is passed to the Louvain method
+algorithm for community detection. By reusing the community assignments
+temporal smoothness is maintained and due to incremental nature of this
+algorithm the overall complexity remains low.
+
+\citet{guoDynamicCommunityDetection2016} envision the target network as
+an adaptive dynamical system, where each node interacts with its
+neighbors. The interaction will change the distances among nodes, while
+the distances will affect the interactions. The intuition is that nodes
+sharing the same community move together and the nodes in different
+communities keep far away from each other. This is modeled by defining
+the so-called Attractor algorithm which consists of three interaction
+patterns that describe how node connection strength is influenced by
+neighboring nodes. The edge weights are initialized using Jaccard
+distance and the propagation is run until convergence. The communities
+can be extracted by thresholding on edge weight/distance. Thereafter,
+all changes are treated as network disturbances. The disturbance can be
+limited to a certain area using a disturbance factor which defines a
+bound on the possible propagation.
+
+More recently the \citet{yinMultiobjectiveEvolutionaryClustering2021}
+have proposed an evolutionary algorithm by looking at the DCD from an
+Evolutionary Clustering Perspective. They detect community structure at
+the current time under guidance of one obtained immediately in the past
+by simultaneously optimizing for community quality score (modularity)
+and community similarity between subsequent time steps (NMI). In the
+methodology, a way is proposed to encode a graph efficiently into a
+genetic sequence. Additionally, new mutation and crossover operators are
+proposed which maximize either of the two objectives. By using a local
+search algorithm, building diverse initial population and selecting for
+dominant candidates the communities maximizing both objectives are
+obtained.
 
 \hypertarget{simultaneous-community-detection}{%
 \paragraph{Simultaneous community
 detection}\label{simultaneous-community-detection}}
 
-\hypertarget{dynamic-community-detection-on-temporal-networks-evolution}{%
-\paragraph{Dynamic Community Detection on Temporal Networks
-(Evolution)}\label{dynamic-community-detection-on-temporal-networks-evolution}}
+The final strategy we consider is one that sidesteps the matching issue
+by considering all snapshots of the dynamic network at one. This is done
+by flattening the network in the temporal dimension and coupling edges
+between the same nodes at different timesteps. These approaches usually
+don't suffer from instability or community drift. The disadvantages
+include that the standard principle of a unique partition for each time
+step can not be applied, limiting the amount of possible algorithms.
+Handling real time changes to the graph is also usually not considered.
+
+\citet{muchaCommunityStructureTimeDependent2009} adopt a simple yet
+powerful solution to this problem by connecting identical nodes between
+different time steps within the unified network. On this network they
+apply a modified Louvain method algorithm to extract the communities
+whose members can be split over different timesteps.
+
+\citet{ghasemianDetectabilityThresholdsOptimal2016} apply stochastic
+block model based approach. They make a distinction between two edge
+types: (i) spatial edges (edges between neighbors) and (ii) temporal
+edges (edges connection nodes in different timesteps). Using this
+distinction, they define a Belief Propagation equations to learn
+marginal probabilities of node labels (\(\mu^i_s(t)\)) over time.
+Additionally in their research they introduce a way to derive a limit to
+the detectability of communities. This is, because some communities may
+not be detectable as their probability nears that of chance.
 
 \hypertarget{representation-based-approaches}{%
 \subsection{Representation-based
 Approaches}\label{representation-based-approaches}}
+
+The main difference between Representation-based approaches and
+link-based approaches is the fact that they usually don't directly model
+the network based on connections. Instead they learn an intermediate
+representation of the graph or its components to which CD detection can
+be applied to. While also relying on the idea of \emph{homophily}, most
+of methods define additional objectives to improve community quality.
+
+The main reasoning for this is the fact that real-world networks are
+non-linear, meaning that there may be no connections when then make
+sense and vice versa. By using deep neural networks to learn these
+embeddings one can address such non-linearity as they are in general
+very robust against noise. Other notable benefits to using
+representation-based approaches include the fact that they compress the
+data efficiently as real-world networks are very sparse. They can also
+represent multi-modal features, network (meta) structure and temporal
+dimension by defining them all in a compatible similarity space or
+learning mappings to this space. Finally, representations are naturally
+easy to compute similarity on.
+
+In this section we describe representation based approaches by first
+covering a number of works on CD and how their approaches can be
+characterized. Afterwards we cover a number of papers that extend these
+ideas to the DCD problem.
 
 \hypertarget{community-detection-2}{%
 \subsubsection{Community Detection}\label{community-detection-2}}
@@ -589,9 +765,20 @@ Approaches}\label{representation-based-approaches}}
 \paragraph{Affiliation Graph
 Networks}\label{affiliation-graph-networks}}
 
+\hypertarget{graph-augmentation}{%
+\paragraph{Graph Augmentation}\label{graph-augmentation}}
+
+\hypertarget{multi-objective-optimization}{%
+\paragraph{Multi-objective
+optimization}\label{multi-objective-optimization}}
+
 \hypertarget{dynamic-community-detection-1}{%
 \subsubsection{Dynamic Community
 Detection}\label{dynamic-community-detection-1}}
+
+\hypertarget{multi-objective-optimization-1}{%
+\paragraph{Multi-objective
+optimization}\label{multi-objective-optimization-1}}
 
 \hypertarget{evaluation}{%
 \subsection{Evaluation}\label{evaluation}}

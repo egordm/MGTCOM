@@ -275,7 +275,3 @@ The final strategy we consider is one that sidesteps the matching issue by consi
 % TODO: I promised some extensions in the intro. Should I add them?
 % 
 % * @liuCommunityDetectionMultiPartite2016  - Heterogenous Networks
-
-
-
-
