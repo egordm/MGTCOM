@@ -177,7 +177,6 @@ $$
 %       * Modularity change can be calculated incrementally (local)
 %   * Then produces condensed graph by merging communities (their nodes) into a single node
 %     * Repeats this process
-% 
 % * Optimizes for modularity
 %   * Is a heuristic algorithm
 %     * Since going through all possible assignments maximizing modularity is impractical
@@ -267,18 +266,6 @@ In @wangCommunityEvolutionSocial2008 the authors circumvent this instability iss
 
 
 
-%  @sunMatrixBasedCommunity2015
-% 
-% * Louvain algorithm for CD
-% * Use correlation matrix for community matching
-%   * relation between t and t+1
-% * Defined rules to detect evolution events based on matrix
-% * Read bit more about it? Though it seems to be overly focused on evolution steps
-
-
-
-
-
 % @rossettiANGELEfficientEffective2020
 % 
 % * Detects overlapping communities 
@@ -291,126 +278,125 @@ In @wangCommunityEvolutionSocial2008 the authors circumvent this instability iss
 % * The resulting communities are merged into larger ones
 %   * By checking if their overlap exceeds a threshold
 
-@rossettiANGELEfficientEffective2020 proposes a way to detect overlapping communities in dynamic networks. A more robust two phase community detection method (ANGEL) is proposed to ensure stability of the found communities. The first phase, extracts and aggregates local communities for each node by applying Label Propagation on their Ego-Graph (graph with the said node removed). Because the found communities are biased due to a partial view they are merged in the second step based on their overlap yielding more stable communities with possibility of overlap. During the matching for each snapshot a step forward and backwards in time is considered where community splits and merges are detected by reusing the matching criteria of the second phase of the CD step.
+@rossettiANGELEfficientEffective2020 proposes a way to detect overlapping communities in dynamic networks. A more robust two phase community detection method (ANGEL) is proposed to ensure stability of the found communities. The first phase, extracts and aggregates local communities for each node by applying Label Propagation on their Ego-Graph (graph with the said node removed). Because the found communities are biased due to a partial view of the network, they are merged in the second step based on their overlap yielding more stable communities with possibility of overlap. During the matching for each snapshot a step forward and backwards in time is considered where community splits and merges are detected by reusing the matching criteria of the second phase of the CD step.
 
 #### Dependent Community Detection
 
-% * Dependent Community Detection / Temporal Trade-Off Communities Discovery
-%   * Use snapshots to detect communtities
-%   * To detect communities in current snapshot, rely on communities from the previous
-%   * Advantage:
-%     * Introduces temporal smoothness (fixes the instability problem mostly)
-%     * Does not diverge from the usual CD definition (search at each timestep)
-%   * Disadvantage:
-%     * Not parallelizable
-%     * Impacts long term coherence of dynamic communtities
-%     * Each steps experience substantial drift compared to what a static algorithm would find
-% * @heFastAlgorithmCommunity2015 (modified louvain)
-%   * Modify louvain algorithm to use previous communities
-% * @sunGraphScopeParameterfreeMining2007 (mdl based)
-%   * FIrst step: apply MDL method to encode graph with min number of bits
-%   * Divide network into multiple sequential segments
-%     * Jumps between segments mark evolution over time
-%   * Incrementally initialize using previous output
-% * @gaoEvolutionaryCommunityDiscovery2016 (leader nodes)
-%   * Propose evolutionary CD algorithm based on leader nodes
-%   * Each community is a set of followers around a leader
-%   * Present an updating strategy with temp info to get initial leader nodes
-%   * Leader nodes ensure temporal smoothneess
-% * @yinMultiobjectiveEvolutionaryClustering2021
-%   * Is a genetic algorithm
-%   * Look at the problem from an Evolutionary Clustering Perspective
-%     * Evolutionary as in Evolutionary Algorithms
-%     * Goal: detect community structure at the current time under guidance of one obtained immediately in the past
-%       * Fit observed data well
-%       * And keep historical consistency
-%   * Solve major drawbacks:
-%     * Absence of error correction - which may lead to result-drifting and error accumulation
-%     * NP-hardness of modularity based community detection
-%     * If initial community structure is not accurate, or the following - this may lead to the “result drift” and “error accumulation”
-%   * Propose DYN-MODPSO
-%     * Combine traditional evolutionary clustering with particle swarm algorithm
-%     * Propose a strategy to detect initial clustering - with insight of future ones
-%     * A new way to generate diverse population of individuals
-%   * Use previous work DYN-MOGA
-%     * Which introduces Multi-Objective optimization
-%       * (Trade-off between - Both objectives are competitive)
-%       * Accuracy in current time step (CS - Community Score)
-%       * Similarity of two communities in consecutive steps (NMI - Similarity of two partitions)
-%   * Algorithm:
-%     * Initialization Phase:
-%       * De redundant random walk to initialize the initial population (with diverse individuals)
-%       * Random walk:
-%         * Used to approximate probability of two nodes being linked
-%         * Then probability is sorted and is split on (based on Q metric optimizing modularity)
-%       * Represent as binary string encoding
-%     * Search Phase:
-%       * Particle swarm optimization - preserving global historically best positions
-%         * Already given initial swarms / clusterings
-%         * Identifies best positions for different nodes - and uses swarm velocity to interpolate between them
-%       * Builds good baseline clusterings
-%     * Crossover & Mutation Phase:
-%       * Uses custom operators MICO and NBM+ to improve global convergence
-%         * Cross-over operators - combining multiple individuals (parents)
-%       * Applies specific operators to maximize NMI of CS
-%   * Results:
-%     * Seems to perform well and be fast?
+% Dependent Community Detection / Temporal Trade-Off Communities Discovery
+% 
+% * Use snapshots to detect communtities
+% * To detect communities in current snapshot, rely on communities from the previous
+% * Advantage:
+%   * Introduces temporal smoothness (fixes the instability problem mostly)
+%   * Does not diverge from the usual CD definition (search at each timestep)
+% * Disadvantage:
+%   * Not parallelizable
+%   * Impacts long term coherence of dynamic communtities
+%   * Each steps experience substantial drift compared to what a static algorithm would find
+
+Dependent Community Detection strategy works detecting communities in each snapshot based on the communities found in the previous snapshots. This approach introduces temporal smoothness due to the fact that the previous solution is reused making the matching process obsolete. Though as part of the described trade-off it can impact long term coherence of the dynamic communities. Mainly, because each step introduces a certain amount of error into the results (community drift) which may get amplified with in further iterations (error accumulation). Another disadvantage is the fact that the strategy has limited possibilities of parallelization due to its dependent nature. 
+
+In order to lessen the complexity of continuous re-detection of the communities some algorithms process the changes incrementally by limiting the change to a local neighborhood. While this approach has many benefits, it is important to note that these algorithms face a problem where only applying local changes can cause communities to drift toward invalid ones in global context. 
+
+% @heFastAlgorithmCommunity2015 (modified louvain)
+% 
+% * Modify louvain algorithm to use previous communities
+% * They start by detecting communities within the initial graph
+% * In subsequent snapshots:
+%   * Say that nodes whose edges do not change, stay in the same community
+%   * Nodes with changing edges, have to be recomputed
+%   * Unchanged nodes maintain their community and are grouped into a single node
+%   * Edge weights to changed nodes change proportionally to their connectivity to the community
+%   * Louvain method algorithm is run on the newly constructed graph
+% * Therefore introducing temporal smoothness and high efficiency
+
+@heFastAlgorithmCommunity2015 introduce an efficient algorithm by modifying the Louvain method algorithm. Based on the observation that between consecutive timesteps only a fraction of connections change and do not affect communities dramatically, they argue that if all community nodes remain unchanged, the community also remains unchanged. With this in mind, they define make distinction between two types of nodes, ones that change connection in a snapshot transition and ones that do not. The former have to be recomputed, while the latter maintain their community label. The nodes that maintain their community are merged into community nodes with edges to other community nodes and changed nodes weighted proportionally to their real connectivity (amount of edges when ungrouped). This simplified graph is passed to the Louvain method algorithm for community detection. By reusing the community assignments temporal smoothness is maintained and due to incremental nature of this algorithm the overall complexity remains low.
+
+
+
+% @guoDynamicCommunityDetection2016 (based on distance dynamics)
+% 
+% * Based on distance dynamics
+% * Define distance dynamics in form of a so called Attractor algorithm
+%   * Edge weights are initialized using Jaccard distance
+%   * Interaction patterns are defined that describe how nodes behave based on their connection to other nodes
+%   * Algorithm is run until the weights converge
+%   * By removing edges with low distance, communities can be found as connected components
+% * Increments can be treated as network disturbance
+%   * They can be limited to a certain area by a disturbance factor
+
+@guoDynamicCommunityDetection2016  envision the target network as an adaptive dynamical system, where each node interacts with its neighbors.  The interaction will change the distances among nodes, while the distances will affect the interactions. The intuition is that nodes sharing the same community move together and the nodes in different communities keep far away from each other. This is modeled by defining the so-called Attractor algorithm which consists of three interaction patterns that describe how node connection strength is influenced by neighboring nodes. The edge weights are initialized using Jaccard distance and the propagation is run until convergence. The communities can be extracted by thresholding on edge weight/distance. Thereafter, all changes are treated as network disturbances. The disturbance can be limited to a certain area using a disturbance factor which defines a bound on the possible propagation.
+
+
+
+% @yinMultiobjectiveEvolutionaryClustering2021
+% 
+% * Look at the problem from an Evolutionary Clustering Perspective
+%   * Propose a generic algorithm as in Evolutionary Algorithms
+%   * Goal: detect community structure at the current time under guidance of one obtained immediately in the past
+%     * Fit observed data well
+%     * And keep historical consistency
+%   * Combine traditional evolutionary clustering with particle swarm algorithm
+% * Solve major drawbacks:
+%   * Absence of error correction - which may lead to result-drifting and error accumulation
+%   * If initial community structure is not accurate, or the following - this may lead to the “result drift” and “error accumulation”
+% * Algorithm:
+%   * Use random walks to build a diverse initial population
+%   * Search Phase:
+%   * Uses custom operators MICO (Communtity Quality) and NBM+ (Community Consistency) to improve global convergence
+%     * Cross-over operators - combining multiple individuals (parents)
+
+
+
+More recently the @yinMultiobjectiveEvolutionaryClustering2021 have proposed an evolutionary algorithm by looking at the DCD from an Evolutionary Clustering Perspective. They detect community structure at the current time under guidance of one obtained immediately in the past by simultaneously optimizing for community quality score (modularity) and community similarity between subsequent time steps (NMI). In the methodology, a way is proposed to encode a graph efficiently into a genetic sequence. Additionally, new mutation and crossover operators are proposed which maximize either of the two objectives. By using a local search algorithm, building diverse initial population and selecting for dominant candidates the communities maximizing both objectives are obtained.
 
 
 
 #### Simultaneous community detection
 
-% * Simultaneous community detection / Cross-Time Community Discovery
-%   * Doest consider independently the different steps of the network evolution
-%   * Advantage:
-%     * Doenst suffer from instability or community drift
-%     * More potential to deal with slow evolution and local anomalies
-%   * Disadvantage:
-%     * Not based on usual principle of a unique partition with each timestep
-%     * Cant handle real time community detection
-%   * Approaches fall in categories:
-%     * Fixed Memberships, Fixed Properties
-%       * Communities can change mambers and nodes cant disappear
-%       * @aynaudMultiStepCommunityDetection2011
-%     * Fixed Membership, Dynamic Properties
-%       * Memberships of communties cant change
-%       * But they are assigned a profile based on their temporal …
-%     * Evolving Membership, Fixed Properties
-%       * Allow membership change along time
-%       * Mostly SBM approaches
-%         * properties can not change over time
-%       * @ghasemianDetectabilityThresholdsOptimal2016
-%     * Evolving Membership, Evolving Properties
-%       * Dont impose any contraints
-%       * Edges are added between existing nodes between consequent snapshots
-%       * @muchaCommunityStructureTimeDependent2009
-%         * Modify louvain
+% Simultaneous community detection / Cross-Time Community Discovery
+% 
+% * Doesnt consider independently the different steps of the network evolution
+% * Advantage:
+%   * Doenst suffer from instability or community drift
+%   * More potential to deal with slow evolution and local anomalies
+% * Disadvantage:
+%   * Not based on usual principle of a unique partition with each timestep
+%   * Cant handle real time community detection
+
+The final strategy we consider is one that sidesteps the matching issue by considering all snapshots of the dynamic network at one. This is done by flattening the network in the temporal dimension and coupling edges between the same nodes at different timesteps. These approaches usually don't suffer from instability or community drift. The disadvantages include that the standard principle of a unique partition for each time step can not be applied, limiting the amount of possible algorithms. Handling real time changes to the graph is also usually not considered.
+
+% @muchaCommunityStructureTimeDependent2009
+% 
+% * Connected identical nodes between different timesteps
+% * Then used used louvain method to detect communities
+
+@muchaCommunityStructureTimeDependent2009 adopt a simple yet powerful solution to this problem by connecting identical nodes between different time steps within the unified network. On this network they apply a modified Louvain method algorithm to extract the communities whose members can be split over different timesteps.
 
 
 
-#### Dynamic Community Detection on Temporal Networks (Evolution)
+% @ghasemianDetectabilityThresholdsOptimal2016
+% 
+% * Stochastic block model based approach
+% * Define a way to derive a limit to the detectability as function of strength of a community
+%   * Some communities are not detectable - probabliity equal to chance
+%   * Model is based on prediction of edges that are generated between the timesteps
+% * Define a community detection algorithm using Belief propagation equations
+%   * To lean marginal probablilities of node labels over time
+%   * The use two edge types spatial edges and temporal edges
+%   * Similar to spectral clustering
 
-% * Dynamic Community Detection on Temporal Networks / Online Approach
-%   * Works directly on temporal graphs
-%   * Network consists of series of changes
-%   * Algorithms are iterative
-%     * Find communties once
-%     * Then update them
-% * @zakrzewskaTrackingLocalCommunities2016 (leader nodes - rule based)
-%   * Dynamic set expandion
-%   * Indrementally update community
-%     * 1st step: initial community finding
-%     * iteration: new nodes are added
-%     * Fitness score is used to assign nodes to communtities
-% * @xieLabelRankStabilizedLabel2013 (label propagation)
-%   * LabelRankT - based on LabelRank (label propagation) algorithm
-%   * When network is updated, label of changed nodes are re-initialized
-% * @guoDynamicCommunityDetection2016 (based on distance dynamics)
-%   * Based on distance dynamics
-%   * Increments can be treated as network disturbance
-%   * Uses candidate set to pick pick ROI
-%     * Changes are made in communties
-%     * Distances are updated
+@ghasemianDetectabilityThresholdsOptimal2016 apply stochastic block model based approach. They make a distinction between two edge types: (i) spatial edges (edges between neighbors) and (ii) temporal edges (edges connection nodes in different timesteps). Using this distinction, they define a Belief Propagation equations to learn marginal probabilities of node labels ($\mu^i_s(t)$) over time. Additionally in their research they introduce a way to derive a limit to the detectability of communities. This is, because some communities may not be detectable as their probability nears that of chance.
+
+
+
+% TODO: I promised some extensions in the intro. Should I add them?
+% 
+% * @liuCommunityDetectionMultiPartite2016  - Heterogenous Networks
+
+
+
+
 
 ## Representation-based Approaches
 
