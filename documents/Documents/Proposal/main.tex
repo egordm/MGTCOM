@@ -761,9 +761,41 @@ ideas to the DCD problem.
 \hypertarget{community-detection-2}{%
 \subsubsection{Community Detection}\label{community-detection-2}}
 
-\hypertarget{affiliation-graph-networks}{%
-\paragraph{Affiliation Graph
-Networks}\label{affiliation-graph-networks}}
+\hypertarget{affiliation-graph-models}{%
+\paragraph{Affiliation Graph Models}\label{affiliation-graph-models}}
+
+While arguably not being representational by itself, Affiliation Graph
+Network (AGM) model introduced in
+\citet{yangCommunityAffiliationGraphModel2012} is very influential
+within deep learning / representation learning CD field.
+
+The AGM models a network as a bipartite graph with communities as first
+class citizens and is represented by the following equation
+\(B(V, C, M, \{p_c\})\), where \(V\) represents nodes, \(C\) set of
+communities, \(M\) node-community memberships and \(\{p_c\}\) model
+parameters (a single probability \(p_c\) per community). It can model
+non-overlapping, overlapping and hierarchical communities by defining
+rules on membership sets in \(M\). AGM can used in both generative and
+discriminative settings.
+
+The generative scenario goes as follows: Given an AGM \(F\) generate
+links between each pair of nodes exceeding a baseline probability \(p\).
+The can be done by considering that according to AGM, each pair of nodes
+in community \(A\) is connected with a probability \(p_A\). Therefore,
+the probability of two nodes having a connection is proportional to the
+amount of communities they share (which is defined in the model).
+
+The discriminative scenario is defined as: Given a graph \(G\) and ,
+find a model \(F\) that may have generated it. By assuming that the
+graph was generated using an AGM, the parameters \(M\), number of
+communities \(|C|\) and \(\{p_c\}\) have to be found. Process for
+finding such a model to the graph usually max likelihood fitting. AGM is
+relaxed to have membership strengths \(F_{uC}\), which helps to define
+probability of nodes \(u\) and \(v\) connecting through community \(C\)
+(\(P_{C}(u, v)\)), and in terms of that by themselves \(P(u, v)\). Using
+this a probability \(P(G|F)\) can be constructed quantifying how well
+the model fits the data. Finally, gradient ascent can be applied
+optimizing the model parameters.
 
 \hypertarget{graph-augmentation}{%
 \paragraph{Graph Augmentation}\label{graph-augmentation}}

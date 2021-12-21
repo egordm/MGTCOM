@@ -418,16 +418,20 @@ In this section we describe representation based approaches by first covering a 
 
 ### Community Detection
 
-#### Affiliation Graph Networks
+% TODO: Not sure what to put here yet.
+
+
+
+#### Affiliation Graph Models
 
 % @yangCommunityAffiliationGraphModel2012
 % 
 % AGM: Affiliation Graph Model: a generative model $B(V, C, M, \{p_c\})$ for graphs
 % 
 % * $V$ vertices, $C$ communities, $M$ community memberships,
-% * ${p_c}$ model parameters (probability matrix) representing connection probabilities
+% * ${p_c}$ model parameters (probability $p_c$ per community $c$ indicating a connection strength.)
 % * Can model variety of community structures: (all have distinct characteristics in M)
-%   * Non-overlapping, Overlapping and hierarchical
+%   * Non-overlapping, Overlapping and hierarchical (TODO: add figure?)
 % * Usage: Generative Model: (generating edges)
 %   * generates links for each pair of nodes in community $A$ with probability $p_a$ 
 %   * The more communities they have in common, means higher probability for a connection
@@ -442,9 +446,27 @@ In this section we describe representation based approaches by first covering a 
 %     * Probability of two nodes connecting is defined in terms of them connecting through a community
 %     * Gradient descent is used to find the optimal parameters
 
+While arguably not being representational by itself, Affiliation Graph Network (AGM) model introduced in @yangCommunityAffiliationGraphModel2012 is very influential within deep learning / representation learning CD field.
+
+The AGM models a network as a bipartite graph with communities as first class citizens and is represented by the following equation $B(V, C, M, \{p_c\})$, where $V$ represents nodes, $C$ set of communities, $M$ node-community memberships and $\{p_c\}$ model parameters (a single probability $p_c$ per community). It can model non-overlapping, overlapping and hierarchical communities by defining rules on membership sets in $M$. AGM can used in both generative and discriminative settings.
+
+The generative scenario goes as follows: Given an AGM $F$ generate links between each pair of nodes exceeding a baseline probability $p$. The can be done by considering that according to AGM, each pair of nodes in community $A$ is connected with a probability $p_A$. Therefore, the probability of two nodes having a connection is proportional to the amount of communities they share (which is defined in the model).
+
+The discriminative scenario is defined as: Given a graph $G$ and , find a model $F$ that may have generated it. By assuming that the graph was generated using an AGM, the parameters $M$, number of communities $|C|$ and $\{p_c\}$ have to be found. Process for finding such a model to the graph usually max likelihood fitting. AGM is relaxed to have membership strengths $F_{uC}$, which helps to define probability of nodes $u$ and $v$ connecting through community $C$ ($P_{C}(u, v)$), and in terms of that by themselves $P(u, v)$. Using this a probability $P(G|F)$ can be constructed quantifying how well the model fits the data. Finally, gradient ascent can be applied optimizing the model parameters.
+
 
 
 #### Graph Augmentation
+
+% Class of methods for Community Detection: Graph Augmentation
+% 
+% * These type of method use representation learning techniques to 
+%   * Enhance the graph (augmentation) by adding valuable edges
+%   * Remove noise by adding missing connections or removing noisy ones
+
+
+
+
 
 % * @kangCommunityReinforcementEffective2021
 %   * Present a **Community Reinforcement** approach

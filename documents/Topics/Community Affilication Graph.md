@@ -37,7 +37,7 @@
       * Edges in graph should have high probability
       * Edges not in graph should have low probability
   * Efficiently Compute $P(G|F)$ (argmax)
-    * Relax AGM: Memberships now have strengths $F_uC$ (non-negative membership strength)
+    * Relax AGM: Memberships now have strengths $F_{uC}$ (non-negative membership strength)
     * Probability of $u$ and $v$ connecting through community $C$: $P_{C}(u, v)=1-\exp \left(-F_{u C} \cdot F_{v C}\right)$
     * Probability of u and v connecting: $P(u, v)=1-\prod_{C \in \Gamma}\left(1-P_{C}(u, v)\right) = 1 - exp(\mathbf{F_u^T F_v^T})$
     * Write as log likelihood: $log(P(G|F))$
