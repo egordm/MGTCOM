@@ -67,62 +67,48 @@ The discriminative scenario is defined as: Given a graph $G$ and , find a model 
 % * These type of method use representation learning techniques to 
 %   * Enhance the graph (augmentation) by adding valuable edges
 %   * Remove noise by adding missing connections or removing noisy ones
+% * TODO: non-linearity, sparsity of real-world graphs
+
+The first class of methods we consider are Graph Augmentation methods. These methods use representation based learning techniques to to enhance the graph by adding valuable edges or reduce the noise by removing noisy connections. This is usually by training a model on a link-prediction task. A notable benefit of this approach is that other well known CD methods can be used on the enhanced graph afterwards.
 
 
 
+% @kangCommunityReinforcementEffective2021
+% 
+% * Present a **Community Reinforcement** approach
+% * Is CD algorithm agnostic
+%   * Shown in experiments - therefore the graph itself benefits
+% * Reinforces the Graph by
+%   * Creating inter-community edges
+%   * Deleting intra-community edges
+%   * Determines the appropriate amount of reinforcement a graph needs
+% * Which helps the dense inter-community and sparse intra-community property of the graph
+%   * Can effectively turn difficult-to-detect community situation into that of easy-to-detect communities
+% * Challenges:
+%   * Needs to be unsupervised (doesn't need community annotations to work)
+%   * Appropriate amount of reinforcement needs to be determined (otherwise noise is introduced)
+%   * Needs to be fast, checking every possible edge is infeasible
+% * Methodology:
+%   * Edge Addition / Deletion
+%     * Based on node similarity of connected pairs
+%       * Similar nodes are likely to be in a community (intra edges)
+%       * Dissimilar ones are less likely to be in a community (inter edges)
+%     * Employ graph embedding to generate topological embeddings
+%       * Adamic/Adar (local link-based)
+%       * SimRank (gloabl link-based)
+%       * Node2vec graph embedding based
+%     * Predict similarities and bucket them
+%       * Use similarity buckets to select intra and inter edges - and to tune the model
+%       * Buckets are selected on how well they predict current edges
+%   * Detect the right amount of addition
+%     * Use a gradual reinforcement strategy by generating a series of graphs (adding top x inter and removing intra edges)
+%     * Pick the best graph using a scoring function (modularity)
+%     * Simply run CD over the graph and see
+%   * Reducing computational overhead
+%     * Using a greedy similarity computation
+%     * Prefer nodes which are likely to be in same community of inter similarity detection
 
-
-% * @kangCommunityReinforcementEffective2021
-%   * Present a **Community Reinforcement** approach
-%     * Is CD algorithm agnostic
-%       * Shown in experiments - therefore the graph itself benefits
-%     * Reinforces the Graph by
-%       * Creating inter-community edges
-%       * Deleting intra-community edges
-%       * Determines the appropriate amount of reinforcement a graph needs
-%     * Which helps the dense inter-community and sparse intra-community property of the graph
-%       * Can effectively turn difficult-to-detect community situation into that of easy-to-detect communities
-%     * Challenges:
-%       * Needs to be unsupervised (doesn't need community annotations to work)
-%       * Appropriate amount of reinforcement needs to be determined (otherwise noise is introduced)
-%       * Needs to be fast, checking every possible edge is infeasible
-%     * Methodology:
-%       * Edge Addition / Deletion
-%         * Based on node similarity of connected pairs
-%           * Similar nodes are likely to be in a community (intra edges)
-%           * Dissimilar ones are less likely to be in a community (inter edges)
-%         * Employ graph embedding to generate topological embeddings
-%           * Adamic/Adar (local link-based)
-%           * SimRank (gloabl link-based)
-%           * Node2vec graph embedding based
-%         * Predict similarities and bucket them
-%           * Use similarity buckets to select intra and inter edges - and to tune the model
-%           * Buckets are selected on how well they predict current edges
-%       * Detect the right amount of addition
-%         * Use a gradual reinforcement strategy by generating a series of graphs (adding top x inter and removing intra edges)
-%         * Pick the best graph using a scoring function (modularity)
-%         * Simply run CD over the graph and see
-%       * Reducing comutational overhead
-%         * Using a greedy similarity computation
-%         * Prefer nodes which are likely to be in same community of inter similarity detection
-%     * Tests results on:
-%       * Synthetic Graphs: LFR
-%       * Real world graphs: Cora, Siteseer, DBLP, Email
-
-
-
-% * @huangInformationFusionOriented2022
-%   * Their own made dataset (rumor detection): [GitHub - MingqingHuang-SHU/HRTCD: Information Fusion Oriented Heterogeneous Social Network for Friend Recommendation via Community Detection](https://github.com/MingqingHuang-SHU/HRTCD)
-%   * Recommendation of friends based on per user detected communities
-%   * Communities are detected on per user contructed subnetworks.
-%   * Approach supports multiple communities per user, but is not one of global community detection
-
-
-
-% * @luberCommunityDetectionHashtagGraphsSemiSupervised2021
-%   * Not really focused on community detection
-%   * More focused on enhancing topic modelling using community detection
-%   * Communities are from Hashtag graphs which help encode structural / content-based information of the tweets in context of other tweets
+@kangCommunityReinforcementEffective2021 present a CD algorithm agnostic pre-processing method for strengthening community structure of a graph by adding non-existing predicted intra-community edges and deleting existing predicted inter-community edges. Their strategy is to learn topological embedding using a graph representation learning algorithm (node2vec) based on existing link prediction task. The similarity is computed between different node pairs and put into buckets. Then with assumption of *homophily* the buckets with higher value can be considered holding intra-community while buckets with lower inter-community connections. Right buckets are picked from both extremes to create or delete edges. Preemptive CD is done to greedily guide pair-wise similarity computation and avoid a high complexity.
 
 
 

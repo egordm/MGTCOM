@@ -43,11 +43,7 @@ Modularity directly measures the density of links inside a graph and is therefor
 
 $$
 Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}_{\text{Expected Connectivity}}\right] \overbrace{S_{v r} S_{w r}}^{\text{Community Similarity}}
-$$
-
-{#eq:modularity}
-
-
+$$ {#eq:modularity}
 
 #### Louvain Method
 
