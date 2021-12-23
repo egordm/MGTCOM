@@ -63,7 +63,7 @@ Finding an optimal partition of a graph into communities is an NP-hard problem. 
 
 Louvain method [@blondelFastUnfoldingCommunities2008] is a heuristic based hierarchical clustering algorithm. It starts by assigning each node in the graph to its own community. Then it merges these communities by checking for each node the change in modularity score produced by assigning it to a neighbor community (based on existence of a connection). Once the optimal merges are preformed, the resulting communities are grouped into single nodes and the process is repeated. 
 
-Due to the fact that modularity changes can be computed incrementally, the complexity of this method is $O(n \log n)$. Additionally due to flexibility of the modularity measure, it allows detecting communities in graphs with weighted edges.
+Due to the fact that modularity changes can be computed incrementally, the complexity of this method is $O\left(n \log n\right)$. Additionally due to flexibility of the modularity measure, it allows detecting communities in graphs with weighted edges.
 
 
 

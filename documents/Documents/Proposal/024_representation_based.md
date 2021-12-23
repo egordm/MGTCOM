@@ -23,6 +23,8 @@ In this section we describe representation based approaches by first covering a 
 ### Community Detection
 
 % TODO: Not sure what to put here yet.
+% 
+% Probably should merge CD and DCD parts in this section
 
 
 
@@ -112,51 +114,70 @@ The first class of methods we consider are Graph Augmentation methods. These met
 
 
 
+% @jiaCommunityGANCommunityDetection2019
+% 
+% * Has some info in related work to extend on graph representation learning
+% * Solves issue of detecting overlapping communities:
+%   * K-means and Gaussian Mixture Model cant do that
+% * Proposes CommunityGAN:
+%   * Solves graph representation learning and community detection jointly
+%   * Embeddings indicate the membership strength of vertices to communities
+%   * Make use of Affiliation Graph Model AGM for community (detection) assignment
+%   * Uses GAN structure to:
+%     * Generate most likely vertex subset s to compose a specified kind of motif
+%       * "Graph AGM" motif generation model
+%     * Discriminate whether vertex subset s is a real motif or not
+%     * Motif = in this case is an n-clique
+%   * Study motif distribution among ground truth communities to analyse how they impact quality of detected communities
+% * Methodology:
+%   * Define a method to efficiently random walk such cliques / motifs
+%   * Generator tries to learn $p_{true}(m|v_c)$ as preference distribution of motifs containing $v_c$ vs all the motifs
+%     * To be able to generate most likely motifs (vertex subsets) similar to real motifs covering $v_c$
+%   * Discriminator tries to learn probability of a vertex subset being a real motif
+%     * Tries to discriminate between ground truth motifs and not
+%   * AGM:
+%     * Can define a measure to check whether two nodes are affiliated through a specific (or any) community
+%     * Usually applied for edge generation
+%     * In this case, extended to motif generation (edge is a 2-clique)
+%       * The affiliation is defined now in form of a motif in community
+%   * Amount of communities are chosen by hyperparameter tuning
+
+@jiaCommunityGANCommunityDetection2019 solves issue of detecting overlapping communities by proposing CommunityGAN algorithm which jointly optimizes for node and community representations. First they define a method for efficient motif (in their case clique) sampling from the graph (true/clique, and false/vertex subset motif sampling). Then, they define a GAN based structure for learning representational vectors where the generator $G$ tries to learn $p_{true}(m|\mathbf{v}_c)$ as preference distribution of motifs to generate most likely vertex subsets most likely to be real motifs. Discriminator $D$ tries to learn probability of a vertex subset being a real motif, therefore creating a minimax game of progressively optimizing embeddings to be able to encode rich information about network topology.
+
+Both components ($G$ and $D$) are implemented as a modified the relaxed AGM model with a to a more general definition be able to handle the motif generation (rather than edge generation). The probability of a set of vertices being a motif is defined in terms of their probability being a motif through a community, therefore making them community-aware as they now represent the affiliation weight between a vertex and a community. Number of communities are chosen by training and testing part of data on link prediction task.
+
+
+
 #### Multi-objective optimization
 
-% * @rozemberczkiGEMSECGraphEmbedding2019
-%   * Learns clustering (centers) simultaneously with computing embeddings
-%   * Objective functions includes:
-%     * Term to embed around the origin
-%     * Term to force nodes with similar sampled neighborhoods to be embedded close
-%     * Term to force nodes to be close to the nearest cluster (weighted by clustering coefficient)
-%   * Weights are randomly initialized
-%   * Clustering coefficient is annealed (changes overtime)
-%   * Uses negative sampling to avoid huge cost of softmax
-%   * Adds regularizer "social network cost" to optimize for homophiliy
-%     * weighs distance in latent space by neighborhood overlap
-%     * Makes algorithm more robust to changes in hyperparameters
-%   * Evaluate cluster quality by modularity
-%   * Evaluate embeddings by genre prediction / recommendation
+% * Is another subject where representation based approaches excel
+% * Usually multiple objectives are defined such as:
+%   * Homophily
+%   * Community Quality
+%   * Temporal Consistency
+% * in terms of given representations to be able to back-propagate the combined error
+
+Another subject where representation based approaches excel is multi-objective optimization. Usually a combined objective is defined in terms of a community quality, temporal consistency or homophily measure. These measures in turn use the proximity between the representation to be able to back-propagate the combined error and optimize the representation(function) directly.
 
 
 
-% * @jiaCommunityGANCommunityDetection2019
-%   * Has some info in related work to extend on graph representation learning
-%   * Solves issue of detecting overlapping communities:
-%     * K-means and Gaussian Mixture Model cant do that
-%   * Proposes CommunityGAN:
-%     * Solves graph representation learning and community detection jointly
-%     * Embeddings indicate the membership strength of vertices to communities
-%     * Make use of Affiliation Graph Model AGM for community (detection) assignment
-%     * Uses GAN structure to:
-%       * Generate most likely vertext subset s to compose a specified kind of motif
-%         * "Graph AGM" motif generation model
-%       * Discriminate whether vertex subset s is a real motif or not
-%       * Motif = in this case is an n-clique
-%     * Study motif distribution among ground truth communities to analyse how they impact quality of detected communities
-%   * Methodology:
-%     * Define a method to efficiently random walk such cliques / motifs
-%     * Generator tries to learn p_{true}(m|v_c) as preference distribution of motifs containing v_c vs all the motifs
-%       * To be able to generate most likely motifs (vertex subsets) similar to real motifs covering v_c
-%     * Discriminator tries to learn probability of a vertex subset being a real motif
-%       * Tries to discriminate between ground truth motifs and not
-%     * AGM:
-%       * Can define a measure to check whether two nodes are affiliated through a specific (or any) community
-%       * Usually applied for edge generation
-%       * In this case, extended to motif generation (edge is a 2-clique)
-%         * The affiliation is defined now in form of a motif in community
-%     * Amount of communities are chosen by hyperparameter tuning
+% @rozemberczkiGEMSECGraphEmbedding2019
+% 
+% * Learns clustering (centers) simultaneously with computing embeddings
+% * Objective functions includes:
+%   * Term to embed around the origin
+%   * Term to force nodes with similar sampled neighborhoods to be embedded close
+%   * Term to force nodes to be close to the nearest cluster (weighted by clustering coefficient)
+% * Weights are randomly initialized
+% * Clustering coefficient is annealed (changes overtime)
+% * Uses negative sampling to avoid huge cost of softmax
+% * Adds regularizer "social network cost" to optimize for homophily
+%   * weighs distance in latent space by neighborhood overlap
+%   * Makes algorithm more robust to changes in hyperparameters
+% * Evaluate cluster quality by modularity
+% * Evaluate embeddings by genre prediction / recommendation
+
+In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method which learns cluster centers along with node embeddings. They define objective function as a combination of three terms: normalization term (ensures embeddings are centered at the origin), proximity term (forces nodes with similar neighborhoods to be embedded close), cluster quality term (forces nodes to be close to their nearest cluster). Additionally, a "social network cost" or *homophily* term is added as a regularizer to optimize for proximity between nodes within the same cluster. During training the clustering coefficient is annealed to ensure convergence and negative sampling is employed to avoid large softmax cost. 
 
 
 
@@ -164,8 +185,8 @@ The first class of methods we consider are Graph Augmentation methods. These met
 %   * Goal: unsupervised clustering on networks with contents
 %     * Propose a way to utilize deep embedding for graph clustering
 %   * Simultaneously solve node representation problem and find optimal clustering in a e2e manner
-%     * Jointly learns embeddings X and soft clustering q_i \in Q
-%     * \sum_k q_{ik}: probablility of node v_i belonging to kth cluster
+%     * Jointly learns embeddings X and soft clustering $q_i \in Q$
+%     * $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$: probablility of node $v_i$ belonging to kth cluster
 %     * K is known a-priori
 %   * Employ Deep Denoise Autoencoder (DAE) - good for features with high-dimensional sparse noisy inputs
 %   * Use stable influence propagation technique (for computing embeddings)
@@ -174,12 +195,12 @@ The first class of methods we consider are Graph Augmentation methods. These met
 %       * Random walk requires more tuning
 %       * Their transition matrix is very similar to a spectral method (symmetric Laplacian matrix)
 %       * Influence propagation is like kipf and welling - doenst require matrix decomposition
-%     * Embedding loss: \mathcal{J}*{1}=\sum*{i=1}^{n} l\left(\mathrm{a}*{i}, \tilde{\mathrm{a}}*{i}\right)
+%     * Embedding loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
 %   * Introduce GRACE cluster module:
-%     * Computes soft clustering Q from: q_{i k}=\frac{\left(1+\left\|\mathbf{x}_{i}-\mathbf{u}_{k}\right\|^{2}\right)^{-1}}{\sum_{j}\left(1+\left\|\mathbf{x}_{i}-\mathbf{u}_{j}\right\|^{2}\right)^{-1}}
-%     * Learn clustering results by learning distribuition P where p_{i k}=\frac{q_{i k}^{2} / f_{k}}{\sum_{j} q_{i j}^{2} / f_{j}}
-%       * and f_{k}=\sum_{i} q_{i k} total number of nodes softly assigned to kth cluster
-%     * Clustering Loss: \mathcal{J}_{2}=K L(\mathcal{P} \| Q)=\sum_{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}
+%     * Computes soft clustering Q from: $q_{i k}=\frac{\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{k}\right|^{2}\right)^{-1}}{\sum_{j}\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{j}\right|^{2}\right)^{-1}}$
+%     * Learn clustering results by learning distribuition P where $p_{i k}=\frac{q_{i k}^{2} / f_{k}}{\sum_{j} q_{i j}^{2} / f_{j}}$
+%       * and $f_{k}=\sum_{i} q_{i k}$ total number of nodes softly assigned to kth cluster
+%     * Clustering Loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
 %     * Training is done in alternating steps:
 %       * Macrostep: Compute: P and fix it
 %       * S Microsteps: Update node embeddings S and cluster centers U
