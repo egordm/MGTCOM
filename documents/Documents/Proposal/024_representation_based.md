@@ -300,7 +300,3 @@ In @faniUserCommunityDetection2020 the authors describe their method to identify
 
 
 
-
-% 
-
-

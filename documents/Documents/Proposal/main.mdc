@@ -693,10 +693,6 @@ In @faniUserCommunityDetection2020 the authors describe their method to identify
 
 
 
-% 
-
-
-
 ## Evaluation
 
 As described in the previous sections, the definition for both community and dynamic community may be quite ambiguous. In this section we will cover how detection and tracking results can be evaluated in a lesser ambiguous setting to compare various approaches. To disambiguate the process a little, during evaluation, the resemblance/detection and matching/tracking tasks are evaluated separately.
