@@ -14,17 +14,9 @@
 
 The main difference between Representation-based approaches and link-based approaches is the fact that they usually don't directly model the network based on connections. Instead they learn an intermediate representation of the graph or its components to which CD detection can be applied to. While also relying on the idea of *homophily*, most of methods define additional objectives to improve community quality.
 
-The main reasoning for this is the fact that real-world networks are non-linear, meaning that there may  be no connections when then make sense and vice versa. By using deep neural networks to learn these embeddings one can address such non-linearity as they are in general very robust against noise. Other notable benefits to using representation-based approaches include the fact that they compress the data efficiently as real-world networks are very sparse. They can also represent multi-modal features, network (meta) structure and temporal dimension by defining them all in a compatible similarity space or learning mappings to this space. Finally, representations are naturally easy to compute similarity on.
+The main reasoning for this is the fact that real-world networks are non-linear, meaning that there may be no connections when then make sense and vice versa [@wangEvolutionaryAutoencoderDynamic2020]. By using deep neural networks to learn these embeddings one can address such non-linearity as they are in general very robust against noise. Other notable benefits to using representation-based approaches include the fact that they compress the data efficiently as real-world networks are very sparse. They can also represent multi-modal features, network (meta) structure and temporal dimension by defining them all in a compatible similarity space or learning mappings to this space. Finally, representations are naturally easy to compute similarity on.
 
-In this section we describe representation based approaches by first covering a number of works on CD and how their approaches can be characterized. Afterwards we cover a number of papers that extend these ideas to the DCD problem.
-
-
-
-### Community Detection
-
-% TODO: Not sure what to put here yet.
-% 
-% Probably should merge CD and DCD parts in this section
+In this section we describe representation based approaches by covering both CD and DCD approaches. To provide a more cohesive overview of the methods, we group them by their innovations instead.
 
 
 
@@ -62,7 +54,7 @@ The discriminative scenario is defined as: Given a graph $G$ and , find a model 
 
 
 
-#### Graph Augmentation
+### Graph Reinforcement
 
 % Class of methods for Community Detection: Graph Augmentation
 % 
@@ -71,7 +63,7 @@ The discriminative scenario is defined as: Given a graph $G$ and , find a model 
 %   * Remove noise by adding missing connections or removing noisy ones
 % * TODO: non-linearity, sparsity of real-world graphs
 
-The first class of methods we consider are Graph Augmentation methods. These methods use representation based learning techniques to to enhance the graph by adding valuable edges or reduce the noise by removing noisy connections. This is usually by training a model on a link-prediction task. A notable benefit of this approach is that other well known CD methods can be used on the enhanced graph afterwards.
+The first class of methods we consider are Graph Reinforcement methods. These methods use representation based learning techniques to to enhance the graph by adding valuable edges or reduce the noise by removing noisy connections. This is usually by training a model on a link-prediction task. A notable benefit of this approach is that other well known CD methods can be used on the enhanced graph afterwards.
 
 
 
@@ -148,7 +140,7 @@ Both components ($G$ and $D$) are implemented as a modified the relaxed AGM mode
 
 
 
-#### Multi-objective optimization
+### Multi-objective optimization
 
 % * Is another subject where representation based approaches excel
 % * Usually multiple objectives are defined such as:
@@ -211,84 +203,104 @@ In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method which learns c
 
 
 
-### Dynamic Community Detection
+% @maCommunityawareDynamicNetwork2020 (use as baseline?)
+% 
+% * Define communities in terms of large and small scale communities
+% * They propose a method for dynamic *community aware* network representation learning
+%   * By creating a unified objective optimizing stability of communities, temporal stability and structure representation
+%   * Uses both first-order as well as second order proximity for node representation learning
+% * They define community representations as average of their members
+%   * Adopt a stacked autoencoder to learn low-dimensional (generic) representations of nodes
+% * They define loss in terms of:
+%   * Reconstruction Error: How well the graph can be reconstructed from the representation
+%   * Local structure preservation: Preservation of homophiliy - connected nodes are similar
+%   * Community evolution preservation: Preservation of smoothness of communities in time at multiple granularity levels
+% * The communities are initialized using classical methods:
+%   * First large communities are detected using Genlouvin (fast and doesnt require priors)
+%   * Then small scale communities are detected using k-means by defining a max community size w
+%     * Which provides more fine tuned communities
+% * Using the initial embeddings the temporal embeddings are optimized
+%   * Done by optimizing all at once - therefore maintaining the stability
+%   * And use of the mentioned combined objective
+% * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
+%   * Therefore the actual quality of communities remains to be known
 
-% * @faniUserCommunityDetection2020
-%   * Propose a new method of identifying user communities through multimodal feature learning:
-%     * learn user embeddings based on their **temporal content similarity**
-%       * Base on topics of interest
-%       * Users are considered like-minded if they are interested in similar topics at similar times
-%       * Learn embeddings using a context modelling approach
-%     * learn user embeddings based on their **social network connections**
-%       * Use GNN which works as a skip-gram like approach by generating context using random walks
-%     * **interpolate** temporal content-based embeddings and social link-based embeddings
-%   * Then they use these multimodal embeddings to detect dynamic communities\
-%     * Communities are detected on a modified graph
-%       * Weights are set given embedding similarity
-%       * Communities are detected using louvain methods
-%     * Then test their approach on specific tasks such as
-%     * News recommendation
-%     * User for content prediction
-%   * Note: **This approach detects static communities**
-%     * But the communities implicitly take time into account
+@maCommunityawareDynamicNetwork2020 proposed a novel approach to constructing community-aware dynamic network embeddings by leveraging multi-objective optimization and extending it into a temporal dimension. They a adopt a Graph Autoencoder structure which works by encoding the full graph into a lower-dimensional structure and decoding it again into a graph. Assuming a well tuned network, this allows authors to encode the network (and its nodes) into more efficient representation vectors which characterize the network well
 
+The objective function they use is defined by three terms: the reconstruction error term minimizing the distance between the ground-truth and the autoencoder output, local structure/homophily preservation term minimizing first- and second-order proximity between connected nodes, and the community evolution preservation term maximizing temporal smoothness of communities at different granularity levels given their representation as aggregation of their members.
 
-
-% * @wangVehicleTrajectoryClustering2020
-%   * Transform task of trajectory clustering into one of Dynamic Community Detection
-%     * discretion the trajectories by recording entity their current neigbors at each time interval
-%     * Edge streaming network is created
-%   * Use representation learning to learn node their embeddings
-%     * Use dyn walks to perform random walks in time dimenstion
-%     * Use negative sampling to avoid the softmax cost
-%   * Then use K-means to find the communities
-%     * Try K-means, K-medioids and GMM (Gaussian Mixture Models)
-%     * Initalize the centers at the previous timestamp centers
-%   * Use quality measures to establish quality of results
+The inital community assignment is generated using Louvain method for high level communities and using k-means for fine grained communities given a max community size parameter $w$. After that, embeddings at each snapshot are optimized by employing dependent community detection like strategy.
 
 
 
-#### Multi-objective optimization
+% @wangEvolutionaryAutoencoderDynamic2020
+% 
+% * Approach is similar to to @maCommunityawareDynamicNetwork2020
+% * Defines a unified objective where
+%   * community characteristics
+%   * previous clustering
+%   * are incorporated as a regularization term
+% * **They argue that real world networks are non-linear** in nature and **classical approaches can not capture this**
+%   * Autoencoders can though
+% * Methodology:
+%   * Construct a similarity matrix using Dice Coefficient (handles varying degrees well)
+%   * Apply stacked (deep) autoencoders to learn the low-dimensional representation
+%   * Characterizes tradeoff between two costs:
+%     * Snapshot cost (SC):
+%       * Reconstruction loss
+%       * Node embedding similarity (homophiliy) between connected nodes
+%       * Node embedding similarity (homophiliy) between nodes in same community
+%     * Temporal cost (TC)
+%       * Temporal smoothness of node embeddings
+%   * Adopt K-means to discover community structure
 
-% * @wangEvolutionaryAutoencoderDynamic2020
-%   * Approach is similar to to @maCommunityawareDynamicNetwork2020
-%   * Defines a unified objective where
-%     * community characteristics
-%     * previous clustering
-%     * are incorporated as a regularization term
-%   * **They argue that real world networks are non-linear** in nature and **classical approaches can not capture this**
-%     * Autoencoders can though
-%   * Methodology:
-%     * Construct a similarity matrix using Dice Coefficient (handles varying degrees well)
-%     * Apply stacked (deep) autoencoders to learn the low-dimensional representation
-%     * Characterizes tradeoff between two costs:
-%       * Snapshot cost (SC):
-%         * Reconstruction loss
-%         * Node embedding similarity (homophiliy) between connected nodes
-%         * Node embedding similarity (homophiliy) between nodes in same community
-%       * Temporal cost (TC)
-%         * Temporal smoothness of node embeddings
-%     * Adopt K-means to discover community structures
+@wangEvolutionaryAutoencoderDynamic2020 employ a similar to DCD detection by utilizing the Graph Autoencoder architecture. As an addition authors add an additional community score term to the objective function also minimizing the distance between nodes in the same community. At last K-means is run on the representational vectors to detect communities at different timesteps while reusing the outputs from the previous step.
 
 
 
-% * @maCommunityawareDynamicNetwork2020 (use as baseline?)
-%   * Define communities in terms of large and small scale communities
-%   * They propose a method for dynamic *community aware* network representation learning
-%     * By creating a unified objective optimizing stability of communities, temporal stability and structure representation
-%     * Uses both first-order as well as second order proximity for node representation learning
-%   * They define community representations as average of their members
-%     * Adopt a stacked autoencoder to learn low-dimensional (generic) representations of nodes
-%   * They define loss in terms of:
-%     * Reconstruction Error: How well the graph can be reconstructed from the representation
-%     * Local structure preservation: Preservation of homophiliy - connected nodes are similar
-%     * Community evolution preservation: Preservation of smoothness of communities in time at multiple granularity levels
-%   * The communities are initialized using classical methods:
-%     * First large communities are detected using Genlouvin (fast and doesnt require priors)
-%     * Then small scale communities are detected using k-means by defining a max community size w
-%       * Which provides more fine tuned communities
-%   * Using the initial embeddings the temporal embeddings are optimized
-%     * Done by optimizing all at once - therefore maintaining the stability
-%     * And use of the mentioned combined objective
-%   * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
-%     * Therefore the actual quality of communities remains to be known
+### Multi-modal community detection
+
+% @faniUserCommunityDetection2020
+% 
+% * Propose a new method of identifying user communities through multimodal feature learning:
+%   * learn user embeddings based on their **temporal content similarity**
+%     * Base on topics of interest
+%     * Users are considered like-minded if they are interested in similar topics at similar times
+%     * Learn embeddings using a context modelling approach
+%   * learn user embeddings based on their **social network connections**
+%     * Use GNN which works as a skip-gram like approach by generating context using random walks
+%   * **interpolate** temporal content-based embeddings and social link-based embeddings
+% * Then they use these multimodal embeddings to detect dynamic communities\
+%   * Communities are detected on a modified graph
+%     * Weights are set given embedding similarity
+%     * Communities are detected using louvain methods
+%   * Then test their approach on specific tasks such as
+%   * News recommendation
+%   * User for content prediction
+% * Note: **This approach detects static communities**
+%   * But the communities implicitly take time into account
+
+In @faniUserCommunityDetection2020 the authors describe their method to identifying user communities through multi-modal feature learning. First user embeddings are learned based on their temporal content similarity by looking topics of interest. Per user a heat map is constructed measuring user's interest over time and topic axes. By considering users like-minded if their heat maps overlap enough they train low-dimensional content embeddings spanning this user similarity space. Next, they use random walk based GNN methods to learn topological similarity embeddings for network nodes. Finally, they modify the graph by setting edge weights proportionally to node proximity in this combined embeddings space. After that, Louvain method is applied to extract  these time and content aware communities.
+
+
+
+% @wangVehicleTrajectoryClustering2020
+% 
+% * Transform task of trajectory clustering into one of Dynamic Community Detection
+%   * discretion the trajectories by recording entity their current neigbors at each time interval
+%   * Edge streaming network is created
+% * Use representation learning to learn node their embeddings
+%   * Use dyn walks to perform random walks in time dimenstion
+%   * Use negative sampling to avoid the softmax cost
+% * Then use K-means to find the communities
+%   * Try K-means, K-medioids and GMM (Gaussian Mixture Models)
+%   * Initalize the centers at the previous timestamp centers
+% * Use quality measures to establish quality of results
+
+
+
+
+
+% 
+
+

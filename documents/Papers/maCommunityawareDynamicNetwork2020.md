@@ -14,7 +14,7 @@ author:
 
 - Propose a Community-aware Dynamic Network Embedding method (CDNE)
   - aiming to learn the low-dimensional representations of nodes over time while preserving the global node structures, local link structures, and continuous community dynamics
-  -  validate the superiority of CDNE over several state-of-the-art DNE methods
+  - validate the superiority of CDNE over several state-of-the-art DNE methods
 
 # Preliminaries
 
@@ -54,19 +54,15 @@ author:
 # Definitions
 
 * **Dynamic network**: $\mathcal{G}$ is a series of network snapshots
-
 * **Adjacency matrix**: $A^a$ Represents a snapshot at time $a$
-
 * **Community Structure**:  A community in a dynamic network consists of a set of nodes, such that the nodes in the community are densely linked with each other whereas they are sparsely connected with the other nodes *at all time stamps*
-
   * communities have a smoother evolution than nodes and links in dynamic systems
-
 * **Dynamic Network Embedding (DNE)**: 
-
   * Finds  a time-series of mappings $\mathbf{F = \{F^1, F^2 , . . . F^t \}}$, and each mapping $F^a: S^a \rightarrow H^a$ , learns the latent $d$ dimensional representations $H^a$ of nodes at $a$th time stamp such that the learned representations can effectively preserve both the **structural information** $S = \{S^1 , S^2 , . . . , S^t \}$ and the evolutionary pattern in $\mathcal{G}$.
-
+  
   ![](/dd_volume/Development/Python/Thesis/documents/Papers/maCommunityawareDynamicNetwork2020.assets/Screenshot_20211214_215516.png)
-
+  
+  
 
 # Outline / Structure
 
@@ -155,7 +151,7 @@ author:
   - Real:
     - ia-contacts, ia-email, ia-enron, ia-stackexch - @rossiNetworkDataRepository2015
     - TCGA, ca-cit-HepTh 
-    -  soc-wiki-elec  - Wikipedia Adminitrat
+    - soc-wiki-elec  - Wikipedia Adminitrat
     - football
 - Baselines: - Mainly Dynamic Network Embedding models
   - SDNE - structural deep autoencoder  for static networks
@@ -173,8 +169,8 @@ author:
     - Dynamic network should have similar evolutionary patterns in both the learned low-dimensional representation and the network representation over time
   - **Community stabilization**: 
     - Stability of communities in dynamic networks on the embedded low-dimensional representations.
-
-
+      
+      
 
 # Discussion
 
