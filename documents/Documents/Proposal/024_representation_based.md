@@ -142,7 +142,7 @@ The first class of methods we consider are Graph Augmentation methods. These met
 %       * The affiliation is defined now in form of a motif in community
 %   * Amount of communities are chosen by hyperparameter tuning
 
-@jiaCommunityGANCommunityDetection2019 solves issue of detecting overlapping communities by proposing CommunityGAN algorithm which jointly optimizes for node and community representations. First they define a method for efficient motif (in their case clique) sampling from the graph (true/clique, and false/vertex subset motif sampling). Then, they define a GAN based structure for learning representational vectors where the generator $G$ tries to learn $p_{true}(m|\mathbf{v}_c)$ as preference distribution of motifs to generate most likely vertex subsets most likely to be real motifs. Discriminator $D$ tries to learn probability of a vertex subset being a real motif, therefore creating a minimax game of progressively optimizing embeddings to be able to encode rich information about network topology.
+@jiaCommunityGANCommunityDetection2019 solves issue of detecting overlapping communities by proposing CommunityGAN algorithm which jointly optimizes for node and community representations. First they define a method for efficient motif (in their case clique) sampling from the graph (true/clique, and false/vertex subset). Then, they define a GAN based structure for learning representational vectors where the generator $G$ tries to learn $p_{true}(m|\mathbf{v}_c)$ as preference distribution of motifs to generate most likely vertex subsets most likely to be real motifs. Discriminator $D$ tries to learn probability of a vertex subset being a real motif, therefore creating a minimax game of progressively optimizing embeddings to be able to encode rich information about network topology.
 
 Both components ($G$ and $D$) are implemented as a modified the relaxed AGM model with a to a more general definition be able to handle the motif generation (rather than edge generation). The probability of a set of vertices being a motif is defined in terms of their probability being a motif through a community, therefore making them community-aware as they now represent the affiliation weight between a vertex and a community. Number of communities are chosen by training and testing part of data on link prediction task.
 
@@ -181,30 +181,33 @@ In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method which learns c
 
 
 
-% * @yangGraphClusteringDynamic2017
-%   * Goal: unsupervised clustering on networks with contents
-%     * Propose a way to utilize deep embedding for graph clustering
-%   * Simultaneously solve node representation problem and find optimal clustering in a e2e manner
-%     * Jointly learns embeddings X and soft clustering $q_i \in Q$
-%     * $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$: probablility of node $v_i$ belonging to kth cluster
-%     * K is known a-priori
-%   * Employ Deep Denoise Autoencoder (DAE) - good for features with high-dimensional sparse noisy inputs
-%   * Use stable influence propagation technique (for computing embeddings)
-%     * Use a transition matrix for a single step embedding propagation
-%     * Because:
-%       * Random walk requires more tuning
-%       * Their transition matrix is very similar to a spectral method (symmetric Laplacian matrix)
-%       * Influence propagation is like kipf and welling - doenst require matrix decomposition
-%     * Embedding loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
-%   * Introduce GRACE cluster module:
-%     * Computes soft clustering Q from: $q_{i k}=\frac{\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{k}\right|^{2}\right)^{-1}}{\sum_{j}\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{j}\right|^{2}\right)^{-1}}$
-%     * Learn clustering results by learning distribuition P where $p_{i k}=\frac{q_{i k}^{2} / f_{k}}{\sum_{j} q_{i j}^{2} / f_{j}}$
-%       * and $f_{k}=\sum_{i} q_{i k}$ total number of nodes softly assigned to kth cluster
-%     * Clustering Loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
-%     * Training is done in alternating steps:
-%       * Macrostep: Compute: P and fix it
-%       * S Microsteps: Update node embeddings S and cluster centers U
-%         * Tries to make Q catch up with P
+% @yangGraphClusteringDynamic2017
+% 
+% * Goal: unsupervised clustering on networks with contents
+%   * Propose a way to utilize deep embedding for graph clustering
+% * Simultaneously solve node representation problem and find optimal clustering in a e2e manner
+%   * Jointly learns embeddings X and soft clustering $q_i \in Q$
+%   * $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$: probablility of node $v_i$ belonging to kth cluster
+%   * K is known a-priori
+% * Employ Deep Denoise Autoencoder (DAE) - good for features with high-dimensional sparse noisy inputs
+% * Use stable influence propagation technique (for computing embeddings)
+%   * Use a transition matrix for a single step embedding propagation
+%   * Because:
+%     * Random walk requires more tuning
+%     * Their transition matrix is very similar to a spectral method (symmetric Laplacian matrix)
+%     * Influence propagation is like kipf and welling - doenst require matrix decomposition
+%   * Embedding loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
+% * Introduce GRACE cluster module:
+%   * Computes soft clustering Q from: $q_{i k}=\frac{\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{k}\right|^{2}\right)^{-1}}{\sum_{j}\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{j}\right|^{2}\right)^{-1}}$
+%   * Learn clustering results by learning distribuition P where $p_{i k}=\frac{q_{i k}^{2} / f_{k}}{\sum_{j} q_{i j}^{2} / f_{j}}$
+%     * and $f_{k}=\sum_{i} q_{i k}$ total number of nodes softly assigned to kth cluster
+%   * Clustering Loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
+%   * Training is done in alternating steps:
+%     * Macrostep: Compute: P and fix it
+%     * S Microsteps: Update node embeddings S and cluster centers U
+%       * Tries to make Q catch up with P
+
+@yangGraphClusteringDynamic2017 propose a similar idea of combining embedding and clustering tasks and solving them in an end-to-end manner. In their work they employ an Deep Denoise Autoencoder (DAE) to learn topological information of the network by optimizing for reconstruction loss. To learn cluster/community centers they define their own GRACE cluster module which first computes soft cluster assignment matrix $Q$ by utilizing the embeddings and cluster centers which contains probabilities $q_{ik}$ of node $i$ belonging to cluster $k$ . The clustering loss is defined as KL-divergence between the soft clustering $Q$ and auxiliary target distribution $P$ which is defined by squaring and normalizing the soft-assignments to reinforce more confident clustering results while preventing formation of too large clusters. Both embeddings and clustering are optimized alternatively until convergence.
 
 
 
