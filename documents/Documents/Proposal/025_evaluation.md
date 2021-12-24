@@ -4,13 +4,15 @@
 % * Describe how detection and result tracking are evaluation
 % * Detection and Tracking are evaluated separately
 
-As described in the previous sections, the definition for both community and dynamic community may be quite ambiguous. In this section we will cover how detection and tracking results can be evaluated in a lesser ambiguous setting to compare various approaches. To disambiguate the process, during evaluation, the resemblance/detection and matching/tracking tasks are considered as separate evaluation tasks.
+In the previous section we have described the different variations of community structure defintions as well as the approaches used for detecting these communities. In this sections we will cover how the found dynamic community structures can be evaluated in a more general setting to allow comparison of different approaches. While dynamic community detection problem can be seen as two tasks (resemblance/detection and matching/tracking) these two should separate evaluation tasks. 
+
+In the following sections we cover both of the evaluation tasks by classifying approaches used in the literature in three classes. Namely, annotated, metric-based and task specific.
 
 
 
 ### Annotated
 
-% * Ground Truth communities - compare againts them
+% * Ground Truth communities - compare against them
 % * Use NMI or other set overlap method
 % * Talk about NF1 @rossettiNovelApproachEvaluate2016
 % * Usually no planted communities:
@@ -21,6 +23,15 @@ Evaluation of detected (dynamic) communities becomes much easier when the *groun
 
 A possible drawback of this measure is that its complexity is quadratic in terms of identified communities. In [@rossettiNovelApproachEvaluate2016] alternative measure (NF1) with linear complexity is introduced which similarly to F1 score uses the trade-off between precision and recall (of the average of harmonic means) of the matched communities. In the follow-up work [@rossettiANGELEfficientEffective2020] the authors describe a way to apply this measure within the context of DCD by calculating this score for all the snapshots and aggregating the results into one single measure.
 
+% * Accuracy: @mrabahRethinkingGraphAutoEncoder2021
+% * NMI: @mrabahRethinkingGraphAutoEncoder2021, @jiaCommunityGANCommunityDetection2019, @yangCommunityAffiliationGraphModel2012
+% * ARI: @mrabahRethinkingGraphAutoEncoder2021, @luoDetectingCommunitiesHeterogeneous2021
+% * F1: @jiaCommunityGANCommunityDetection2019, @yangCommunityAffiliationGraphModel2012
+% * Omega Index: @yangCommunityAffiliationGraphModel2012
+%   * is the accuracy on estimating the number of communities that each pair of nodes shares
+
+Aside from NMI other measures are employed such as Jaccard Coeficient, Accuracy and Rand-Index measuring community overlap [@yangGraphClusteringDynamic2017; @mrabahRethinkingGraphAutoEncoder2021; @luoDetectingCommunitiesHeterogeneous2021], Overlapping-NMI [@yeDeepAutoencoderlikeNonnegative2018] and Omega-Index measuring is the accuracy on estimating the number of communities that each pair of nodes shares [@yangCommunityAffiliationGraphModel2012], 
+
 In real-world there are usually no ground truth communities. Therefore this approach is usually applied on synthetic datasets where the communities and their dynamicity is sampled from a distribution. Alternative approach some papers take is by defining ground truth communities using the metadata and node attributes present within the datasets. Some datasets may include annotated communities, but this is not common within DCD datasets.
 
 
@@ -30,19 +41,24 @@ In real-world there are usually no ground truth communities. Therefore this appr
 % * When Ground Truth Communities don't exist
 % * Network-based measures
 
-Another way to evaluate and compare different CD algorithms without knowing ground truth communities is using a quality function. Modularity is the most widely used measure [@newmanFastAlgorithmDetecting2004], since it measures the strength of division of a network into modules. Networks with high modularity have dense connections between the nodes within the modules, and sparse connections between nodes in different modules. Other measures are used as well including:
+Another way to evaluate and compare different CD algorithms without knowing ground truth communities is using a quality function. 
 
-* Conductance: the percentage of edges that cross the cluster border
-* Expansion: the number of edges that cross the community border
-* Internal Density: the ratio of edges within the cluster with respect to all possible edges
-* Cut Ratio and Normalized Cut: the fraction of all possible edges leaving the cluster
-* Maximum/Average ODF: the maximum/average fraction of nodes’ edges crossing the cluster border
+#### Network-based metrics
 
+The first first group of measures we consider operate directly on the network structure. They are most commonly used to evaluate link-based methods as their results are network partitioning sets. Modularity is the most widely used measure [@newmanFastAlgorithmDetecting2004; @suComprehensiveSurveyCommunity2021], since it measures the strength of division of a network into modules. Networks with high modularity have dense connections between the nodes within the modules, and sparse connections between nodes in different modules. Other measures are used as well including:
 
+* **Conductance**: the percentage of edges that cross the cluster border
+* **Expansion**: the number of edges that cross the community border
+* **Internal Density**: the ratio of edges within the cluster with respect to all possible edges
+* **Cut Ratio and Normalized Cut**: the fraction of all possible edges leaving the cluster
+* **Maximum/Average ODF**: the maximum/average fraction of nodes’ edges crossing the cluster border
+* **Triangle Participation Ratio TPR**: measures fraction of triads within the community. A higher TPR indicates a denser community structure
 
-% Representation-/Proximity- based measures
+% See: @suComprehensiveSurveyCommunity2021 as it has a well curated collection of evaluation metrics
 
+#### Proximity-based measures
 
+Proximity-based measures are often used to evaluate clustering tasks, but are also often used to evaluate representation-based CD methods since there is a large overlap in their methodology. Additionally, representation based approaches have a benefit of being able to quantify both entities and communities as a d-dimensional vector enabling a more direct comparison of the two [@wangVehicleTrajectoryClustering2020]. The most common measures include:
 
 % @wangVehicleTrajectoryClustering2020
 % 
@@ -66,14 +82,12 @@ Another way to evaluate and compare different CD algorithms without knowing grou
 %     * $W_k$ is covariance matrix between the data in the cluster
 %     * $tr$ is trace of the matrix
 
+* **Silhouette Coefficient**: Is defined as $S(i)=\frac{b(i)-a(i)}{\max \{a(i), b(i)\}}$ where $a(i)$ defines the mean distance from node $i$  to other nodes in the same cluster while $b(i)$ is mean distance to any node not in the same cluster. It measures cohesion of a cluster/community and indicates how well a node is matched to its own cluster.
+* **Davies-Bouldin Index**: Is the ratio of the sum of the average distance to the distance between the centers of mass of the two clusters. In other words, it is defined as a ratio of within cluster, to the between cluster separation. The index is defined as an average over all the found clusters, and is therefore also a good measure to deciding how many clusters should be used.
+* **Calinski-Harabasz Index**: Is similarly the ratio of the between-cluster to the within-cluster variance. Therefore it measures both cohesion (how well its members fit the cluster) as well as compares it to other clusters (separation).
+  
+  
 
-
-% @mrabahRethinkingGraphAutoEncoder2021
-% 
-% * Accuracy:
-% * NMI
-% * ARI:
-% 
 % @huangInformationFusionOriented2022
 % 
 % * Based on link prediction or friend recommendation
@@ -162,9 +176,11 @@ In [@peelGroundTruthMetadata2017] the authors criticize **these** evaluation app
 
 
 
+% @rozemberczkiGEMSECGraphEmbedding2019
+% 
+% * Music recommendation
 
-
-## Datasets
+ 
 
 ### Synthetic Datasets
 
@@ -177,22 +193,22 @@ In [@peelGroundTruthMetadata2017] the authors criticize **these** evaluation app
 | SYN - @ghalebiDynamicNetworkModel2019              |                                                                                                          |
 | SBM - @lancichinettiBenchmarksTestingCommunity2009 | extracted from the dynamic Stochastic Block Model                                                        |
 
-### Real World Datasets
+###Real World Datasets
 
-| Dataset                                                                                      | Description                                                                                      |
-| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| [Enron](https://www.cs.cmu.edu/~./enron/)                                                    | Includes: Persons, Email Categories, Sentiment, Email Content                                    |
-| [KIT](https://i11www.iti.kit.edu/en/projects/spp1307/emaildata) (dead)                       |                                                                                                  |
-| [Weibo](http://www.wise2012.cs.ucy.ac.cy/challenge.html)                                     | Includes: Persons, Tweets, Followers; **Excludes: Tweet Content**                                |
-| [Digg](https://www.isi.edu/~lerman/downloads/digg2009.html)                                  | Includes: Persons, Stores, Followers, Votes; **Excludes: Content**                               |
-| [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html)                       | Includes: Persons, Votes; **Excludes: Content**                                                  |
-| [IMDB](https://paperswithcode.com/dataset/imdb-binary)                                       | Actor movie network; Content is implicitly defined                                               |
-| [WIKI-RFA](https://snap.stanford.edu/data/wiki-RfA.html)                                     | Wikipedia Adminitrator Election; Network of Voters and Votees. Links are votes and vote comments |
-| [FB-wosn](http://socialnetworks.mpi-sws.org/data-wosn2009.html)                              | User friendship links and User posts on users walls; **Excludes: Content**                       |
-| [TweetUM](https://wis.st.ewi.tudelft.nl/research/tweetum/) (dead)                            | Twitter Tweets, User Profiles and Followers; Includes: Content                                   |
-| [Reddit Pushift](https://arxiv.org/abs/2001.08435)                                           | User Submissions and Posts on Subreddits; With timestamps                                        |
-| [Bitcoin Trust Network](https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html)            | Network Nodes and peer Ratings; With timestamps                                                  |
-| [LastFM1k](http://ocelma.net/MusicRecommendationDataset/lastfm-1K.html)                      | User - Song Listen histories; With timestamps                                                    |
-| [MovieLens25M](https://grouplens.org/datasets/movielens/25m/)                                | Users and Movie Ratings; With timestamps                                                         |
-| [Memetracker](https://snap.stanford.edu/data/memetracker9.html)                              |                                                                                                  |
-| [Rumor Detection](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0168344) | Rumor Detection over Varying Time Windows; Twitter data; With timestamps                         |
+| Dataset | Description |
+| ------- | ----------- |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |
+|         |             |

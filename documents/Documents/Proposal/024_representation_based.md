@@ -310,3 +310,10 @@ In @faniUserCommunityDetection2020 the authors describe their method for identif
 % * Use quality measures to establish quality of results
 
 
+
+
+
+% **Resources:**
+% 
+% * https://paperswithcode.com/paper/a-comprehensive-survey-on-community-detection/review/
+% * 
