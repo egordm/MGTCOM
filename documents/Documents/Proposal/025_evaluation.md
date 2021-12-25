@@ -88,33 +88,36 @@ Proximity-based measures are often used to evaluate clustering tasks, but are al
   
   
 
-#### Structure-based measures
+#### Stability-based measures
 
-% @maCommunityawareDynamicNetwork2020
-% 
-% * **Network Stabilization**: evaluates preformance of DNE on stabilization of embedding
+% * Stability-based measures evaluate temporal stability and consistency of the network
+%   * The ones we consider were introduced in @maCommunityawareDynamicNetwork2020
+%   * 
+% * **Network Stabilization**: evaluates performance of DNE on stabilization of embedding
 %   * dynamic network should have similar evolutionary patterns in both the learned low-dimensional representation and the
 %     network representation over time
-%   * evaluates the evolution ratio of the low-dimensional node representations to the network representations at $a$ th timestamp
+%   * evaluates the evolution ratio of the low-dimensional node representations to the network representations at $a$-th time stamp
 %   * $p_{s}^{a}=\frac{\left(\left\|\mathrm{H}^{a+1}-\mathrm{H}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}^{a+1}-\mathrm{A}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}^{a}\right\|_{2}^{2}} .$
 % * **Community Stabilization**: evaluates stability of communities in dynamic networks on the embedded low-dimensional representations
-%   * Evaluates communty evolution ratio to network representation evolution between subsequent timestamps
+%   * Evaluates community evolution ratio to network representation evolution between subsequent time stamps
 %   * Lower values point to more stable communities and are better
 %   * $p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q$
-% * Note: the evalution is at graph level since their methods are spectral GAE based
+% * Note: the evaluation is at graph level since their methods are spectral GAE based
 
+To evaluate temporal stability and consistency of the node and community structures, measures based on temporal smoothness are proposed in @maCommunityawareDynamicNetwork2020. These measures compare the evolution rate of network structures against the evolution rate of the whole network given node embeddings between two consecutive snapshots. The intuition is that rapidly evolving structures relative to global evolution rate are temporally unstable and thus of low quality. Metrics proposed include:
 
+* **Network Stability**: Is defined as +@eq:networkstability and evaluates the evolution ratio of the low-dimensional node representations to the network representations between snapshots at $a$-th time stamp.
+* **Community Stability**: Is defined as +@eq:communitystability and computes stability of communities in dynamic networks on the embedded low-dimensional representations. It is represented as evolution ratio of the low-dimensional community representations to the network representations between snapshots at $a$-th time stamp.
 
-% @huangInformationFusionOriented2022
-% 
-% * Based on link prediction or friend recommendation
-% * Precision
-% * Recall
-% * F-score
-% * normalized discounted cumulative gain (nDCG)
-% * mean reciprocal rank (MRR)
+$$
+p_{s}^{a}=\frac{\left(\left\|\mathrm{H}^{a+1}-\mathrm{H}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}^{a+1}-\mathrm{A}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}^{a}\right\|_{2}^{2}}
+$$ {#eq:networkstability}
 
+$$
+p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q
+$$ {#eq:communitystability}
 
+In this case $\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}$ represents the normalized euclidean distance between the two clusters while $\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}$ represents the normalized euclidean distance between the adjacency matrices of the two clusters. For network stability no such grouping is done and evaluation is performed on global representation and adjacency matrices. 
 
 ### Task specific
 
@@ -127,8 +130,8 @@ In [@peelGroundTruthMetadata2017] the authors criticize annotation and metric ba
 
 % * Problems:
 %   * Absence of ground truth communities
-%   * Modularity cant be used - based on explicit links betwene users (structural)
-%     * Doesnt account for content at all
+%   * Modularity cant be used - based on explicit links between users (structural)
+%     * Doesn't account for content at all
 % * Solutions: Application level evaluation
 %   * A user community detection method is considered to have better quality iff its output communities improve an underlying application
 
@@ -138,24 +141,31 @@ To address this issue, is common for to evaluate algorithm on both earlier descr
 
 #### Link-prediction
 
+% * Link-prediction is a common task to evaluate embedding quality within Graph Representation learning
+%   * It usually given an existing graph links are split into a train and test set
+%   * The model is trained on the test set, while the edges in train set are predicted and evaluated using classification metrics
+%   * In context of dynamic community detection some changes can be applied 
 % * **User Prediction** @faniUserCommunityDetection2020
 %   * Goal: Predict which users posted a news article $a$ at time $t$
 %   * Methodology:
 %     * Find closest community to the article in terms of interest at time $t$ (cosine sim)
 %     * Members of community are predicted users
 %   * Same reasoning as news prediction
-%   * Metrics (classificiation metrics)
+%   * Metrics (classification metrics)
 %     * Precision, Recall, F-measure
 % * **Link Prediction**: @maCommunityawareDynamicNetwork2020
-%   * Prediction of existence of links between nodes in the next timestamps
-%   * Based on representation in the current timestamp
+%   * Prediction of existence of links between nodes in the next time stamps
+%   * Based on representation in the current time stamp
+
+A common way to evaluate quality of extracted node embeddings within Graph Representation learning is using the link-prediction task. As link-prediction can be done in unsupervised manner, it does not require additional labeling for evaluation. The edge set of the input network is split into a test set on which the model is trained, and a test set on which is used to compare the predicted links against. For node representation learning the predictions are defined by proximity between the nodes and a threshold. To quantify the quality of the results classification metrics are usually employed such as accuracy, precision, recall and f-score.
+
+In context of CD and DCD the link-prediction is usually modified to measure the predicting capability of the community embeddings. @faniUserCommunityDetection2020 define a user prediction task to predict which users posted a certain news article at a certain time. Their methodology is, given a news at time $t$, find the closest community to the article in representational similarity space. All members of the given community are seen as predicted users over which the classification metrics are calculated. Similarly @maCommunityawareDynamicNetwork2020 modify the task by predicting whether the edges will still exist within the next time stamp to also quantify temporal prediction capability of the trained embeddings.
 
 
 
 #### Recommendation Tasks
 
 % * Generally identified by the fact that they do population based recommendation
-% 
 % * **News recommendation** (in time) @faniUserCommunityDetection2020
 %   * Curate dataset of news articles mentioned by users (user mention means user interest)
 %   * Methodology:
@@ -175,6 +185,14 @@ To address this issue, is common for to evaluate algorithm on both earlier descr
 %       * $\mathrm{S}_{k}=\frac{1}{|\mathbb{U}|} \sum_{u \in \mathcal{U}}\left(\operatorname{rank}_{u} \leq k\right)$
 % * @rozemberczkiGEMSECGraphEmbedding2019
 %   * Music recommendation
+% * Based on link prediction or friend recommendation @huangInformationFusionOriented2022
+%   * Precision
+%   * Recall
+%   * F-score
+%   * normalized discounted cumulative gain (nDCG)
+%   * mean reciprocal rank (MRR)
+
+Another way quality of node representations can be evaluated, is using recommendation tasks. Here the idea is, instead of predicting a single item like in link-prediction, to rank the items based on their recommendation confidence. Using the ranked list, standard information retrieval metrics such as precision at rank, mean reciprocal rank and success at rank can be computed. This approach is applied to CD [@rozemberczkiGEMSECGraphEmbedding2019; @huangInformationFusionOriented2022; @faniUserCommunityDetection2020] by ranking recommendations for per community instead of on individual basis. Communities with higher scores therefore would indicate a high similarity between their members.
 
 
 
@@ -188,4 +206,4 @@ To address this issue, is common for to evaluate algorithm on both earlier descr
 %     * This is done for each timestamp
 %     * For each node, the nearest embedding neighbors are used as predicted links
 
-% 
+
