@@ -88,6 +88,23 @@ Proximity-based measures are often used to evaluate clustering tasks, but are al
   
   
 
+#### Structure-based measures
+
+% @maCommunityawareDynamicNetwork2020
+% 
+% * **Network Stabilization**: evaluates preformance of DNE on stabilization of embedding
+%   * dynamic network should have similar evolutionary patterns in both the learned low-dimensional representation and the
+%     network representation over time
+%   * evaluates the evolution ratio of the low-dimensional node representations to the network representations at $a$ th timestamp
+%   * $p_{s}^{a}=\frac{\left(\left\|\mathrm{H}^{a+1}-\mathrm{H}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}^{a+1}-\mathrm{A}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}^{a}\right\|_{2}^{2}} .$
+% * **Community Stabilization**: evaluates stability of communities in dynamic networks on the embedded low-dimensional representations
+%   * Evaluates communty evolution ratio to network representation evolution between subsequent timestamps
+%   * Lower values point to more stable communities and are better
+%   * $p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q$
+% * Note: the evalution is at graph level since their methods are spectral GAE based
+
+
+
 % @huangInformationFusionOriented2022
 % 
 % * Based on link prediction or friend recommendation
@@ -104,49 +121,60 @@ Proximity-based measures are often used to evaluate clustering tasks, but are al
 % * @peelGroundTruthMetadata2017 Criticize methods that define their own community criteria
 %   * No free lunch - solving task for your definition wont solve all CD problems
 %   * When CD algorithm, it is indistinguishable from possibilities: irrelevant metadata, orthogonal data, network lacks structure.
-%   * Evaluate on tasks and usecases and not based on a single measure
+%   * Evaluate on tasks and use-cases and not based on a single measure
 
-In [@peelGroundTruthMetadata2017] the authors criticize **these** evaluation approaches by proving that they introduce severe theoretical and practical problems. For one, they prove the no free lunch theorem for CD, ie. they prove that algorithmic biases that improve performance on one class of networks must reduce performance on others. Therefore, there can be no algorithm that is optimal for all possible community detection tasks, as quality of communities may differ by the optimized metrics. Additionally, they demonstrate that when a CD algorithm fails, the poor performance is indistinguishable from any of the three alternative possibilities: (i) the metadata is irrelevant to the network structure, (ii) the metadata and communities capture different aspects of network structure, (iii) the network itself lacks structure. Therefore, which community is optimal should depend on it’s subsequent use cases and not a single measure.
+In [@peelGroundTruthMetadata2017] the authors criticize annotation and metric based CD evaluation approaches by proving that they introduce severe theoretical and practical problems. For one, they prove the no free lunch theorem for CD, ie. they prove that algorithmic biases that improve performance on one class of networks must reduce performance on others. Therefore, there can be no algorithm that is optimal for all possible community detection tasks, as quality of communities may differ by the optimized metrics. Additionally, they demonstrate that when a CD algorithm fails, the poor performance is indistinguishable from any of the three alternative possibilities: (i) the metadata is irrelevant to the network structure, (ii) the metadata and communities capture different aspects of network structure, (iii) the network itself lacks structure. Therefore, which community is optimal should depend on it’s subsequent use cases and not a single measure.
 
-
-
-% @faniUserCommunityDetection2020
-% 
-% * Compare against Static Content Based CD Algorithms
-% * Content Based Community Detection
-% * Compare against Static Link Based CD Algorithms
-% * Compare against Multimodal Based CD Algorithms
 % * Problems:
 %   * Absence of ground truth communities
 %   * Modularity cant be used - based on explicit links betwene users (structural)
 %     * Doesnt account for content at all
 % * Solutions: Application level evaluation
 %   * A user community detection method is considered to have better quality iff its output communities improve an underlying application
-%   * **News recommendation** (in time)
-%     * Curate dataset of news articles mentioned by users (user mention means user interest)
-%     * Methodology:
-%       * Detect communities and assign them a topic of interest at a time
-%       * Topic is average of user interests
-%       * All news articles are ranked based on their similarity with the overall topic (in time)
-%       * Each member in community is recommended the ranked list
-%     * Metrics: (stadard info retreval metrics)
-%       * Precision at rank $k$ ($P_k$)
-%         * $\mathrm{P}_{k}=\frac{1}{|\mathrm{U}|} \sum_{u \in \mathbb{U}} \frac{t p_{u}}{k}$
-%         * $u$ is user
-%       * Mean Reciprocal Rank (MRR)
-%         * $\mathrm{MRR}=\frac{1}{|\mathbb{U}|} \sum_{u \in \mathbb{U}} \frac{1}{\operatorname{rank}_{u}}$
-%         * First position correct result occurs in list
-%       * Success at rank $k$ ($S_k$)
-%         * Probability that at least one correct item is within a top-k list
-%         * $\mathrm{S}_{k}=\frac{1}{|\mathbb{U}|} \sum_{u \in \mathcal{U}}\left(\operatorname{rank}_{u} \leq k\right)$
-%   * **User Prediction**
-%     * Goal: Predict which users posted a news article $a$ at time $t$
-%     * Methodology:
-%       * Find closest community to the article in terms of interest at time $t$ (cosine sim)
-%       * Members of community are predicted users
-%     * Same reasoning as news prediction
-%     * Metrics (classificiation metrics)
-%       * Precision, Recall, F-measure
+
+To address this issue, is common for to evaluate algorithm on both earlier described approaches as auxiliary tasks. The general sentiment behind it is, that communities have better quality if they improve an underlying application. In the following sections we describe a few commonly used auxiliary tasks in literature.
+
+
+
+#### Link-prediction
+
+% * **User Prediction** @faniUserCommunityDetection2020
+%   * Goal: Predict which users posted a news article $a$ at time $t$
+%   * Methodology:
+%     * Find closest community to the article in terms of interest at time $t$ (cosine sim)
+%     * Members of community are predicted users
+%   * Same reasoning as news prediction
+%   * Metrics (classificiation metrics)
+%     * Precision, Recall, F-measure
+% * **Link Prediction**: @maCommunityawareDynamicNetwork2020
+%   * Prediction of existence of links between nodes in the next timestamps
+%   * Based on representation in the current timestamp
+
+
+
+#### Recommendation Tasks
+
+% * Generally identified by the fact that they do population based recommendation
+% 
+% * **News recommendation** (in time) @faniUserCommunityDetection2020
+%   * Curate dataset of news articles mentioned by users (user mention means user interest)
+%   * Methodology:
+%     * Detect communities and assign them a topic of interest at a time
+%     * Topic is average of user interests
+%     * All news articles are ranked based on their similarity with the overall topic (in time)
+%     * Each member in community is recommended the ranked list
+%   * Metrics: (stadard info retreval metrics)
+%     * Precision at rank $k$ ($P_k$)
+%       * $\mathrm{P}_{k}=\frac{1}{|\mathrm{U}|} \sum_{u \in \mathbb{U}} \frac{t p_{u}}{k}$
+%       * $u$ is user
+%     * Mean Reciprocal Rank (MRR)
+%       * $\mathrm{MRR}=\frac{1}{|\mathbb{U}|} \sum_{u \in \mathbb{U}} \frac{1}{\operatorname{rank}_{u}}$
+%       * First position correct result occurs in list
+%     * Success at rank $k$ ($S_k$)
+%       * Probability that at least one correct item is within a top-k list
+%       * $\mathrm{S}_{k}=\frac{1}{|\mathbb{U}|} \sum_{u \in \mathcal{U}}\left(\operatorname{rank}_{u} \leq k\right)$
+% * @rozemberczkiGEMSECGraphEmbedding2019
+%   * Music recommendation
 
 
 
@@ -159,56 +187,5 @@ In [@peelGroundTruthMetadata2017] the authors criticize **these** evaluation app
 %     * Average reconstruction precision is measured
 %     * This is done for each timestamp
 %     * For each node, the nearest embedding neighbors are used as predicted links
-%   * **Link Prediction**:
-%     * Prediction of existence of links between nodes in the next timestamps
-%     * Based on representation in the current timestamp
-%   * **Network Stabilization**: evaluates preformance of DNE on stabilization of embedding
-%     * dynamic network should have similar evolutionary patterns in both the learned low-dimensional representation and the
-%       network representation over time
-%     * evaluates the evolution ratio of the low-dimensional node representations to the network representations at $a$ th timestamp
-%     * $p_{s}^{a}=\frac{\left(\left\|\mathrm{H}^{a+1}-\mathrm{H}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}^{a+1}-\mathrm{A}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}^{a}\right\|_{2}^{2}} .$
-%   * **Community Stabilization**: evaluates stability of communities in dynamic networks on the embedded low-dimensional representations
-%     * Evaluates communty evolution ratio to network representation evolution between subsequent timestamps
-%     * Lower values point to more stable communities and are better
-%     * $p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q$
-% * Network is first fine-tuned on each of the tasks
-% * Note: the evalution is at graph level since their methods are spectral GAE based
 
-
-
-% @rozemberczkiGEMSECGraphEmbedding2019
 % 
-% * Music recommendation
-
- 
-
-### Synthetic Datasets
-
-| Paper                                              | Description                                                                                              |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| @lancichinettiBenchmarkGraphsTesting2008           | Static networks (widely used)                                                                            |
-| @greeneTrackingEvolutionCommunities2010            | Generate Graphs based on Modularity measure                                                              |
-| @granellBenchmarkModelAssess2015                   |                                                                                                          |
-| @hamiltonRepresentationLearningGraphs2018          | Generate Time dependent Heterogeneous graphs using modularity optimization and multi-dependency sampling |
-| SYN - @ghalebiDynamicNetworkModel2019              |                                                                                                          |
-| SBM - @lancichinettiBenchmarksTestingCommunity2009 | extracted from the dynamic Stochastic Block Model                                                        |
-
-###Real World Datasets
-
-| Dataset | Description |
-| ------- | ----------- |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
-|         |             |
