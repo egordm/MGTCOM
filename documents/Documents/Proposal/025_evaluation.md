@@ -4,9 +4,9 @@
 % * Describe how detection and result tracking are evaluation
 % * Detection and Tracking are evaluated separately
 
-In the previous section we have described the different variations of community structure defintions as well as the approaches used for detecting these communities. In this sections we will cover how the found dynamic community structures can be evaluated in a more general setting to allow comparison of different approaches. While dynamic community detection problem can be seen as two tasks (resemblance/detection and matching/tracking) these two should separate evaluation tasks. 
+In the previous section, we have described the different variations of community structure definitions as well as the approaches used for detecting these communities. In this section, we will cover how the found dynamic community structures can be evaluated in a more general setting to allow a comparison of different approaches. While dynamic community detection problems can be seen as two tasks (resemblance/detection and matching/tracking) these two should separate evaluation tasks.
 
-In the following sections we cover both of the evaluation tasks by classifying approaches used in the literature in three classes. Namely, annotated, metric-based and task specific.
+In the following sections, we cover both of the evaluation tasks by classifying approaches used in the literature in three classes. Namely, annotated, metric-based, and task-specific.
 
 
 
@@ -19,9 +19,9 @@ In the following sections we cover both of the evaluation tasks by classifying a
 %   * Synthetic datasets
 %   * Use annotated features
 
-Evaluation of detected (dynamic) communities becomes much easier when the *ground truth communities* are provided. The evaluation is then done by comparing the difference between the produced communities and the effective ones. To perform this comparison, information theory based metric Normalized Mutual Information (NMI) is used which converts community sets to bit-strings and quantifies the “amount of information” can be obtained about one community by observing the other [@lancichinettiDetectingOverlappingHierarchical2009].
+Evaluation of detected (dynamic) communities becomes much easier when the *ground-truth communities* are provided. The evaluation is then done by comparing the difference between the produced communities and the effective ones. To perform this comparison, the information theory-based metric Normalized Mutual Information (NMI) is used which converts community sets to bit-strings and quantifies the “amount of information” that can be obtained about one community by observing the other [@lancichinettiDetectingOverlappingHierarchical2009].
 
-A possible drawback of this measure is that its complexity is quadratic in terms of identified communities. In [@rossettiNovelApproachEvaluate2016] alternative measure (NF1) with linear complexity is introduced which similarly to F1 score uses the trade-off between precision and recall (of the average of harmonic means) of the matched communities. In the follow-up work [@rossettiANGELEfficientEffective2020] the authors describe a way to apply this measure within the context of DCD by calculating this score for all the snapshots and aggregating the results into one single measure.
+A possible drawback of this measure is that its complexity is quadratic in terms of identified communities. In [@rossettiNovelApproachEvaluate2016] alternative measure (NF1) with linear complexity is introduced which similarly to the F1 score uses the trade-off between precision and recall (of the average of harmonic means) of the matched communities. In the follow-up work [@rossettiANGELEfficientEffective2020] the authors describe a way to apply this measure within the context of DCD by calculating this score for all the snapshots and aggregating the results into one single measure.
 
 % * Accuracy: @mrabahRethinkingGraphAutoEncoder2021
 % * NMI: @mrabahRethinkingGraphAutoEncoder2021, @jiaCommunityGANCommunityDetection2019, @yangCommunityAffiliationGraphModel2012
@@ -30,9 +30,9 @@ A possible drawback of this measure is that its complexity is quadratic in terms
 % * Omega Index: @yangCommunityAffiliationGraphModel2012
 %   * is the accuracy on estimating the number of communities that each pair of nodes shares
 
-Aside from NMI other measures are employed such as Jaccard Coeficient, Accuracy and Rand-Index measuring community overlap [@yangGraphClusteringDynamic2017; @mrabahRethinkingGraphAutoEncoder2021; @luoDetectingCommunitiesHeterogeneous2021], Overlapping-NMI [@yeDeepAutoencoderlikeNonnegative2018] and Omega-Index measuring is the accuracy on estimating the number of communities that each pair of nodes shares [@yangCommunityAffiliationGraphModel2012], 
+Aside from NMI other measures are employed such as Jaccard Coefficient, Accuracy and Rand-Index measuring community overlap [@yangGraphClusteringDynamic2017; @mrabahRethinkingGraphAutoEncoder2021; @luoDetectingCommunitiesHeterogeneous2021], Overlapping-NMI [@yeDeepAutoencoderlikeNonnegative2018] and Omega-Index measuring is the accuracy on estimating the number of communities that each pair of nodes shares [@yangCommunityAffiliationGraphModel2012],
 
-In real-world there are usually no ground truth communities. Therefore this approach is usually applied on synthetic datasets where the communities and their dynamicity is sampled from a distribution. Alternative approach some papers take is by defining ground truth communities using the metadata and node attributes present within the datasets. Some datasets may include annotated communities, but this is not common within DCD datasets.
+In the real world, there are usually no ground-truth communities. Therefore this approach is usually applied on synthetic datasets where the communities and their dynamicity is sampled from a distribution. An alternative approach some papers take is by defining ground-truth communities using the metadata and node attributes present within the datasets. Some datasets may include annotated communities, but this is not common within DCD datasets.
 
 
 
@@ -41,11 +41,11 @@ In real-world there are usually no ground truth communities. Therefore this appr
 % * When Ground Truth Communities don't exist
 % * Network-based measures
 
-Another way to evaluate and compare different CD algorithms without knowing ground truth communities is using a quality function. 
+Another way to evaluate and compare different CD algorithms without knowing ground-truth communities is using a quality function. 
 
 #### Network-based metrics
 
-The first first group of measures we consider operate directly on the network structure. They are most commonly used to evaluate link-based methods as their results are network partitioning sets. Modularity is the most widely used measure [@newmanFastAlgorithmDetecting2004; @suComprehensiveSurveyCommunity2021], since it measures the strength of division of a network into modules. Networks with high modularity have dense connections between the nodes within the modules, and sparse connections between nodes in different modules. Other measures are used as well including:
+The first group of measures we consider operates directly on the network structure. They are most commonly used to evaluate link-based methods as their results are network partitioning sets. Modularity is the most widely used measure [@newmanFastAlgorithmDetecting2004; @suComprehensiveSurveyCommunity2021], since it measures the strength of division of a network into modules. Networks with high modularity have dense connections between the nodes within the modules and sparse connections between nodes in different modules. Other measures are used as well including:
 
 * **Conductance**: the percentage of edges that cross the cluster border
 * **Expansion**: the number of edges that cross the community border
@@ -58,7 +58,7 @@ The first first group of measures we consider operate directly on the network st
 
 #### Proximity-based measures
 
-Proximity-based measures are often used to evaluate clustering tasks, but are also often used to evaluate representation-based CD methods since there is a large overlap in their methodology. Additionally, representation based approaches have a benefit of being able to quantify both entities and communities as a d-dimensional vector enabling a more direct comparison of the two [@wangVehicleTrajectoryClustering2020]. The most common measures include:
+Proximity-based measures are often used to evaluate clustering tasks but are also often employed for representation-based CD methods since there is a large overlap in their methodology. Additionally, representation-based approaches have the benefit of being able to quantify both entities and communities as a d-dimensional vector enabling a more direct comparison of the two [@wangVehicleTrajectoryClustering2020]. The most common measures include:
 
 % @wangVehicleTrajectoryClustering2020
 % 
@@ -83,7 +83,7 @@ Proximity-based measures are often used to evaluate clustering tasks, but are al
 %     * $tr$ is trace of the matrix
 
 * **Silhouette Coefficient**: Is defined as $S(i)=\frac{b(i)-a(i)}{\max \{a(i), b(i)\}}$ where $a(i)$ defines the mean distance from node $i$  to other nodes in the same cluster while $b(i)$ is mean distance to any node not in the same cluster. It measures cohesion of a cluster/community and indicates how well a node is matched to its own cluster.
-* **Davies-Bouldin Index**: Is the ratio of the sum of the average distance to the distance between the centers of mass of the two clusters. In other words, it is defined as a ratio of within cluster, to the between cluster separation. The index is defined as an average over all the found clusters, and is therefore also a good measure to deciding how many clusters should be used.
+* **Davies-Bouldin Index**: Is the ratio of the sum of the average distance to the distance between the centers of mass of the two clusters. In other words, it is defined as a ratio of within-cluster, to the between cluster separation. The index is defined as an average over all the found clusters and is therefore also a good measure to deciding how many clusters should be used.
 * **Calinski-Harabasz Index**: Is similarly the ratio of the between-cluster to the within-cluster variance. Therefore it measures both cohesion (how well its members fit the cluster) as well as compares it to other clusters (separation).
   
   
@@ -104,7 +104,7 @@ Proximity-based measures are often used to evaluate clustering tasks, but are al
 %   * $p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q$
 % * Note: the evaluation is at graph level since their methods are spectral GAE based
 
-To evaluate temporal stability and consistency of the node and community structures, measures based on temporal smoothness are proposed in @maCommunityawareDynamicNetwork2020. These measures compare the evolution rate of network structures against the evolution rate of the whole network given node embeddings between two consecutive snapshots. The intuition is that rapidly evolving structures relative to global evolution rate are temporally unstable and thus of low quality. Metrics proposed include:
+To evaluate temporal stability and consistency of the node and community structures, measures based on temporal smoothness are proposed in @maCommunityawareDynamicNetwork2020. These measures compare the evolution rate of network structures against the evolution rate of the whole network given node embeddings between two consecutive snapshots. The intuition is that rapidly evolving structures relative to the global evolution rate are temporally unstable and thus of low quality. Metrics proposed include:
 
 * **Network Stability**: Is defined as +@eq:networkstability and evaluates the evolution ratio of the low-dimensional node representations to the network representations between snapshots at $a$-th time stamp.
 * **Community Stability**: Is defined as +@eq:communitystability and computes stability of communities in dynamic networks on the embedded low-dimensional representations. It is represented as evolution ratio of the low-dimensional community representations to the network representations between snapshots at $a$-th time stamp.
@@ -126,7 +126,7 @@ In this case $\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}
 %   * When CD algorithm, it is indistinguishable from possibilities: irrelevant metadata, orthogonal data, network lacks structure.
 %   * Evaluate on tasks and use-cases and not based on a single measure
 
-In [@peelGroundTruthMetadata2017] the authors criticize annotation and metric based CD evaluation approaches by proving that they introduce severe theoretical and practical problems. For one, they prove the no free lunch theorem for CD, ie. they prove that algorithmic biases that improve performance on one class of networks must reduce performance on others. Therefore, there can be no algorithm that is optimal for all possible community detection tasks, as quality of communities may differ by the optimized metrics. Additionally, they demonstrate that when a CD algorithm fails, the poor performance is indistinguishable from any of the three alternative possibilities: (i) the metadata is irrelevant to the network structure, (ii) the metadata and communities capture different aspects of network structure, (iii) the network itself lacks structure. Therefore, which community is optimal should depend on it’s subsequent use cases and not a single measure.
+In [@peelGroundTruthMetadata2017] the authors criticize annotation and metric-based CD evaluation approaches by proving that they introduce severe theoretical and practical problems. For one, they prove the no-free lunch theorem for CD, ie. they prove that algorithmic biases that improve performance on one class of networks must reduce performance on others. Therefore, there can be no algorithm that is optimal for all possible community detection tasks, as the quality of communities may differ by the optimized metrics. Additionally, they demonstrate that when a CD algorithm fails, the poor performance is indistinguishable from any of the three alternative possibilities: (i) the metadata is irrelevant to the network structure, (ii) the metadata and communities capture different aspects of network structure, (iii) the network itself lacks structure. Therefore, which community is optimal should depend on its subsequent use cases and not a single measure.
 
 % * Problems:
 %   * Absence of ground truth communities
@@ -135,7 +135,7 @@ In [@peelGroundTruthMetadata2017] the authors criticize annotation and metric ba
 % * Solutions: Application level evaluation
 %   * A user community detection method is considered to have better quality iff its output communities improve an underlying application
 
-To address this issue, is common for to evaluate algorithm on both earlier described approaches as auxiliary tasks. The general sentiment behind it is, that communities have better quality if they improve an underlying application. In the following sections we describe a few commonly used auxiliary tasks in literature.
+To address this issue, it is common to evaluate the algorithm on both earlier described approaches as auxiliary tasks. The general sentiment behind it is, that communities have better quality if they improve an underlying application. In the following sections, we describe a few commonly used auxiliary tasks in literature.
 
 
 
@@ -157,11 +157,9 @@ To address this issue, is common for to evaluate algorithm on both earlier descr
 %   * Prediction of existence of links between nodes in the next time stamps
 %   * Based on representation in the current time stamp
 
-A common way to evaluate quality of extracted node embeddings within Graph Representation learning is using the link-prediction task. As link-prediction can be done in unsupervised manner, it does not require additional labeling for evaluation. The edge set of the input network is split into a test set on which the model is trained, and a test set on which is used to compare the predicted links against. For node representation learning the predictions are defined by proximity between the nodes and a threshold. To quantify the quality of the results classification metrics are usually employed such as accuracy, precision, recall and f-score.
+A common way to evaluate the quality of extracted node embeddings within Graph Representation learning is using the link-prediction task. As link-prediction can be done in an unsupervised manner, it does not require additional labeling for evaluation. The edge set of the input network is split into a test set on which the model is trained, and a test set on which is used to compare the predicted links against. For node representation learning the predictions are defined by proximity between the nodes and a threshold. To quantify the quality of the results classification metrics are usually employed such as accuracy, precision, recall, and f-score.
 
-In context of CD and DCD the link-prediction is usually modified to measure the predicting capability of the community embeddings. @faniUserCommunityDetection2020 define a user prediction task to predict which users posted a certain news article at a certain time. Their methodology is, given a news at time $t$, find the closest community to the article in representational similarity space. All members of the given community are seen as predicted users over which the classification metrics are calculated. Similarly @maCommunityawareDynamicNetwork2020 modify the task by predicting whether the edges will still exist within the next time stamp to also quantify temporal prediction capability of the trained embeddings.
-
-
+In the context of CD and DCD, the link prediction is modified to measure the predicting capability of the community embeddings. @faniUserCommunityDetection2020 defines a user prediction task to predict which users posted a certain news article at a certain time. Their methodology is, given a news item at time $t$, find the closest community to the article in representational similarity space. All members of the given community are seen as predicted users over which the classification metrics are calculated. Similarly, @maCommunityawareDynamicNetwork2020 modify the task by predicting whether the edges will still exist within the next timestamp to also quantify the temporal prediction capability of the trained embeddings.
 
 #### Recommendation Tasks
 
@@ -192,7 +190,7 @@ In context of CD and DCD the link-prediction is usually modified to measure the 
 %   * normalized discounted cumulative gain (nDCG)
 %   * mean reciprocal rank (MRR)
 
-Another way quality of node representations can be evaluated, is using recommendation tasks. Here the idea is, instead of predicting a single item like in link-prediction, to rank the items based on their recommendation confidence. Using the ranked list, standard information retrieval metrics such as precision at rank, mean reciprocal rank and success at rank can be computed. This approach is applied to CD [@rozemberczkiGEMSECGraphEmbedding2019; @huangInformationFusionOriented2022; @faniUserCommunityDetection2020] by ranking recommendations for per community instead of on individual basis. Communities with higher scores therefore would indicate a high similarity between their members.
+Another way the quality of node representations can be evaluated is by using recommendation tasks. Here the idea is, instead of predicting a single item like in link-prediction, to rank the items based on their recommendation confidence. Using the ranked list, standard information retrieval metrics such as precision at rank, mean reciprocal rank, and success at rank k can be computed. This approach is applied to CD [@rozemberczkiGEMSECGraphEmbedding2019; @huangInformationFusionOriented2022; @faniUserCommunityDetection2020] by ranking recommendations for per community instead of on an individual basis. Communities with higher scores therefore would indicate high similarity between their members.
 
 
 
@@ -205,5 +203,3 @@ Another way quality of node representations can be evaluated, is using recommend
 %     * Average reconstruction precision is measured
 %     * This is done for each timestamp
 %     * For each node, the nearest embedding neighbors are used as predicted links
-
-
