@@ -76,4 +76,9 @@ Throughout the literature various ways are used to incorporate temporal aspect i
 
 : *Do community-aware node embeddings perform well on both node as well as community evaluation based tasks?*
 
-% * 
+% * While optimizing for multiple objectives (community and individual based)
+%   * It is important to evaluate algorithm against other community algorithms
+%   * As well as dynamic representation methods
+%   * To see whether community-aware embeddings provide benefits for standard node represenation tasks
+
+While the main task of the algorithm is to find high quality dynamic communities, the result also includes community-aware dynamic embeddings. Aside from testing the quality of the communities, it as important to compare how this community-awareness influences the embeddings on dynamic node representation tasks such as link-prediction and node classification.

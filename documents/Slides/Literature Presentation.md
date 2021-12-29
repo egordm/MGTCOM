@@ -34,11 +34,11 @@ biblio-style: abbrvnat
     * Normalized Mutual Information score (NMI)
     * Modularity
 
-::: notes
+: : : notes
 
 - Quality function to evaluate algorithms **favors the ones that are designed to optimize it**
 
-:::
+: : : 
 
 ## Changes in Evolving Communities
 
@@ -48,35 +48,31 @@ biblio-style: abbrvnat
 
 
 
-::: notes
+: : : notes
 
-- 
-
-:::
+- : : : 
 
 ## Challenges & Uses
 
 * Ship of Thesseus: *deciding if an **element composed of several entities** at a given instant is the same or not as another one composed of some—or even none—of such entities at a later point in time is **necessarily arbitrary and cannot be answered unambiguously***
 * Dynamic community detection  solutions are often unstable
-
 * Use cases:
   * forecasting emerging market trends in online retail networks
   * characterizing functions of unknown proteins
   * real-time partitioning of web-pages with different topics
   * predicting the emergence and lifetimes of overlapping communities in online social networks
 
-::: notes
+: : : notes
 
 - *deciding if an **element composed of several entities** at a given instant is the same or not as another one composed of some—or even none—of such entities at a later point in time is **necessarily arbitrary and cannot be answered unambiguously***
 - Main issues encountered by dynamic community detection approaches is the **instability of solutions**
-
 * Use cases:
   * forecasting emerging market trends in online retail networks
   * characterizing functions of unknown proteins
   * real-time partitioning of web-pages with different topics
   * predicting the emergence and lifetimes of overlapping communities in online social networks
 
-:::
+: : : 
 
 # Classical ML Methods
 
@@ -108,7 +104,7 @@ biblio-style: abbrvnat
     * Allows for overlapping communities using modified node labeling algorithm
     * Matching based om multiple labels in t, t-1, t+1
 
-::: notes
+: : : notes
 
 - Independent Community Detection and Matching:
   - Unmodified traditional community detection methods can be reused
@@ -126,19 +122,18 @@ biblio-style: abbrvnat
   * Events are detected and evaluated against ground truth
   * Provides a deterministic output
 
-:::
+: : : 
 
 ## Dependent Community Detection
 
 * **Detect communities at time** $t$ and then **use them to detect communities at time $t+1$**,
 * Reduce computational cost but do not allow parallelism
-
 * Examples: 
   * **Gao, Luo, and Bu (2016)**:
     * Evolutionary community discovery algorithm based on **leader nodes**
     * Each **community is considered as a set of follower nodes** congregating close to a potential leader
 
-::: notes
+: : : notes
 
 - Dependent Community Detection
   - Reduce computational cost by reusing much of the previous community
@@ -148,26 +143,25 @@ biblio-style: abbrvnat
   * Evolutionary community discovery algorithm based on **leader nodes**
   * Each **community is considered as a set of follower nodes** congregating close to a potential leader
 
-:::
+: : : 
 
 ## Simultaneous Community Detection on All Snapshots
 
 * **Construct a single graph** and then run a classic community detection
 * Solution for the lack of stability of the independent community detection
 
-::: notes
+: : : notes
 
 - Simultaneous Community Detection on All Snapshots
   - **Main advantage**: is providing a solution for the lack of stability of the independent community detection
   - Difficulty to detect complex operations such as merging and splitting
 
-:::
+: : : 
 
 ## Dynamic Community Detection on Temporal Networks (online approach)
 
 * Update previously found communities based on network modifications
 * Problem: Modifications are done at a **local level**
-
 * Examples:
   * **Shang et al. (2012)**: 
     * Update graph real-time, and **locally modify the concerned communities** in a way to increase the modularity
@@ -177,7 +171,7 @@ biblio-style: abbrvnat
     * A dynamic network snapshot is totally re-partitioned once the error accumulation degree of incremental clustering exceeds a pre-defined threshold
     * Use 
 
-::: notes
+: : : notes
 
 - Dynamic Community Detection on Temporal Networks (online approach)
   - Since the communities evolve naturally through modifications, there is, **no longer, an instability problem**
@@ -190,7 +184,7 @@ biblio-style: abbrvnat
 - [@xuSuperspreadersSuperblockersBased2020]
   * A dynamic network snapshot is totally re-partitioned once the error accumulation degree of incremental clustering exceeds a pre-defined threshold
 
-:::
+: : : 
 
 # Deep Learning Based Methods
 
@@ -204,7 +198,7 @@ biblio-style: abbrvnat
 * Combine both Temporal Social Content $\mathcal{D}=(\mathbb{U}, \mathbb{M}, \mathrm{T})$ 
   * Model communities **based on topics of interest**
 
-::: notes
+: : : notes
 
 - They state the following: Content on the social network are often reflective of issues in the real world. Topics discussed on the network constantly change and hence users’ interests towards these topics
 - Apply a multimodal learning approach to community detection
@@ -214,7 +208,7 @@ biblio-style: abbrvnat
   * $\mathbb{U}$: Users/Nodes, $\mathbb{A}$: Edges
 - Homophily: (densely connected groups of users imply a user community)
 
-:::
+: : : 
 
 ## User community detection via embedding of social network structure and temporal content
 
@@ -226,13 +220,13 @@ biblio-style: abbrvnat
 
 <img src="/dd_volume/Development/Python/Thesis/notes/Slides/Literature Presentation.assets/Screenshot_20211118_134050.png" alt=" Different temporal behaviour of three Twitter users with respect to the War in Afghanistan topic" style="zoom:90%;" />
 
-::: notes
+: : : notes
 
 - **Region of like-mindedness**: Parts in $X$ where users share interest in same topics given a threshold (for level of interest)
 - BFS favours structural equivalence
 - DFS in contrast, respects homophily and leads to similar (close) embeddings for densely connected users
 
-:::
+: : : 
 
 ## User community detection via embedding of social network structure and temporal content
 
@@ -244,11 +238,11 @@ biblio-style: abbrvnat
   * Users end up in one community per users
   * Consider negative sampling
 
-::: notes
+: : : notes
 
 - With as weights the user embedding **dot products**
 
-:::
+: : : 
 
 ## Vehicle Trajectory Clustering Based on Dynamic Representation Learning of Internet of Vehicles
 
@@ -259,7 +253,7 @@ biblio-style: abbrvnat
   * Discretize vehicle positions using a Grid
   * Given vehicle $v$ at time $t$ , connect $k$ closest vehicles
 
-::: notes
+: : : notes
 
 - Vehicle trajectory clustering aims to regroup similar vehicle trajectories together into different groups
   - Extract relevant information in order to, for instance, calculate the optimal path from one position to another, detect abnormal behavior, monitor the traffic flow in a city, and predict the next position of an object
@@ -267,7 +261,7 @@ biblio-style: abbrvnat
   - Vehicle may present totally different trajectories over different time periods of a day
   - Meanwhile, the patterns on weekdays and weekends may also different.
 
-:::
+: : : 
 
 ## Vehicle Trajectory Clustering Based on Dynamic Representation Learning of Internet of Vehicles
 
@@ -279,15 +273,15 @@ biblio-style: abbrvnat
 * Finally clustering is done:
   * K-means, K-medoids, GMM
   * For each timestep
+    
+    
 
-
-
-::: notes
+: : : notes
 
 - Performs truncated random walks with length $l$ on each selected node for $r$ times
 - By using a silding window with length w + 1 + w to slide on each random walk sequence
 
-:::
+: : : 
 
 # Conclusion
 

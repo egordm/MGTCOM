@@ -6,9 +6,7 @@ creator: "Egor Dmitriev (6100120)"
 
 ---
 
-# Superspreaders and superblockers based community evolution tracking in dynamic social networks - Xu et al. 
-
-
+# Superspreaders and superblockers based community evolution tracking in dynamic social networks - Xu et al.
 
 ## Goals
 

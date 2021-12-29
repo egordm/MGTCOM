@@ -97,14 +97,14 @@ author:
   * Allows for **maintaining community stability**
   * $\mathrm{H}_{c_{k}}^{a}$: is the low-dimensional representation of community $C_k$ at $a$th time stamp
     * $\mathrm{H}_{\mathcal{C}_{k}}^{a}=\frac{\sum_{i \in \mathcal{C}_{k}} \mathrm{H}_{i .}^{a}}{\left|\mathcal{C}_{k}\right|}$ is average of its members’ representations
-* **Tradeoff between the sensibility and stability** (Small Scale vs Large Scale communities)
+* **Trade-off between the sensibility and stability** (Small Scale vs Large Scale communities)
   * In the embedded space, a **node is closer to its small-scale community than its large-scale community**
   * Small-scale community is more sensitive to the evolution than a large-scale community
 * **Community Evolution Loss (Hierarchical)**: $\mathbf{L}_{c}^{a}= \begin{cases}\sum_{k=1}^{q} \sum_{j=1}^{q_{k}} \sum_{i \in \mathcal{C}_{k}^{j}}\left\|\mathrm{H}_{i .}^{a}-\mathrm{H}_{\mathcal{C}_{k}^{j}}^{a-1}\right\|_{2}^{2} & \text { if } a>1 \\ 0 & \text { if } a=0\end{cases}$ where
   * Community: $\mathcal{C}_{k}=\left\{\mathcal{C}_{k}^{1}, \mathcal{C}_{k}^{2}, \ldots, \mathcal{C}_{k}^{q_{k}}\right\}$  
-  * $q_k$ is the number of small scale communitiies
+  * $q_k$ is the number of small scale communities
   * $\mathrm{H}_{\mathcal{C}_{k}^{j}}^{a}=\frac{\sum_{i \in \mathcal{C}_{k}^{j}} \mathrm{H}_{i}^{a}}{\left|\mathcal{C}_{k}^{j}\right|}$ 
-* Number of subcommunities: $q_k$ 
+* Number of sub communities: $q_k$ 
   * Determined by $w$ (hyperparameter) which controls the size of small communities
 * Calculating the loss requires already having communities:
   * **Requires having some prior knowledge about community structures**

@@ -188,6 +188,22 @@
   file = {/home/egordm/Documents/Research/Reference/storage/HE39ZTMV/Chakraborty et al_2019_Ensemble-based overlapping community detection using disjoint community.pdf}
 }
 
+@article{chenCatGCNGraphConvolutional2021,
+  title = {{{CatGCN}}: {{Graph Convolutional Networks}} with {{Categorical Node Features}}},
+  shorttitle = {{{CatGCN}}},
+  author = {Chen, Weijian and Feng, Fuli and Wang, Qifan and He, Xiangnan and Song, Chonggang and Ling, Guohui and Zhang, Yongdong},
+  year = {2021},
+  month = dec,
+  journal = {arXiv:2009.05303 [cs, stat]},
+  eprint = {2009.05303},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Recent studies on Graph Convolutional Networks (GCNs) reveal that the initial node representations (i.e., the node representations before the first-time graph convolution) largely affect the final model performance. However, when learning the initial representation for a node, most existing work linearly combines the embeddings of node features, without considering the interactions among the features (or feature embeddings). We argue that when the node features are categorical, e.g., in many real-world applications like user profiling and recommender system, feature interactions usually carry important signals for predictive analytics. Ignoring them will result in suboptimal initial node representation and thus weaken the effectiveness of the follow-up graph convolution. In this paper, we propose a new GCN model named CatGCN, which is tailored for graph learning when the node features are categorical. Specifically, we integrate two ways of explicit interaction modeling into the learning of initial node representation, i.e., local interaction modeling on each pair of node features and global interaction modeling on an artificial feature graph. We then refine the enhanced initial node representations with the neighborhood aggregation-based graph convolution. We train CatGCN in an end-to-end fashion and demonstrate it on semi-supervised node classification. Extensive experiments on three tasks of user profiling (the prediction of user age, city, and purchase level) from Tencent and Alibaba datasets validate the effectiveness of CatGCN, especially the positive effect of performing feature interaction modeling before graph convolution.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/CXW2GGSB/Chen et al_2021_CatGCN.pdf;/home/egordm/Documents/Research/Reference/storage/A87P4Y2X/2009.html}
+}
+
 @article{cosciaClassificationCommunityDiscovery2011,
   title = {A {{Classification}} for {{Community Discovery Methods}} in {{Complex Networks}}},
   author = {Coscia, Michele and Giannotti, Fosca and Pedreschi, Dino},
@@ -249,6 +265,22 @@
   abstract = {Knowledge Graph (KG) embedding has emerged as an active area of research resulting in the development of several KG embedding methods. Relational facts in KG often show temporal dynamics, e.g., the fact (Cristiano\_Ronaldo, playsFor, Manchester\_United) is valid only from 2003 to 2009. Most of the existing KG embedding methods ignore this temporal dimension while learning embeddings of the KG elements. In this paper, we propose HyTE, a temporally aware KG embedding method which explicitly incorporates time in the entity-relation space by associating each timestamp with a corresponding hyperplane. HyTE not only performs KG inference using temporal guidance, but also predicts temporal scopes for relational facts with missing time annotations. Through extensive experimentation on temporal datasets extracted from real-world KGs, we demonstrate the effectiveness of our model over both traditional as well as temporal KG embedding methods.},
   keywords = {Temporal Negative Sampling},
   file = {/home/egordm/Documents/Research/Reference/storage/9AQ25I7H/Dasgupta et al_2018_HyTE.pdf}
+}
+
+@article{devlinBERTPretrainingDeep2019,
+  title = {{{BERT}}: {{Pre-training}} of {{Deep Bidirectional Transformers}} for {{Language Understanding}}},
+  shorttitle = {{{BERT}}},
+  author = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  year = {2019},
+  month = may,
+  journal = {arXiv:1810.04805 [cs]},
+  eprint = {1810.04805},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
+  abstract = {We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5\% (7.7\% point absolute improvement), MultiNLI accuracy to 86.7\% (4.6\% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Computation and Language},
+  file = {/home/egordm/Documents/Research/Reference/storage/AMSPICWM/Devlin et al_2019_BERT.pdf;/home/egordm/Documents/Research/Reference/storage/ZRULVP4H/1810.html}
 }
 
 @inproceedings{diehlRelationshipIdentificationSocial2007,
@@ -865,6 +897,21 @@
   langid = {english},
   keywords = {class1,prio4,read},
   file = {/home/egordm/Documents/Research/Reference/storage/VPXYA664/Liu et al_2021_Multiple Local Community Detection via High-Quality Seed Identification over.pdf}
+}
+
+@article{liVariationalDiffusionAutoencoders2020,
+  title = {Variational {{Diffusion Autoencoders}} with {{Random Walk Sampling}}},
+  author = {Li, Henry and Lindenbaum, Ofir and Cheng, Xiuyuan and Cloninger, Alexander},
+  year = {2020},
+  month = aug,
+  journal = {arXiv:1905.12724 [cs, stat]},
+  eprint = {1905.12724},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  abstract = {Variational autoencoders (VAEs) and generative adversarial networks (GANs) enjoy an intuitive connection to manifold learning: in training the decoder/generator is optimized to approximate a homeomorphism between the data distribution and the sampling space. This is a construction that strives to define the data manifold. A major obstacle to VAEs and GANs, however, is choosing a suitable prior that matches the data topology. Well-known consequences of poorly picked priors are posterior and mode collapse. To our knowledge, no existing method sidesteps this user choice. Conversely, \$\textbackslash textit\{diffusion maps\}\$ automatically infer the data topology and enjoy a rigorous connection to manifold learning, but do not scale easily or provide the inverse homeomorphism (i.e. decoder/generator). We propose a method that combines these approaches into a generative model that inherits the asymptotic guarantees of \$\textbackslash textit\{diffusion maps\}\$ while preserving the scalability of deep models. We prove approximation theoretic results for the dimension dependence of our proposed method. Finally, we demonstrate the effectiveness of our method with various real and synthetic datasets.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/XQLHTSV3/Li et al_2020_Variational Diffusion Autoencoders with Random Walk Sampling.pdf;/home/egordm/Documents/Research/Reference/storage/RIBGHBH4/1905.html}
 }
 
 @article{luberCommunityDetectionHashtagGraphsSemiSupervised2021,
@@ -1569,6 +1616,15 @@
   file = {/home/egordm/Documents/Research/Reference/storage/ZZA22TDK/Wu et al_2021_SageDy.pdf}
 }
 
+@book{wuTopologicalMachineLearning2020,
+  title = {Topological {{Machine Learning}} for {{Mixed Numeric}} and {{Categorical Data}}},
+  author = {Wu, Chengyuan and Hargreaves, Carol},
+  year = {2020},
+  month = mar,
+  abstract = {Topological data analysis is a relatively new branch of machine learning that excels in studying high dimensional data, and is theoretically known to be robust against noise. Meanwhile, data objects with mixed numeric and categorical attributes are ubiquitous in real-world applications. However, topological methods are usually applied to point cloud data, and to the best of our knowledge there is no available framework for the classification of mixed data using topological methods. In this paper, we propose a novel topological machine learning method for mixed data classification. In the proposed method, we use theory from topological data analysis such as persistent homology, persistence diagrams and Wasserstein distance to study mixed data. The performance of the proposed method is demonstrated by experiments on a real-world heart disease dataset. Experimental results show that our topological method outperforms several state-of-the-art algorithms in the prediction of heart disease.},
+  file = {/home/egordm/Documents/Research/Reference/storage/MU2TAGBK/Wu_Hargreaves_2020_Topological Machine Learning for Mixed Numeric and Categorical Data.pdf}
+}
+
 @article{xieLabelRankStabilizedLabel2013,
   title = {{{LabelRank}}: {{A Stabilized Label Propagation Algorithm}} for {{Community Detection}} in {{Networks}}},
   shorttitle = {{{LabelRank}}},
@@ -1693,6 +1749,22 @@
   isbn = {978-1-4503-6014-2},
   keywords = {community detection,deep learning,deep nonnegative matrix factorization,graph clustering,network analytics},
   file = {/home/egordm/Documents/Research/Reference/storage/DU54HJFV/Ye et al_2018_Deep Autoencoder-like Nonnegative Matrix Factorization for Community Detection.pdf}
+}
+
+@article{yingGraphConvolutionalNeural2018,
+  title = {Graph {{Convolutional Neural Networks}} for {{Web-Scale Recommender Systems}}},
+  author = {Ying, Rex and He, Ruining and Chen, Kaifeng and Eksombatchai, Pong and Hamilton, William L. and Leskovec, Jure},
+  year = {2018},
+  month = jul,
+  journal = {Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining},
+  eprint = {1806.01973},
+  eprinttype = {arxiv},
+  pages = {974--983},
+  doi = {10.1145/3219819.3219890},
+  abstract = {Recent advancements in deep neural networks for graph-structured data have led to state-of-the-art performance on recommender system benchmarks. However, making these methods practical and scalable to web-scale recommendation tasks with billions of items and hundreds of millions of users remains a challenge. Here we describe a large-scale deep recommendation engine that we developed and deployed at Pinterest. We develop a data-efficient Graph Convolutional Network (GCN) algorithm PinSage, which combines efficient random walks and graph convolutions to generate embeddings of nodes (i.e., items) that incorporate both graph structure as well as node feature information. Compared to prior GCN approaches, we develop a novel method based on highly efficient random walks to structure the convolutions and design a novel training strategy that relies on harder-and-harder training examples to improve robustness and convergence of the model. We also develop an efficient MapReduce model inference algorithm to generate embeddings using a trained model. We deploy PinSage at Pinterest and train it on 7.5 billion examples on a graph with 3 billion nodes representing pins and boards, and 18 billion edges. According to offline metrics, user studies and A/B tests, PinSage generates higher-quality recommendations than comparable deep learning and graph-based alternatives. To our knowledge, this is the largest application of deep graph embeddings to date and paves the way for a new generation of web-scale recommender systems based on graph convolutional architectures.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Information Retrieval,Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/NFWXCAJH/Ying et al_2018_Graph Convolutional Neural Networks for Web-Scale Recommender Systems.pdf;/home/egordm/Documents/Research/Reference/storage/J27FHN4G/1806.html}
 }
 
 @article{yinMultiobjectiveEvolutionaryClustering2021,

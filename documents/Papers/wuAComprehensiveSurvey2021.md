@@ -34,10 +34,9 @@ creator: Egor Dmitriev (6100120)
 - **Spatial-temporal graph neural networks (STGNNs)** 
   - aim to learn hidden patterns from spatial-temporal graphs
 - **Graph Attention Network (GAT)**
-  -  assumes contributions of neighboring nodes to the central node are neither identical like GraphSage [42], nor pre-determined like GCN
+  - assumes contributions of neighboring nodes to the central node are neither identical like GraphSage [42], nor pre-determined like GCN
   - GAT further performs the multi-head attention to increase the model’s expressive capability. This shows an impressive improvement over GraphSage on node classification tasks.
-
-*  Spectral-based ConvGNNs
+* Spectral-based ConvGNNs
   * Note paper has some really intuitive explaination on spectral based GNNs
 
 ### Theoretical Foundation
@@ -47,14 +46,14 @@ creator: Egor Dmitriev (6100120)
 * **Graph isomorphism**:  Two graphs are isomorphic if they are topologically identical. They show that common GNNs such as GCN [22] and GraphSage [42] are incapable of distinguishing different graph structures. Xu et al. [57] further prove if the aggregation functions and the readout functions of a GNN are injective, the GNN is at most as powerful as the WL test in distinguishing different graphs.
 * **Equivariance and invariance**:  In order to achieve equivariance or invariance, components of a GNN must be invariant to node orderings
 * **Universal approximation**:   Xu et al. [57] show that ConvGNNs under the framework of message passing [27] are not universal approximators of continuous functions defined on multisets. Maron et al. [104] prove that an invariant graph network can approximate an arbitrary invariant function defined on graphs.
+  
+  
 
-
-
-### **Spatial-temporal graph neural networks (STGNNs)** 
+### **Spatial-temporal graph neural networks (STGNNs)**
 
 - Methods under this category aim to model the dynamic node inputs while assuming interdependency between connected nodes. 
 - Most **RNN-based approaches** capture spatial-temporal dependencies by filtering inputs and hidden states passed to a recurrent unit using graph convolutions [48], [71], [72].
--  Diffusion Convolutional Recurrent Neural Network (DCRNN) [72] incorporates a proposed diffusion graph convolutional layer (Equation 18) into a GRU network. In addition, DCRNN adopts an encoder-decoder framework to predict the future K steps of node values.
+- Diffusion Convolutional Recurrent Neural Network (DCRNN) [72] incorporates a proposed diffusion graph convolutional layer (Equation 18) into a GRU network. In addition, DCRNN adopts an encoder-decoder framework to predict the future K steps of node values.
 - **RNN-based approaches** suffer from time-consuming iterative propagation and gradient explosion/vanishing issues.
 - **CNN-based approaches** tackle spatial-temporal graphs in a non-recursive manner with the advantages of parallel computing, stable gradients, and low memory requirements.
 - Learning latent static spatial dependencies can help researchers discover interpretable and stable correlations among
