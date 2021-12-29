@@ -21,9 +21,8 @@ creator: "Egor Dmitriev (6100120)"
 
 * Project Title: 
   * Community Detection through Representation learning in Evolving Heterogenous Networks
-  
 * Short description of the project, including aims:
-
+  
   
 
 Recent developments in big data and graph representation learning have allowed researchers to make breakthroughs in social network analysis and the identification of communities. While opening a lot of research opportunities, such approaches are highly limited to snapshots of rapidly evolving social networks. This, in fact, is a great simplification of the real-world situation which is always evolving and expanding by the user and/or machine interactions. 
@@ -45,4 +44,3 @@ Agreements between students and supervisors:
 * Supervisor absence (holidays, conferences, etc.): No holidays planned yet
 * Presentations to be held: Thesis Defense
 * Lab/group meetings to be attended: N/A
-

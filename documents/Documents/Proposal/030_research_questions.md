@@ -7,6 +7,9 @@
 %   * Combination poses a problem
 % * To the best of my knowledge: there are currently no algorithms that can do this
 % * Direct comparison is therefore impossible
+% * Introduce our research questions
+%   * Elaborate a bit on their relevance
+%   * In next section explain their implementation
 
  The main goal of my thesis is to build a framework for community detection and representation in dynamic heterogeneous networks. 
 
@@ -16,7 +19,7 @@ As there are no alike algorithms, direct comparison is not possible. To both val
 
 
 
-[Research Question 1]{#thm:rq1}
+[Research Question 1 (Information)]{#thm:rq1}
 
 : *Does addition of meta-topological and/or content-based information improve quality of detected communities?*
 
@@ -29,11 +32,15 @@ As there are no alike algorithms, direct comparison is not possible. To both val
 % * Improvements in natural text analysis allow for representation of unstructured text
 %   * Would this data improve quality of embeddings
 
+While focusing on link-based features, CD algorithms treat all nodes alike. Therefore ignoring arguably most important structural features, namely node types. Additionally, supplementary node types can be constructed from categorical features enhancing network topology and solving issues requiring topic modelling. 
+
+Similarly, recent improvements in natural text processing allow for efficient representation of natural text which is proven to improve quality of node embeddings. As formation of communities is not purely a sociological process, CD problem should benefit from incorporation of such content-based features.
 
 
-[Research Question 2]{#thm:rq2}
 
-: *Does usage of graph representation function learning techniques improve scale of CD beyond current state of the art?*
+[Research Question 2 (Scale)]{#thm:rq2}
+
+: *Does usage of graph representation function learning techniques improve scale of CD beyond current state-of-the-art?*
 
 % * In last few years new graph representation approaches were introduced
 %   * Instead of operating on the whole networks
@@ -47,22 +54,26 @@ As there are no alike algorithms, direct comparison is not possible. To both val
 %   * allow for parameter sharing across timesteps
 %   * Allow for streaming graphs
 
+Previously mentioned representation-based DCD method use spectral graph representation methods which operate on the whole network at once. More recent graph representation approaches instead learn a graph representation function by sampling the network using random walks or convolutions. 
 
-
-[Research Question 3]{#thm:rq3}
-
-: *Does optimization for temporal smoothness provide better quality communities?*
-
-% * 
+This has a two-fold positive effects on the scalability of the algorithms. Computation can be done more efficiently as opposed to spectral methods which rely on adjacency matrices. By learning a representation function, embeddings are computed on-demand instead of being held in memory for the whole network therefore limiting impact of big networks. Other benefits may include the fact that they would be a suitable choice for processing streaming edge network variants.
 
 
 
-[Research Question 4]{#thm:rq4}
+[Research Question 3 (Modelling)]{#thm:rq3}
 
 : *Does making temporal features implicit in node representations provide better quality communities as opposed to making them explicit?*
 
 % * Previous approaches either
 %   * Learn the temporal component implicitly in node representations, causing embedding be temporally aware
-%   * Sepaerate the temporal aspect explicitly by defining 
+%   * Separate the temporal aspect explicitly by defining 
+
+Throughout the literature various ways are used to incorporate temporal aspect into node embeddings. The implicit approach aims to make the embeddings temporally aware while the explicit approach creates a separate embedding for each snapshot. While methods using either approaches have presented good results in the literature, it is important to analyse the potential trade-off and benefits of both.
 
 
+
+[Research Question 4 (Results)]{#thm:rq4}
+
+: *Do community-aware node embeddings perform well on both node as well as community evaluation based tasks?*
+
+% * 

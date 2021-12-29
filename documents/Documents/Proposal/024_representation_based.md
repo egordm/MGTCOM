@@ -311,9 +311,14 @@ In @faniUserCommunityDetection2020 the authors describe their method for identif
 
 
 
+% Important drawback:
+% 
+% * Require representation for each node
+
 
 
 % **Resources:**
 % 
 % * https://paperswithcode.com/paper/a-comprehensive-survey-on-community-detection/review/
-% * 
+
+

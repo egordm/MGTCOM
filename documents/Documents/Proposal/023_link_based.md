@@ -271,3 +271,4 @@ The final strategy we consider sidesteps the matching issue by considering all s
 % TODO: I promised some extensions in the intro. Should I add them?
 % 
 % * @liuCommunityDetectionMultiPartite2016  - Heterogenous Networks
+% * @wanyeTopologyGuidedSamplingFast2021 - Sampling
