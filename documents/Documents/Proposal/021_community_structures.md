@@ -18,9 +18,9 @@ The *link-based* (also referred to as classic) community detection methods intui
 
 Unfortunately, in most cases link-based methods fall short to identify communities of similar individuals. This is mainly due to two facts: (i) many similar individuals in a social network are not explicitly connected together, (ii) an explicit connection does not necessarily indicate similarity, but may explained by sociological processes such as conformity, friendship or kinship [@diehlRelationshipIdentificationSocial2007; @faniUserCommunityDetection2020].
 
-A more general definition is introduced in [@cosciaClassificationCommunityDiscovery2011] to create an underlying concept generalizing all variants found in the literature (+@thm:community). In link-based methods, a direct connection is considered as a particular and very important kind of action, while newer methods also consider content or interest overlap.
+A more general definition is introduced in [@cosciaClassificationCommunityDiscovery2011] to create an underlying concept generalizing all variants found in the literature (+@dfn:community). In link-based methods, a direct connection is considered as a particular and very important kind of action, while newer methods also consider content or interest overlap.
 
-[Community]{#thm:community}
+[Community]{#dfn:community}
 
 : A community in a complex network is a set of entities that share some closely correlated sets of actions with the other entities of the community.
 

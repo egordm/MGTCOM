@@ -16,3 +16,10 @@ abstract: |
   | Relying on novel research of dynamic graph representation learning, the goal of my thesis project is to build a framework for community detection and representation in dynamic heterogeneous networks. To verify the merit of the proposed framework, it will be evaluated against baselines on static heterogeneous graphs, and analyzed against gathered twitter dataset on covid measures.
 toc-depth: 2
 xnos-capitalise: true
+theoremnos-names:
+- id: thm
+  name: Theorem
+- id: rqq
+  name: Research Question
+- id: dfn
+  name: Definition

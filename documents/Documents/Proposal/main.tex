@@ -60,36 +60,17 @@ acmthm]{../../scripts/pandoc/templates/acmart}
 \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 %\setcounter{secnumdepth}{5}
 
-%% pandoc-eqnos: required package
+%% pandoc-theoremnos: required package
+\usepackage{amsthm}
 \usepackage[capitalise]{cleveref}
+
+%% pandoc-theoremnos: set theorem types
+\newtheorem{thm}{Theorem}
+\newtheorem{rqq}{Research Question}
+\newtheorem{dfn}{Definition}
 
 %% pandoc-eqnos: disable brackets around cleveref numbers
 \creflabelformat{equation}{#2#1#3}
-
-%% pandoc-tablenos: required package
-\usepackage{caption}
-
-%% pandoc-tablenos: environment to disable table caption prefixes
-\makeatletter
-\newcounter{tableno}
-\newenvironment{tablenos:no-prefix-table-caption}{
-  \caption@ifcompatibility{}{
-    \let\oldthetable\thetable
-    \let\oldtheHtable\theHtable
-    \renewcommand{\thetable}{tableno:\thetableno}
-    \renewcommand{\theHtable}{tableno:\thetableno}
-    \stepcounter{tableno}
-    \captionsetup{labelformat=empty}
-  }
-}{
-  \caption@ifcompatibility{}{
-    \captionsetup{labelformat=default}
-    \let\thetable\oldthetable
-    \let\theHtable\oldtheHtable
-    \addtocounter{table}{-1}
-  }
-}
-\makeatother
 \ifLuaTeX
 \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -134,7 +115,7 @@ expanding by the user and/or machine interactions.\\
 \strut \\
 Relying on novel research of dynamic graph representation learning, the
 goal of my thesis project is to build a framework for community
-detection and representation in evolving heterogeneous networks. To
+detection and representation in dynamic heterogeneous networks. To
 verify the merit of the proposed framework, it will be evaluated against
 baselines on static heterogeneous graphs, and analyzed against gathered
 twitter dataset on covid measures.
@@ -177,7 +158,7 @@ community discovery.
 This thesis proposal is structured as follows: in this section, we are
 going to introduce basic concepts and challenges of Dynamic Community
 Detection. In \cref{literature-review} a brief literature survey is
-conducted on identifying the current state of the art and approaches to
+conducted, identifying the current state of the art and approaches to
 Dynamic Community Detection. In \cref{research-questions} we will
 describe the problem we are trying to solve as well as formulate the
 research questions. In \cref{approach} we will elaborate on our proposed
@@ -257,9 +238,9 @@ terms of membership assignment, while in more content-based settings
 communities are described in terms of modeled topics (that usually
 represent interest areas) or distributions over latent similarity space.
 Both definitions have their shortcomings as they often fail to account
-for more complex community structures (such as overlapping and
-hierarchical communities) and non-linearity of structures often found in
-the real world.
+for more complex community structures (overlapping and hierarchical
+communities) and non-linearity of structures often found in the real
+world.
 
 Task of community detection is often compared to clustering and graph
 clustering, which not always may be a fair comparison as a main focus
@@ -346,16 +327,17 @@ conformity, friendship or kinship
 A more general definition is introduced in
 \citep{cosciaClassificationCommunityDiscovery2011} to create an
 underlying concept generalizing all variants found in the literature
-(+\citet{thm:community}). In link-based methods, a direct connection is
+(\cref{dfn:community}). In link-based methods, a direct connection is
 considered as a particular and very important kind of action, while
 newer methods also consider content or interest overlap.
 
-\begin{description}
-\item[\protect\hypertarget{thm:community}{}{Community}]
+\begin{dfn}[Community]\label{dfn:community} 
+
 A community in a complex network is a set of entities that share some
 closely correlated sets of actions with the other entities of the
 community.
-\end{description}
+
+\end{dfn}
 
 \hypertarget{dynamic-communities}{%
 \subsubsection{Dynamic Communities}\label{dynamic-communities}}
@@ -861,11 +843,10 @@ objective function as a combination of three terms: normalization term
 (ensures embeddings are centered at the origin), proximity term (forces
 nodes with similar neighborhoods to be embedded close), cluster quality
 term (forces nodes to be close to their nearest cluster). Additionally,
-a ``social network cost'' or \emph{homophily} term is added as a
-regularizer to optimize for proximity between nodes within the same
-cluster. During training, the clustering coefficient is annealed to
-ensure convergence and negative sampling is employed to avoid large
-softmax costs.
+a ``social network cost'' term is added as a regularizer to optimize for
+proximity between nodes within the same cluster. During training, the
+clustering coefficient is annealed to ensure convergence and negative
+sampling is employed to avoid large softmax costs.
 
 \citet{yangGraphClusteringDynamic2017} propose a similar idea of
 combining embedding and clustering tasks and solving them in an
@@ -876,7 +857,7 @@ GRACE cluster module which first computes soft cluster assignment matrix
 \(Q\) by utilizing the embeddings and cluster centers which contains
 probabilities \(q_{ik}\) of node \(i\) belonging to cluster \(k\). The
 clustering loss is defined as KL-divergence between the soft clustering
-\(Q\) and auxiliary target distribution \(P\) which is defined by
+\(Q\) and auxiliary target distribution \(P\) which is computed by
 squaring and normalizing the soft assignments to reinforce more
 confident clustering results while preventing the formation of
 excessively large clusters. Both embeddings and clustering are optimized
@@ -1182,51 +1163,77 @@ similarity between their members.
 \hypertarget{datasets}{%
 \subsection{Datasets}\label{datasets}}
 
+In this section, we curate popular datasets used in literature for CD
+and DCD tasks. First, we discuss methods for generating synthetic
+datasets containing ground-truth communities. We conclude this section
+with an overview of real-world dynamic networks.
+
 \hypertarget{synthetic-datasets}{%
 \subsubsection{Synthetic Datasets}\label{synthetic-datasets}}
 
-\begin{tablenos:no-prefix-table-caption}
+Synthetic Datasets are datasets generated by specific models on manually
+designed rules. These datasets are generated with communities in mind
+and therefore most of the time contain ground-truth communities which
+can be used for the evaluation of CD algorithms. In this section, we
+describe a selection of popular synthetic data set generation
+techniques.
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.3247}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.6753}}@{}}
-\toprule
-\begin{minipage}[b]{\linewidth}\raggedright
-Paper
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Description
-\end{minipage} \\
-\midrule
-\endhead
-\citet{lancichinettiBenchmarkGraphsTesting2008} & Static networks
-(widely used) \\
-\citet{greeneTrackingEvolutionCommunities2010} & Generate Graphs based
-on Modularity measure \\
-\citet{granellBenchmarkModelAssess2015} & \\
-\citet{hamiltonRepresentationLearningGraphs2018} & Generate Time
-dependent Heterogeneous graphs using modularity optimization and
-multi-dependency sampling \\
-SYN - \citet{ghalebiDynamicNetworkModel2019} & \\
-SBM - \citet{lancichinettiBenchmarksTestingCommunity2009} & extracted
-from the dynamic Stochastic Block Model \\
-\bottomrule
-\end{longtable}
+The most common benchmark dataset is was introduced in
+\citet{lancichinettiBenchmarkGraphsTesting2008}. Their method for
+generating the network generates communities and their nodes with size
+and degree drawn from a power-law distribution. After that node edge
+rewiring is applied that enforces mixture parameter \(\mu\) which
+determines the ratio of in- to between-community connections. In
+follow-up \citep{lancichinettiBenchmarksTestingCommunity2009} the
+authors extend their method to work for overlapping communities.
 
-\end{tablenos:no-prefix-table-caption}
+In \citet{greeneTrackingEvolutionCommunities2010} the authors modify the
+\citet{lancichinettiBenchmarkGraphsTesting2008} method to generate
+dynamic community networks. They do this by defining a set of community
+events that can be used as seeds for the temporal evolution of the
+network. The subsequent snapshots of the graph are defined by this set
+of events.
+
+\citet{granellBenchmarkModelAssess2015} propose a model for generating
+simple dynamic networks based on stochastic block models (SBM). The time
+evolution consists of periodic oscillation of the system's structure
+between configurations. Once the initial network is created, it is
+divided into subgraphs each having certain inter-and intra- connectivity
+probability. The edges between the timestamps are drawn from binomial
+distributions which themselves are modified by stochastic
+community-based events such as shrinking, growing, merging, and
+splitting.
+
+\citet{ghalebiDynamicNetworkModel2019} similarly proposes an SBM
+model-based approach to generate dynamic community networks.
+Additionally, they propose a methodology to learn model parameters from
+existing real-world networks.
 
 \hypertarget{real-world-datasets}{%
 \subsubsection{Real World Datasets}\label{real-world-datasets}}
 
-Hello world
-
-\begin{tablenos:no-prefix-table-caption}
+Real-world network datasets are often categorized based on the source
+they model such as social networks, biological networks, and webpage
+networks. In \cref{tbl:realworlddatasets} we present an overview of the
+most commonly used datasets in the literature. For each of the datasets,
+we describe their scale in terms of their node and edge counts.
+Additionally, we specify the presence of meta-topological information in
+form of node types, whether the network is dynamic, whether it includes
+content-based (unstructured/textual) information, and the availability
+of node features.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2754}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2186}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1766}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1228}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2066}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2706}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2147}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1735}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1206}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2206}}@{}}
+\caption{Summary of real-world data sets. Nodes column contains single
+character combinations representing the node types available (one
+character per distinct type). Node attributes column indicates the
+presence of temporal data using character ``T'' and the presence of
+content-based (unstructured) data with character ``C''.
+\label{tbl:realworlddatasets}}\tabularnewline
 \toprule
 \begin{minipage}[b]{\linewidth}\raggedright
 Data set
@@ -1237,7 +1244,21 @@ Nodes~~~~~~~~~
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Edges~~~~~~
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Node Attributes~~~~~~~~~
+Node Attributes~~~~~~~~~~
+\end{minipage} \\
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{\linewidth}\raggedright
+Data set
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Nodes~~~~~~~~~
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Edges~~~~~~
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Node Attributes~~~~~~~~~~
 \end{minipage} \\
 \midrule
 \endhead
@@ -1274,22 +1295,461 @@ Node Attributes~~~~~~~~~
 \href{https://snap.stanford.edu/data/wiki-RfA.html}{Wiki-RFA} &
 \citep{westExploitingSocialNetwork2014} & 10K (U) & 159K & 5 (CT) \\
 \href{https://snap.stanford.edu/data/soc-sign-bitcoin-otc.html}{Bitcoin}
-& \citep{kumarEdgeWeightPrediction2016} & 5K & 35K & 2 (T) \\
+& \citep{kumarEdgeWeightPrediction2016} & 5K (U) & 35K & 2 (T) \\
 \href{https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0168344}{Rumor
 Detection} & \citep{kwonRumorDetectionVarying2017} & 54M (UT) & 1.9B &
 22 (T) \\
 \bottomrule
 \end{longtable}
 
-\end{tablenos:no-prefix-table-caption}
-
 \hypertarget{research-questions}{%
 \section{Research Questions}\label{research-questions}}
+
+The main goal of my thesis is to build a framework for community
+detection and representation in dynamic heterogeneous networks.
+
+This is, to enable dynamic community analysis on the datasets proposed
+in \citet{wangPublicSentimentGovernmental2020}. The data described is
+collected from the Twitter social platform and is dynamic,
+heterogeneous, and rich in contentual (unstructured text) data. To the
+best of our knowledge, there are currently no dynamic community
+detection algorithms that can handle this data without relaxing its rich
+data representation (data loss).
+
+As there are no alike algorithms, direct comparison is not possible. To
+both validate the merit of our methods as well as the quality of the
+results, we spread our research over four research questions.
+
+\begin{rqq}[Information]\label{rqq:rq1} 
+
+\emph{Does addition of meta-topological and/or content-based information
+improve quality of detected communities?}
+
+\end{rqq}
+
+While focusing on link-based features, CD algorithms treat all nodes
+alike. Therefore ignoring arguably most important structural features,
+namely node types. Additionally, supplementary node types can be
+constructed from categorical features enhancing network topology and
+solving issues requiring topic modeling.
+
+Similarly, recent improvements in natural text processing allow for
+efficient representation of natural text which is proven to improve the
+quality of node embeddings. As the formation of communities is not
+purely a sociological process, the CD problem should benefit from the
+incorporation of such content-based features.
+
+\begin{rqq}[Scale]\label{rqq:rq2} 
+
+\emph{Does usage of graph representation function learning techniques
+improve scale of CD beyond current state-of-the-art?}
+
+\end{rqq}
+
+The previously mentioned representation-based DCD method use spectral
+graph representation methods which operate on the whole network at once.
+More recent graph representation approaches instead learn a graph
+representation function by sampling the network using random walks or
+convolutions.
+
+This has a two-fold positive effect on the scalability of the
+algorithms. Computation can be done more efficiently as opposed to
+spectral methods which rely on adjacency matrices. By learning a
+representation function, embeddings are computed on-demand instead of
+being held in memory for the whole network, therefore, limiting the
+impact of big networks. Other benefits may include the fact that they
+would be a suitable choice for processing streaming edge network
+variants.
+
+\begin{rqq}[Modelling]\label{rqq:rq3} 
+
+\emph{Does making temporal features implicit in node representations
+provide better quality communities as opposed to making them explicit?}
+
+\end{rqq}
+
+Throughout the literature, various ways are used to incorporate temporal
+aspects into node embeddings. The implicit approach aims to make the
+embeddings temporally aware while the explicit approach creates a
+separate embedding for each snapshot. While methods using either
+approach have presented good results in the literature, it is important
+to analyze the potential trade-off and benefits of both.
+
+\begin{rqq}[Results]\label{rqq:rq4} 
+
+\emph{Do community-aware node embeddings perform well on both node as
+well as community evaluation based tasks?}
+
+\end{rqq}
+
+While the main task of the algorithm is to find high-quality dynamic
+communities, the result also includes community-aware dynamic
+embeddings. Aside from testing the quality of the communities, it is
+important to compare how this community awareness influences the
+embeddings on dynamic node representation tasks such as link prediction
+and node classification.
 
 \hypertarget{approach}{%
 \section{Approach}\label{approach}}
 
-\renewcommand\refname{Planning}
+To find an answer to our research questions, the methodology is split
+into multiple parts which address the selection of baselines, evaluation
+benchmark set up, the architecture of the algorithm, building an
+appropriate objective function, and elaborating on DCD result extraction
+respectively. While split into parts, it is important to note that these
+tasks have a large overlap and won't be considered in isolation.
+
+The final result of my thesis will consist of the said framework for DCD
+within dynamic heterogeneous graphs, a set of results comparing the
+algorithm to the current state-of-the-art approaches on various related
+tasks, and a set of ablation tests providing empirical corroboration for
+important design choices.
+
+\hypertarget{benchmarks-and-baselines}{%
+\subsection{Benchmarks and Baselines}\label{benchmarks-and-baselines}}
+
+As the research questions posed in \cref{research-questions} are all
+mostly of a quantitative nature, it is very important to set up
+appropriate benchmarks in order to provide a valid answer. As a direct
+comparison between methods is not always possible, we define auxiliary
+task benchmarks testing algorithms on desired properties as well as
+reuse benchmarks used in previous literature to provide a fair
+comparison.
+
+\hypertarget{benchmarks-and-evaluation}{%
+\subsubsection{Benchmarks and
+Evaluation}\label{benchmarks-and-evaluation}}
+
+To provide an answer for \cref{rqq:rq1}, the quality of the algorithm on
+both static and dynamic communities needs to be compared against the
+benchmarks for various configurations (considering the content and/or
+meta-topological data). As our baselines include both representation- as
+well as link-based approaches, the benchmarks should cover measures used
+in both groups. To evaluate the quality of the communities,
+annotation-based approaches (computing NMI and NF1) and quality
+metric-based evaluation approaches will be employed (See
+\ref{evaluation}). Since our definition of community slightly differs
+from the literature as it encompasses network external information
+(content) we will also employ task-based evaluation such as
+recommendation tasks (follower recommendation, hashtag recommendation -
+depending on the dataset).
+
+A similar evaluation methodology will be employed for \cref{rqq:rq3},
+though the question is of a more exploratory nature concerning the
+modeling of temporal information, and therefore will be conducted as an
+ablation test with a focus on stability measures.
+
+The \cref{rqq:rq2} aims to compare the scalability of our approach to
+the current representation-based approaches. Therefore a rough
+complexity analysis, as well as performance benchmarking (computation
+time), shall be conducted.
+
+Finally, \cref{rqq:rq4} addresses the usability of our dynamic community
+detection results to other tasks concerning dynamic node representation
+learning. Here we, make use of defined auxiliary tasks (recommendation
+and link-prediction) to compare our method against more popular dynamic
+node representation learning algorithms.
+
+\hypertarget{baselines}{%
+\subsubsection{Baselines}\label{baselines}}
+
+To give a fair representation of the state-of-the-art the following
+methods are selected as baselines. The selection is based on the
+category of communities they learn, diversification of techniques, and
+competitiveness with the ideas introduced as part of our framework.
+
+\hypertarget{static-community-detection}{%
+\paragraph{Static Community
+Detection:}\label{static-community-detection}}
+
+\begin{itemize}
+\tightlist
+\item
+  Link-based:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \citet{heFastAlgorithmCommunity2015}
+  \item
+    \citet{rossettiANGELEfficientEffective2020}
+  \end{itemize}
+\item
+  Representation-based:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \citet{rozemberczkiGEMSECGraphEmbedding2019}~~~~
+  \item
+    \citet{cavallariLearningCommunityEmbedding2017}
+  \item
+    \citet{jiaCommunityGANCommunityDetection2019}
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{dynamic-community-detection-1}{%
+\paragraph{Dynamic Community
+Detection:}\label{dynamic-community-detection-1}}
+
+\begin{itemize}
+\tightlist
+\item
+  Link-based:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \citet{rossettiANGELEfficientEffective2020}
+  \end{itemize}
+\item
+  Representation-based:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \citet{wangEvolutionaryAutoencoderDynamic2020}
+  \item
+    \citet{maCommunityawareDynamicNetwork2020}
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{dynamic-representation-learning}{%
+\paragraph{Dynamic Representation
+Learning:}\label{dynamic-representation-learning}}
+
+\begin{itemize}
+\tightlist
+\item
+  \citet{nguyenContinuousTimeDynamicNetwork2018}
+\item
+  \citet{wuSageDyNovelSampling2021}
+\end{itemize}
+
+\hypertarget{representation-learning}{%
+\subsection{Representation learning}\label{representation-learning}}
+
+The core part of the proposed framework is the representation learning
+algorithm as it is responsible for both random walk sampling of the
+graph, as well as provides the architecture for the deep neural network
+used to learn or map the node representation. The representation
+learning can be split into three main components. Each of the components
+respectively has sufficient prior work and has been used in literature.
+The challenge lays in combining them into an efficient architecture for
+representation learning capable of maximizing set objective function.
+
+\hypertarget{graph-sampling}{%
+\subsubsection{Graph Sampling}\label{graph-sampling}}
+
+The first component concerns efficient graph sampling. In the
+literature, various ways to sample graphs can be found a way that
+enforces learning desired topological properties of the network. In this
+work, the choice lies between random walk approaches
+\citep{perozziDeepWalkOnlineLearning2014, groverNode2vecScalableFeature2016, groverNode2vecScalableFeature2016}
+which traverse the graph in a depth-first search manner which is known
+for favoring homophily and convolution-based approaches
+(\citet{kipfSemiSupervisedClassificationGraph2017a};
+\citet{hamiltonInductiveRepresentationLearning2018}) which sample the
+graph in a breadth-first search manner favoring structural equivalence.
+
+Both methods support heterogeneous graph sampling
+\citep{wuAuthor2VecFrameworkGenerating2020, yingGraphConvolutionalNeural2018, yangHeterogeneousNetworkRepresentation2020, dongMetapath2vecScalableRepresentation2017, wangHeterogeneousGraphAttention2021},
+and temporally aware sampling
+\citep{nguyenContinuousTimeDynamicNetwork2018, wuSageDyNovelSampling2021, dasguptaHyTEHyperplanebasedTemporally2018}.
+
+\hypertarget{dnn-architecture}{%
+\subsubsection{DNN Architecture}\label{dnn-architecture}}
+
+The architecture and training strategy of the underlying neural network
+matter. Many methods introduced in the previous section already outline
+an effective architecture suitable for training on the introduced
+sampling method. Though it is important to note that as both data and
+requirements for our algorithms differ, they can not be used as it. The
+architecture should allow for heterogeneous graph samples, temporally
+aware samples, and node features.
+
+Similarly, related literature can be used as inspiration as various
+approaches already utilize content-rich networks
+\citep{wuAuthor2VecFrameworkGenerating2020, yingGraphConvolutionalNeural2018},
+attention-based mechanisms
+\citep{abu-el-haijaWatchYourStep2018, sankarDynamicGraphRepresentation2019, wangHeterogeneousGraphAttention2021},
+and alternative training strategies such (variational or diffusion)
+auto-encoders, GAN
+\citep{liVariationalDiffusionAutoencoders2020, kipfVariationalGraphAutoEncoders2016}.
+
+\hypertarget{feature-fusion}{%
+\subsubsection{Feature Fusion}\label{feature-fusion}}
+
+Many of the presented datasets are feature-rich. While for some feature
+types using them is as simple as pre-processing the values and passing
+them to the DNN, some features require additional attention. The natural
+text features can be aggregated into a single representation vector
+using pre-trained embeddings
+\citep{devlinBERTPretrainingDeep2019, penningtonGloveGlobalVectors2014},
+and (large) categorical features may be transformed into network nodes,
+thus moving the information into topological domain
+\citep{chenCatGCNGraphConvolutional2021, wuTopologicalMachineLearning2020}.
+
+\hypertarget{objective-function}{%
+\subsection{Objective Function}\label{objective-function}}
+
+A very important part of representation-based DCD methods is the
+objective function. By utilizing node (and community) representation
+vectors one can optimize the network to maximize a multi-objective
+function using back-propagation. During the training process, the focus
+can be shifted between the different objectives. By focusing on defining
+necessary criteria for dynamic community detection which will give a
+rough overview of the multi-objective function we will use.
+
+\hypertarget{cohesion}{%
+\paragraph{Cohesion}\label{cohesion}}
+
+The most common definition states that communities are characterized by
+more dense inter-community connections compared to intra-community
+density. Representation methods extend this definition by noting that
+the density of the connections is can be represented by the topological
+similarity measure of two nodes. Clustering methods further extend this
+definition by defining similarity on multi-modal embeddings, therefore
+keeping the definition consistent for attributed networks. Therefore a
+viable choice for community cohesion would be the Silhouette Coefficient
+(See \cref{evaluation})
+
+\hypertarget{homophily}{%
+\paragraph{Homophily}\label{homophily}}
+
+To ensure reliable computation of the cohesion measure, the
+representation vectors need to be accurate. A way to train these
+representations is by assuming homophily which states that the more two
+nodes occur in the same context, the more similar they are. This is
+translated to network problems by using node neighborhood as context.
+Either using first-order proximity where nodes should occur in their
+counterpart's context or by utilizing second-order proximity where two
+nodes are similar if they share the same context. Hybrid approaches
+exist which optimize for both as they both model different semantics.
+This idea can also be extended to content-based features and attributed
+networks, therefore, extending the definition of a community through
+transitivity when the above definition for cohesion is utilized.
+
+\hypertarget{temporal-smoothness}{%
+\paragraph{Temporal Smoothness}\label{temporal-smoothness}}
+
+When talking about dynamic networks and communities, temporal smoothness
+should also be considered. Between subsequent timesteps, the dynamic
+networks often evolve, but not by a large amount. While individual nodes
+may change drastically within a single timestep, the communities are
+seen as more stable structures within the networks. Therefore the
+evolution of the communities should not exceed to global (network) or
+individual (node) evolution rate.
+
+In most of the literature, this temporal smoothness is indirectly
+handled by result matching or reuse of results from previous timesteps.
+Within representation-based approaches, this property can be quantified
+and optimized for. A similar approach is employed to keep the embedding
+space temporally stable while only individual nodes may change.
+
+\hypertarget{community-detection-2}{%
+\subsection{Community Detection}\label{community-detection-2}}
+
+As the final step of the framework, the viable dynamic communities need
+to be extracted. This may be done by simultaneously training community
+embeddings along with the node embeddings
+\citep{maCommunityawareDynamicNetwork2020, limBlackHoleRobustCommunity2016, wangEvolutionaryAutoencoderDynamic2020},
+therefore having the advantage that objective function can directly
+influence the resulting communities. Other approaches instead operate on
+the resulting embedding space or the augmented graphs to extract the
+resulting communities using link-based methods such as the Louvain
+method or density-based clustering algorithms such as K-means, BIRCH
+\citep{zhangBIRCHEfficientData1996}, or OPTICS
+\citep{ankerstOPTICSOrderingPoints1999} yielding the benefit of losing
+the community count assumption.
+
+In our approach, we plan to focus on direct community optimization,
+while avoiding hard-coding the model to specific assumptions using
+spectral clustering-based techniques and soft assignment clustering
+\citep[
+]{liDivideandconquerBasedLargeScale2021, maCommunityawareDynamicNetwork2020}.
+
+\hypertarget{extensions}{%
+\subsection{Extensions}\label{extensions}}
+
+If the timing of the research project permits, while not the main focus
+of the research, additional extensions of the algorithms for future work
+may be explored. These extensions may encompass exploring evolutional
+event detection within the extracted dynamic communities.
+
+\hypertarget{planning}{%
+\section{Planning}\label{planning}}
+
+In this section, the approximate planning for my thesis is discussed.
+The research phase of the thesis is broken down into two-week blocks.
+Below a timeline of these sprints can be found along with goals expected
+to achieve by the end of the block. The final deadline for the thesis is
+June 13th, 2022.
+
+\hypertarget{timeline}{%
+\subsection{Timeline}\label{timeline}}
+
+\hypertarget{january-24---2-weeks}{%
+\subsubsection{January 24 - 2 weeks}\label{january-24---2-weeks}}
+
+Preparing the datasets, and setting up benchmarks for the baseline
+methods. Implementation of baseline if the implementation is not
+publicly available.
+
+\hypertarget{february-5---2-weeks}{%
+\subsubsection{February 5 - 2 weeks}\label{february-5---2-weeks}}
+
+Finishing up the benchmark implementation. Conducting the evaluation and
+collection of the results on the baselines for the RQ's.
+
+\hypertarget{february-19---2-weeks}{%
+\subsubsection{February 19 - 2 weeks}\label{february-19---2-weeks}}
+
+Setting up graph sampling pipeline and experimentation with various
+representation-based approaches. Collecting performance results for
+ablation tests.
+
+\hypertarget{march-3---2-weeks}{%
+\subsubsection{March 3 - 2 weeks}\label{march-3---2-weeks}}
+
+Experimenting and implementing incorporation of community-based
+objectives into the framework. Conducting experiments with temporal
+modeling for \cref{rqq:rq3}.
+
+\hypertarget{march-19---2-weeks}{%
+\subsubsection{March 19 - 2 weeks}\label{march-19---2-weeks}}
+
+Finishing up experimenting and implementing incorporation of
+community-based objectives into the framework. Experimenting with
+community extraction and sub-sampling.
+
+\hypertarget{april-2---2-weeks}{%
+\subsubsection{April 2 - 2 weeks}\label{april-2---2-weeks}}
+
+Evaluation and tuning of the algorithm parameters to collect results for
+\cref{rqq:rq1} and \cref{rqq:rq4}
+
+\hypertarget{april-10---2-weeks}{%
+\subsubsection{April 10 - 2 weeks}\label{april-10---2-weeks}}
+
+Evaluation and optimization of the algorithm for scalability. Collecting
+data for \cref{rqq:rq2}.
+
+\hypertarget{april-30---2-weeks}{%
+\subsubsection{April 30 - 2 weeks}\label{april-30---2-weeks}}
+
+Writing thesis: describing the full methodology
+
+\hypertarget{may-14---2-weeks}{%
+\subsubsection{May 14 - 2 weeks}\label{may-14---2-weeks}}
+
+Writing thesis: describing evaluation and summarizing the results
+
+\hypertarget{may-28---2-weeks}{%
+\subsubsection{May 28 - 2 weeks}\label{may-28---2-weeks}}
+
+Completing the thesis and ensuring everything is ready for delivery.
+
 \bibliography{../../refs.bib}
 
 \end{document}
