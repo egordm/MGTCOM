@@ -1,0 +1,33 @@
+package:
+  name: "angel_cd"
+  version: "1.0.3"
+
+source:
+  git_rev: v1.0.3
+  git_url: https://github.com/GiulioRossetti/ANGEL
+
+requirements:
+  host:
+    - python
+    - setuptools
+  build:
+    - python
+    - setuptools
+  run:
+    - python>=3.7
+    - future
+    - tqdm
+    - numpy
+    - python-igraph
+    - networkx>=2.4
+
+about:
+  home: https://github.com/GiulioRossetti/ANGEL
+  license: BSD-2-Clause
+  license_familY: BSD
+  license_file: LICENSE
+  summary: "ANGEL - Overlapping Community Discovery"
+
+extra:
+  recipe-maintainers:
+    - GiulioRossetti
