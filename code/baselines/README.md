@@ -6,6 +6,9 @@
 #### [ANGEL](https://github.com/GiulioRossetti/ANGEL)
 G. Rossetti, “ANGEL: efficient, and effective, node-centric community discovery in static and dynamic networks,” Appl Netw Sci, vol. 5, no. 1, p. 26, Jun. 2020, doi: 10.1007/s41109-020-00270-6.
 
+#### [Louvain](#scikit-learn-louvain)
+
+#### [Label Propagation](#scikit-learn-label-propagation)
 
 ### Representation-based
 #### [ComE](https://github.com/vwz/ComE)
