@@ -1,0 +1,3 @@
+neo4j:
+  java_home: /home/egordm/.config/Neo4j Desktop/Application/distributions/java/zulu11.41.23-ca-jdk11.0.8
+  neo4j_home: /home/egordm/.config/Neo4j Desktop/Application/relate-data/dbmss/dbms-00639bc1-c59a-4555-9390-a48ca2a15f5e
