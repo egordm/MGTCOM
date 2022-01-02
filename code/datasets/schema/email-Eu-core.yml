@@ -1,0 +1,26 @@
+name: email-Eu-core
+prefix: Email_EuCore
+database: email-Eu-core
+description: null
+nodes:
+- label: User
+  path: data/processed/email-Eu-core/nodes_User
+  properties:
+  - name: id
+    type: int
+    ignore: false
+    label: false
+edges:
+- type: COMMUNICATES
+  source: User
+  target: User
+  path: data/processed/email-Eu-core/edges_COMMUNITCATES
+  properties:
+  - name: src
+    type: int
+    ignore: false
+    label: false
+  - name: dst
+    type: int
+    ignore: false
+    label: false
