@@ -15,7 +15,7 @@ class DatasetPath:
     def __init__(self, name):
         self.name = name
 
-    def raw(self, str=False, *args: str) -> Path:
+    def raw(self, *args: str) -> Path:
         return DATASETS_DATA_RAW.joinpath(self.name, *args)
 
     def raw_str(self, *args: str) -> str:
