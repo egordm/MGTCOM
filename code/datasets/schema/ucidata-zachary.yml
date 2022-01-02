@@ -1,15 +1,15 @@
 name: ucidata-zachary
 prefix: UcidataZachary
 database: ucidata-zachary
-description: null
+description: Zachary's karate club dataset
 nodes:
 - label: Pupil
-  id: id
   path: data/processed/ucidata-zachary/nodes_Pupil
   properties:
   - name: id
     type: string
     ignore: false
+    label: true
 edges:
 - type: TRAINS
   source: Pupil
@@ -19,6 +19,8 @@ edges:
   - name: src
     type: string
     ignore: false
+    label: false
   - name: dst
     type: string
     ignore: false
+    label: false

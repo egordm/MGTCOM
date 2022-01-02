@@ -7,7 +7,7 @@ import pyspark.sql.functions as F
 from pyspark.sql import SparkSession
 from simple_parsing import ArgumentParser
 
-from datasets.schema import load_schema
+from datasets.schema import DatasetSchema
 from shared.config import ConnectionConfig
 from shared.constants import DatasetPath, DATASETS_PATH
 from shared.logger import get_logger
@@ -25,7 +25,7 @@ connections = ConnectionConfig.load_config()
 
 LOG = get_logger(os.path.basename(__file__))
 DATASET = DatasetPath(args.dataset)
-schema = load_schema(args.dataset)
+schema = DatasetSchema.load_schema(args.dataset)
 
 spark = (SparkSession.builder
          .appName(f'{DATASET}_preprocess')

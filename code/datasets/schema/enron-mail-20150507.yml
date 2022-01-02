@@ -16,6 +16,7 @@ nodes:
   - name: id
     type: string
     ignore: false
+    label: true
 - label: Email
   id: id
   path: data/processed/enron-mail-20150507/nodes_Email
@@ -23,6 +24,7 @@ nodes:
   - name: id
     type: string
     ignore: false
+    label: true
   - name: content
     type: string
     ignore: false
@@ -47,6 +49,7 @@ nodes:
   - name: Subject
     type: string
     ignore: false
+    label: true
   - name: folder
     type: string
     ignore: false

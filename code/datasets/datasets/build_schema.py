@@ -6,7 +6,7 @@ import pyspark.sql.types as T
 import stringcase
 from pyspark.sql import SparkSession
 
-from datasets.schema import DatasetSchema, Property, NodeSchema, EdgeSchema, save_schema
+from datasets.schema import DatasetSchema, Property, NodeSchema, EdgeSchema
 from shared.constants import DATASETS_PATH
 from shared.logger import get_logger
 
@@ -54,7 +54,6 @@ def df_to_node_schema(name: str, path: str, spark: SparkSession) -> NodeSchema:
     return NodeSchema(
         path=os.path.relpath(path, DATASETS_PATH),
         label=stringcase.pascalcase(name),
-        id='id',
         properties=sstruct_to_nstruct(df.schema),
     )
 
@@ -106,5 +105,13 @@ def build_schema(
         ],
     )
 
-    save_schema(result)
+    # Load and merge old schema
+    try:
+        old_schema = DatasetSchema.load_schema(name)
+        LOG.debug(f'Merging old schema for {name}')
+        result = old_schema.merge(result)
+    except FileNotFoundError:
+        pass
+
+    result.save_schema()
     return result
