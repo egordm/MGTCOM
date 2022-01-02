@@ -1,0 +1,24 @@
+name: ucidata-zachary
+prefix: UcidataZachary
+database: ucidata-zachary
+description: null
+nodes:
+- label: Pupil
+  id: id
+  path: data/processed/ucidata-zachary/nodes_Pupil
+  properties:
+  - name: id
+    type: string
+    ignore: false
+edges:
+- type: TRAINS
+  source: Pupil
+  target: Pupil
+  path: data/processed/ucidata-zachary/nodes_TRAINS
+  properties:
+  - name: src
+    type: string
+    ignore: false
+  - name: dst
+    type: string
+    ignore: false
