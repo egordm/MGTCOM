@@ -1,0 +1,26 @@
+name: com-youtube
+prefix: ComYoutube
+database: com-youtube
+description: null
+nodes:
+- label: User
+  path: data/processed/com-youtube/nodes_User
+  properties:
+  - name: id
+    type: int
+    ignore: false
+    label: false
+edges:
+- type: FRIENDS
+  source: User
+  target: User
+  path: data/processed/com-youtube/edges_FRIENDS
+  properties:
+  - name: src
+    type: int
+    ignore: false
+    label: false
+  - name: dst
+    type: int
+    ignore: false
+    label: false
