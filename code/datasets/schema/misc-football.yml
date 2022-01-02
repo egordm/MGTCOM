@@ -1,0 +1,26 @@
+name: misc-football
+prefix: MiscFootball
+database: misc-football
+description: null
+nodes:
+  - label: Team
+    path: data/processed/misc-football/nodes_Team
+    properties:
+      - name: id
+        type: int
+        ignore: false
+        label: false
+edges:
+  - type: PLAYS
+    source: Team
+    target: Team
+    path: data/processed/misc-football/edges_PLAYS
+    properties:
+      - name: src
+        type: int
+        ignore: false
+        label: false
+      - name: dst
+        type: int
+        ignore: false
+        label: false
