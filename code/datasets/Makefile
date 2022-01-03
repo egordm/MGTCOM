@@ -1,3 +1,6 @@
+SHELL := /bin/bash
+PY := source ../activate.sh && python
+
 data/raw/ucidata-zachary:
 	cd data/raw \
 		&& wget -c http://konect.cc/files/download.tsv.ucidata-zachary.tar.bz2 -O - | tar -xvjf -
@@ -76,7 +79,7 @@ data/raw/email-Eu-core:
 		&& rm email-Eu-core.txt.gz email-Eu-core-department-labels.txt.gz
 
 
-data/raw/com-Youtube:
+data/raw/com-youtube:
 	cd data/raw \
 		&& wget https://snap.stanford.edu/data/bigdata/communities/com-youtube.ungraph.txt.gz \
 		&& wget https://snap.stanford.edu/data/bigdata/communities/com-youtube.all.cmty.txt.gz \
@@ -99,4 +102,17 @@ download: \
 	data/raw/sx-mathoverflow \
 	data/raw/sx-superuser \
 	data/raw/email-Eu-core \
-	data/raw/com-Youtube
+	data/raw/com-youtube
+
+export:
+	$(PY) scripts/export_to_neo4j.py --dataset=ucidata-zachary
+	$(PY) scripts/export_to_neo4j.py --dataset=enron-mail-20150507
+	$(PY) scripts/export_to_neo4j.py --dataset=misc-football
+	$(PY) scripts/export_to_neo4j.py --dataset=imdb-5000-movie-dataset
+	$(PY) scripts/export_to_neo4j.py --dataset=DBLP-V1
+	$(PY) scripts/export_to_neo4j.py --dataset=DBLP-V3
+	$(PY) scripts/export_to_neo4j.py --dataset=DBLP-HCN
+	$(PY) scripts/export_to_neo4j.py --dataset=sx-mathoverflow
+	$(PY) scripts/export_to_neo4j.py --dataset=sx-superuser
+	$(PY) scripts/export_to_neo4j.py --dataset=email-Eu-core
+	$(PY) scripts/export_to_neo4j.py --dataset=com-youtube
