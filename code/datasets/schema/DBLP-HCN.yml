@@ -1,0 +1,85 @@
+name: DBLP-HCN
+prefix: DBLP_HCN
+database: DBLP-HCN
+description: null
+nodes:
+- label: Author
+  path: data/processed/DBLP-HCN/nodes_Author
+  properties:
+  - name: name
+    type: string
+    ignore: false
+    label: true
+  - name: id
+    type: string
+    ignore: false
+    label: true
+- label: Venue
+  path: data/processed/DBLP-HCN/nodes_Venue
+  properties:
+  - name: id
+    type: string
+    ignore: false
+    label: false
+  - name: name
+    type: string
+    ignore: false
+    label: true
+- label: Paper
+  path: data/processed/DBLP-HCN/nodes_Paper
+  properties:
+  - name: id
+    type: int
+    ignore: false
+    label: false
+  - name: title
+    type: string
+    ignore: false
+    label: true
+  - name: authors
+    type: string[]
+    ignore: false
+    label: false
+  - name: venue
+    type: string
+    ignore: false
+    label: false
+  - name: year
+    type: int
+    ignore: false
+    label: false
+  - name: abstract
+    type: string
+    ignore: false
+    label: false
+  - name: timestamp
+    type: datetime
+    ignore: false
+    label: false
+edges:
+- type: AUTHORED
+  source: Author
+  target: Paper
+  path: data/processed/DBLP-HCN/edges_AUTHORED
+  properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+  - name: dst
+    type: int
+    ignore: false
+    label: false
+- type: PUBLISHED_IN
+  source: Paper
+  target: Venue
+  path: data/processed/DBLP-HCN/edges_PUBLISHED_IN
+  properties:
+  - name: src
+    type: int
+    ignore: false
+    label: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
