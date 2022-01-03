@@ -7,6 +7,3 @@ lock:
 	conda env export --prefix=./env -f environment.yml.lock
 
 install: update lock
-
-activate:
-	conda activate ./env
