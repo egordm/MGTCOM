@@ -84,56 +84,50 @@ for edge_schema in schema.edges:
     export_csv(str(path), str(output_path), mapping)
     relationships.extend(map(str, output_path.glob('*.csv.gz')))
 
-with connections.neo4j.open() as driver:
+with driver.session(database='system') as session:
+    LOG.info('Stopping and deleting existing database')
     try:
-        driver.verify_connectivity()
+        session.run(f'STOP DATABASE `{schema.database}`')
+        session.run(f'DROP DATABASE `{schema.database}`')
     except Exception as e:
-        LOG.error(f'Could not connect to Neo4j: {e}')
-        sys.exit(1)
+        LOG.warning(f'Failed to stop and delete existing database: {e}')
 
-    with driver.session(database='system') as session:
-        LOG.info('Stopping and deleting existing database')
+    LOG.info('Creating new database from data')
+    node_args = [f'--nodes="{s}"' for s in nodes]
+    relationship_args = [f'--relationships="{s}"' for s in relationships]
+    p = subprocess.Popen(
+        'bin/neo4j-admin import --database={database} --legacy-style-quoting=true --multiline-fields=true '
+        '--verbose --trim-strings=false --ignore-empty-strings=true --normalize-types=true '
+        '--skip-bad-relationships=true --skip-duplicate-nodes=true {nodes} {relationships}'.format(
+            database=schema.database,
+            nodes=' '.join(node_args),
+            relationships=' '.join(relationship_args),
+        ),
+        shell=True,
+        stdout=sys.stdout, stderr=sys.stderr,
+        cwd=str(connections.neo4j.neo4j_home),
+        env={
+            'JAVA_HOME': connections.neo4j.java_home,
+            'NEO4J_HOME': connections.neo4j.neo4j_home,
+        }
+    )
+    p.wait()
+    if p.returncode != 0:
+        LOG.error(f'Failed to import data to neo4j: {p.returncode}')
+        sys.exit(p.returncode)
+
+    LOG.info('Creating database and indexes')
+    try:
+        session.run(f'CREATE DATABASE `{schema.database}`')
+    except Exception as e:
+        LOG.warning(f'Failed to create new database: {e}')
+
+LOG.info(f'Connecting to database: {schema.database}')
+with driver.session(database=schema.database) as session:
+    LOG.info('Creating contraints')
+    for node_schema in schema.nodes:
         try:
-            session.run(f'STOP DATABASE `{schema.database}`')
-            session.run(f'DROP DATABASE `{schema.database}`')
+            session.run(
+                f'CREATE CONSTRAINT {node_schema.label}_unique_id ON (n:{node_schema.label}) ASSERT n.id IS UNIQUE')
         except Exception as e:
-            LOG.warning(f'Failed to stop and delete existing database: {e}')
-
-        LOG.info('Creating new database from data')
-        node_args = [f'--nodes=Users="{s}"' for s in nodes]
-        relationship_args = [f'--relationships="{s}"' for s in relationships]
-        p = subprocess.Popen(
-            'bin/neo4j-admin import --database={database} --legacy-style-quoting=true --multiline-fields=true '
-            '--verbose --trim-strings=false --ignore-empty-strings=true --normalize-types=true '
-            '--skip-bad-relationships=true --skip-duplicate-nodes=true {nodes} {relationships}'.format(
-                database=schema.database,
-                nodes=' '.join(node_args),
-                relationships=' '.join(relationship_args),
-            ),
-            shell=True,
-            stdout=sys.stdout, stderr=sys.stderr,
-            cwd=str(connections.neo4j.neo4j_home),
-            env={
-                'JAVA_HOME': connections.neo4j.java_home,
-                'NEO4J_HOME': connections.neo4j.neo4j_home,
-            }
-        )
-        p.wait()
-        if p.returncode != 0:
-            LOG.error(f'Failed to import data to neo4j: {p.returncode}')
-            sys.exit(p.returncode)
-
-        LOG.info('Creating database and indexes')
-        try:
-            session.run(f'CREATE DATABASE `{schema.database}`')
-        except Exception as e:
-            LOG.warning(f'Failed to create new database: {e}')
-
-    LOG.info(f'Connecting to database: {schema.database}')
-    with driver.session(database=schema.database) as session:
-        LOG.info('Creating contraints')
-        for node_schema in schema.nodes:
-            try:
-                session.run(f'CREATE CONSTRAINT {node_schema.label}_unique_id ON (n:{node_schema.label}) ASSERT n.id IS UNIQUE')
-            except Exception as e:
-                LOG.error(f'Failed to create constraint: {e}')
+            LOG.error(f'Failed to create constraint: {e}')
