@@ -27,6 +27,18 @@ LOG = get_logger(os.path.basename(__file__))
 DATASET = DatasetPath(args.dataset)
 schema = DatasetSchema.load_schema(args.dataset)
 
+driver = connections.neo4j.open()
+
+# Check if the database already exists
+with driver.session(database='system') as session:
+    # Check if database already exists
+    result = session.run(f'SHOW DATABASE `{schema.database}`')
+    if result.peek():
+        LOG.info(f'Database {schema.database} already exists')
+        proceed = input(f'Do you want to overwrite {schema.database}? [y/N] ')
+        if proceed.lower() != 'y':
+            sys.exit(0)
+
 spark = (SparkSession.builder
          .appName(f'{DATASET}_preprocess')
          .config('spark.sql.legacy.timeParserPolicy', 'LEGACY')
@@ -41,6 +53,9 @@ def properties_to_neo4j(properties):
     select = []
 
     for property in properties:
+        if property.ignore:
+            continue
+
         if property.is_id():
             select.append(F.col(property.name).alias(f'{property.name}:ID'))
         elif property.is_src():
