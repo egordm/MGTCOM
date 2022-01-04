@@ -1,0 +1,7 @@
+version: '3'
+services:
+  greenedcd:
+    build: .
+    volumes:
+      - ../../benchmarks/outputs/GreeneDCD/:/output
+      - ../../datasets/data/export/:/input
