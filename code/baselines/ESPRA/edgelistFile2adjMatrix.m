@@ -13,7 +13,9 @@ function [ simMatrix ] = edgelistFile2adjMatrix( networkfile, Ncount )
 % OUTPUT: The adjacency matrix
 
 xx=load(networkfile);
-%Ncount=max(max(xx));
+if (Ncount < 0)
+    Ncount=max(max(xx));
+end
 Ecount=size(xx,1);
 
 if (size(xx, 2)<2)
