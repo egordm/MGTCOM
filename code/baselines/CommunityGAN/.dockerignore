@@ -279,5 +279,5 @@ results
 
 
 /src/PreTrain/magic
-/src/PreTrain/community_detection
-/cache
+docker-compose.yml
+Dockerfile

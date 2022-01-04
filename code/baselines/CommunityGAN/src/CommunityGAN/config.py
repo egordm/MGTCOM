@@ -21,7 +21,7 @@ class Config():
         self.max_value = 1000  # max value in embedding matrix
 
         # model saving
-        self.load_model = False  # whether loading existing model for initialization
+        self.load_model = True  # whether loading existing model for initialization
         self.save_steps = 10
 
         # other hyper-parameters

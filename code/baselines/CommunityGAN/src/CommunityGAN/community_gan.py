@@ -68,7 +68,7 @@ class CommunityGAN(object):
             self.discriminator = discriminator.Discriminator(self.graph.n_node, self.node_embed_init_d, config)
 
     def train(self):
-
+        print('train')
         self.write_embeddings_to_file()
         self.evaluation(self, pre_train=True)
 

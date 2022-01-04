@@ -12,6 +12,7 @@ dependencies:
   - torchaudio=0.10.1
   - cudatoolkit=11.3
   - pyspark=3.2.0
+  - tensorflow
   - numpy
   - scipy
   - pandas
