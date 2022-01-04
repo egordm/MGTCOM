@@ -7,7 +7,7 @@ nodes:
   path: data/processed/ucidata-zachary/nodes_Pupil
   properties:
   - name: id
-    type: string
+    type: int
     ignore: false
     label: true
 edges:
@@ -17,10 +17,10 @@ edges:
   path: data/processed/ucidata-zachary/nodes_TRAINS
   properties:
   - name: src
-    type: string
+    type: int
     ignore: false
     label: false
   - name: dst
-    type: string
+    type: int
     ignore: false
     label: false

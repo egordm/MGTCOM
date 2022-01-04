@@ -17,8 +17,11 @@ class Neo4JConfig(Serializable):
     java_home: Optional[str] = None
     neo4j_home: Optional[str] = None
 
-    def open(self) -> BoltDriver:
-        return GraphDatabase.driver(f'bolt://{self.host}:{self.port}', auth=(self.username, self.password))
+    def open(self, check_connection=True) -> BoltDriver:
+        driver = GraphDatabase.driver(f'bolt://{self.host}:{self.port}', auth=(self.username, self.password))
+        if check_connection:
+            driver.verify_connectivity()
+        return driver
 
 
 @dataclass

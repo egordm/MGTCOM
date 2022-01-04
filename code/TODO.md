@@ -1,6 +1,6 @@
-- [ ] Look into https://graphia.app/
-- [ ] GraphML export script for Neo4j
+- [x] Look into https://graphia.app/
+- [x] GraphML export script for Neo4j
 - [x] Add smart schema overwrite (preserving existing properties)
-- [ ] Add preprocessing for other datasets
+- [x] Add preprocessing for other datasets
 - [ ] Add a way to visualize CD results
-- [ ] Figure out how to use timestamps in gephi
+- [x] Figure out how to use timestamps in gephi

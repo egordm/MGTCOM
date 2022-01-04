@@ -1,6 +1,6 @@
 import os.path
 from dataclasses import dataclass, field, fields
-from typing import List, Optional, Dict, ClassVar, Callable, Any
+from typing import List, Optional, Dict, ClassVar, Callable, Any, Iterator
 
 from simple_parsing.helpers import Serializable
 
@@ -118,6 +118,12 @@ class DatasetSchema(Serializable, Mergeable):
         'nodes': merge_list_by_key(lambda node: node.label),
         'edges': merge_list_by_key(lambda edge: edge.type)
     }
+
+    def all_properties(self) -> Iterator[Property]:
+        for node in self.nodes:
+            yield from node.properties
+        for edge in self.edges:
+            yield from edge.properties
 
     @staticmethod
     def load_schema(name: str) -> 'DatasetSchema':

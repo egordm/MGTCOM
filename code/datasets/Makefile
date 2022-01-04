@@ -104,7 +104,7 @@ download: \
 	data/raw/email-Eu-core \
 	data/raw/com-youtube
 
-export:
+export_neo4j:
 	$(PY) scripts/export_to_neo4j.py --dataset=ucidata-zachary
 	$(PY) scripts/export_to_neo4j.py --dataset=enron-mail-20150507
 	$(PY) scripts/export_to_neo4j.py --dataset=misc-football
@@ -116,3 +116,16 @@ export:
 	$(PY) scripts/export_to_neo4j.py --dataset=sx-superuser
 	$(PY) scripts/export_to_neo4j.py --dataset=email-Eu-core
 	$(PY) scripts/export_to_neo4j.py --dataset=com-youtube
+
+export_graphml:
+	$(PY) scripts/export_to_graphml.py --dataset=ucidata-zachary
+	$(PY) scripts/export_to_graphml.py --dataset=enron-mail-20150507
+	$(PY) scripts/export_to_graphml.py --dataset=misc-football
+	$(PY) scripts/export_to_graphml.py --dataset=imdb-5000-movie-dataset
+	$(PY) scripts/export_to_graphml.py --dataset=DBLP-V1
+	$(PY) scripts/export_to_graphml.py --dataset=DBLP-V3
+	$(PY) scripts/export_to_graphml.py --dataset=DBLP-HCN
+	$(PY) scripts/export_to_graphml.py --dataset=sx-mathoverflow
+	$(PY) scripts/export_to_graphml.py --dataset=sx-superuser
+	$(PY) scripts/export_to_graphml.py --dataset=email-Eu-core
+	$(PY) scripts/export_to_graphml.py --dataset=com-youtube
