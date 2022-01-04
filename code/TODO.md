@@ -11,3 +11,4 @@
 - [ ] Run Dynamic Community Detection on benchmark datasets
 - [ ] Run Representation Learning on benchmark datasets
 - [ ] Implement remaining DCD methods
+- [ ] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD 
