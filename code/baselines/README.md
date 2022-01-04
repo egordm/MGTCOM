@@ -24,10 +24,15 @@ B. Rozemberczki, R. Davies, R. Sarkar, and C. Sutton, “GEMSEC: Graph Embedding
 
 
 ## Dynamic Community Detection
-
 ### Link-based
 #### [ANGEL](https://github.com/GiulioRossetti/ANGEL)
 G. Rossetti, “ANGEL: efficient, and effective, node-centric community discovery in static and dynamic networks,” Appl Netw Sci, vol. 5, no. 1, p. 26, Jun. 2020, doi: 10.1007/s41109-020-00270-6.
+
+#### [ESPRA](https://github.com/WPZgithub/ESPRA)
+P. Wang, L. Gao, and X. Ma, “Dynamic community detection based on network structural perturbation and topological similarity,” J. Stat. Mech., vol. 2017, no. 1, p. 013401, Jan. 2017, doi: 10.1088/1742-5468/2017/1/013401.
+
+#### [GreeneDCD](https://github.com/derekgreene/dynamic-community)
+D. Greene, D. Doyle, and P. Cunningham, “Tracking the Evolution of Communities in Dynamic Social Networks,” in 2010 International Conference on Advances in Social Networks Analysis and Mining, Aug. 2010, pp. 176–183. doi: 10.1109/ASONAM.2010.17.
 
 
 ### Representation-based
@@ -39,12 +44,10 @@ L. Ma et al., “Community-aware dynamic network embedding by using deep autoenc
 
 
 ## Dynamic Representation Learning
-
 #### [CTDNE](https://github.com/LogicJake/CTDNE)
 G. H. Nguyen, J. B. Lee, R. A. Rossi, N. K. Ahmed, E. Koh, and S. Kim, “Continuous-Time Dynamic Network Embeddings,” in Companion of the The Web Conference 2018 on The Web Conference 2018 - WWW ’18, Lyon, France, 2018, pp. 969–976. doi: 10.1145/3184558.3191526.
 
 
 #### [SageDy](https://github.com/wjm199717/SageDy)
 J. Wu, M. Liu, J. Fan, Y. Liu, and M. Han, “SageDy: A Novel Sampling and Aggregating Based Representation Learning Approach for Dynamic Networks,” in Artificial Neural Networks and Machine Learning – ICANN 2021, Cham, 2021, pp. 3–15. doi: 10.1007/978-3-030-86383-8_1.
-
 

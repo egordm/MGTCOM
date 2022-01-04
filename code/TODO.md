@@ -2,5 +2,12 @@
 - [x] GraphML export script for Neo4j
 - [x] Add smart schema overwrite (preserving existing properties)
 - [x] Add preprocessing for other datasets
-- [ ] Add a way to visualize CD results
 - [x] Figure out how to use timestamps in gephi
+- [ ] Add a way to visualize CD results
+- [ ] Has cool visualizations [majortrack](https://majortrack.readthedocs.io/en/latest/readme_include.html#synthetic-example)
+- [ ] Implementation overlapping NMI - [LINK](https://github.com/ponxosio/pyonmi)
+- [ ] Checkout R based DCD lib [LINK](https://github.com/softskillsgroup/DynComm-R-package)
+- [ ] Run Static Community Detection on benchmark datasets
+- [ ] Run Dynamic Community Detection on benchmark datasets
+- [ ] Run Representation Learning on benchmark datasets
+- [ ] Implement remaining DCD methods
