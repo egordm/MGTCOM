@@ -29,5 +29,6 @@ tracker
 louvain-generic/convert
 louvain-generic/louvain
 louvain-generic/matrix
+louvain-generic/hierarchy
 Dockerfile
 docker-compose.yml

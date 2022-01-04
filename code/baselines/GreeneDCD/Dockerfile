@@ -5,11 +5,12 @@ WORKDIR /build
 COPY louvain-generic ./louvain-generic
 RUN cd louvain-generic && make
 
-COPY . .
+COPY common ./common
+COPY *.cpp *.h *.c Makefile ./
 RUN make all
 
 
-FROM debian:bullseye-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
@@ -20,10 +21,10 @@ COPY --from=build \
     /build/louvain-generic/matrix \
     /app/louvain-generic/
 
-COPY --from=build \
-    /build/MOSES/moses-binary-linux-32bit \
-    /build/MOSES/moses-binary-linux-x86-64 \
-    /build/MOSES/moses-binary-Mach-O-i386 \
+COPY \
+    ./MOSES/moses-binary-linux-32bit \
+    ./MOSES/moses-binary-linux-x86-64 \
+    ./MOSES/moses-binary-Mach-O-i386 \
     /app/MOSES/
 
 COPY --from=build \
@@ -34,7 +35,8 @@ COPY --from=build \
     /build/tracker \
     /app/
 
-RUN ln -s /app/louvain-generic/louvain ./louvain \
-    && ln -s /app/MOSES/moses-binary-linux-x86-64 ./moses
+RUN ln -s /app/MOSES/moses-binary-linux-x86-64 /app/MOSES/moses
 
-ENTRYPOINT ["/app/moses"]
+COPY run.py .
+
+ENTRYPOINT ["python", "run.py"]
