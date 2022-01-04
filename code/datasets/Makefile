@@ -90,6 +90,11 @@ data/raw/com-youtube:
 		&& gunzip -c com-youtube.top5000.cmty.txt.gz > com-youtube/com-youtube.top5000.cmty.txt \
 		&& rm com-youtube.ungraph.txt.gz com-youtube.all.cmty.txt.gz com-youtube.top5000.cmty.txt.gz
 
+data/raw/the-marvel-universe-social-network:
+	cd data/raw \
+		&& kaggle datasets download csanhueza/the-marvel-universe-social-network \
+		&& unzip -d the-marvel-universe-social-network the-marvel-universe-social-network.zip \
+		&& rm the-marvel-universe-social-network.zip
 
 download: \
 	data/raw/ucidata-zachary \
@@ -102,7 +107,8 @@ download: \
 	data/raw/sx-mathoverflow \
 	data/raw/sx-superuser \
 	data/raw/email-Eu-core \
-	data/raw/com-youtube
+	data/raw/com-youtube \
+	data/raw/the-marvel-universe-social-network
 
 export_neo4j:
 	$(PY) scripts/export_to_neo4j.py --dataset=ucidata-zachary
@@ -116,6 +122,7 @@ export_neo4j:
 	$(PY) scripts/export_to_neo4j.py --dataset=sx-superuser
 	$(PY) scripts/export_to_neo4j.py --dataset=email-Eu-core
 	$(PY) scripts/export_to_neo4j.py --dataset=com-youtube
+	$(PY) scripts/export_to_neo4j.py --dataset=the-marvel-universe-social-network
 
 export_graphml:
 	$(PY) scripts/export_to_graphml.py --dataset=ucidata-zachary
@@ -129,3 +136,4 @@ export_graphml:
 	$(PY) scripts/export_to_graphml.py --dataset=sx-superuser
 	$(PY) scripts/export_to_graphml.py --dataset=email-Eu-core
 	$(PY) scripts/export_to_graphml.py --dataset=com-youtube
+	$(PY) scripts/export_to_graphml.py --dataset=the-marvel-universe-social-network
