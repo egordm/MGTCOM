@@ -40,6 +40,9 @@ class Config():
             if k in self.__dict__:
                 self.__dict__[k] = type(self.__dict__[k])(v)
         self.update_path()
+        for k, v in kwargs.items():
+            if k in self.__dict__:
+                self.__dict__[k] = type(self.__dict__[k])(v)
 
     # path settings
     def update_path(self):
@@ -49,6 +52,10 @@ class Config():
         self.community_filename = "../../data/" + self.app + "/" + self.dataset + ".sampled.cmty.txt"
         self.model_log = "../../log/"
         self.cache_filename_prefix = "../../cache/" + self.app + "/" + self.dataset
-        self.emb_filenames = ["../../results/" + self.app + "/" + self.dataset + "_gen_.emb",
-                              "../../results/" + self.app + "/" + self.dataset + "_dis_.emb"]
+        self.emb_filenames_g = "../../results/" + self.app + "/" + self.dataset + "_gen_.emb"
+        self.emb_filenames_d = "../../results/" + self.app + "/" + self.dataset + "_dis_.emb"
         self.result_filename = "../../results/" + self.app + "/" + self.dataset + ".txt"
+
+    @property
+    def emb_filenames(self):
+        return  [self.emb_filenames_g, self.emb_filenames_d]

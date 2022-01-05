@@ -8,10 +8,15 @@ RUN cd /build/src/PreTrain && make
 
 FROM tensorflow/tensorflow:1.9.0-gpu-py3
 
-# Copy python scripts
+RUN apt update && apt -y install libomp-dev
+
 WORKDIR /app
+
+# Copy the pretrain binaries
+COPY --from=build /build/src/PreTrain/magic /app/src/PreTrain/magic
+
+# Copy python scripts
 COPY . .
 
 
-#ENTRYPOINT ["python", "run.py"]
-CMD ["python", "-c", "import tensorflow as tf;tf.test.gpu_device_name()"]
+ENTRYPOINT ["python", "run.py"]

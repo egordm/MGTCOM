@@ -1,4 +1,4 @@
-cc = g++ -static-libstdc++
+cc = g++ -static-libstdc++ -static
 exe = magic
 std = c++11
 objects = ./model.o ./magic.o ./nnvector.o ./common.o ./utils.o ./graph.o
