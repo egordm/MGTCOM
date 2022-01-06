@@ -1,6 +1,6 @@
 update:
 	@echo 'Updating dependencies'
-	conda env update --prefix ./env --file environment.yml --prune
+	conda env update --prefix=./env --f environment.yml --prune
 
 lock:
 	@echo 'Locking dependencies'

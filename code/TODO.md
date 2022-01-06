@@ -3,6 +3,13 @@
 - [x] Add smart schema overwrite (preserving existing properties)
 - [x] Add preprocessing for other datasets
 - [x] Figure out how to use timestamps in gephi
+- [ ] Add docker configs and run scripts for baselines
+- [ ] Add dataset export to edge list
+- [ ] Find ground truth communities if applicable on current datasets
+- [ ] Added baseline config format (and add configs)
+- [ ] Add baseline benchmarking based on config
+- [ ] Added W&B support for running baselines
+- [ ] Add evaluation metrics to the baselines
 - [ ] Add a way to visualize CD results
 - [ ] Has cool visualizations [majortrack](https://majortrack.readthedocs.io/en/latest/readme_include.html#synthetic-example)
 - [ ] Implementation overlapping NMI - [LINK](https://github.com/ponxosio/pyonmi)
@@ -12,3 +19,4 @@
 - [ ] Run Representation Learning on benchmark datasets
 - [ ] Implement remaining DCD methods
 - [ ] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD 
+- [ ] Check [Karate Club](https://karateclub.readthedocs.io/en/latest/) lib. It has a few CD methods
