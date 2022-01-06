@@ -18,5 +18,4 @@ COPY --from=build /build/src/PreTrain/magic /app/src/PreTrain/magic
 # Copy python scripts
 COPY . .
 
-
 ENTRYPOINT ["python", "run.py"]

@@ -1,6 +1,8 @@
 __author__ = 'ando'
 
 import pickle
+from collections import defaultdict
+
 import numpy as np
 from os.path import join as path_join, dirname
 from os import makedirs
@@ -15,7 +17,7 @@ def save_ground_true(file_name, community_color, path="./data",):
         for node, com in enumerate(community_color):
             txt_file.write('%d\t%d\n' % ((node+1), com))
 
-def load_ground_true(path='data/', file_name=None, multilabel=False):
+def load_ground_true(path='data/', multilabel=False):
     '''
     Return the label and the number of communities of the dataset
     :param path: path to the dir containing the file
@@ -23,20 +25,18 @@ def load_ground_true(path='data/', file_name=None, multilabel=False):
     :param multilabel: True if the dataset is multilabel
     :return:
     '''
-    labels = {}
+    labels = defaultdict(list)
     max = 0
-    with open(path_join(path, file_name + '.labels'), 'r') as file:
-        for line_no, line in enumerate(file):
-            tokens = line.strip().split('\t')
-            node_id = int(tokens[0])
-            label_id = int(tokens[1])
+    with open(path, 'r') as file:
+        for label_id, line in enumerate(file):
+            if line.strip() == '':
+                continue
+            tokens = line.strip().split(' ')
+            for node_id in tokens:
+                labels[int(node_id)].append(label_id)
+
             if label_id > max:
                 max = label_id
-            if node_id in labels:
-                labels[node_id].append(label_id)
-            else:
-                labels[node_id] = [label_id]
-
 
     ret = []
     for key in sorted(labels.keys()):

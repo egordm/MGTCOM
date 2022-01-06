@@ -1,0 +1,7 @@
+version: '3'
+services:
+  come:
+    build: .
+    volumes:
+      - ../../benchmarks/outputs/ComE/:/output
+      - ../../datasets/data/export/:/input
