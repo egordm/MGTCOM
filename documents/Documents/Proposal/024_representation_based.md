@@ -20,7 +20,7 @@ In this section, we describe representation-based approaches by covering both CD
 
 
 
-#### Affiliation Graph Models
+### Affiliation Graph Models
 
 % @yangCommunityAffiliationGraphModel2012
 % 
@@ -48,9 +48,9 @@ While arguably not being representational by itself, Affiliation Graph Network (
 
 The AGM models a network as a bipartite graph with communities as first-class citizens and is represented by the following equation $B(V, C, M, \{p_c\})$, where $V$ represents nodes, $C$ set of communities, $M$ node-community memberships and $\{p_c\}$ model parameters (a single probability $p_c$ per community). It can model non-overlapping, overlapping, and hierarchical communities by defining rules on membership sets in $M$. AGM can be used in both generative and discriminative settings.
 
-The generative scenario goes as follows: Given an AGM $F$ generates links between each pair of nodes exceeding a baseline probability $p$. The can be done by considering that according to AGM, each pair of nodes in community $A$ is connected with a probability $p_A$. Therefore, the probability of two nodes having a connection is proportional to the number of communities they share (which is defined in the model).
+The generative scenario works as follows: Given an AGM $F(V, C, M, {p_c})$, generate links between each pair of nodes exceeding a baseline probability $p$. This is done by considering that, according to AGM, each pair of nodes in community $C_i$ is connected with a probability $p_{c_i}$. Therefore, the probability of two nodes having a connection is proportional to the number of communities they share (which can be derived from the model).
 
-The discriminative scenario is defined as: Given a graph $G$ and, find a model $F$ that may have generated it. By assuming that the graph was generated using an AGM, the parameters $M$, number of communities $|C|$ and $\{p_c\}$ have to be found. Process for finding such a model to the graph usually max likelihood fitting. AGM is relaxed to have membership strengths $F_{uC}$, which helps to define the probability of nodes $u$ and $v$ connecting through community $C$ ($P_{C}(u, v)$), and in terms of that by themselves $P(u, v)$. Using this a probability $P(G|F)$ can be constructed quantifying how well the model fits the data. Finally, gradient ascent can be applied to optimize the model parameters.
+The discriminative scenario is defined as: Given a graph $G$, find a model $F(V, C, M, {p_c})$ that may have generated it. By assuming that the graph was generated using an AGM, the parameters $M$, number of communities $|C|$ and $\{p_c\}$ have to be found. Process for finding such a model to the graph involves max likelihood fitting. AGM is relaxed to have membership strengths $F_{uC}$, which helps to define the probability of nodes $u$ and $v$ connecting through community $C$ as $P_{C}(u, v)$, and by themselves $P(u, v)$ (by marginalizing over communities). Using this, a probability $P(G|F)$ can be constructed quantifying how well the model fits the data. Finally, gradient ascent can be applied to optimize for the model's parameters.
 
 
 

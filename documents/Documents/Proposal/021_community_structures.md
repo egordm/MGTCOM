@@ -16,7 +16,7 @@ Communities in real-world networks can be of different kinds: disjoint (students
 
 The *link-based* (also referred to as classic) community detection methods intuitively describe communities as groups of nodes within a graph, such that the intra-group connections are denser than the inter-group ones. This definition is primarily based on the *homophily* principle, which refers to the assumption that similar individuals are those that are densely connected together. Therefore, these kind of methods look for sub-graph structures such as cliques and components that identify connectedness within the graph structure to represent the communities.
 
-Unfortunately, in most cases link-based methods fall short to identify communities of similar individuals. This is mainly due to two facts: (i) many similar individuals in a social network are not explicitly connected together, (ii) an explicit connection does not necessarily indicate similarity, but may explained by sociological processes such as conformity, friendship or kinship [@diehlRelationshipIdentificationSocial2007; @faniUserCommunityDetection2020].
+Unfortunately, in most cases link-based methods fall short to identify communities of similar individuals. This is mainly due to two facts: (i) many similar individuals in a social network are not explicitly connected together, (ii) an explicit connection does not necessarily indicate similarity, but can explained by sociological processes such as conformity, friendship or kinship [@diehlRelationshipIdentificationSocial2007; @faniUserCommunityDetection2020].
 
 A more general definition is introduced in [@cosciaClassificationCommunityDiscovery2011] to create an underlying concept generalizing all variants found in the literature (+@dfn:community). In link-based methods, a direct connection is considered as a particular and very important kind of action, while newer methods also consider content or interest overlap.
 
@@ -26,13 +26,17 @@ A more general definition is introduced in [@cosciaClassificationCommunityDiscov
 
 
 
+% Feedback: Define what a "network" and a "dynamic network" is. (Probably should go into preliminaries)
+
+
+
 ### Dynamic Communities
 
 Similar to how communities can be found in static networks, dynamic communities extend this definition by utilizing the temporal dimension to define their life cycle/evolution over a dynamic network. A dynamic community is characterized by a collection of communities and a set of transformations on these communities over time.
 
 This persistence of communities across time subjected to progressive changes is an important problem to tackle. Though, as noted by [@rossettiCommunityDiscoveryDynamic2018] the problem can be compared to the famous “the ship of Theseus” paradox. Because (verbatim), *deciding if an element composed of several entities at a given instant is the same or not as another one composed of some—or even none—of such entities at a later point in time is necessarily arbitrary and cannot be answered unambiguously*.
 
-Most of the works agree on two atomic transformations on the communities, including node/edge appearance and vanishing. While some such as [@pallaQuantifyingSocialGroup2007; @asurEventbasedFrameworkCharacterizing2009; @cazabetUsingDynamicCommunity2012] define a more extensive set of transformations (also referred to as events) which may be more interesting for analytical purposes:
+Most of the works agree on two atomic transformations on the communities, including node/edge appearance and vanishing. In  other works such as [@pallaQuantifyingSocialGroup2007; @asurEventbasedFrameworkCharacterizing2009; @cazabetUsingDynamicCommunity2012] authors define a more high-level set of transformations (also referred to as events) built on top of the atomic ones. These transformations more interesting for analytical purposes and include:
 
 * Birth, when a new community emerges at a given time. 
 * Death, when a community disappears. All nodes belonging to this community lose their membership.
