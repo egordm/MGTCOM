@@ -36,3 +36,4 @@
 - [ ] https://www.kaggle.com/gpreda/birds-arent-real
 - [ ] https://www.kaggle.com/lakritidis/identifying-influential-bloggers-techcrunch
 - [ ] https://www.kaggle.com/andreagarritano/deezer-social-networks
+- [ ] https://www.kaggle.com/ellipticco/elliptic-data-set

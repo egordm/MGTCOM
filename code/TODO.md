@@ -6,17 +6,16 @@
 - [ ] Add docker configs and run scripts for baselines
 - [ ] Add dataset export to edge list
 - [ ] Find ground truth communities if applicable on current datasets
-- [ ] Added baseline config format (and add configs)
+- [ ] Add baseline config format (and add configs)
 - [ ] Add baseline benchmarking based on config
-- [ ] Added W&B support for running baselines
+- [ ] Add W&B support for running baselines
 - [ ] Add evaluation metrics to the baselines
 - [ ] Add a way to visualize CD results
-- [ ] Has cool visualizations [majortrack](https://majortrack.readthedocs.io/en/latest/readme_include.html#synthetic-example)
 - [ ] Implementation overlapping NMI - [LINK](https://github.com/ponxosio/pyonmi)
-- [ ] Checkout R based DCD lib [LINK](https://github.com/softskillsgroup/DynComm-R-package)
 - [ ] Run Static Community Detection on benchmark datasets
 - [ ] Run Dynamic Community Detection on benchmark datasets
 - [ ] Run Representation Learning on benchmark datasets
 - [ ] Implement remaining DCD methods
 - [ ] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD 
-- [ ] Check [Karate Club](https://karateclub.readthedocs.io/en/latest/) lib. It has a few CD methods
+- [ ] Run thesis through GeCTOR 
+- [ ] Update thesis with parejaEvolveGCNEvolvingGraph2020, acharyaCommunityDetectionClustering2020
