@@ -3,9 +3,9 @@ import logging
 import pathlib
 import subprocess
 import sys
-# Determine the mode to use
 from collections import defaultdict
 
+# Determine the mode to use
 MODES = [
     'louvain',
     'moses',

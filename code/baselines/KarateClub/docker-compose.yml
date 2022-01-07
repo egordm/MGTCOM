@@ -1,0 +1,7 @@
+version: '3'
+services:
+  karateclub:
+    build: .
+    volumes:
+      - ../../benchmarks/outputs/KarateClub/:/output
+      - ../../datasets/data/export/:/input
