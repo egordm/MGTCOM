@@ -8,7 +8,7 @@ authors:
     institution: "Utrecht University"
     country: "The Netherlands"
 topic: "dynamic networks, community detection"
-bibliography: "../../refs.bib"
+bibliography: refs.bib
 toc: true
 abstract: |
   | Recent developments in big data and graph representation learning have allowed researchers to make breakthroughs in social network analysis and the identification of communities. While opening a lot of research opportunities, such approaches are highly limited to snapshots of rapidly evolving social networks. This, in fact, is a great simplification of the real-world situation which is always evolving and expanding by the user and/or machine interactions.

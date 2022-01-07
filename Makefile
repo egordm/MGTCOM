@@ -6,10 +6,11 @@ notes:
 	typora documents &
 
 copy-refs:
+	cp refs.bib "documents/Documents/Proposal/refs.bib"
 	cp refs.bib "documents/Meta/Presentation Template/refs.bib"
 	cp refs.bib "documents/refs.bib"
 
-documents-to-pdf: # copy-refs
+documents-to-pdf: copy-refs
 	bash ./scripts/documents_to_pdf.sh
 
 notes-to-pdf: copy-refs

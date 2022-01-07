@@ -1,8 +1,8 @@
 # Introduction and Background
 
-Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in the real-world using Network and Graph Theory. These social structures usually include social media networks [@grandjeanSocialNetworkAnalysis2016; @hagenCrisisCommunicationsAge2018], economic transaction networks [@prykeAnalysingConstructionProject2004; @kongWhyAreSocial2011; @swamynathanSocialNetworksImprove2008], knowledge networks [@gruberCollectiveKnowledgeSystems2008; @brenneckeFirmKnowledgeNetwork2017], and disease transmission networks [@morrisNetworkEpidemiologyHandbook2004].
+Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in the real-world using Network and Graph Theory. These social structures usually include social media networks [@grandjeanSocialNetworkAnalysis2016; @hagenCrisisCommunicationsAge2018], economic transaction networks [@prykeAnalysingConstructionProject2004; @kongWhyAreSocial2011; @swamynathanSocialNetworksImprove2008], knowledge networks [@gruberCollectiveKnowledgeSystems2008; @brenneckeFirmKnowledgeNetwork2017], and disease transmission networks [@morrisNetworkEpidemiologyHandbook2004; @stattnerSocialNetworkAnalysis2011].
 
-% Feedback: Include reference to the social structure and SNA survey
+% 
 
 One main issue to address while studying this type of real-world events lies in the identification of meaningful substructures hidden within the overall complex system. The SNA is therefore applied to extract patterns from the data usually in form of information flow, identification of high throughput nodes and paths, and discovery of communities and clusters. In this thesis, we are going to focus on the problem of community discovery.
 
