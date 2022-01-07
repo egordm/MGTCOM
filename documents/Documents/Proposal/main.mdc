@@ -1,7 +1,9 @@
 
 # Introduction and Background
 
-Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in the real-world using Network and Graph Theory. These social structures usually include social media networks, economic transaction networks, knowledge networks, and disease transmission networks.
+Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in the real-world using Network and Graph Theory. These social structures usually include social media networks [@grandjeanSocialNetworkAnalysis2016; @hagenCrisisCommunicationsAge2018], economic transaction networks [@prykeAnalysingConstructionProject2004; @kongWhyAreSocial2011; @swamynathanSocialNetworksImprove2008], knowledge networks [@gruberCollectiveKnowledgeSystems2008; @brenneckeFirmKnowledgeNetwork2017], and disease transmission networks [@morrisNetworkEpidemiologyHandbook2004].
+
+% Feedback: Include reference to the social structure and SNA survey
 
 One main issue to address while studying this type of real-world events lies in the identification of meaningful substructures hidden within the overall complex system. The SNA is therefore applied to extract patterns from the data usually in form of information flow, identification of high throughput nodes and paths, and discovery of communities and clusters. In this thesis, we are going to focus on the problem of community discovery.
 
@@ -13,9 +15,9 @@ The problem of partitioning a complex network into *communities* which represent
 
 Many useful applications of CD have been studied by researchers including identification of criminal groups [@sarvariConstructingAnalyzingCriminal2014], social bot detection [@karatasReviewSocialBot2017], targeted marketing [@mosadeghUsingSocialNetwork2011], and public health/disease control [@salatheDynamicsControlDiseases2010].
 
-With the explosion of human- and machine-generated data, often collected by social platforms, more datasets are emerging having rich temporal information that can be studied. CD operates only on static networks. Meaning that their temporal dimension is often omitted, which often does not yield a good representation of the real world, where networks constantly evolve. Such networks are often referred to as dynamic networks as their components such as nodes and edges may appear and fade from existence. Accordingly community detection on such dynamic networks is called Dynamic Community Detection (DCD).
+With the explosion of human- and machine-generated data, often collected by social platforms, more datasets are emerging having rich temporal information that can be studied. Most of the CD methods operate only on static networks. Meaning that their temporal dimension is often omitted, which often does not yield a good representation of the real world, where networks constantly evolve. Such networks are often referred to as dynamic networks as their components such as nodes and edges may appear and fade from existence. Accordingly community detection on such dynamic networks is called Dynamic Community Detection (DCD).
 
-DCD algorithms incorporate additional temporal data are often able to both outperform their counterpart CD algorithms [@granellBenchmarkModelAssess2015; @liuCommunityDetectionMultiPartite2016; @faniUserCommunityDetection2020; @rossettiANGELEfficientEffective2020], as well as provide additional information about communities for analysis [@pallaQuantifyingSocialGroup2007]. This additional information comes in form of community events such as (birth, growth, split, merging, and death) or in form of the ability to track the membership of certain individuals over time.
+DCD algorithms that incorporate additional temporal data are often able to both outperform their counterpart CD algorithms [@granellBenchmarkModelAssess2015; @liuCommunityDetectionMultiPartite2016; @faniUserCommunityDetection2020; @rossettiANGELEfficientEffective2020], as well as provide additional information about communities for analysis [@pallaQuantifyingSocialGroup2007]. This additional information comes in form of community events such as (birth, growth, split, merging, and death) or in form of the ability to track the membership of certain individuals over time.
 
 ## Challenges in Community Detection
 
@@ -23,21 +25,25 @@ DCD is seen as the hardest problem within Social Network Analysis. The reason fo
 
 Additionally, the increasing richness of the data is not only limited to temporal data. The real-world data often connects entities of different modalities. This multi-modality occurs through the fact that the entities and relations themselves may be of different types (meta topology-based features). For example users, topics, and documents in a social network (or vehicles and landmarks in a traffic network). More complex networks may include asymmetric relationships, and temporal networks may include appearing, disappearing, or streaming edges/nodes.
 
-Another example of multi-modality in networks comes in form of node and relation features (content-based features). These features may come in form of structured (numerical, categorical, or vector data) or unstructured data such as images and text. It is of high importance to explore this multi-modal data as it may not always be possible to explain the formation of communities using network structural information alone.
+Another example of multi-modality in networks comes in the form of node and relation features (content-based features). These features may come in the form of structured (numerical, categorical, or vector data) or unstructured data such as images and text. It is of high importance to explore this multi-modal data as it may not always be possible to explain the formation of communities using network structural information alone.
 
 Finally, a more systematic issue is that there is no common definition for a community structure. Within networks, it is usually described in terms of membership assignment, while in more content-based settings communities are described in terms of modeled topics (that usually represent interest areas) or distributions over latent similarity space. Both definitions have their shortcomings as they often fail to account for more complex community structures (overlapping and hierarchical communities) and non-linearity of structures often found in the real world.
 
-Task of community detection is often compared to clustering and graph clustering, which not always may be a fair comparison as a main focus point in many CD algorithms is the fact that the amount of communities is unknown a priori. Communities are not are never planted in the real world and the algorithms should detect them in an unsupervised manner.
+The task of community detection is often compared to clustering and graph clustering, which not always may be a fair comparison as a main focus point in many CD algorithms is the fact that the amount of communities is unknown a priori. Communities are never planted in the real world and the algorithms should detect them in an unsupervised manner.
 
 
 
 # Literature Review
 
-The problem of dynamic community detection was noticed quite early on within the SNA community and a considerable amount of research has been made in order to provide a comprehensive analysis of the network. While the said research was mostly focused on the discovery of communities using topologically-based features and node connectivity, the covered methods did research the limitations and challenges posed by a temporal context.
+The problem of dynamic community detection was noticed quite early on within the SNA community and a considerable amount of research has been made in order to provide a comprehensive a analysis of network. While the said research was mostly focused on the discovery of communities using topologically-based features and node connectivity, the covered methods did research the limitations and challenges posed by a temporal context.
+
+% Feedback: Add citations to the "said Research" that provides this comprehensive analysis, and cite ones analyzing temporal context
 
 In recent years, significant developments have been made in the space of deep learning. Mainly in the development of new deep learning methods capable of learning graph-structured data [@bronsteinGeometricDeepLearning2017; @hamiltonRepresentationLearningGraphs2018; @kipfSemiSupervisedClassificationGraph2017] which is fundamental for SNA. Because of this, various problems within the field have been revisited, including community detection problems. The approaches have been expanded by incorporation of more complex features, solving the problems concerning multi-modality, and the introduction of unsupervised learning.
 
 Despite this resurgence, the DCD problem has received little attention. Though a few efforts have been made to incorporate the deep learning methods by introducing content-based similarity dynamic, the definition of unified constraints for end-to-end learning, and usage of graph representation-based CD algorithms within a temporal context, the current state of the art leaves a lot to be desired.
+
+% Feedback: Cite below works (so checking subsequent sections is not necessary)
 
 We structure the literature as follows: first, we describe the various interpretations of the Community Structure in +@community-structures. Next, we explore various approaches and techniques related to Graph Representation Learning in +@graph-representation-learning. Then, we provide an overview of the current state-of-the-art approaches for Community Detection and Dynamic Community Detection tasks in +@link-based-approaches and +@representation-based-approaches. Finally, we discuss the ways to evaluate the said algorithms in +@evaluation and the datasets available in +@datasets.
 
@@ -65,7 +71,7 @@ Communities in real-world networks can be of different kinds: disjoint (students
 
 The *link-based* (also referred to as classic) community detection methods intuitively describe communities as groups of nodes within a graph, such that the intra-group connections are denser than the inter-group ones. This definition is primarily based on the *homophily* principle, which refers to the assumption that similar individuals are those that are densely connected together. Therefore, these kind of methods look for sub-graph structures such as cliques and components that identify connectedness within the graph structure to represent the communities.
 
-Unfortunately, in most cases link-based methods fall short to identify communities of similar individuals. This is mainly due to two facts: (i) many similar individuals in a social network are not explicitly connected together, (ii) an explicit connection does not necessarily indicate similarity, but may explained by sociological processes such as conformity, friendship or kinship [@diehlRelationshipIdentificationSocial2007; @faniUserCommunityDetection2020].
+Unfortunately, in most cases link-based methods fall short to identify communities of similar individuals. This is mainly due to two facts: (i) many similar individuals in a social network are not explicitly connected together, (ii) an explicit connection does not necessarily indicate similarity, but can explained by sociological processes such as conformity, friendship or kinship [@diehlRelationshipIdentificationSocial2007; @faniUserCommunityDetection2020].
 
 A more general definition is introduced in [@cosciaClassificationCommunityDiscovery2011] to create an underlying concept generalizing all variants found in the literature (+@dfn:community). In link-based methods, a direct connection is considered as a particular and very important kind of action, while newer methods also consider content or interest overlap.
 
@@ -75,13 +81,17 @@ A more general definition is introduced in [@cosciaClassificationCommunityDiscov
 
 
 
+% Feedback: Define what a "network" and a "dynamic network" is. (Probably should go into preliminaries)
+
+
+
 ### Dynamic Communities
 
 Similar to how communities can be found in static networks, dynamic communities extend this definition by utilizing the temporal dimension to define their life cycle/evolution over a dynamic network. A dynamic community is characterized by a collection of communities and a set of transformations on these communities over time.
 
 This persistence of communities across time subjected to progressive changes is an important problem to tackle. Though, as noted by [@rossettiCommunityDiscoveryDynamic2018] the problem can be compared to the famous “the ship of Theseus” paradox. Because (verbatim), *deciding if an element composed of several entities at a given instant is the same or not as another one composed of some—or even none—of such entities at a later point in time is necessarily arbitrary and cannot be answered unambiguously*.
 
-Most of the works agree on two atomic transformations on the communities, including node/edge appearance and vanishing. While some such as [@pallaQuantifyingSocialGroup2007; @asurEventbasedFrameworkCharacterizing2009; @cazabetUsingDynamicCommunity2012] define a more extensive set of transformations (also referred to as events) which may be more interesting for analytical purposes:
+Most of the works agree on two atomic transformations on the communities, including node/edge appearance and vanishing. In  other works such as [@pallaQuantifyingSocialGroup2007; @asurEventbasedFrameworkCharacterizing2009; @cazabetUsingDynamicCommunity2012] authors define a more high-level set of transformations (also referred to as events) built on top of the atomic ones. These transformations more interesting for analytical purposes and include:
 
 * Birth, when a new community emerges at a given time. 
 * Death, when a community disappears. All nodes belonging to this community lose their membership.
@@ -144,7 +154,7 @@ Different metrics exist quantifying the characteristic of *homophily* over edg
 * Expansion: the number of edges that cross the community border
 * Internal Density: the ratio of edges within the cluster with respect to all possible edges
 * Cut Ratio and Normalized Cut: the fraction of all possible edges leaving the cluster
-* Maximum/Average ODF: the maximum/average fraction of nodes’ edges crossing the cluster border
+* Maximum/Average ODF (out-degree fraction): the maximum/average fraction of nodes’ edges crossing the cluster border
 
 #### Modularity
 
@@ -158,6 +168,8 @@ Different metrics exist quantifying the characteristic of *homophily* over edg
 %   * [Explanations of terms in equations](https://latex.org/forum/viewtopic.php?t=11318)
 
 Modularity directly measures the density of links inside a graph and is therefore computed on communities (sets of nodes) individually by weighing edges based on community similarity (or exact matching). Calculation of modularity is done by aggregating for each pair of nodes the difference between the expected connectivity (amount of edges between the nodes) and the actual connectivity (existence of an edge) given their degrees (+@eq:modularity). The final result represents the delta difference by how much the given graph exceeds a random graph as expected connectivity is determined by a random rewiring graph. Because intra-community pairs are weighted lower than inter-community pairs the score can vary.
+
+% Feedback: Explain what the parameters mean
 
 $$
 Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}_{\text{Expected Connectivity}}\right] \overbrace{S_{v r} S_{w r}}^{\text{Community Similarity}}
@@ -177,7 +189,9 @@ $$ {#eq:modularity}
 %   * Is a heuristic algorithm
 %     * Since going through all possible assignments maximizing modularity is impractical
 
-Finding an optimal partition of a graph into communities is an NP-hard problem. This is because, while calculating the modularity score can be done in a timely manner, still all possible node to community assignments have to be considered. Therefore heuristic-based methods such as the Louvain method are usually used.
+Finding an optimal partition of a graph into communities is an NP-hard problem. This is because, while calculating the modularity score can be done in linear time, all possible node to community assignments still have to be considered. Therefore heuristic-based methods such as the Louvain method are usually used.
+
+% Feedback: Cite NP-hard CD
 
 Louvain method [@blondelFastUnfoldingCommunities2008] is a heuristic-based hierarchical clustering algorithm. It starts by assigning each node in the graph to its own community. Then it merges these communities by checking for each node the change in modularity score produced by assigning it to a neighbor community (based on the existence of a connection). Once the optimal merges are performed, the resulting communities are grouped into single nodes and the process is repeated.
 
@@ -218,7 +232,7 @@ The algorithm starts by assigning each node their own label. After that, for eac
 %   * Caused by relying on the previously found communities
 %   * Can cause avalanche of wrong detection
 
-Dynamic Community Detection can be seen as an extension to community detection by the addition of the Community Tracking task. Tracking relies on the coherency and stability of found communities to define their evolution through time. The said properties are not be taken for granted and introduce new challenges when designing DCD methods. The main issue is in fact that they are competitive with each other causing a trade-off between community coherency/quality and community temporal stability.
+Dynamic Community Detection can be seen as an extension to community detection by the addition of the Community Tracking task. Tracking relies on the coherency and stability of found communities to define their evolution through time. The said properties can not be taken for granted and introduce new challenges when designing DCD methods. The main issue is in fact that they are competitive with each other causing a trade-off between community coherency/quality and community temporal stability.
 
 Various strategies dealing with this trade-off are categorized by @rossettiCommunityDiscoveryDynamic2018 and @dakicheTrackingCommunityEvolution2019 where authors reach a consensus over three main groups. In the following sections, we briefly introduce these strategies and describe the current state of the art in similar order.
 
@@ -274,7 +288,7 @@ In @wangCommunityEvolutionSocial2008 the authors circumvent this instability iss
 % * The resulting communities are merged into larger ones
 %   * By checking if their overlap exceeds a threshold
 
-@rossettiANGELEfficientEffective2020 proposes a way to detect overlapping communities in dynamic networks. A more robust two-phase community detection method (ANGEL) is proposed to ensure the stability of the found communities. The first phase extracts and aggregates local communities for each node by applying Label Propagation on their Ego-Graph (graph with the said node removed). Because the found communities are biased due to a partial view of the network, they are merged in the second step based on their overlap yielding more stable communities with the possibility of overlap. During the matching for each snapshot, a step forward and backward in time is considered where community splits and merges are detected by reusing the matching criteria of the second phase of the CD step.
+@rossettiANGELEfficientEffective2020 proposes a way to detect overlapping communities in dynamic networks. A more robust two-phase community detection method (ANGEL) is proposed to ensure the stability of the found communities. The first phase extracts and aggregates local communities by applying Label Propagation on the Ego-Graph (graph excluding a single node) for each node in network. The found communities are biased due to their partial view of the network and are merged in the second step based on their overlap yielding more stable communities with the possibility of overlap. During the matching for each snapshot, a step forward and backward in time is considered where community splits and merges are detected by reusing the matching criteria of the second phase of the CD step.
 
 #### Dependent Community Detection
 
@@ -290,7 +304,7 @@ In @wangCommunityEvolutionSocial2008 the authors circumvent this instability iss
 %   * Impacts long term coherence of dynamic communtities
 %   * Each steps experience substantial drift compared to what a static algorithm would find
 
-Dependent Community Detection strategy works detecting communities in each snapshot based on the communities found in the previous snapshots. This approach introduces temporal smoothness because the previous solution is reused making the matching process obsolete. Though as part of the described trade-off it can impact the long-term coherence of the dynamic communities. Mainly, because each step introduces a certain amount of error into the results (community drift) which may get amplified within further iterations (error accumulation). Another disadvantage is the fact that the strategy has limited possibilities of parallelization due to its dependent nature.
+Dependent Community Detection strategy works by detecting communities in each snapshot based on the communities found in the previous snapshots. This approach introduces temporal smoothness because the previous solution is reused making the matching process obsolete. Though as part of the described trade-off it can impact the long-term coherence of the dynamic communities. Mainly, because each step introduces a certain amount of error into the results (community drift) which may get amplified within further iterations (error accumulation). Another disadvantage is the fact that the strategy has limited possibilities of parallelization due to its dependent nature.
 
 To lessen the complexity of continuous re-detection of the communities some algorithms process the changes incrementally by limiting the change to a local neighborhood. While this approach has many benefits, it is important to note that these algorithms face a problem where only applying local changes can cause communities to drift toward invalid ones in a global context.
 
@@ -306,7 +320,7 @@ To lessen the complexity of continuous re-detection of the communities some algo
 %   * Louvain method algorithm is run on the newly constructed graph
 % * Therefore introducing temporal smoothness and high efficiency
 
-@heFastAlgorithmCommunity2015 introduces an efficient algorithm by modifying the Louvain method algorithm. Based on the observation that between consecutive timesteps only a fraction of connections changes and do not affect communities dramatically, they argue that if all community nodes remain unchanged, the community also remains unchanged. With this in mind, they make a distinction between two types of nodes, ones that change the connection in a snapshot transition and ones that do not. The former have to be recomputed, while the latter maintain their community label. The nodes that maintain their community are merged into community nodes with edges to other community nodes and changed nodes weighted proportionally to their real connectivity (amount of edges when ungrouped). This simplified graph is passed to the Louvain method algorithm for community detection. By reusing the community assignments temporal smoothness is maintained and due to the incremental nature of this algorithm, the overall complexity remains low.
+@heFastAlgorithmCommunity2015 introduces an efficient algorithm by modifying the Louvain method. Based on the observation that between consecutive timesteps only a fraction of connections changes and do not affect communities dramatically, they argue that if all community nodes remain unchanged, the community also remains unchanged. With this in mind, they make a distinction between two types of nodes, ones that change the connection in a snapshot transition and ones that do not. The former have to be recomputed, while the latter maintain their community label. The nodes that maintain their community are merged into community nodes with edges to other community nodes and changed nodes weighted proportionally to their real connectivity (amount of edges when ungrouped). This simplified graph is passed to the Louvain method algorithm for community detection. By reusing the community assignments temporal smoothness is maintained and due to the incremental nature of this algorithm, the overall complexity remains low.
 
 
 
@@ -346,6 +360,8 @@ To lessen the complexity of continuous re-detection of the communities some algo
 
 More recently the @yinMultiobjectiveEvolutionaryClustering2021 has proposed an evolutionary algorithm by looking at the DCD from an Evolutionary Clustering Perspective. They detect community structure at the current time under the guidance of one obtained immediately in the past by simultaneously optimizing for community quality score (modularity) and community similarity between subsequent time steps (NMI). In the methodology, a way is proposed to encode a graph efficiently into a genetic sequence. Additionally, new mutation and crossover operators are proposed which maximize either of the two objectives. By using a local search algorithm, building a diverse initial population, and selecting for dominant candidates the communities maximizing both objectives are obtained.
 
+% Feedback: Define NMI here (instead of in evaluation?) - Or move it into community detection?
+
 
 
 #### Simultaneous community detection
@@ -360,7 +376,7 @@ More recently the @yinMultiobjectiveEvolutionaryClustering2021 has proposed an e
 %   * Not based on usual principle of a unique partition with each timestep
 %   * Cant handle real time community detection
 
-The final strategy we consider sidesteps the matching issue by considering all snapshots of the dynamic network at once. This is done by flattening the network in the temporal dimension and coupling edges between the same nodes at different timesteps. These approaches usually don't suffer from instability or community drift. The disadvantages include that the standard principle of a unique partition for each time step can not be applied, limiting the number of possible algorithms. Handling real-time changes to the graph are also usually not considered.
+The final strategy we consider sidesteps the matching issue by considering all snapshots of the dynamic network at once. This is done by flattening the network in the temporal dimension and coupling edges between the same nodes at different timesteps. These approaches usually don't suffer from instability or community drift. The disadvantages include that the standard principle of an unique partition for each time step can't be applied, as only the combined network is used, therefore limiting the number of possible algorithms. Handling real-time changes to the graph are also usually not considered.
 
 % @muchaCommunityStructureTimeDependent2009
 % 
@@ -382,7 +398,7 @@ The final strategy we consider sidesteps the matching issue by considering all s
 %   * The use two edge types spatial edges and temporal edges
 %   * Similar to spectral clustering
 
-@ghasemianDetectabilityThresholdsOptimal2016 apply stochastic block model-based approach. They make a distinction between two edge types: (i) spatial edges (edges between neighbors) and (ii) temporal edges (edges connection nodes in different timesteps). Using this distinction, they define a Belief Propagation equations to learn marginal probabilities of node labels ($\mu^i_s(t)$) over time. Additionally in their research, they introduce a way to derive a limit to the detectability of communities. This is, because some communities may not be detectable as their probability nears that of chance.
+@ghasemianDetectabilityThresholdsOptimal2016 apply stochastic block model-based approach. They make a distinction between two edge types: (i) spatial edges (edges between neighbors) and (ii) temporal edges (edges between nodes in subsequent timesteps). Using this distinction, they define a Belief Propagation equation to learn marginal probabilities of node labels over time. Additionally in their research, they introduce a way to derive a limit to the detectability of communities. This is, because some communities may not be detectable as their probability nears that of random chance.
 
 
 
@@ -413,7 +429,7 @@ In this section, we describe representation-based approaches by covering both CD
 
 
 
-#### Affiliation Graph Models
+### Affiliation Graph Models
 
 % @yangCommunityAffiliationGraphModel2012
 % 
@@ -441,9 +457,9 @@ While arguably not being representational by itself, Affiliation Graph Network (
 
 The AGM models a network as a bipartite graph with communities as first-class citizens and is represented by the following equation $B(V, C, M, \{p_c\})$, where $V$ represents nodes, $C$ set of communities, $M$ node-community memberships and $\{p_c\}$ model parameters (a single probability $p_c$ per community). It can model non-overlapping, overlapping, and hierarchical communities by defining rules on membership sets in $M$. AGM can be used in both generative and discriminative settings.
 
-The generative scenario goes as follows: Given an AGM $F$ generates links between each pair of nodes exceeding a baseline probability $p$. The can be done by considering that according to AGM, each pair of nodes in community $A$ is connected with a probability $p_A$. Therefore, the probability of two nodes having a connection is proportional to the number of communities they share (which is defined in the model).
+The generative scenario works as follows: Given an AGM $F(V, C, M, {p_c})$, generate links between each pair of nodes exceeding a baseline probability $p$. This is done by considering that, according to AGM, each pair of nodes in community $C_i$ is connected with a probability $p_{c_i}$. Therefore, the probability of two nodes having a connection is proportional to the number of communities they share (which can be derived from the model).
 
-The discriminative scenario is defined as: Given a graph $G$ and, find a model $F$ that may have generated it. By assuming that the graph was generated using an AGM, the parameters $M$, number of communities $|C|$ and $\{p_c\}$ have to be found. Process for finding such a model to the graph usually max likelihood fitting. AGM is relaxed to have membership strengths $F_{uC}$, which helps to define the probability of nodes $u$ and $v$ connecting through community $C$ ($P_{C}(u, v)$), and in terms of that by themselves $P(u, v)$. Using this a probability $P(G|F)$ can be constructed quantifying how well the model fits the data. Finally, gradient ascent can be applied to optimize the model parameters.
+The discriminative scenario is defined as: Given a graph $G$, find a model $F(V, C, M, {p_c})$ that may have generated it. By assuming that the graph was generated using an AGM, the parameters $M$, number of communities $|C|$ and $\{p_c\}$ have to be found. Process for finding such a model to the graph involves max likelihood fitting. AGM is relaxed to have membership strengths $F_{uC}$, which helps to define the probability of nodes $u$ and $v$ connecting through community $C$ as $P_{C}(u, v)$, and by themselves $P(u, v)$ (by marginalizing over communities). Using this, a probability $P(G|F)$ can be constructed quantifying how well the model fits the data. Finally, gradient ascent can be applied to optimize for the model's parameters.
 
 
 
