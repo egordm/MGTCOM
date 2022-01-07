@@ -51,3 +51,5 @@ G. H. Nguyen, J. B. Lee, R. A. Rossi, N. K. Ahmed, E. Koh, and S. Kim, “Contin
 #### [SageDy](https://github.com/wjm199717/SageDy)
 J. Wu, M. Liu, J. Fan, Y. Liu, and M. Han, “SageDy: A Novel Sampling and Aggregating Based Representation Learning Approach for Dynamic Networks,” in Artificial Neural Networks and Machine Learning – ICANN 2021, Cham, 2021, pp. 3–15. doi: 10.1007/978-3-030-86383-8_1.
 
+#### [EvolveGCN](https://github.com/IBM/EvolveGCN)
+A. Pareja et al., “EvolveGCN: Evolving Graph Convolutional Networks for Dynamic Graphs,” Proceedings of the AAAI Conference on Artificial Intelligence, vol. 34, pp. 5363–5370, Apr. 2020, doi: 10.1609/aaai.v34i04.5984.
