@@ -150,7 +150,7 @@ economic transaction networks
 knowledge networks
 \citep{gruberCollectiveKnowledgeSystems2008, brenneckeFirmKnowledgeNetwork2017},
 and disease transmission networks
-\citep{morrisNetworkEpidemiologyHandbook2004}.
+\citep{morrisNetworkEpidemiologyHandbook2004, stattnerSocialNetworkAnalysis2011}.
 
 One main issue to address while studying this type of real-world events
 lies in the identification of meaningful substructures hidden within the
@@ -259,11 +259,12 @@ manner.
 
 The problem of dynamic community detection was noticed quite early on
 within the SNA community and a considerable amount of research has been
-made in order to provide a comprehensive a analysis of network. While
-the said research was mostly focused on the discovery of communities
-using topologically-based features and node connectivity, the covered
-methods did research the limitations and challenges posed by a temporal
-context.
+made in order to provide a comprehensive analysis
+\citep{tamimiLiteratureSurveyDynamic2015, rossettiCommunityDiscoveryDynamic2018, dakicheTrackingCommunityEvolution2019}.
+While the said research was mostly focused on the discovery of
+communities using topologically-based features and node connectivity,
+the covered methods did research the limitations and challenges posed by
+a temporal context.
 
 In recent years, significant developments have been made in the space of
 deep learning. Mainly in the development of new deep learning methods
@@ -277,10 +278,14 @@ introduction of unsupervised learning.
 
 Despite this resurgence, the DCD problem has received little attention.
 Though a few efforts have been made to incorporate the deep learning
-methods by introducing content-based similarity dynamic, the definition
-of unified constraints for end-to-end learning, and usage of graph
-representation-based CD algorithms within a temporal context, the
-current state of the art leaves a lot to be desired.
+methods by introducing content-based similarity
+\citep{faniUserCommunityDetection2020, cazabetUsingDynamicCommunity2012, huangInformationFusionOriented2022},
+the definition of unified constraints for end-to-end learning
+\citep{maCommunityawareDynamicNetwork2020, wangEvolutionaryAutoencoderDynamic2020, cavallariLearningCommunityEmbedding2017, jiaCommunityGANCommunityDetection2019},
+and usage of graph representation-based CD algorithms
+\citep{wangVehicleTrajectoryClustering2020, limBlackHoleRobustCommunity2016}
+within a temporal context, the current state of the art leaves room for
+improvement.
 
 We structure the literature as follows: first, we describe the various
 interpretations of the Community Structure in
@@ -510,14 +515,17 @@ to:
 Modularity directly measures the density of links inside a graph and is
 therefore computed on communities (sets of nodes) individually by
 weighing edges based on community similarity (or exact matching).
-Calculation of modularity is done by aggregating for each pair of nodes
-the difference between the expected connectivity (amount of edges
-between the nodes) and the actual connectivity (existence of an edge)
-given their degrees (\cref{eq:modularity}). The final result represents
-the delta difference by how much the given graph exceeds a random graph
-as expected connectivity is determined by a random rewiring graph.
-Because intra-community pairs are weighted lower than inter-community
-pairs the score can vary.
+Calculation of modularity is done by aggregating for each community
+\(r\) and for each pair of nodes \(vw\) the difference between the
+expected connectivity \(\frac{k_{v} k_{w}}{2 m}\) (amount of edges
+between the nodes) and the actual connectivity \(A_{vw}\) (existence of
+an edge) given their degrees (\(k_v\) and \(k_w\)). The final result
+represents the delta difference by how much the given graph exceeds a
+random graph as expected connectivity is determined by a random rewiring
+graph. Because intra-community pairs are weighted lower than
+inter-community pairs the score can vary. See \cref{eq:modularity} where
+\(S_{vr}\) indicates membership of node \(v\) for community \(r\) and
+\(m\) represents the total edge count.
 
 \begin{equation}
 Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}_{\text{Expected Connectivity}}\right] \overbrace{S_{v r} S_{w r}}^{\text{Community Similarity}}

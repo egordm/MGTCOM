@@ -4,8 +4,16 @@
 - [x] Add preprocessing for other datasets
 - [x] Figure out how to use timestamps in gephi
 - [ ] Add docker configs and run scripts for baselines
+  - [ ] SageDy
+  - [ ] EvolveGCN
+  - [ ] CTDNE
 - [ ] Add dataset export to edge list
 - [ ] Find ground truth communities if applicable on current datasets
+  - [ ] Karate Club
+  - [ ] Enron
+  - [ ] DBLP
+  - [ ] com-* datasets
+  - [ ] sx-mathoverflow
 - [ ] Add baseline config format (and add configs)
 - [ ] Add baseline benchmarking based on config
 - [ ] Add W&B support for running baselines

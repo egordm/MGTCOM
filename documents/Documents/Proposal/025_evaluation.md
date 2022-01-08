@@ -4,9 +4,9 @@
 % * Describe how detection and result tracking are evaluation
 % * Detection and Tracking are evaluated separately
 
-In the previous section, we have described the different variations of community structure definitions as well as the approaches used for detecting these communities. In this section, we will cover how the found dynamic community structures can be evaluated in a more general setting to allow a comparison of different approaches. While dynamic community detection problems can be seen as two tasks (resemblance/detection and matching/tracking) these two should separate evaluation tasks.
+In the previous section, we have described the different variations of community structure definitions as well as the approaches used for detecting communities. In this section, we will cover how the found dynamic community structures can be evaluated in a more general setting to allow a comparison of different approaches. Dynamic community detection problems can be seen as a combination of two tasks, matching and tracking. Due to the large difference between the two tasks, the evaluation is usually conducted separately for each of the tasks.
 
-In the following sections, we cover both of the evaluation tasks by classifying approaches used in the literature in three classes. Namely, annotated, metric-based, and task-specific.
+In the following sections, we cover both of the evaluation methods for both tasks by classifying approaches used in the literature in three classes, namely, annotated, metric-based, and task-specific.
 
 
 
@@ -51,7 +51,7 @@ The first group of measures we consider operates directly on the network structu
 * **Expansion**: the number of edges that cross the community border
 * **Internal Density**: the ratio of edges within the cluster with respect to all possible edges
 * **Cut Ratio and Normalized Cut**: the fraction of all possible edges leaving the cluster
-* **Maximum/Average ODF**: the maximum/average fraction of nodes’ edges crossing the cluster border
+* **Maximum/Average ODF** (out-degree fraction): the maximum/average fraction of nodes’ edges crossing the cluster border
 * **Triangle Participation Ratio TPR**: measures fraction of triads within the community. A higher TPR indicates a denser community structure
 
 % See: @suComprehensiveSurveyCommunity2021 as it has a well curated collection of evaluation metrics
@@ -82,9 +82,9 @@ Proximity-based measures are often used to evaluate clustering tasks but are als
 %     * $W_k$ is covariance matrix between the data in the cluster
 %     * $tr$ is trace of the matrix
 
-* **Silhouette Coefficient**: Is defined as $S(i)=\frac{b(i)-a(i)}{\max \{a(i), b(i)\}}$ where $a(i)$ defines the mean distance from node $i$  to other nodes in the same cluster while $b(i)$ is mean distance to any node not in the same cluster. It measures cohesion of a cluster/community and indicates how well a node is matched to its own cluster.
-* **Davies-Bouldin Index**: Is the ratio of the sum of the average distance to the distance between the centers of mass of the two clusters. In other words, it is defined as a ratio of within-cluster, to the between cluster separation. The index is defined as an average over all the found clusters and is therefore also a good measure to deciding how many clusters should be used.
-* **Calinski-Harabasz Index**: Is similarly the ratio of the between-cluster to the within-cluster variance. Therefore it measures both cohesion (how well its members fit the cluster) as well as compares it to other clusters (separation).
+* **Silhouette Coefficient**: is defined as $S(i)=\frac{b(i)-a(i)}{\max \{a(i), b(i)\}}$ where $a(i)$ defines the mean distance from node $i$  to other nodes in the same cluster while $b(i)$ is mean distance to any node not in the same cluster. It measures cohesion of a cluster/community and indicates how well a node is matched to its own cluster.
+* **Davies-Bouldin Index**: is the ratio of the sum of the average distance to the distance between the centers of mass of the two clusters. In other words, it is defined as a ratio of within-cluster, to the between cluster separation. The index is defined as an average over all the found clusters and is therefore also a good measure to deciding how many clusters should be used.
+* **Calinski-Harabasz Index**: is the ratio of the between-cluster to the within-cluster variance. Therefore it measures both cohesion (how well its members fit the cluster) as well as compares it to other clusters (separation).
   
   
 
@@ -117,7 +117,7 @@ $$
 p_{c}^{a}=\sum_{k=1}^{q}\left(\frac{\left(\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}}{\left(\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}\right) /\left\|\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}}\right) / q
 $$ {#eq:communitystability}
 
-In this case $\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}$ represents the normalized euclidean distance between the two clusters while $\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}$ represents the normalized euclidean distance between the adjacency matrices of the two clusters. For network stability no such grouping is done and evaluation is performed on global representation and adjacency matrices. 
+Where $H^a_i$ and $H^a_{c_k}$ represent the embedding vector for a node $i$ and a community $k$ at $a$-th timestamp respectively. Similarly separate node and community based adjacency matrices are defined as $A^a$ and $A^a_{c_k}$. Therefore, in this case $\left\|\mathrm{H}_{c_{k}}^{a+1}-\mathrm{H}_{c_{k}}^{a}\right\|_{2}^{2}$ represents the normalized euclidean distance between the two clusters while $\left\|\mathrm{~A}_{c_{k}}^{a+1}-\mathrm{A}_{c_{k}}^{a}\right\|_{2}^{2}$ represents the normalized euclidean distance between the adjacency matrices of the two clusters. For network stability no such grouping is done and evaluation is performed on node-based (global) representation and adjacency matrices. 
 
 ### Task specific
 
@@ -157,7 +157,7 @@ To address this issue, it is common to evaluate the algorithm on both earlier de
 %   * Prediction of existence of links between nodes in the next time stamps
 %   * Based on representation in the current time stamp
 
-A common way to evaluate the quality of extracted node embeddings within Graph Representation learning is using the link-prediction task. As link-prediction can be done in an unsupervised manner, it does not require additional labeling for evaluation. The edge set of the input network is split into a test set on which the model is trained, and a test set on which is used to compare the predicted links against. For node representation learning the predictions are defined by proximity between the nodes and a threshold. To quantify the quality of the results classification metrics are usually employed such as accuracy, precision, recall, and f-score.
+A common way to evaluate the quality of extracted node embeddings within Graph Representation learning is using the link-prediction task. As link-prediction can be done in an unsupervised manner, it does not require additional labeling for evaluation. The edge set of the input network is split into a train set on which the model is trained, and a test set on which is used to compare the predicted links against. When using node representation learning, the predictions are defined by proximity between the nodes and a threshold. To quantify the quality of the results classification metrics are usually employed such as accuracy, precision, recall, and f-score.
 
 In the context of CD and DCD, the link prediction is modified to measure the predicting capability of the community embeddings. @faniUserCommunityDetection2020 defines a user prediction task to predict which users posted a certain news article at a certain time. Their methodology is, given a news item at time $t$, find the closest community to the article in representational similarity space. All members of the given community are seen as predicted users over which the classification metrics are calculated. Similarly, @maCommunityawareDynamicNetwork2020 modify the task by predicting whether the edges will still exist within the next timestamp to also quantify the temporal prediction capability of the trained embeddings.
 
@@ -190,7 +190,7 @@ In the context of CD and DCD, the link prediction is modified to measure the pre
 %   * normalized discounted cumulative gain (nDCG)
 %   * mean reciprocal rank (MRR)
 
-Another way the quality of node representations can be evaluated is by using recommendation tasks. Here the idea is, instead of predicting a single item like in link-prediction, to rank the items based on their recommendation confidence. Using the ranked list, standard information retrieval metrics such as precision at rank, mean reciprocal rank, and success at rank k can be computed. This approach is applied to CD [@rozemberczkiGEMSECGraphEmbedding2019; @huangInformationFusionOriented2022; @faniUserCommunityDetection2020] by ranking recommendations for per community instead of on an individual basis. Communities with higher scores therefore would indicate high similarity between their members.
+Another way the quality of node representations can be evaluated is by using recommendation tasks. Here the idea is, instead of predicting a single item like in link-prediction, to rank the items based on their recommendation confidence. Using the ranked list, standard information retrieval metrics such as precision at rank, mean reciprocal rank, and success at rank k can be computed. This approach is applied to CD [@rozemberczkiGEMSECGraphEmbedding2019; @huangInformationFusionOriented2022; @faniUserCommunityDetection2020] by ranking recommendations per community instead of on an individual basis. Communities with higher scores therefore would indicate high similarity between their members.
 
 
 

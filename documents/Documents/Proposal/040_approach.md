@@ -9,7 +9,7 @@
 % * Then we will define components for our objective function
 % * Finally we will discuss how community detection results are extracted 
 
-To find an answer to our research questions, the methodology is split into multiple parts which address the selection of baselines, evaluation benchmark set up, the architecture of the algorithm, building an appropriate objective function, and elaborating on DCD result extraction respectively. While split into parts, it is important to note that these tasks have a large overlap and won't be considered in isolation.
+To find an answer to our research questions, the methodology is split into multiple parts which address the selection of baselines, evaluation benchmark set up, the architecture of the algorithm, building an appropriate objective function, and elaborating on DCD result extraction respectively. While split, it is important to note that these tasks have a large overlap and won't be considered in isolation.
 
 The final result of my thesis will consist of the said framework for DCD within dynamic heterogeneous graphs, a set of results comparing the algorithm to the current state-of-the-art approaches on various related tasks, and a set of ablation tests providing empirical corroboration for important design choices.
 
@@ -55,7 +55,7 @@ As the research questions posed in +@research-questions are all mostly of a quan
 %     * Friend Recommendation
 % * Test improvement based on inclusion of content and metadata
 
-To provide an answer for @rqq:rq1, the quality of the algorithm on both static and dynamic communities needs to be compared against the benchmarks for various configurations (considering the content and/or meta-topological data). As our baselines include both representation- as well as link-based approaches, the benchmarks should cover measures used in both groups. To evaluate the quality of the communities, annotation-based approaches (computing NMI and NF1) and quality metric-based evaluation approaches will be employed (See @evaluation). Since our definition of community slightly differs from the literature as it encompasses network external information (content) we will also employ task-based evaluation such as recommendation tasks (follower recommendation, hashtag recommendation - depending on the dataset).
+To provide an answer for @rqq:rq1, the quality of the algorithm on both static and dynamic communities needs to be compared against the benchmarks for various configurations (considering the content and/or meta-topological data). As our baselines include both representation- as well as link-based approaches, the benchmarks should cover measures used in both groups. To evaluate the quality of the communities, annotation-based approaches (computing NMI and NF1) and quality metric-based evaluation approaches will be employed (See +@evaluation). Since our definition of community slightly differs from the literature as it encompasses network external information (content) we will also employ task-based evaluation such as recommendation tasks (follower recommendation, hashtag recommendation - depending on the dataset).
 
 A similar evaluation methodology will be employed for @rqq:rq3, though the question is of a more exploratory nature concerning the modeling of temporal information, and therefore will be conducted as an ablation test with a focus on stability measures.
 
@@ -118,15 +118,15 @@ The core part of the proposed framework is the representation learning algorithm
 
 ### Graph Sampling
 
-The first component concerns efficient graph sampling. In the literature, various ways to sample graphs can be found a way that enforces learning desired topological properties of the network. In this work, the choice lies between random walk approaches [@perozziDeepWalkOnlineLearning2014; @groverNode2vecScalableFeature2016; @groverNode2vecScalableFeature2016] which traverse the graph in a depth-first search manner which is known for favoring homophily and convolution-based approaches (@kipfSemiSupervisedClassificationGraph2017a; @hamiltonInductiveRepresentationLearning2018) which sample the graph in a breadth-first search manner favoring structural equivalence.
+The first component concerns efficient graph sampling, which is a way to enforce learning of desired topological properties from the network. Various ways to sample graphs can be found in the literature. For this work, the choice lies between random walk approaches [@perozziDeepWalkOnlineLearning2014; @groverNode2vecScalableFeature2016; @groverNode2vecScalableFeature2016] which traverse the graph in a depth-first search manner which is known for favoring homophily and convolution-based approaches (@kipfSemiSupervisedClassificationGraph2017a; @hamiltonInductiveRepresentationLearning2018) which sample the graph in a breadth-first search manner favoring structural equivalence. Both methods support heterogeneous graph sampling [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018; @yangHeterogeneousNetworkRepresentation2020; @dongMetapath2vecScalableRepresentation2017; @wangHeterogeneousGraphAttention2021], and temporally aware sampling [@nguyenContinuousTimeDynamicNetwork2018; @wuSageDyNovelSampling2021; @dasguptaHyTEHyperplanebasedTemporally2018].
 
-Both methods support heterogeneous graph sampling [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018; @yangHeterogeneousNetworkRepresentation2020; @dongMetapath2vecScalableRepresentation2017; @wangHeterogeneousGraphAttention2021], and temporally aware sampling [@nguyenContinuousTimeDynamicNetwork2018; @wuSageDyNovelSampling2021; @dasguptaHyTEHyperplanebasedTemporally2018].
+% * TODO: BFS random walk is not equivalent to graph convolution?
 
 
 
-### DNN Architecture
+### Neural Network Architecture
 
-The architecture and training strategy of the underlying neural network matter. Many methods introduced in the previous section already outline an effective architecture suitable for training on the introduced sampling method. Though it is important to note that as both data and requirements for our algorithms differ, they can not be used as it. The architecture should allow for heterogeneous graph samples, temporally aware samples, and node features.
+The architecture and training strategy of the underlying neural network matter. Many methods introduced in the previous section already outline an effective architecture suitable for training on the introduced sampling method. Because both data and requirements for our algorithms differ, they can't be used as is. The final architecture should allow for heterogeneous graph samples, temporal-aware samples, and node features.
 
 Similarly, related literature can be used as inspiration as various approaches already utilize content-rich networks [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018], attention-based mechanisms [@abu-el-haijaWatchYourStep2018; @sankarDynamicGraphRepresentation2019; @wangHeterogeneousGraphAttention2021], and alternative training strategies such (variational or diffusion) auto-encoders, GAN [@liVariationalDiffusionAutoencoders2020; @kipfVariationalGraphAutoEncoders2016].
 
@@ -178,7 +178,7 @@ In most of the literature, this temporal smoothness is indirectly handled by res
 
 As the final step of the framework, the viable dynamic communities need to be extracted. This may be done by simultaneously training community embeddings along with the node embeddings [@maCommunityawareDynamicNetwork2020; @limBlackHoleRobustCommunity2016; @wangEvolutionaryAutoencoderDynamic2020], therefore having the advantage that objective function can directly influence the resulting communities. Other approaches instead operate on the resulting embedding space or the augmented graphs to extract the resulting communities using link-based methods such as the Louvain method or density-based clustering algorithms such as K-means, BIRCH [@zhangBIRCHEfficientData1996], or OPTICS [@ankerstOPTICSOrderingPoints1999] yielding the benefit of losing the community count assumption.
 
-In our approach, we plan to focus on direct community optimization, while avoiding hard-coding the model to specific assumptions using spectral clustering-based techniques and soft assignment clustering [@liDivideandconquerBasedLargeScale2021; @maCommunityawareDynamicNetwork2020 ].
+In our approach, we plan to focus on direct community optimization, while avoiding hard-coding the model to specific assumptions using spectral clustering-based techniques and soft assignment clustering [@liDivideandconquerBasedLargeScale2021; @maCommunityawareDynamicNetwork2020].
 
 ## Extensions
 

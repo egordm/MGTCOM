@@ -39,9 +39,7 @@ Different metrics exist quantifying the characteristic of *homophily* over edg
 %   * It is positive if number of edges within a group exceeds expected number on basis of chance
 %   * [Explanations of terms in equations](https://latex.org/forum/viewtopic.php?t=11318)
 
-Modularity directly measures the density of links inside a graph and is therefore computed on communities (sets of nodes) individually by weighing edges based on community similarity (or exact matching). Calculation of modularity is done by aggregating for each pair of nodes the difference between the expected connectivity (amount of edges between the nodes) and the actual connectivity (existence of an edge) given their degrees (+@eq:modularity). The final result represents the delta difference by how much the given graph exceeds a random graph as expected connectivity is determined by a random rewiring graph. Because intra-community pairs are weighted lower than inter-community pairs the score can vary.
-
-% Feedback: Explain what the parameters mean
+Modularity directly measures the density of links inside a graph and is therefore computed on communities (sets of nodes) individually by weighing edges based on community similarity (or exact matching). Calculation of modularity is done by aggregating for each community $r$ and for each pair of nodes $vw$ the difference between the expected connectivity $\frac{k_{v} k_{w}}{2 m}$ (amount of edges between the nodes) and the actual connectivity $A_{vw}$ (existence of an edge) given their degrees ($k_v$ and $k_w$). The final result represents the delta connectivity difference by how much the given graph exceeds a random graph as expected connectivity is determined by a random rewiring graph. Because intra-community pairs are weighted lower than inter-community pairs the score can vary. See +@eq:modularity where $S_{vr}$ indicates membership of node $v$ for community $r$ and $m$ represents the total edge count.
 
 $$
 Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}_{\text{Expected Connectivity}}\right] \overbrace{S_{v r} S_{w r}}^{\text{Community Similarity}}
@@ -61,7 +59,7 @@ $$ {#eq:modularity}
 %   * Is a heuristic algorithm
 %     * Since going through all possible assignments maximizing modularity is impractical
 
-Finding an optimal partition of a graph into communities is an NP-hard problem. This is because, while calculating the modularity score can be done in linear time, all possible node to community assignments still have to be considered. Therefore heuristic-based methods such as the Louvain method are usually used.
+Finding an optimal partition of a graph into communities is an NP-hard problem. This is because, while calculating the modularity score can be done in loglinear time, all possible node to community assignments still have to be considered. Therefore heuristic-based methods such as the Louvain method are usually used.
 
 % Feedback: Cite NP-hard CD
 

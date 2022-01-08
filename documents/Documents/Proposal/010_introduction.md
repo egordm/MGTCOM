@@ -2,8 +2,6 @@
 
 Social Network Analysis (SNA) is a huge part of the Network Science field and is concerned with the process of investigating social structures that occur in the real-world using Network and Graph Theory. These social structures usually include social media networks [@grandjeanSocialNetworkAnalysis2016; @hagenCrisisCommunicationsAge2018], economic transaction networks [@prykeAnalysingConstructionProject2004; @kongWhyAreSocial2011; @swamynathanSocialNetworksImprove2008], knowledge networks [@gruberCollectiveKnowledgeSystems2008; @brenneckeFirmKnowledgeNetwork2017], and disease transmission networks [@morrisNetworkEpidemiologyHandbook2004; @stattnerSocialNetworkAnalysis2011].
 
-% 
-
 One main issue to address while studying this type of real-world events lies in the identification of meaningful substructures hidden within the overall complex system. The SNA is therefore applied to extract patterns from the data usually in form of information flow, identification of high throughput nodes and paths, and discovery of communities and clusters. In this thesis, we are going to focus on the problem of community discovery.
 
 This thesis proposal is structured as follows: in this section, we are going to introduce basic concepts and challenges of Dynamic Community Detection. In +@literature-review a brief literature survey is conducted, identifying the current state of the art and approaches to Dynamic Community Detection. In +@research-questions we will describe the problem we are trying to solve as well as formulate the research questions. In +@approach we will elaborate on our proposed methodology for solving the posed problem and answering the research questions. Finally, in +@planning the concrete planning for the research project is laid out.

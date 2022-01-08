@@ -13,7 +13,7 @@
 
 The main goal of my thesis is to build a framework for community detection and representation in dynamic heterogeneous networks.
 
-This is, to enable dynamic community analysis on the datasets proposed in @wangPublicSentimentGovernmental2020. The data described is collected from the Twitter social platform and is dynamic, heterogeneous, and rich in contentual (unstructured text) data. To the best of our knowledge, there are currently no dynamic community detection algorithms that can handle this data without relaxing its rich data representation (data loss).
+This is, to enable dynamic community analysis on the datasets proposed in @wangPublicSentimentGovernmental2020. The data described is collected from the Twitter social platform and is dynamic, heterogeneous, and rich in content-based (unstructured text) data. To the best of our knowledge, there are currently no dynamic community detection algorithms that can handle this data without relaxing its rich data representation (data loss).
 
 As there are no alike algorithms, direct comparison is not possible. To both validate the merit of our methods as well as the quality of the results, we spread our research over four research questions.
 

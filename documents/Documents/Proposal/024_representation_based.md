@@ -102,7 +102,7 @@ The first class of methods we consider are Graph Reinforcement methods. These me
 %     * Using a greedy similarity computation
 %     * Prefer nodes which are likely to be in same community of inter similarity detection
 
-@kangCommunityReinforcementEffective2021 present a CD algorithm agnostic pre-processing method for strengthening the community structure of a graph by adding non-existing predicted intra-community edges and deleting existing predicted inter-community edges. Their strategy is to learn topological embedding using a graph representation learning algorithm (node2vec) based on the existing link prediction task. The similarity is computed between different node pairs and put into buckets. Then with the assumption of *homophily* the buckets with a higher value can be considered holding intra-community while buckets with lower inter-community connections. Right buckets are picked from both extremes to create or delete edges. The preemptive CD is done to greedily guide pair-wise similarity computation and avoid a high complexity.
+@kangCommunityReinforcementEffective2021 present a pre-processing method for strengthening the community structure of a graph by adding non-existing predicted intra-community edges and deleting existing predicted inter-community edges. Their strategy is to learn topological embedding using a graph representation learning algorithm (node2vec) based on the existing link prediction task. The similarity is computed between different node pairs and put into buckets. Then with the assumption of *homophily* the buckets with a higher value can be considered holding intra-community while buckets with lower inter-community connections. Right buckets are picked from both extremes to create or delete edges. The preemptive CD is done to greedily guide pair-wise similarity computation and avoid a high complexity. Once the reinforced graph is constructed, already existing CD algorithms can be applied.
 
 
 
@@ -149,7 +149,7 @@ Both components ($G$ and $D$) are implemented as a modified relaxed AGM model wi
 %   * Temporal Consistency
 % * in terms of given representations to be able to back-propagate the combined error
 
-Another subject where representation-based approaches excel is multi-objective optimization. Usually, a combined objective is defined in terms of a community quality, temporal consistency, or homophily measure. These measures in turn use the proximity between the representation to be able to back-propagate the combined error and optimize the representation(function) directly.
+Another subject where representation-based approaches excel is multi-objective optimization. Usually, a combined objective is defined in terms of a community quality, temporal consistency, or homophily measure. These measures in turn use the proximity between the representation to be able to back-propagate the combined error and optimize the representation (function) directly.
 
 
 
@@ -169,7 +169,7 @@ Another subject where representation-based approaches excel is multi-objective o
 % * Evaluate cluster quality by modularity
 % * Evaluate embeddings by genre prediction / recommendation
 
-In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cluster centers along with node embeddings. They define objective function as a combination of three terms: normalization term (ensures embeddings are centered at the origin), proximity term (forces nodes with similar neighborhoods to be embedded close), cluster quality term (forces nodes to be close to their nearest cluster). Additionally, a "social network cost" term is added as a regularizer to optimize for proximity between nodes within the same cluster. During training, the clustering coefficient is annealed to ensure convergence and negative sampling is employed to avoid large softmax costs.
+In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cluster centers along with node embeddings. They define an objective function as a combination of three terms: normalization term (ensures embeddings are centered at the origin), proximity term (forces nodes with similar neighborhoods to be embedded close), cluster quality term (forces nodes to be close to their nearest cluster). Additionally, a "social network cost" term is added as a regularizer to optimize for proximity between nodes within the same cluster. During training, the clustering coefficient is annealed to ensure convergence and negative sampling is employed to avoid large softmax costs.
 
 
 
@@ -199,7 +199,7 @@ In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cl
 %     * S Microsteps: Update node embeddings S and cluster centers U
 %       * Tries to make Q catch up with P
 
-@yangGraphClusteringDynamic2017 propose a similar idea of combining embedding and clustering tasks and solving them in an end-to-end manner. In their work, they employ a Deep Denoise Autoencoder (DAE) to learn topological information of the network by optimizing for reconstruction loss. To learn cluster/community centers they define GRACE cluster module which first computes soft cluster assignment matrix $Q$ by utilizing the embeddings and cluster centers which contains probabilities $q_{ik}$ of node $i$ belonging to cluster $k$. The clustering loss is defined as KL-divergence between the soft clustering $Q$ and auxiliary target distribution $P$ which is computed by squaring and normalizing the soft assignments to reinforce more confident clustering results while preventing the formation of excessively large clusters. Both embeddings and clustering are optimized alternatively until convergence.
+@yangGraphClusteringDynamic2017 propose a similar idea of combining embedding and clustering tasks and solving them in an end-to-end manner. In their work, they employ a Deep Denoise Autoencoder (DAE) to learn topological information of the network by optimizing for reconstruction loss. To learn cluster/community centers they define GRACE cluster module which first computes soft cluster assignment matrix $Q$ by utilizing the embeddings and cluster centers which contain probabilities $q_{ik}$ of node $i$ belonging to cluster $k$. The clustering loss is defined as (Kullback Leiber) KL-divergence between the soft clustering $Q$ and auxiliary target distribution $P$ which is computed by squaring and normalizing the soft assignments to reinforce more confident clustering results while preventing the formation of excessively large clusters. Both embeddings and clustering are optimized alternatively until convergence.
 
 
 
@@ -225,11 +225,11 @@ In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cl
 % * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
 %   * Therefore the actual quality of communities remains to be known
 
-@maCommunityawareDynamicNetwork2020 proposed a novel approach to constructing community-aware dynamic network embeddings by leveraging multi-objective optimization and extending it into a temporal dimension. They adopt a Graph Autoencoder structure which works by encoding the full graph into a lower-dimensional structure and decoding it again into a graph. Assuming a well-tuned network, this allows authors to encode the network (and its nodes) into more efficient representation vectors which characterize the network well
+@maCommunityawareDynamicNetwork2020 proposed a novel approach to constructing community-aware dynamic network embeddings by leveraging multi-objective optimization and extending it into a temporal dimension. They adopt a Graph Autoencoder structure which works by encoding the full graph into a lower-dimensional structure and decoding it again into a graph. Assuming a well-tuned autoencoder, this allows authors to encode the input network (and its nodes) into a more efficient representation vectors which characterize the network well.
 
 The objective function they use is defined by three terms: the reconstruction error term minimizing the distance between the ground-truth and the autoencoder output, local structure/homophily preservation term minimizing first- and second-order proximity between connected nodes, and the community evolution preservation term maximizing temporal smoothness of communities at different granularity levels given their representation as an aggregation of their members.
 
-The initial community assignment is generated using the Louvain method for high-level communities and using k-means for fine-grained communities given a max community size parameter $w$. After that, embeddings at each snapshot are optimized by employing a dependent community detection-like strategy.
+The initial community assignment is generated using the Louvain method for high-level communities and using K-means for fine-grained communities given a max community size parameter $w$. After that, embeddings at each snapshot are optimized by employing a dependent community detection-like strategy.
 
 
 
@@ -254,7 +254,7 @@ The initial community assignment is generated using the Louvain method for high-
 %       * Temporal smoothness of node embeddings
 %   * Adopt K-means to discover community structure
 
-@wangEvolutionaryAutoencoderDynamic2020 employs a similar to DCD detection by utilizing the Graph Autoencoder architecture. As an addition authors add an additional community score term to the objective function also minimizing the distance between nodes in the same community. At last, K-means is run on the representational vectors to detect communities at different timesteps while reusing the outputs from the previous step.
+@wangEvolutionaryAutoencoderDynamic2020 employs a similar strategy for DCD detection by utilizing the Graph Autoencoder architecture. Authors add an additional community score term to the objective function, therefore also minimizing the distance between nodes in the same community. At last, K-means is run on the representational vectors to detect communities at different timesteps while reusing the outputs from the previous step.
 
 
 
@@ -268,7 +268,7 @@ The initial community assignment is generated using the Louvain method for high-
 % * Can calculate similarity over these
 % * e2e optimization makes these additions viable
 
-Another way to improve community quality is by incorporating multi-modal features. These can come in form of node attributes, content-based or meta-topological data. These representations are incorporated into learned embedding vectors either by direct learning, incorporating them into the objective function, or use of pre-trained models.
+Another way to improve community quality is by incorporating multi-modal features. These can come in the form of node attributes, content-based or meta-topological data. These representations are incorporated into learned embedding vectors either by direct learning, incorporating them into the objective function, or use of pre-trained models.
 
 
 
