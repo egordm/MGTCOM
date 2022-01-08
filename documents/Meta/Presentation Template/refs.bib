@@ -1,18 +1,17 @@
 
-@article{abu-el-haijaWatchYourStep2018,
-  title = {Watch {{Your Step}}: {{Learning Node Embeddings}} via {{Graph Attention}}},
-  shorttitle = {Watch {{Your Step}}},
+@inproceedings{abu-el-haijaWatchYourStep2018,
+  title = {Watch Your Step: Learning Node Embeddings via Graph Attention},
+  shorttitle = {Watch Your Step},
+  booktitle = {Proceedings of the 32nd {{International Conference}} on {{Neural Information Processing Systems}}},
   author = {{Abu-El-Haija}, Sami and Perozzi, Bryan and {Al-Rfou}, Rami and Alemi, Alex},
   year = {2018},
-  month = sep,
-  journal = {arXiv:1710.09599 [cs, stat]},
-  eprint = {1710.09599},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
-  abstract = {Graph embedding methods represent nodes in a continuous vector space, preserving information from the graph (e.g. by sampling random walks). There are many hyper-parameters to these methods (such as random walk length) which have to be manually tuned for every graph. In this paper, we replace random walk hyper-parameters with trainable parameters that we automatically learn via backpropagation. In particular, we learn a novel attention model on the power series of the transition matrix, which guides the random walk to optimize an upstream objective. Unlike previous approaches to attention models, the method that we propose utilizes attention parameters exclusively on the data (e.g. on the random walk), and not used by the model for inference. We experiment on link prediction tasks, as we aim to produce embeddings that best-preserve the graph structure, generalizing to unseen information. We improve state-of-the-art on a comprehensive suite of real world datasets including social, collaboration, and biological networks. Adding attention to random walks can reduce the error by 20\% to 45\% on datasets we attempted. Further, our learned attention parameters are different for every graph, and our automatically-found values agree with the optimal choice of hyper-parameter if we manually tune existing methods.},
-  archiveprefix = {arXiv},
-  keywords = {class3,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio2,Statistics - Machine Learning,unread},
-  file = {/home/egordm/Documents/Research/Reference/storage/NNKLCN8M/Abu-El-Haija et al_2018_Watch Your Step.pdf;/home/egordm/Documents/Research/Reference/storage/VH9LCXBM/1710.html}
+  month = dec,
+  series = {{{NIPS}}'18},
+  pages = {9198--9208},
+  publisher = {{Curran Associates Inc.}},
+  address = {{Red Hook, NY, USA}},
+  abstract = {Graph embedding methods represent nodes in a continuous vector space, preserving different types of relational information from the graph. There are many hyper-parameters to these methods (e.g. the length of a random walk) which have to be manually tuned for every graph. In this paper, we replace previously fixed hyper-parameters with trainable ones that we automatically learn via backpropagation. In particular, we propose a novel attention model on the power series of the transition matrix, which guides the random walk to optimize an upstream objective. Unlike previous approaches to attention models, the method that we propose utilizes attention parameters exclusively on the data itself (e.g. on the random walk), and are not used by the model for inference. We experiment on link prediction tasks, as we aim to produce embeddings that best-preserve the graph structure, generalizing to unseen information. We improve state-of-the-art results on a comprehensive suite of real-world graph datasets including social, collaboration, and biological networks, where we observe that our graph attention model can reduce the error by up to 20\%-40\%. We show that our automatically-learned attention parameters can vary significantly per graph, and correspond to the optimal choice of hyper-parameter if we manually tune existing methods.},
+  file = {/home/egordm/Documents/Research/Reference/storage/Q62YUM8E/Abu-El-Haija et al_2018_Watch your step.pdf}
 }
 
 @article{acharyaCommunityDetectionClustering2020,
@@ -150,23 +149,20 @@
 }
 
 @article{bronsteinGeometricDeepLearning2017,
-  title = {Geometric Deep Learning: Going beyond {{Euclidean}} Data},
-  shorttitle = {Geometric Deep Learning},
+  title = {Geometric {{Deep Learning}}: {{Going}} beyond {{Euclidean}} Data},
+  shorttitle = {Geometric {{Deep Learning}}},
   author = {Bronstein, Michael M. and Bruna, Joan and LeCun, Yann and Szlam, Arthur and Vandergheynst, Pierre},
   year = {2017},
   month = jul,
   journal = {IEEE Signal Processing Magazine},
   volume = {34},
   number = {4},
-  eprint = {1611.08097},
-  eprinttype = {arxiv},
   pages = {18--42},
-  issn = {1053-5888, 1558-0792},
+  issn = {1558-0792},
   doi = {10.1109/MSP.2017.2693418},
-  abstract = {Many scientific fields study data with an underlying structure that is a non-Euclidean space. Some examples include social networks in computational social sciences, sensor networks in communications, functional networks in brain imaging, regulatory networks in genetics, and meshed surfaces in computer graphics. In many applications, such geometric data are large and complex (in the case of social networks, on the scale of billions), and are natural targets for machine learning techniques. In particular, we would like to use deep neural networks, which have recently proven to be powerful tools for a broad range of problems from computer vision, natural language processing, and audio analysis. However, these tools have been most successful on data with an underlying Euclidean or grid-like structure, and in cases where the invariances of these structures are built into networks used to model them. Geometric deep learning is an umbrella term for emerging techniques attempting to generalize (structured) deep neural models to non-Euclidean domains such as graphs and manifolds. The purpose of this paper is to overview different examples of geometric deep learning problems and present available solutions, key difficulties, applications, and future research directions in this nascent field.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Computer Vision and Pattern Recognition},
-  file = {/home/egordm/Documents/Research/Reference/storage/VK4EB5FJ/Bronstein et al_2017_Geometric deep learning.pdf;/home/egordm/Documents/Research/Reference/storage/TU6N2XVW/1611.html}
+  abstract = {Geometric deep learning is an umbrella term for emerging techniques attempting to generalize (structured) deep neural models to non-Euclidean domains, such as graphs and manifolds. The purpose of this article is to overview different examples of geometric deep-learning problems and present available solutions, key difficulties, applications, and future research directions in this nascent field.},
+  keywords = {Computational modeling,Computer architecture,Convolution,Convolutional codes,Euclidean distance,Machine learning,Social network services},
+  file = {/home/egordm/Documents/Research/Reference/storage/8VNCJ46R/Bronstein et al_2017_Geometric Deep Learning.pdf;/home/egordm/Documents/Research/Reference/storage/VT2N8XLQ/7974879.html}
 }
 
 @article{buttsSocialNetworkAnalysis2008,
@@ -244,15 +240,11 @@
   shorttitle = {{{CatGCN}}},
   author = {Chen, Weijian and Feng, Fuli and Wang, Qifan and He, Xiangnan and Song, Chonggang and Ling, Guohui and Zhang, Yongdong},
   year = {2021},
-  month = dec,
-  journal = {arXiv:2009.05303 [cs, stat]},
-  eprint = {2009.05303},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
-  abstract = {Recent studies on Graph Convolutional Networks (GCNs) reveal that the initial node representations (i.e., the node representations before the first-time graph convolution) largely affect the final model performance. However, when learning the initial representation for a node, most existing work linearly combines the embeddings of node features, without considering the interactions among the features (or feature embeddings). We argue that when the node features are categorical, e.g., in many real-world applications like user profiling and recommender system, feature interactions usually carry important signals for predictive analytics. Ignoring them will result in suboptimal initial node representation and thus weaken the effectiveness of the follow-up graph convolution. In this paper, we propose a new GCN model named CatGCN, which is tailored for graph learning when the node features are categorical. Specifically, we integrate two ways of explicit interaction modeling into the learning of initial node representation, i.e., local interaction modeling on each pair of node features and global interaction modeling on an artificial feature graph. We then refine the enhanced initial node representations with the neighborhood aggregation-based graph convolution. We train CatGCN in an end-to-end fashion and demonstrate it on semi-supervised node classification. Extensive experiments on three tasks of user profiling (the prediction of user age, city, and purchase level) from Tencent and Alibaba datasets validate the effectiveness of CatGCN, especially the positive effect of performing feature interaction modeling before graph convolution.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
-  file = {/home/egordm/Documents/Research/Reference/storage/CXW2GGSB/Chen et al_2021_CatGCN.pdf;/home/egordm/Documents/Research/Reference/storage/A87P4Y2X/2009.html}
+  journal = {IEEE Transactions on Knowledge and Data Engineering},
+  pages = {1--1},
+  issn = {1041-4347, 1558-2191, 2326-3865},
+  doi = {10.1109/TKDE.2021.3133013},
+  file = {/home/egordm/Documents/Research/Reference/storage/HAVJDRD4/Chen et al_2021_CatGCN.pdf}
 }
 
 @misc{ClassificationCommunityDiscovery,
@@ -261,7 +253,7 @@
   file = {/home/egordm/Documents/Research/Reference/storage/7VDHLYZU/sam.html}
 }
 
-@article{cosciaClassificationCommunityDiscovery2011a,
+@article{cosciaClassificationCommunityDiscovery2011,
   title = {A Classification for Community Discovery Methods in Complex Networks},
   author = {Coscia, Michele and Giannotti, Fosca and Pedreschi, Dino},
   year = {2011},
@@ -411,38 +403,33 @@
   file = {/home/egordm/Documents/Research/Reference/storage/FL7YEW7F/7425801.html}
 }
 
-@article{ghalebiDynamicNetworkModel2019,
-  title = {Dynamic {{Network Model}} from {{Partial Observations}}},
+@inproceedings{ghalebiDynamicNetworkModel2019,
+  title = {Dynamic Network Model from Partial Observations},
+  booktitle = {Proceedings of the 32nd {{International Conference}} on {{Neural Information Processing Systems}}},
   author = {Ghalebi, Elahe and Mirzasoleiman, Baharan and Grosu, Radu and Leskovec, Jure},
-  year = {2019},
-  month = feb,
-  journal = {arXiv:1805.10616 [cs, stat]},
-  eprint = {1805.10616},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
-  abstract = {Can evolving networks be inferred and modeled without directly observing their nodes and edges? In many applications, the edges of a dynamic network might not be observed, but one can observe the dynamics of stochastic cascading processes (e.g., information diffusion, virus propagation) occurring over the unobserved network. While there have been efforts to infer networks based on such data, providing a generative probabilistic model that is able to identify the underlying time-varying network remains an open question. Here we consider the problem of inferring generative dynamic network models based on network cascade diffusion data. We propose a novel framework for providing a non-parametric dynamic network model--based on a mixture of coupled hierarchical Dirichlet processes-- based on data capturing cascade node infection times. Our approach allows us to infer the evolving community structure in networks and to obtain an explicit predictive distribution over the edges of the underlying network--including those that were not involved in transmission of any cascade, or are likely to appear in the future. We show the effectiveness of our approach using extensive experiments on synthetic as well as real-world networks.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning,Synthetic},
-  file = {/home/egordm/Documents/Research/Reference/storage/9E3N8GQF/Ghalebi et al_2019_Dynamic Network Model from Partial Observations.pdf;/home/egordm/Documents/Research/Reference/storage/VRCU8BZY/1805.html}
+  year = {2018},
+  month = dec,
+  series = {{{NIPS}}'18},
+  pages = {9884--9894},
+  publisher = {{Curran Associates Inc.}},
+  address = {{Red Hook, NY, USA}},
+  abstract = {Can evolving networks be inferred and modeled without directly observing their nodes and edges? In many applications, the edges of a dynamic network might not be observed, but one can observe the dynamics of stochastic cascading processes (e.g., information diffusion, virus propagation) occurring over the unobserved network. While there have been efforts to infer networks based on such data, providing a generative probabilistic model that is able to identify the underlying time-varying network remains an open question. Here we consider the problem of inferring generative dynamic network models based on network cascade diffusion data. We propose a novel framework for providing a non-parametric dynamic network model\textemdash based on a mixture of coupled hierarchical Dirichlet processes\textemdash{} based on data capturing cascade node infection times. Our approach allows us to infer the evolving community structure in networks and to obtain an explicit predictive distribution over the edges of the underlying network\textemdash including those that were not involved in transmission of any cascade, or are likely to appear in the future. We show the effectiveness of our approach using extensive experiments on synthetic as well as real-world networks.},
+  file = {/home/egordm/Documents/Research/Reference/storage/3LY9T2HG/Ghalebi et al_2018_Dynamic network model from partial observations.pdf}
 }
 
 @article{ghasemianDetectabilityThresholdsOptimal2016,
-  title = {Detectability Thresholds and Optimal Algorithms for Community Structure in Dynamic Networks},
+  title = {Detectability {{Thresholds}} and {{Optimal Algorithms}} for {{Community Structure}} in {{Dynamic Networks}}},
   author = {Ghasemian, Amir and Zhang, Pan and Clauset, Aaron and Moore, Cristopher and Peel, Leto},
   year = {2016},
   month = jul,
   journal = {Physical Review X},
   volume = {6},
   number = {3},
-  eprint = {1506.06179},
-  eprinttype = {arxiv},
   pages = {031005},
-  issn = {2160-3308},
+  publisher = {{American Physical Society}},
   doi = {10.1103/PhysRevX.6.031005},
-  abstract = {We study the fundamental limits on learning latent community structure in dynamic networks. Specifically, we study dynamic stochastic block models where nodes change their community membership over time, but where edges are generated independently at each time step. In this setting (which is a special case of several existing models), we are able to derive the detectability threshold exactly, as a function of the rate of change and the strength of the communities. Below this threshold, we claim that no algorithm can identify the communities better than chance. We then give two algorithms that are optimal in the sense that they succeed all the way down to this limit. The first uses belief propagation (BP), which gives asymptotically optimal accuracy, and the second is a fast spectral clustering algorithm, based on linearizing the BP equations. We verify our analytic and algorithmic results via numerical simulation, and close with a brief discussion of extensions and open questions.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning,Computer Science - Social and Information Networks,Condensed Matter - Disordered Systems and Neural Networks,Physics - Data Analysis Statistics and Probability,Statistics - Machine Learning},
-  file = {/home/egordm/Documents/Research/Reference/storage/MJPG6DIZ/Ghasemian et al_2016_Detectability thresholds and optimal algorithms for community structure in.pdf;/home/egordm/Documents/Research/Reference/storage/F3XYPPXN/1506.html}
+  abstract = {The detection of communities within a dynamic network is a common means for obtaining a coarse-grained view of a complex system and for investigating its underlying processes. While a number of methods have been proposed in the machine learning and physics literature, we lack a theoretical analysis of their strengths and weaknesses, or of the ultimate limits on when communities can be detected. Here, we study the fundamental limits of detecting community structure in dynamic networks. Specifically, we analyze the limits of detectability for a dynamic stochastic block model where nodes change their community memberships over time, but where edges are generated independently at each time step. Using the cavity method, we derive a precise detectability threshold as a function of the rate of change and the strength of the communities. Below this sharp threshold, we claim that no efficient algorithm can identify the communities better than chance. We then give two algorithms that are optimal in the sense that they succeed all the way down to this threshold. The first uses belief propagation, which gives asymptotically optimal accuracy, and the second is a fast spectral clustering algorithm, based on linearizing the belief propagation equations. These results extend our understanding of the limits of community detection in an important direction, and introduce new mathematical tools for similar extensions to networks with other types of auxiliary information.},
+  file = {/home/egordm/Documents/Research/Reference/storage/U2BDKJT6/Ghasemian et al_2016_Detectability Thresholds and Optimal Algorithms for Community Structure in.pdf;/home/egordm/Documents/Research/Reference/storage/6JE944FW/PhysRevX.6.html}
 }
 
 @article{girvanCommunityStructureSocial2002,
@@ -508,15 +495,11 @@
   journal = {Physical Review E},
   volume = {92},
   number = {1},
-  eprint = {1501.05808},
-  eprinttype = {arxiv},
   pages = {012805},
-  issn = {1539-3755, 1550-2376},
+  publisher = {{American Physical Society}},
   doi = {10.1103/PhysRevE.92.012805},
-  abstract = {Detecting the time evolution of the community structure of networks is crucial to identify major changes in the internal organization of many complex systems, which may undergo important endogenous or exogenous events. This analysis can be done in two ways: considering each snapshot as an independent community detection problem or taking into account the whole evolution of the network. In the first case, one can apply static methods on the temporal snapshots, which correspond to configurations of the system in short time windows, and match afterwards the communities across layers. Alternatively, one can develop dedicated dynamic procedures, so that multiple snapshots are simultaneously taken into account while detecting communities, which allows us to keep memory of the flow. To check how well a method of any kind could capture the evolution of communities, suitable benchmarks are needed. Here we propose a model for generating simple dynamic benchmark graphs, based on stochastic block models. In them, the time evolution consists of a periodic oscillation of the system's structure between configurations with built-in community structure. We also propose the extension of quality comparison indices to the dynamic scenario.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Social and Information Networks,Physics - Data Analysis Statistics and Probability,Physics - Physics and Society},
-  file = {/home/egordm/Documents/Research/Reference/storage/XPKRVRQT/Granell et al_2015_Benchmark model to assess community structure in evolving networks.pdf;/home/egordm/Documents/Research/Reference/storage/LMUP4BEY/1501.html}
+  abstract = {Detecting the time evolution of the community structure of networks is crucial to identify major changes in the internal organization of many complex systems, which may undergo important endogenous or exogenous events. This analysis can be done in two ways: considering each snapshot as an independent community detection problem or taking into account the whole evolution of the network. In the first case, one can apply static methods on the temporal snapshots, which correspond to configurations of the system in short time windows, and match afterward the communities across layers. Alternatively, one can develop dedicated dynamic procedures so that multiple snapshots are simultaneously taken into account while detecting communities, which allows us to keep memory of the flow. To check how well a method of any kind could capture the evolution of communities, suitable benchmarks are needed. Here we propose a model for generating simple dynamic benchmark graphs, based on stochastic block models. In them, the time evolution consists of a periodic oscillation of the system's structure between configurations with built-in community structure. We also propose the extension of quality comparison indices to the dynamic scenario.},
+  file = {/home/egordm/Documents/Research/Reference/storage/9DHUWZHC/Granell et al_2015_Benchmark model to assess community structure in evolving networks.pdf;/home/egordm/Documents/Research/Reference/storage/6XHIXPBN/PhysRevE.92.html}
 }
 
 @inproceedings{greeneTrackingEvolutionCommunities2010,
@@ -532,20 +515,22 @@
   file = {/home/egordm/Documents/Research/Reference/storage/79L3I688/Greene et al_2010_Tracking the Evolution of Communities in Dynamic Social Networks.pdf;/home/egordm/Documents/Research/Reference/storage/5RVCMN8U/5562773.html}
 }
 
-@article{groverNode2vecScalableFeature2016,
+@inproceedings{groverNode2vecScalableFeature2016,
   title = {Node2vec: {{Scalable Feature Learning}} for {{Networks}}},
   shorttitle = {Node2vec},
+  booktitle = {Proceedings of the 22nd {{ACM SIGKDD International Conference}} on {{Knowledge Discovery}} and {{Data Mining}}},
   author = {Grover, Aditya and Leskovec, Jure},
   year = {2016},
-  month = jul,
-  journal = {arXiv:1607.00653 [cs, stat]},
-  eprint = {1607.00653},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
+  month = aug,
+  series = {{{KDD}} '16},
+  pages = {855--864},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/2939672.2939754},
   abstract = {Prediction tasks over nodes and edges in networks require careful effort in engineering features used by learning algorithms. Recent research in the broader field of representation learning has led to significant progress in automating prediction by learning the features themselves. However, present feature learning approaches are not expressive enough to capture the diversity of connectivity patterns observed in networks. Here we propose node2vec, an algorithmic framework for learning continuous feature representations for nodes in networks. In node2vec, we learn a mapping of nodes to a low-dimensional space of features that maximizes the likelihood of preserving network neighborhoods of nodes. We define a flexible notion of a node's network neighborhood and design a biased random walk procedure, which efficiently explores diverse neighborhoods. Our algorithm generalizes prior work which is based on rigid notions of network neighborhoods, and we argue that the added flexibility in exploring neighborhoods is the key to learning richer representations. We demonstrate the efficacy of node2vec over existing state-of-the-art techniques on multi-label classification and link prediction in several real-world networks from diverse domains. Taken together, our work represents a new way for efficiently learning state-of-the-art task-independent representations in complex networks.},
-  archiveprefix = {arXiv},
-  keywords = {class3,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio3,Statistics - Machine Learning,unread},
-  file = {/home/egordm/Documents/Research/Reference/storage/AEQN6HVT/Grover_Leskovec_2016_node2vec.pdf;/home/egordm/Documents/Research/Reference/storage/CG6XISUF/1607.html}
+  isbn = {978-1-4503-4232-2},
+  keywords = {feature learning,graph representations,information networks,node embeddings},
+  file = {/home/egordm/Documents/Research/Reference/storage/NYWEQ6BK/Grover_Leskovec_2016_node2vec.pdf}
 }
 
 @article{gruberCollectiveKnowledgeSystems2008,
@@ -599,19 +584,19 @@
   file = {/home/egordm/Documents/Research/Reference/storage/C4TTHYL5/Hagen et al_2018_Crisis Communications in the Age of Social Media.pdf}
 }
 
-@article{hamiltonInductiveRepresentationLearning2018,
-  title = {Inductive {{Representation Learning}} on {{Large Graphs}}},
+@inproceedings{hamiltonInductiveRepresentationLearning2018,
+  title = {Inductive Representation Learning on Large Graphs},
+  booktitle = {Proceedings of the 31st {{International Conference}} on {{Neural Information Processing Systems}}},
   author = {Hamilton, William L. and Ying, Rex and Leskovec, Jure},
-  year = {2018},
-  month = sep,
-  journal = {arXiv:1706.02216 [cs, stat]},
-  eprint = {1706.02216},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
-  abstract = {Low-dimensional embeddings of nodes in large graphs have proved extremely useful in a variety of prediction tasks, from content recommendation to identifying protein functions. However, most existing approaches require that all nodes in the graph are present during training of the embeddings; these previous approaches are inherently transductive and do not naturally generalize to unseen nodes. Here we present GraphSAGE, a general, inductive framework that leverages node feature information (e.g., text attributes) to efficiently generate node embeddings for previously unseen data. Instead of training individual embeddings for each node, we learn a function that generates embeddings by sampling and aggregating features from a node's local neighborhood. Our algorithm outperforms strong baselines on three inductive node-classification benchmarks: we classify the category of unseen nodes in evolving information graphs based on citation and Reddit post data, and we show that our algorithm generalizes to completely unseen graphs using a multi-graph dataset of protein-protein interactions.},
-  archiveprefix = {arXiv},
-  keywords = {class2,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio2,Statistics - Machine Learning,unread},
-  file = {/home/egordm/Documents/Research/Reference/storage/IRLHCRZT/Hamilton et al_2018_Inductive Representation Learning on Large Graphs.pdf;/home/egordm/Documents/Research/Reference/storage/T4ZBKLY9/1706.html}
+  year = {2017},
+  month = dec,
+  series = {{{NIPS}}'17},
+  pages = {1025--1035},
+  publisher = {{Curran Associates Inc.}},
+  address = {{Red Hook, NY, USA}},
+  abstract = {Low-dimensional embeddings of nodes in large graphs have proved extremely useful in a variety of prediction tasks, from content recommendation to identifying protein functions. However, most existing approaches require that all nodes in the graph are present during training of the embeddings; these previous approaches are inherently transductive and do not naturally generalize to unseen nodes. Here we present GraphSAGE, a general inductive framework that leverages node feature information (e.g., text attributes) to efficiently generate node embeddings for previously unseen data. Instead of training individual embeddings for each node, we learn a function that generates embeddings by sampling and aggregating features from a node's local neighborhood. Our algorithm outperforms strong baselines on three inductive node-classification benchmarks: we classify the category of unseen nodes in evolving information graphs based on citation and Reddit post data, and we show that our algorithm generalizes to completely unseen graphs using a multi-graph dataset of protein-protein interactions.},
+  isbn = {978-1-5108-6096-4},
+  file = {/home/egordm/Documents/Research/Reference/storage/VWQZCDLC/Hamilton et al_2017_Inductive representation learning on large graphs.pdf}
 }
 
 @article{hamiltonRepresentationLearningGraphs2018,
@@ -682,20 +667,20 @@
   file = {/home/egordm/Documents/Research/Reference/storage/Y92ULWF8/Huang et al_2022_Information fusion oriented heterogeneous social network for friend.pdf}
 }
 
-@article{jiaCommunityGANCommunityDetection2019,
+@inproceedings{jiaCommunityGANCommunityDetection2019,
   title = {{{CommunityGAN}}: {{Community Detection}} with {{Generative Adversarial Nets}}},
   shorttitle = {{{CommunityGAN}}},
+  booktitle = {The {{World Wide Web Conference}}},
   author = {Jia, Yuting and Zhang, Qinqin and Zhang, Weinan and Wang, Xinbing},
   year = {2019},
-  month = dec,
-  journal = {arXiv:1901.06631 [cs]},
-  eprint = {1901.06631},
-  eprinttype = {arxiv},
-  primaryclass = {cs},
-  abstract = {Community detection refers to the task of discovering groups of vertices sharing similar properties or functions so as to understand the network data. With the recent development of deep learning, graph representation learning techniques are also utilized for community detection. However, the communities can only be inferred by applying clustering algorithms based on learned vertex embeddings. These general cluster algorithms like K-means and Gaussian Mixture Model cannot output much overlapped communities, which have been proved to be very common in many real-world networks. In this paper, we propose CommunityGAN, a novel community detection framework that jointly solves overlapping community detection and graph representation learning. First, unlike the embedding of conventional graph representation learning algorithms where the vector entry values have no specific meanings, the embedding of CommunityGAN indicates the membership strength of vertices to communities. Second, a specifically designed Generative Adversarial Net (GAN) is adopted to optimize such embedding. Through the minimax competition between the motif-level generator and discriminator, both of them can alternatively and iteratively boost their performance and finally output a better community structure. Extensive experiments on synthetic data and real-world tasks demonstrate that CommunityGAN achieves substantial community detection performance gains over the state-of-the-art methods.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Artificial Intelligence,Computer Science - Social and Information Networks},
-  file = {/home/egordm/Documents/Research/Reference/storage/VLU3EHSN/Jia et al_2019_CommunityGAN.pdf;/home/egordm/Documents/Research/Reference/storage/FYTF8S8T/1901.html}
+  month = may,
+  pages = {784--794},
+  publisher = {{ACM}},
+  address = {{San Francisco CA USA}},
+  doi = {10.1145/3308558.3313564},
+  isbn = {978-1-4503-6674-8},
+  langid = {english},
+  file = {/home/egordm/Documents/Research/Reference/storage/3CHGESGT/Jia et al_2019_CommunityGAN.pdf}
 }
 
 @article{kangCommunityReinforcementEffective2021,
@@ -728,15 +713,13 @@
   shorttitle = {Representation {{Learning}} for {{Dynamic Graphs}}},
   author = {Kazemi, Seyed Mehran and Goel, Rishab and Jain, Kshitij and Kobyzev, Ivan and Sethi, Akshay and Forsyth, Peter and Poupart, Pascal},
   year = {2020},
-  month = apr,
-  journal = {arXiv:1905.11485 [cs, stat]},
-  eprint = {1905.11485},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
+  journal = {Journal of Machine Learning Research},
+  volume = {21},
+  number = {70},
+  pages = {1--73},
+  issn = {1533-7928},
   abstract = {Graphs arise naturally in many real-world applications including social networks, recommender systems, ontologies, biology, and computational finance. Traditionally, machine learning models for graphs have been mostly designed for static graphs. However, many applications involve evolving graphs. This introduces important challenges for learning and inference since nodes, attributes, and edges change over time. In this survey, we review the recent advances in representation learning for dynamic graphs, including dynamic knowledge graphs. We describe existing models from an encoder-decoder perspective, categorize these encoders and decoders based on the techniques they employ, and analyze the approaches in each category. We also review several prominent applications and widely used datasets and highlight directions for future research.},
-  archiveprefix = {arXiv},
-  keywords = {class2,Computer Science - Machine Learning,prio2,Statistics - Machine Learning,unread},
-  file = {/home/egordm/Documents/Research/Reference/storage/ZSVE7WAW/Kazemi et al_2020_Representation Learning for Dynamic Graphs.pdf;/home/egordm/Documents/Research/Reference/storage/DPV9QU2Z/1905.html}
+  file = {/home/egordm/Documents/Research/Reference/storage/LCY3D6PT/Kazemi et al_2020_Representation Learning for Dynamic Graphs.pdf}
 }
 
 @article{kimCommunityDetectionMultiLayer2015,
@@ -874,15 +857,11 @@
   journal = {Physical Review E},
   volume = {78},
   number = {4},
-  eprint = {0805.4770},
-  eprinttype = {arxiv},
   pages = {046110},
-  issn = {1539-3755, 1550-2376},
+  publisher = {{American Physical Society}},
   doi = {10.1103/PhysRevE.78.046110},
-  abstract = {Community structure is one of the most important features of real networks and reveals the internal organization of the nodes. Many algorithms have been proposed but the crucial issue of testing, i.e. the question of how good an algorithm is, with respect to others, is still open. Standard tests include the analysis of simple artificial graphs with a built-in community structure, that the algorithm has to recover. However, the special graphs adopted in actual tests have a structure that does not reflect the real properties of nodes and communities found in real networks. Here we introduce a new class of benchmark graphs, that account for the heterogeneity in the distributions of node degrees and of community sizes. We use this new benchmark to test two popular methods of community detection, modularity optimization and Potts model clustering. The results show that the new benchmark poses a much more severe test to algorithms than standard benchmarks, revealing limits that may not be apparent at a first analysis.},
-  archiveprefix = {arXiv},
-  keywords = {Physics - Computational Physics,Physics - Physics and Society},
-  file = {/home/egordm/Documents/Research/Reference/storage/SH2YKTRN/Lancichinetti et al_2008_Benchmark graphs for testing community detection algorithms.pdf;/home/egordm/Documents/Research/Reference/storage/GHSS94FR/0805.html}
+  abstract = {Community structure is one of the most important features of real networks and reveals the internal organization of the nodes. Many algorithms have been proposed but the crucial issue of testing, i.e., the question of how good an algorithm is, with respect to others, is still open. Standard tests include the analysis of simple artificial graphs with a built-in community structure, that the algorithm has to recover. However, the special graphs adopted in actual tests have a structure that does not reflect the real properties of nodes and communities found in real networks. Here we introduce a class of benchmark graphs, that account for the heterogeneity in the distributions of node degrees and of community sizes. We use this benchmark to test two popular methods of community detection, modularity optimization, and Potts model clustering. The results show that the benchmark poses a much more severe test to algorithms than standard benchmarks, revealing limits that may not be apparent at a first analysis.},
+  file = {/home/egordm/Documents/Research/Reference/storage/UJI526C6/Lancichinetti et al_2008_Benchmark graphs for testing community detection algorithms.pdf;/home/egordm/Documents/Research/Reference/storage/AEUYEAY4/PhysRevE.78.html}
 }
 
 @article{lancichinettiBenchmarksTestingCommunity2009,
@@ -893,34 +872,28 @@
   journal = {Physical Review E},
   volume = {80},
   number = {1},
-  eprint = {0904.3940},
-  eprinttype = {arxiv},
   pages = {016118},
-  issn = {1539-3755, 1550-2376},
+  publisher = {{American Physical Society}},
   doi = {10.1103/PhysRevE.80.016118},
-  abstract = {Many complex networks display a mesoscopic structure with groups of nodes sharing many links with the other nodes in their group and comparatively few with nodes of different groups. This feature is known as community structure and encodes precious information about the organization and the function of the nodes. Many algorithms have been proposed but it is not yet clear how they should be tested. Recently we have proposed a general class of undirected and unweighted benchmark graphs, with heterogenous distributions of node degree and community size. An increasing attention has been recently devoted to develop algorithms able to consider the direction and the weight of the links, which require suitable benchmark graphs for testing. In this paper we extend the basic ideas behind our previous benchmark to generate directed and weighted networks with built-in community structure. We also consider the possibility that nodes belong to more communities, a feature occurring in real systems, like, e. g., social networks. As a practical application, we show how modularity optimization performs on our new benchmark.},
-  archiveprefix = {arXiv},
-  keywords = {Physics - Computational Physics,Physics - Physics and Society,Synthetic},
-  file = {/home/egordm/Documents/Research/Reference/storage/X6RWXZVG/Lancichinetti_Fortunato_2009_Benchmarks for testing community detection algorithms on directed and weighted.pdf;/home/egordm/Documents/Research/Reference/storage/FSC84UZV/0904.html}
+  abstract = {Many complex networks display a mesoscopic structure with groups of nodes sharing many links with the other nodes in their group and comparatively few with nodes of different groups. This feature is known as community structure and encodes precious information about the organization and the function of the nodes. Many algorithms have been proposed but it is not yet clear how they should be tested. Recently we have proposed a general class of undirected and unweighted benchmark graphs, with heterogeneous distributions of node degree and community size. An increasing attention has been recently devoted to develop algorithms able to consider the direction and the weight of the links, which require suitable benchmark graphs for testing. In this paper we extend the basic ideas behind our previous benchmark to generate directed and weighted networks with built-in community structure. We also consider the possibility that nodes belong to more communities, a feature occurring in real systems, such as social networks. As a practical application, we show how modularity optimization performs on our benchmark.},
+  file = {/home/egordm/Documents/Research/Reference/storage/V26V74ZE/Lancichinetti_Fortunato_2009_Benchmarks for testing community detection algorithms on directed and weighted.pdf;/home/egordm/Documents/Research/Reference/storage/EFKK4YEC/PhysRevE.80.html}
 }
 
 @article{lancichinettiDetectingOverlappingHierarchical2009,
-  title = {Detecting the Overlapping and Hierarchical Community Structure of Complex Networks},
-  author = {Lancichinetti, Andrea and Fortunato, Santo and Kertesz, Janos},
+  title = {Detecting the Overlapping and Hierarchical Community Structure in Complex Networks},
+  author = {Lancichinetti, Andrea and Fortunato, Santo and Kert{\'e}sz, J{\'a}nos},
   year = {2009},
   month = mar,
   journal = {New Journal of Physics},
   volume = {11},
   number = {3},
-  eprint = {0802.1218},
-  eprinttype = {arxiv},
   pages = {033015},
+  publisher = {{IOP Publishing}},
   issn = {1367-2630},
   doi = {10.1088/1367-2630/11/3/033015},
-  abstract = {Many networks in nature, society and technology are characterized by a mesoscopic level of organization, with groups of nodes forming tightly connected units, called communities or modules, that are only weakly linked to each other. Uncovering this community structure is one of the most important problems in the field of complex networks. Networks often show a hierarchical organization, with communities embedded within other communities; moreover, nodes can be shared between different communities. Here we present the first algorithm that finds both overlapping communities and the hierarchical structure. The method is based on the local optimization of a fitness function. Community structure is revealed by peaks in the fitness histogram. The resolution can be tuned by a parameter enabling to investigate different hierarchical levels of organization. Tests on real and artificial networks give excellent results.},
-  archiveprefix = {arXiv},
-  keywords = {Condensed Matter - Statistical Mechanics,Physics - Computational Physics,Physics - Physics and Society,Statistics - Computation},
-  file = {/home/egordm/Documents/Research/Reference/storage/9THPJS7K/Lancichinetti et al_2009_Detecting the overlapping and hierarchical community structure of complex.pdf;/home/egordm/Documents/Research/Reference/storage/UG2FBCLN/0802.html}
+  abstract = {Many networks in nature, society and technology are characterized by a mesoscopic level of organization, with groups of nodes forming tightly connected units, called communities or modules, that are only weakly linked to each other. Uncovering this community structure is one of the most important problems in the field of complex networks. Networks often show a hierarchical organization, with communities embedded within other communities; moreover, nodes can be shared between different communities. Here, we present the first algorithm that finds both overlapping communities and the hierarchical structure. The method is based on the local optimization of a fitness function. Community structure is revealed by peaks in the fitness histogram. The resolution can be tuned by a parameter enabling different hierarchical levels of organization to be investigated. Tests on real and artificial networks give excellent results.},
+  langid = {english},
+  file = {/home/egordm/Documents/Research/Reference/storage/RZGWG4MU/Lancichinetti et al_2009_Detecting the overlapping and hierarchical community structure in complex.pdf}
 }
 
 @inproceedings{leeAutomatedIBeaconBasedCommunity2018,
@@ -996,20 +969,20 @@
 }
 
 @article{liuDeepLearningCommunity2020,
-  title = {Deep {{Learning}} for {{Community Detection}}: {{Progress}}, {{Challenges}} and {{Opportunities}}},
-  shorttitle = {Deep {{Learning}} for {{Community Detection}}},
+  title = {Deep Learning for Community Detection: 29th {{International Joint Conference}} on {{Artificial Intelligence}}, {{IJCAI}} 2020},
+  shorttitle = {Deep Learning for Community Detection},
   author = {Liu, Fanzhen and Xue, Shan and Wu, Jia and Zhou, Chuan and Hu, Wenbin and Paris, Cecile and Nepal, Surya and Yang, Jian and Yu, Philip S.},
+  editor = {Bessiere, Christian},
   year = {2020},
-  month = jul,
-  journal = {Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence},
-  eprint = {2005.08225},
-  eprinttype = {arxiv},
+  journal = {Proceedings of the 29th International Joint Conference on Artificial Intelligence, IJCAI 2020},
+  series = {{{IJCAI International Joint Conference}} on {{Artificial Intelligence}}},
   pages = {4981--4987},
+  publisher = {{International Joint Conferences on Artificial Intelligence}},
+  address = {{California}},
   doi = {10.24963/ijcai.2020/693},
   abstract = {As communities represent similar opinions, similar functions, similar purposes, etc., community detection is an important and extremely useful tool in both scientific inquiry and data analytics. However, the classic methods of community detection, such as spectral clustering and statistical inference, are falling by the wayside as deep learning techniques demonstrate an increasing capacity to handle high-dimensional graph data with impressive performance. Thus, a survey of current progress in community detection through deep learning is timely. Structured into three broad research streams in this domain - deep neural networks, deep graph embedding, and graph neural networks, this article summarizes the contributions of the various frameworks, models, and algorithms in each stream along with the current challenges that remain unsolved and the future research opportunities yet to be explored.},
-  archiveprefix = {arXiv},
-  keywords = {class3,Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio0,unread},
-  file = {/home/egordm/Documents/Research/Reference/storage/ZKWVVZCG/Liu et al_2020_Deep Learning for Community Detection.pdf;/home/egordm/Documents/Research/Reference/storage/ANZNEQZU/2005.html}
+  keywords = {Machine Learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/KPMEQBUB/Liu et al_2020_Deep learning for community detection.pdf}
 }
 
 @article{liuMultipleLocalCommunity2021,
@@ -1029,19 +1002,22 @@
   file = {/home/egordm/Documents/Research/Reference/storage/VPXYA664/Liu et al_2021_Multiple Local Community Detection via High-Quality Seed Identification over.pdf}
 }
 
-@article{liVariationalDiffusionAutoencoders2020,
+@inproceedings{liVariationalDiffusionAutoencoders2020,
   title = {Variational {{Diffusion Autoencoders}} with {{Random Walk Sampling}}},
+  booktitle = {Computer {{Vision}} \textendash{} {{ECCV}} 2020},
   author = {Li, Henry and Lindenbaum, Ofir and Cheng, Xiuyuan and Cloninger, Alexander},
+  editor = {Vedaldi, Andrea and Bischof, Horst and Brox, Thomas and Frahm, Jan-Michael},
   year = {2020},
-  month = aug,
-  journal = {arXiv:1905.12724 [cs, stat]},
-  eprint = {1905.12724},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
-  abstract = {Variational autoencoders (VAEs) and generative adversarial networks (GANs) enjoy an intuitive connection to manifold learning: in training the decoder/generator is optimized to approximate a homeomorphism between the data distribution and the sampling space. This is a construction that strives to define the data manifold. A major obstacle to VAEs and GANs, however, is choosing a suitable prior that matches the data topology. Well-known consequences of poorly picked priors are posterior and mode collapse. To our knowledge, no existing method sidesteps this user choice. Conversely, \$\textbackslash textit\{diffusion maps\}\$ automatically infer the data topology and enjoy a rigorous connection to manifold learning, but do not scale easily or provide the inverse homeomorphism (i.e. decoder/generator). We propose a method that combines these approaches into a generative model that inherits the asymptotic guarantees of \$\textbackslash textit\{diffusion maps\}\$ while preserving the scalability of deep models. We prove approximation theoretic results for the dimension dependence of our proposed method. Finally, we demonstrate the effectiveness of our method with various real and synthetic datasets.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
-  file = {/home/egordm/Documents/Research/Reference/storage/XQLHTSV3/Li et al_2020_Variational Diffusion Autoencoders with Random Walk Sampling.pdf;/home/egordm/Documents/Research/Reference/storage/RIBGHBH4/1905.html}
+  series = {Lecture {{Notes}} in {{Computer Science}}},
+  pages = {362--378},
+  publisher = {{Springer International Publishing}},
+  address = {{Cham}},
+  doi = {10.1007/978-3-030-58592-1_22},
+  abstract = {Variational autoencoders (VAEs) and generative adversarial networks (GANs) enjoy an intuitive connection to manifold learning: in training the decoder/generator is optimized to approximate a homeomorphism between the data distribution and the sampling space. This is a construction that strives to define the data manifold. A major obstacle to VAEs and GANs, however, is choosing a suitable prior that matches the data topology. Well-known consequences of poorly picked priors are posterior and mode collapse. To our knowledge, no existing method sidesteps this user choice. Conversely, diffusion maps automatically infer the data topology and enjoy a rigorous connection to manifold learning, but do not scale easily or provide the inverse homeomorphism (i.e. decoder/generator). We propose a method (https://github.com/lihenryhfl/vdae) that combines these approaches into a generative model that inherits the asymptotic guarantees of diffusion maps while preserving the scalability of deep models. We prove approximation theoretic results for the dimension dependence of our proposed method. Finally, we demonstrate the effectiveness of our method with various real and synthetic datasets.},
+  isbn = {978-3-030-58592-1},
+  langid = {english},
+  keywords = {Deep learning,Generative models,Image and video synthesis,Manifold learning,Unsupervised learning,Variational inference},
+  file = {/home/egordm/Documents/Research/Reference/storage/NUX43J3J/Li et al_2020_Variational Diffusion Autoencoders with Random Walk Sampling.pdf}
 }
 
 @article{luberCommunityDetectionHashtagGraphsSemiSupervised2021,
@@ -1059,21 +1035,20 @@
   file = {/home/egordm/Documents/Research/Reference/storage/9VAM3IRW/Luber et al_2021_Community-Detection via Hashtag-Graphs for Semi-Supervised NMF Topic Models.pdf;/home/egordm/Documents/Research/Reference/storage/PV398MYU/2111.html}
 }
 
-@article{luoDetectingCommunitiesHeterogeneous2021,
+@incollection{luoDetectingCommunitiesHeterogeneous2021,
   title = {Detecting {{Communities}} from {{Heterogeneous Graphs}}: {{A Context Path-based Graph Neural Network Model}}},
   shorttitle = {Detecting {{Communities}} from {{Heterogeneous Graphs}}},
+  booktitle = {Proceedings of the 30th {{ACM International Conference}} on {{Information}} \& {{Knowledge Management}}},
   author = {Luo, Linhao and Fang, Yixiang and Cao, Xin and Zhang, Xiaofeng and Zhang, Wenjie},
   year = {2021},
   month = oct,
-  journal = {Proceedings of the 30th ACM International Conference on Information \& Knowledge Management},
-  eprint = {2109.02058},
-  eprinttype = {arxiv},
   pages = {1170--1180},
-  doi = {10.1145/3459637.3482250},
-  abstract = {Community detection, aiming to group the graph nodes into clusters with dense inner-connection, is a fundamental graph mining task. Recently, it has been studied on the heterogeneous graph, which contains multiple types of nodes and edges, posing great challenges for modeling the high-order relationship between nodes. With the surge of graph embedding mechanism, it has also been adopted to community detection. A remarkable group of works use the meta-path to capture the high-order relationship between nodes and embed them into nodes' embedding to facilitate community detection. However, defining meaningful meta-paths requires much domain knowledge, which largely limits their applications, especially on schema-rich heterogeneous graphs like knowledge graphs. To alleviate this issue, in this paper, we propose to exploit the context path to capture the high-order relationship between nodes, and build a Context Path-based Graph Neural Network (CP-GNN) model. It recursively embeds the high-order relationship between nodes into the node embedding with attention mechanisms to discriminate the importance of different relationships. By maximizing the expectation of the co-occurrence of nodes connected by context paths, the model can learn the nodes' embeddings that both well preserve the high-order relationship between nodes and are helpful for community detection. Extensive experimental results on four real-world datasets show that CP-GNN outperforms the state-of-the-art community detection methods.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Artificial Intelligence,Computer Science - Social and Information Networks,heterogenous},
-  file = {/home/egordm/Documents/Research/Reference/storage/SXV5FSXQ/Luo et al_2021_Detecting Communities from Heterogeneous Graphs.pdf;/home/egordm/Documents/Research/Reference/storage/VYQ5HW29/2109.html}
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  abstract = {Community detection, aiming to group the graph nodes into clusters with dense inner-connection, is a fundamental graph mining task. Recently, it has been studied on the heterogeneous graph, which contains multiple types of nodes and edges, posing great challenges for modeling the high-order relationship between nodes. With the surge of graph embedding mechanism, it has also been adopted to community detection. A remarkable group of works use the meta-path to capture the high-order relationship between nodes and embed them into nodes' embedding to facilitate community detection. However, defining meaningful meta-paths requires much domain knowledge, which largely limits their applications, especially on schema-rich heterogeneous graphs like knowledge graphs. To alleviate this issue, in this paper, we propose to exploit the context path to capture the high-order relationship between nodes, and build a Context Path-based Graph Neural Network (CP-GNN) model. It recursively embeds the high-order relationship between nodes into the node embedding with attention mechanisms to discriminate the importance of different relationships. By maximizing the expectation of the co-occurrence of nodes connected by context paths, the model can learn the nodes' embeddings that both well preserve the high-order relationship between nodes and are helpful for community detection. Extensive experimental results on four real-world datasets show that CP-GNN outperforms the state-of-the-art community detection methods1.},
+  isbn = {978-1-4503-8446-9},
+  keywords = {community detection,context path,graph neural network,heterogeneous graphs,unsupervised learning},
+  file = {/home/egordm/Documents/Research/Reference/storage/927V4CRQ/Luo et al_2021_Detecting Communities from Heterogeneous Graphs.pdf}
 }
 
 @article{maCommunityawareDynamicNetwork2020,
@@ -1192,18 +1167,16 @@
   author = {Newman, M. E. J.},
   year = {2004},
   month = jun,
-  journal = {Physical Review E},
+  journal = {Physical Review. E, Statistical, Nonlinear, and Soft Matter Physics},
   volume = {69},
-  number = {6},
-  eprint = {cond-mat/0309508},
-  eprinttype = {arxiv},
+  number = {6 Pt 2},
   pages = {066133},
-  issn = {1539-3755, 1550-2376},
+  issn = {1539-3755},
   doi = {10.1103/PhysRevE.69.066133},
-  abstract = {It has been found that many networks display community structure -- groups of vertices within which connections are dense but between which they are sparser -- and highly sensitive computer algorithms have in recent years been developed for detecting such structure. These algorithms however are computationally demanding, which limits their application to small networks. Here we describe a new algorithm which gives excellent results when tested on both computer-generated and real-world networks and is much faster, typically thousands of times faster than previous algorithms. We give several example applications, including one to a collaboration network of more than 50000 physicists.},
-  archiveprefix = {arXiv},
-  keywords = {Condensed Matter - Disordered Systems and Neural Networks,Condensed Matter - Statistical Mechanics},
-  file = {/home/egordm/Documents/Research/Reference/storage/WXUPC2QY/Newman_2004_Fast algorithm for detecting community structure in networks.pdf;/home/egordm/Documents/Research/Reference/storage/5VFNENAT/0309508.html}
+  abstract = {Many networks display community structure--groups of vertices within which connections are dense but between which they are sparser--and sensitive computer algorithms have in recent years been developed for detecting this structure. These algorithms, however, are computationally demanding, which limits their application to small networks. Here we describe an algorithm which gives excellent results when tested on both computer-generated and real-world networks and is much faster, typically thousands of times faster, than previous algorithms. We give several example applications, including one to a collaboration network of more than 50,000 physicists.},
+  langid = {english},
+  pmid = {15244693},
+  file = {/home/egordm/Documents/Research/Reference/storage/5NAH83M8/Newman_2004_Fast algorithm for detecting community structure in networks.pdf}
 }
 
 @inproceedings{nguyenContinuousTimeDynamicNetwork2018,
@@ -1269,33 +1242,36 @@
   file = {/home/egordm/Documents/Research/Reference/storage/BW8FFYWG/Peel et al_The ground truth about metadata and community detection in networks.pdf}
 }
 
-@inproceedings{penningtonGloveGlobalVectors2014,
-  title = {Glove: {{Global Vectors}} for {{Word Representation}}},
-  shorttitle = {Glove},
-  booktitle = {{{EMNLP}}},
+@inproceedings{penningtonGloVeGlobalVectors2014,
+  title = {{{GloVe}}: {{Global Vectors}} for {{Word Representation}}},
+  shorttitle = {{{GloVe}}},
+  booktitle = {Proceedings of the 2014 {{Conference}} on {{Empirical Methods}} in {{Natural Language Processing}} ({{EMNLP}})},
   author = {Pennington, Jeffrey and Socher, Richard and Manning, Christopher},
   year = {2014},
-  month = jan,
-  volume = {14},
+  month = oct,
   pages = {1532--1543},
+  publisher = {{Association for Computational Linguistics}},
+  address = {{Doha, Qatar}},
   doi = {10.3115/v1/D14-1162},
-  file = {/home/egordm/Documents/Research/Reference/storage/P82Q4NYR/Pennington et al_2014_Glove.pdf}
+  file = {/home/egordm/Documents/Research/Reference/storage/LVXWQVB2/Pennington et al_2014_GloVe.pdf}
 }
 
-@article{perozziDeepWalkOnlineLearning2014,
-  title = {{{DeepWalk}}: {{Online Learning}} of {{Social Representations}}},
+@inproceedings{perozziDeepWalkOnlineLearning2014,
+  title = {{{DeepWalk}}: Online Learning of Social Representations},
   shorttitle = {{{DeepWalk}}},
+  booktitle = {Proceedings of the 20th {{ACM SIGKDD}} International Conference on {{Knowledge}} Discovery and Data Mining},
   author = {Perozzi, Bryan and {Al-Rfou}, Rami and Skiena, Steven},
   year = {2014},
   month = aug,
-  journal = {Proceedings of the 20th ACM SIGKDD international conference on Knowledge discovery and data mining},
-  eprint = {1403.6652},
-  eprinttype = {arxiv},
+  series = {{{KDD}} '14},
   pages = {701--710},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
   doi = {10.1145/2623330.2623732},
-  abstract = {We present DeepWalk, a novel approach for learning latent representations of vertices in a network. These latent representations encode social relations in a continuous vector space, which is easily exploited by statistical models. DeepWalk generalizes recent advancements in language modeling and unsupervised feature learning (or deep learning) from sequences of words to graphs. DeepWalk uses local information obtained from truncated random walks to learn latent representations by treating walks as the equivalent of sentences. We demonstrate DeepWalk's latent representations on several multi-label network classification tasks for social networks such as BlogCatalog, Flickr, and YouTube. Our results show that DeepWalk outperforms challenging baselines which are allowed a global view of the network, especially in the presence of missing information. DeepWalk's representations can provide \$F\_1\$ scores up to 10\% higher than competing methods when labeled data is sparse. In some experiments, DeepWalk's representations are able to outperform all baseline methods while using 60\% less training data. DeepWalk is also scalable. It is an online learning algorithm which builds useful incremental results, and is trivially parallelizable. These qualities make it suitable for a broad class of real world applications such as network classification, and anomaly detection.},
-  archiveprefix = {arXiv},
-  keywords = {class3,Computer Science - Machine Learning,Computer Science - Social and Information Networks,H.2.8,I.2.6,I.5.1,prio3,unread}
+  abstract = {We present DeepWalk, a novel approach for learning latent representations of vertices in a network. These latent representations encode social relations in a continuous vector space, which is easily exploited by statistical models. DeepWalk generalizes recent advancements in language modeling and unsupervised feature learning (or deep learning) from sequences of words to graphs. DeepWalk uses local information obtained from truncated random walks to learn latent representations by treating walks as the equivalent of sentences. We demonstrate DeepWalk's latent representations on several multi-label network classification tasks for social networks such as BlogCatalog, Flickr, and YouTube. Our results show that DeepWalk outperforms challenging baselines which are allowed a global view of the network, especially in the presence of missing information. DeepWalk's representations can provide F1 scores up to 10\% higher than competing methods when labeled data is sparse. In some experiments, DeepWalk's representations are able to outperform all baseline methods while using 60\% less training data. DeepWalk is also scalable. It is an online learning algorithm which builds useful incremental results, and is trivially parallelizable. These qualities make it suitable for a broad class of real world applications such as network classification, and anomaly detection.},
+  isbn = {978-1-4503-2956-9},
+  keywords = {deep learning,latent representations,learning with partial labels,network classification,online learning,social networks},
+  file = {/home/egordm/Documents/Research/Reference/storage/TGXNIVWC/Perozzi et al_2014_DeepWalk.pdf}
 }
 
 @article{prykeAnalysingConstructionProject2004,
@@ -1414,20 +1390,22 @@
   keywords = {Real World}
 }
 
-@article{rozemberczkiGEMSECGraphEmbedding2019,
-  title = {{{GEMSEC}}: {{Graph Embedding}} with {{Self Clustering}}},
+@inproceedings{rozemberczkiGEMSECGraphEmbedding2019,
+  title = {{{GEMSEC}}: Graph Embedding with Self Clustering},
   shorttitle = {{{GEMSEC}}},
+  booktitle = {Proceedings of the 2019 {{IEEE}}/{{ACM International Conference}} on {{Advances}} in {{Social Networks Analysis}} and {{Mining}}},
   author = {Rozemberczki, Benedek and Davies, Ryan and Sarkar, Rik and Sutton, Charles},
   year = {2019},
-  month = jul,
-  journal = {arXiv:1802.03997 [cs]},
-  eprint = {1802.03997},
-  eprinttype = {arxiv},
-  primaryclass = {cs},
-  abstract = {Modern graph embedding procedures can efficiently process graphs with millions of nodes. In this paper, we propose GEMSEC -- a graph embedding algorithm which learns a clustering of the nodes simultaneously with computing their embedding. GEMSEC is a general extension of earlier work in the domain of sequence-based graph embedding. GEMSEC places nodes in an abstract feature space where the vertex features minimize the negative log-likelihood of preserving sampled vertex neighborhoods, and it incorporates known social network properties through a machine learning regularization. We present two new social network datasets and show that by simultaneously considering the embedding and clustering problems with respect to social properties, GEMSEC extracts high-quality clusters competitive with or superior to other community detection algorithms. In experiments, the method is found to be computationally efficient and robust to the choice of hyperparameters.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Social and Information Networks,Deep Community Detection},
-  file = {/home/egordm/Documents/Research/Reference/storage/LEEXNYZG/Rozemberczki et al_2019_GEMSEC.pdf;/home/egordm/Documents/Research/Reference/storage/QLBPKIWE/1802.html}
+  month = aug,
+  series = {{{ASONAM}} '19},
+  pages = {65--72},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/3341161.3342890},
+  abstract = {Modern graph embedding procedures can efficiently process graphs with millions of nodes. In this paper, we propose GEMSEC - a graph embedding algorithm which learns a clustering of the nodes simultaneously with computing their embedding. GEMSEC is a general extension of earlier work in the domain of sequence-based graph embedding. GEMSEC places nodes in an abstract feature space where the vertex features minimize the negative log-likelihood of preserving sampled vertex neighborhoods, and it incorporates known social network properties through a machine learning regularization. We present two new social network datasets and show that by simultaneously considering the embedding and clustering problems with respect to social properties, GEMSEC extracts high-quality clusters competitive with or superior to other community detection algorithms. In experiments, the method is found to be computationally efficient and robust to the choice of hyperparameters.},
+  isbn = {978-1-4503-6868-1},
+  keywords = {clustering,community detection,feature extraction,network embedding,node embedding},
+  file = {/home/egordm/Documents/Research/Reference/storage/9W65Q4XG/Rozemberczki et al_2019_GEMSEC.pdf}
 }
 
 @article{salatheDynamicsControlDiseases2010,
@@ -1645,21 +1623,22 @@
   file = {/home/egordm/Documents/Research/Reference/storage/7X8D9BF2/Tang et al_2008_ArnetMiner.pdf}
 }
 
-@article{tangLINELargescaleInformation2015,
+@inproceedings{tangLINELargescaleInformation2015,
   title = {{{LINE}}: {{Large-scale Information Network Embedding}}},
   shorttitle = {{{LINE}}},
+  booktitle = {Proceedings of the 24th {{International Conference}} on {{World Wide Web}}},
   author = {Tang, Jian and Qu, Meng and Wang, Mingzhe and Zhang, Ming and Yan, Jun and Mei, Qiaozhu},
   year = {2015},
   month = may,
-  journal = {Proceedings of the 24th International Conference on World Wide Web},
-  eprint = {1503.03578},
-  eprinttype = {arxiv},
+  series = {{{WWW}} '15},
   pages = {1067--1077},
+  publisher = {{International World Wide Web Conferences Steering Committee}},
+  address = {{Republic and Canton of Geneva, CHE}},
   doi = {10.1145/2736277.2741093},
-  abstract = {This paper studies the problem of embedding very large information networks into low-dimensional vector spaces, which is useful in many tasks such as visualization, node classification, and link prediction. Most existing graph embedding methods do not scale for real world information networks which usually contain millions of nodes. In this paper, we propose a novel network embedding method called the "LINE," which is suitable for arbitrary types of information networks: undirected, directed, and/or weighted. The method optimizes a carefully designed objective function that preserves both the local and global network structures. An edge-sampling algorithm is proposed that addresses the limitation of the classical stochastic gradient descent and improves both the effectiveness and the efficiency of the inference. Empirical experiments prove the effectiveness of the LINE on a variety of real-world information networks, including language networks, social networks, and citation networks. The algorithm is very efficient, which is able to learn the embedding of a network with millions of vertices and billions of edges in a few hours on a typical single machine. The source code of the LINE is available online.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning},
-  file = {/home/egordm/Documents/Research/Reference/storage/7JKXPAI8/Tang et al_2015_LINE.pdf;/home/egordm/Documents/Research/Reference/storage/7QT4QVLM/1503.html}
+  abstract = {This paper studies the problem of embedding very large information networks into low-dimensional vector spaces, which is useful in many tasks such as visualization, node classification, and link prediction. Most existing graph embedding methods do not scale for real world information networks which usually contain millions of nodes. In this paper, we propose a novel network embedding method called the ``LINE,'' which is suitable for arbitrary types of information networks: undirected, directed, and/or weighted. The method optimizes a carefully designed objective function that preserves both the local and global network structures. An edge-sampling algorithm is proposed that addresses the limitation of the classical stochastic gradient descent and improves both the effectiveness and the efficiency of the inference. Empirical experiments prove the effectiveness of the LINE on a variety of real-world information networks, including language networks, social networks, and citation networks. The algorithm is very efficient, which is able to learn the embedding of a network with millions of vertices and billions of edges in a few hours on a typical single machine. The source code of the LINE is available online\textbackslash footnote\{\textbackslash url\{https://github.com/tangjianpku/LINE\}\}.},
+  isbn = {978-1-4503-3469-3},
+  keywords = {dimension reduction,feature learning,information network embedding,scalability},
+  file = {/home/egordm/Documents/Research/Reference/storage/R6G95HL2/Tang et al_2015_LINE.pdf}
 }
 
 @article{vanburenEnronDatasetResearch2009,
@@ -1739,35 +1718,21 @@
   file = {/home/egordm/Documents/Research/Reference/storage/QZWXRYHQ/Wang et al_2020_An evolutionary autoencoder for dynamic community detection.pdf}
 }
 
-@article{wangHeterogeneousGraphAttention2021,
+@inproceedings{wangHeterogeneousGraphAttention2019,
   title = {Heterogeneous {{Graph Attention Network}}},
-  author = {Wang, Xiao and Ji, Houye and Shi, Chuan and Wang, Bai and Cui, Peng and Yu, P. and Ye, Yanfang},
-  year = {2021},
-  month = jan,
-  journal = {arXiv:1903.07293 [cs]},
-  eprint = {1903.07293},
-  eprinttype = {arxiv},
-  primaryclass = {cs},
-  abstract = {Graph neural network, as a powerful graph representation technique based on deep learning, has shown superior performance and attracted considerable research interest. However, it has not been fully considered in graph neural network for heterogeneous graph which contains different types of nodes and links. The heterogeneity and rich semantic information bring great challenges for designing a graph neural network for heterogeneous graph. Recently, one of the most exciting advancements in deep learning is the attention mechanism, whose great potential has been well demonstrated in various areas. In this paper, we first propose a novel heterogeneous graph neural network based on the hierarchical attention, including node-level and semantic-level attentions. Specifically, the node-level attention aims to learn the importance between a node and its metapath based neighbors, while the semantic-level attention is able to learn the importance of different meta-paths. With the learned importance from both node-level and semantic-level attention, the importance of node and meta-path can be fully considered. Then the proposed model can generate node embedding by aggregating features from meta-path based neighbors in a hierarchical manner. Extensive experimental results on three real-world heterogeneous graphs not only show the superior performance of our proposed model over the state-of-the-arts, but also demonstrate its potentially good interpretability for graph analysis.},
-  archiveprefix = {arXiv},
-  langid = {english},
-  keywords = {class3,Computer Science - Social and Information Networks,prio9,read},
-  file = {/home/egordm/Documents/Research/Reference/storage/Q95C8ZTH/Wang et al_2021_Heterogeneous Graph Attention Network.pdf}
-}
-
-@article{wangHeterogeneousGraphAttention2021a,
-  title = {Heterogeneous {{Graph Attention Network}}},
-  author = {Wang, Xiao and Ji, Houye and Shi, Chuan and Wang, Bai and Cui, Peng and Yu, P. and Ye, Yanfang},
-  year = {2021},
-  month = jan,
-  journal = {arXiv:1903.07293 [cs]},
-  eprint = {1903.07293},
-  eprinttype = {arxiv},
-  primaryclass = {cs},
-  abstract = {Graph neural network, as a powerful graph representation technique based on deep learning, has shown superior performance and attracted considerable research interest. However, it has not been fully considered in graph neural network for heterogeneous graph which contains different types of nodes and links. The heterogeneity and rich semantic information bring great challenges for designing a graph neural network for heterogeneous graph. Recently, one of the most exciting advancements in deep learning is the attention mechanism, whose great potential has been well demonstrated in various areas. In this paper, we first propose a novel heterogeneous graph neural network based on the hierarchical attention, including node-level and semantic-level attentions. Specifically, the node-level attention aims to learn the importance between a node and its metapath based neighbors, while the semantic-level attention is able to learn the importance of different meta-paths. With the learned importance from both node-level and semantic-level attention, the importance of node and meta-path can be fully considered. Then the proposed model can generate node embedding by aggregating features from meta-path based neighbors in a hierarchical manner. Extensive experimental results on three real-world heterogeneous graphs not only show the superior performance of our proposed model over the state-of-the-arts, but also demonstrate its potentially good interpretability for graph analysis.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Social and Information Networks},
-  file = {/home/egordm/Documents/Research/Reference/storage/Z4ZZL4P8/Wang et al_2021_Heterogeneous Graph Attention Network.pdf;/home/egordm/Documents/Research/Reference/storage/QSTBSPJL/1903.html}
+  booktitle = {The {{World Wide Web Conference}}},
+  author = {Wang, Xiao and Ji, Houye and Shi, Chuan and Wang, Bai and Ye, Yanfang and Cui, Peng and Yu, Philip S},
+  year = {2019},
+  month = may,
+  series = {{{WWW}} '19},
+  pages = {2022--2032},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/3308558.3313562},
+  abstract = {Graph neural network, as a powerful graph representation technique based on deep learning, has shown superior performance and attracted considerable research interest. However, it has not been fully considered in graph neural network for heterogeneous graph which contains different types of nodes and links. The heterogeneity and rich semantic information bring great challenges for designing a graph neural network for heterogeneous graph. Recently, one of the most exciting advancements in deep learning is the attention mechanism, whose great potential has been well demonstrated in various areas. In this paper, we first propose a novel heterogeneous graph neural network based on the hierarchical attention, including node-level and semantic-level attentions. Specifically, the node-level attention aims to learn the importance between a node and its meta-path based neighbors, while the semantic-level attention is able to learn the importance of different meta-paths. With the learned importance from both node-level and semantic-level attention, the importance of node and meta-path can be fully considered. Then the proposed model can generate node embedding by aggregating features from meta-path based neighbors in a hierarchical manner. Extensive experimental results on three real-world heterogeneous graphs not only show the superior performance of our proposed model over the state-of-the-arts, but also demonstrate its potentially good interpretability for graph analysis.},
+  isbn = {978-1-4503-6674-8},
+  keywords = {Graph Analysis,Neural Network,Social Network},
+  file = {/home/egordm/Documents/Research/Reference/storage/7CJN4TXV/Wang et al_2019_Heterogeneous Graph Attention Network.pdf}
 }
 
 @inproceedings{wangPublicSentimentGovernmental2020,
@@ -1816,15 +1781,14 @@
   title = {Exploiting {{Social Network Structure}} for {{Person-to-Person Sentiment Analysis}}},
   author = {West, Robert and Paskov, Hristo S. and Leskovec, Jure and Potts, Christopher},
   year = {2014},
-  month = sep,
-  journal = {arXiv:1409.2450 [physics]},
-  eprint = {1409.2450},
-  eprinttype = {arxiv},
-  primaryclass = {physics},
+  month = oct,
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume = {2},
+  pages = {297--310},
+  issn = {2307-387X},
+  doi = {10.1162/tacl_a_00184},
   abstract = {Person-to-person evaluations are prevalent in all kinds of discourse and important for establishing reputations, building social bonds, and shaping public opinion. Such evaluations can be analyzed separately using signed social networks and textual sentiment analysis, but this misses the rich interactions between language and social context. To capture such interactions, we develop a model that predicts individual A's opinion of individual B by synthesizing information from the signed social network in which A and B are embedded with sentiment analysis of the evaluative texts relating A to B. We prove that this problem is NP-hard but can be relaxed to an efficiently solvable hinge-loss Markov random field, and we show that this implementation outperforms text-only and network-only versions in two very different datasets involving community-level decision-making: the Wikipedia Requests for Adminship corpus and the Convote U.S. Congressional speech corpus.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Computation and Language,Computer Science - Social and Information Networks,Physics - Physics and Society},
-  file = {/home/egordm/Documents/Research/Reference/storage/EQUW2GSN/West et al_2014_Exploiting Social Network Structure for Person-to-Person Sentiment Analysis.pdf;/home/egordm/Documents/Research/Reference/storage/2CH28NHM/1409.html}
+  file = {/home/egordm/Documents/Research/Reference/storage/L466IH2I/West et al_2014_Exploiting Social Network Structure for Person-to-Person Sentiment Analysis.pdf;/home/egordm/Documents/Research/Reference/storage/5SWF9HUB/Exploiting-Social-Network-Structure-for-Person-to.html}
 }
 
 @article{wuAuthor2VecFrameworkGenerating2020,
@@ -1890,20 +1854,18 @@
   file = {/home/egordm/Documents/Research/Reference/storage/MU2TAGBK/Wu_Hargreaves_2020_Topological Machine Learning for Mixed Numeric and Categorical Data.pdf}
 }
 
-@article{xieLabelRankStabilizedLabel2013,
-  title = {{{LabelRank}}: {{A Stabilized Label Propagation Algorithm}} for {{Community Detection}} in {{Networks}}},
+@inproceedings{xieLabelRankStabilizedLabel2013,
+  title = {{{LabelRank}}: {{A}} Stabilized Label Propagation Algorithm for Community Detection in Networks},
   shorttitle = {{{LabelRank}}},
+  booktitle = {2013 {{IEEE}} 2nd {{Network Science Workshop}} ({{NSW}})},
   author = {Xie, Jierui and Szymanski, Boleslaw K.},
   year = {2013},
-  month = mar,
-  journal = {arXiv:1303.0868 [physics]},
-  eprint = {1303.0868},
-  eprinttype = {arxiv},
-  primaryclass = {physics},
+  month = apr,
+  pages = {138--143},
+  doi = {10.1109/NSW.2013.6609210},
   abstract = {An important challenge in big data analysis nowadays is detection of cohesive groups in large-scale networks, including social networks, genetic networks, communication networks and so. In this paper, we propose LabelRank, an efficient algorithm detecting communities through label propagation. A set of operators is introduced to control and stabilize the propagation dynamics. These operations resolve the randomness issue in traditional label propagation algorithms (LPA), stabilizing the discovered communities in all runs of the same network. Tests on real-world networks demonstrate that LabelRank significantly improves the quality of detected communities compared to LPA, as well as other popular algorithms.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Social and Information Networks,Physics - Physics and Society},
-  file = {/home/egordm/Documents/Research/Reference/storage/VTVQ3M7K/Xie_Szymanski_2013_LabelRank.pdf;/home/egordm/Documents/Research/Reference/storage/EQQMTG2N/1303.html}
+  keywords = {Algorithm design and analysis,clustering,Clustering algorithms,Communities,community detection,Electronic mail,group,Heuristic algorithms,social network analysis,Social network services,Sociology},
+  file = {/home/egordm/Documents/Research/Reference/storage/GMVQ2ESR/Xie_Szymanski_2013_LabelRank.pdf;/home/egordm/Documents/Research/Reference/storage/R7YLM7CB/6609210.html}
 }
 
 @article{xinAdaptiveRandomWalk2016,
@@ -1952,19 +1914,21 @@
   file = {/home/egordm/Documents/Research/Reference/storage/X4BW73B5/Yang_Leskovec_2012_Community-Affiliation Graph Model for Overlapping Network Community Detection.pdf;/home/egordm/Documents/Research/Reference/storage/9AEA3LSU/6413734.html}
 }
 
-@article{yangDefiningEvaluatingNetwork2012,
-  title = {Defining and {{Evaluating Network Communities}} Based on {{Ground-truth}}},
+@inproceedings{yangDefiningEvaluatingNetwork2012,
+  title = {Defining and Evaluating Network Communities Based on Ground-Truth},
+  booktitle = {Proceedings of the {{ACM SIGKDD Workshop}} on {{Mining Data Semantics}}},
   author = {Yang, Jaewon and Leskovec, Jure},
   year = {2012},
-  month = nov,
-  journal = {arXiv:1205.6233 [physics]},
-  eprint = {1205.6233},
-  eprinttype = {arxiv},
-  primaryclass = {physics},
-  abstract = {Nodes in real-world networks organize into densely linked communities where edges appear with high concentration among the members of the community. Identifying such communities of nodes has proven to be a challenging task mainly due to a plethora of definitions of a community, intractability of algorithms, issues with evaluation and the lack of a reliable gold-standard ground-truth. In this paper we study a set of 230 large real-world social, collaboration and information networks where nodes explicitly state their group memberships. For example, in social networks nodes explicitly join various interest based social groups. We use such groups to define a reliable and robust notion of ground-truth communities. We then propose a methodology which allows us to compare and quantitatively evaluate how different structural definitions of network communities correspond to ground-truth communities. We choose 13 commonly used structural definitions of network communities and examine their sensitivity, robustness and performance in identifying the ground-truth. We show that the 13 structural definitions are heavily correlated and naturally group into four classes. We find that two of these definitions, Conductance and Triad-participation-ratio, consistently give the best performance in identifying ground-truth communities. We also investigate a task of detecting communities given a single seed node. We extend the local spectral clustering algorithm into a heuristic parameter-free community detection method that easily scales to networks with more than hundred million nodes. The proposed method achieves 30\% relative improvement over current local clustering methods.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Social and Information Networks,Physics - Physics and Society},
-  file = {/home/egordm/Documents/Research/Reference/storage/CRESL6VD/Yang_Leskovec_2012_Defining and Evaluating Network Communities based on Ground-truth.pdf;/home/egordm/Documents/Research/Reference/storage/PSJ2ZFK5/1205.html}
+  month = aug,
+  series = {{{MDS}} '12},
+  pages = {1--8},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/2350190.2350193},
+  abstract = {Nodes in real-world networks, such as social, information or technological networks, organize into communities where edges appear with high concentration among the members of the community. Identifying communities in networks has proven to be a challenging task mainly due to a plethora of definitions of a community, intractability of algorithms, issues with evaluation and the lack of a reliable gold-standard ground-truth. We study a set of 230 large social, collaboration and information networks where nodes explicitly define group memberships. We use these groups to define the notion of ground-truth communities. We then propose a methodology which allows us to compare and quantitatively evaluate different definitions of network communities on a large scale. We choose 13 commonly used definitions of network communities and examine their quality, sensitivity and robustness. We show that the 13 definitions naturally group into four classes. We find that two of these definitions, Conductance and Triad-participation-ratio, consistently give the best performance in identifying ground-truth communities.},
+  isbn = {978-1-4503-1546-3},
+  keywords = {community scores,network communities,social and information networks},
+  file = {/home/egordm/Documents/Research/Reference/storage/9M8HK9ZD/Yang_Leskovec_2012_Defining and evaluating network communities based on ground-truth.pdf}
 }
 
 @article{yangGraphClusteringDynamic2017,
@@ -1988,15 +1952,12 @@
   author = {Yang, Carl and Xiao, Yuxin and Zhang, Yu and Sun, Yizhou and Han, Jiawei},
   year = {2020},
   month = dec,
-  journal = {arXiv:2004.00216 [cs]},
-  eprint = {2004.00216},
-  eprinttype = {arxiv},
-  primaryclass = {cs},
-  abstract = {Since real-world objects and their interactions are often multi-modal and multi-typed, heterogeneous networks have been widely used as a more powerful, realistic, and generic superclass of traditional homogeneous networks (graphs). Meanwhile, representation learning (a.k.a. embedding) has recently been intensively studied and shown effective for various network mining and analytical tasks. In this work, we aim to provide a unified framework to deeply summarize and evaluate existing research on heterogeneous network embedding (HNE), which includes but goes beyond a normal survey. Since there has already been a broad body of HNE algorithms, as the first contribution of this work, we provide a generic paradigm for the systematic categorization and analysis over the merits of various existing HNE algorithms. Moreover, existing HNE algorithms, though mostly claimed generic, are often evaluated on different datasets. Understandable due to the application favor of HNE, such indirect comparisons largely hinder the proper attribution of improved task performance towards effective data preprocessing and novel technical design, especially considering the various ways possible to construct a heterogeneous network from real-world application data. Therefore, as the second contribution, we create four benchmark datasets with various properties regarding scale, structure, attribute/label availability, and etc. from different sources, towards handy and fair evaluations of HNE algorithms. As the third contribution, we carefully refactor and amend the implementations and create friendly interfaces for 13 popular HNE algorithms, and provide all-around comparisons among them over multiple tasks and experimental settings. By putting all existing HNE algorithms under a unified framework, we aim to provide a universal reference and guideline for the understanding and development of HNE algorithms. Meanwhile, by open-sourcing all data and code, we envision to serve the community with an ready-to-use benchmark platform to test and compare the performance of existing and future HNE algorithms (https://github.com/yangji9181/HNE).},
-  archiveprefix = {arXiv},
-  langid = {english},
-  keywords = {class3,Computer Science - Machine Learning,Computer Science - Social and Information Networks,prio9,read},
-  file = {/home/egordm/Documents/Research/Reference/storage/H3H8GVWY/Yang et al_2020_Heterogeneous Network Representation Learning.pdf}
+  journal = {IEEE Transactions on Knowledge and Data Engineering},
+  volume = {PP},
+  pages = {1--1},
+  doi = {10.1109/TKDE.2020.3045924},
+  abstract = {Since real-world objects and their interactions are often multi-modal and multi-typed, heterogeneous networks have been widely used as a more powerful, realistic, and generic superclass of traditional homogeneous networks (graphs). Meanwhile, representation learning (a.k.a. embedding) has recently been intensively studied and shown effective for various network mining and analytical tasks. In this work, we aim to provide a unified framework to deeply summarize and evaluate existing research on heterogeneous network embedding (HNE), which includes but goes beyond a normal survey. Since there has already been a broad body of HNE algorithms, as the first contribution of this work, we provide a generic paradigm for the systematic categorization and analysis over the merits of various existing HNE algorithms. Moreover, existing HNE algorithms, though mostly claimed generic, are often evaluated on different datasets. As the second contribution, we create four benchmark datasets with various properties regarding scale, structure, attribute/label availability, and etc. from different sources, towards handy and fair evaluations of HNE algorithms. As the third contribution, we carefully refactor and amend the implementations and create friendly interfaces for eleven popular HNE algorithms, and provide all-around comparisons among them over multiple tasks and experimental settings.},
+  file = {/home/egordm/Documents/Research/Reference/storage/RWUEUWZ8/Yang et al_2020_Heterogeneous Network Representation Learning.pdf}
 }
 
 @inproceedings{yeDeepAutoencoderlikeNonnegative2018,
@@ -2016,20 +1977,21 @@
   file = {/home/egordm/Documents/Research/Reference/storage/DU54HJFV/Ye et al_2018_Deep Autoencoder-like Nonnegative Matrix Factorization for Community Detection.pdf}
 }
 
-@article{yingGraphConvolutionalNeural2018,
+@inproceedings{yingGraphConvolutionalNeural2018,
   title = {Graph {{Convolutional Neural Networks}} for {{Web-Scale Recommender Systems}}},
+  booktitle = {Proceedings of the 24th {{ACM SIGKDD International Conference}} on {{Knowledge Discovery}} \& {{Data Mining}}},
   author = {Ying, Rex and He, Ruining and Chen, Kaifeng and Eksombatchai, Pong and Hamilton, William L. and Leskovec, Jure},
   year = {2018},
   month = jul,
-  journal = {Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining},
-  eprint = {1806.01973},
-  eprinttype = {arxiv},
+  series = {{{KDD}} '18},
   pages = {974--983},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
   doi = {10.1145/3219819.3219890},
-  abstract = {Recent advancements in deep neural networks for graph-structured data have led to state-of-the-art performance on recommender system benchmarks. However, making these methods practical and scalable to web-scale recommendation tasks with billions of items and hundreds of millions of users remains a challenge. Here we describe a large-scale deep recommendation engine that we developed and deployed at Pinterest. We develop a data-efficient Graph Convolutional Network (GCN) algorithm PinSage, which combines efficient random walks and graph convolutions to generate embeddings of nodes (i.e., items) that incorporate both graph structure as well as node feature information. Compared to prior GCN approaches, we develop a novel method based on highly efficient random walks to structure the convolutions and design a novel training strategy that relies on harder-and-harder training examples to improve robustness and convergence of the model. We also develop an efficient MapReduce model inference algorithm to generate embeddings using a trained model. We deploy PinSage at Pinterest and train it on 7.5 billion examples on a graph with 3 billion nodes representing pins and boards, and 18 billion edges. According to offline metrics, user studies and A/B tests, PinSage generates higher-quality recommendations than comparable deep learning and graph-based alternatives. To our knowledge, this is the largest application of deep graph embeddings to date and paves the way for a new generation of web-scale recommender systems based on graph convolutional architectures.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Information Retrieval,Computer Science - Machine Learning,Statistics - Machine Learning},
-  file = {/home/egordm/Documents/Research/Reference/storage/NFWXCAJH/Ying et al_2018_Graph Convolutional Neural Networks for Web-Scale Recommender Systems.pdf;/home/egordm/Documents/Research/Reference/storage/J27FHN4G/1806.html}
+  abstract = {Recent advancements in deep neural networks for graph-structured data have led to state-of-the-art performance on recommender system benchmarks. However, making these methods practical and scalable to web-scale recommendation tasks with billions of items and hundreds of millions of users remains an unsolved challenge. Here we describe a large-scale deep recommendation engine that we developed and deployed at Pinterest. We develop a data-efficient Graph Convolutional Network (GCN) algorithm, which combines efficient random walks and graph convolutions to generate embeddings of nodes (i.e., items) that incorporate both graph structure as well as node feature information. Compared to prior GCN approaches, we develop a novel method based on highly efficient random walks to structure the convolutions and design a novel training strategy that relies on harder-and-harder training examples to improve robustness and convergence of the model. We also develop an efficient MapReduce model inference algorithm to generate embeddings using a trained model. Overall, we can train on and embed graphs that are four orders of magnitude larger than typical GCN implementations. We show how GCN embeddings can be used to make high-quality recommendations in various settings at Pinterest, which has a massive underlying graph with 3 billion nodes representing pins and boards, and 17 billion edges. According to offline metrics, user studies, as well as A/B tests, our approach generates higher-quality recommendations than comparable deep learning based systems. To our knowledge, this is by far the largest application of deep graph embeddings to date and paves the way for a new generation of web-scale recommender systems based on graph convolutional architectures.},
+  isbn = {978-1-4503-5552-0},
+  keywords = {deep learning,graph convolutional networks,recommender systems,scalability},
+  file = {/home/egordm/Documents/Research/Reference/storage/ZKM89MJ3/Ying et al_2018_Graph Convolutional Neural Networks for Web-Scale Recommender Systems.pdf}
 }
 
 @article{yinMultiobjectiveEvolutionaryClustering2021,
