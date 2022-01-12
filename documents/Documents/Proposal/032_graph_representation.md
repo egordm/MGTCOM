@@ -10,7 +10,52 @@ Newer approaches introduce the possibility for the fusion of different data type
 
 
 
-% Various works have emerged exploring community detection using the representation learning approach. In @cavallariLearningCommunityEmbedding2017 the authors define a community as a distribution over the vector representation (embedding) space of the network (which encodes both content-based as well as topological information). Here community detection and node representation are jointly solved by defining a unified objective and alternating their optimization steps. @faniUserCommunityDetection2020 redefine node connection proximity based on learned multi-modal embedding vectors incorporating both temporal social content as well as social network neighborhood information. As *homophiliy* is optimized, more valuable communities are found within the resulting network.
-% 
-% * todo: 
-%   * Talk in more detail about more performant algorithms which we plan to use
+% * Goals:
+%   * Introduce common graph represntation learning techniques
+%   * By covering influential 
+
+
+
+### Node2Vec
+
+% * Learns representation vectors in graph via
+%   * 2nd order random walk (node similarity depends of connected *through* node )  (dfs)
+%   * 1st order random walk - learning from direct neighbors  (bfs)
+% * Features bias parameter $\alpha$ that makes the bfs and dfs tradeoff
+% * Random walks start from a random node and span a length of l
+%   * Starting at node $v$, transition probability is calculated for each of the neighbors using
+%     * 1st order (context 0): $p(u \mid v)=\frac{w(u, v)}{\sum_{u^{\prime} \in \mathcal{N} v} w\left(u^{\prime}, v\right)}=\frac{w(u, v)}{d(v)}$ 
+%       * Thus prob is $1/p$ of picking a node
+%     * 2nd order (context 1 node) $p(u)$ where
+%       * $1/q$  probability of leaving the neighborhood
+%         * where $q$ is in-out degree ratio parameter
+%       * $\alpha_{p q}(t, x)= \begin{cases}\frac{1}{p} & \text { if } d_{t x}=0 \\ 1 & \text { if } d_{t x}=1 \\ \frac{1}{q} & \text { if } d_{t x}=2\end{cases}$
+%       * $d_{tx}$ denotes shortest path distance between two nodes
+%         * $p$ and $q$ control how fast the walk leaves a neighborhood
+%   * And as such the path is chosen
+% * Random walks are efficient in terms of space complexity
+% * Also in time complexity since you are effectively sampling
+
+
+
+### Graph Autoencoder
+
+% * ...
+
+
+
+### GraphSAGE
+
+% * ...
+
+
+
+### CTDN
+
+% * ....
+
+
+
+
+
+
