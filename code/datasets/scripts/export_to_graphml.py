@@ -39,6 +39,11 @@ export_options = {
 output_file = DATASET.export_str('graphml', 'default.graphml' if not args.output else args.output)
 os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
+if os.path.exists(output_file):
+    proceed = input(f'Do you want to overwrite {output_file}? [y/N] ')
+    if proceed.lower() != 'y':
+        sys.exit(0)
+
 driver = connections.neo4j.open()
 with driver.session(database=schema.database) as session:
     session: neo4j.Session = session

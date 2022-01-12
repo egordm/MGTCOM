@@ -1,0 +1,59 @@
+name: star-wars
+prefix: StarWars
+database: star-wars
+description: None
+nodes:
+- label: Character
+  path: data/processed/star-wars/nodes_Characters
+  properties:
+  - name: name
+    type: string
+    ignore: false
+    label: true
+  - name: id
+    type: long
+    ignore: false
+    label: false
+edges:
+- type: INTERACTS_WITH
+  source: Character
+  target: Character
+  path: data/processed/star-wars/edges_INTERACTIONS
+  properties:
+  - name: time
+    type: long
+    ignore: false
+    label: false
+  - name: src
+    type: long
+    ignore: false
+    label: false
+  - name: dst
+    type: long
+    ignore: false
+    label: false
+  - name: weight
+    type: long
+    ignore: false
+    label: false
+- type: MENTIONS
+  source: Character
+  target: Character
+  path: data/processed/star-wars/edges_MENTIONS
+  properties:
+  - name: time
+    type: long
+    ignore: false
+    label: false
+  - name: src
+    type: long
+    ignore: false
+    label: false
+  - name: dst
+    type: long
+    ignore: false
+    label: false
+  - name: weight
+    type: long
+    ignore: false
+    label: false

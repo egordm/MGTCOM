@@ -96,6 +96,12 @@ data/raw/the-marvel-universe-social-network:
 		&& unzip -d the-marvel-universe-social-network the-marvel-universe-social-network.zip \
 		&& rm the-marvel-universe-social-network.zip
 
+data/raw/star-wars:
+	cd data/raw \
+		&& kaggle datasets download ruchi798/star-wars \
+		&& unzip -d star-wars star-wars.zip \
+		&& rm star-wars.zip
+
 download: \
 	data/raw/ucidata-zachary \
 	data/raw/enron-mail-20150507 \
@@ -108,7 +114,9 @@ download: \
 	data/raw/sx-superuser \
 	data/raw/email-Eu-core \
 	data/raw/com-youtube \
+	data/raw/star-wars \
 	data/raw/the-marvel-universe-social-network
+
 
 export_neo4j:
 	$(PY) scripts/export_to_neo4j.py --dataset=ucidata-zachary
@@ -122,6 +130,7 @@ export_neo4j:
 	$(PY) scripts/export_to_neo4j.py --dataset=sx-superuser
 	$(PY) scripts/export_to_neo4j.py --dataset=email-Eu-core
 	$(PY) scripts/export_to_neo4j.py --dataset=com-youtube
+	$(PY) scripts/export_to_neo4j.py --dataset=star-wars
 	$(PY) scripts/export_to_neo4j.py --dataset=the-marvel-universe-social-network
 
 export_graphml:
@@ -136,4 +145,5 @@ export_graphml:
 	$(PY) scripts/export_to_graphml.py --dataset=sx-superuser
 	$(PY) scripts/export_to_graphml.py --dataset=email-Eu-core
 	$(PY) scripts/export_to_graphml.py --dataset=com-youtube
+	$(PY) scripts/export_to_graphml.py --dataset=star-wars
 	$(PY) scripts/export_to_graphml.py --dataset=the-marvel-universe-social-network
