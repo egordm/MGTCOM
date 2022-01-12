@@ -6,7 +6,7 @@ creator: Egor Dmitriev (6100120)
 
 ---
 
-# Heterogeneous Graph Attention Network - Wang et al. 
+# Heterogeneous Graph Attention Network - Wang et al.
 
 ## Goals
 
@@ -67,8 +67,6 @@ w_{\Phi} & \text { Importance of meta-path } \Phi \\
 \end{array}
 $$
 
-
-
 ## Outline / Structure
 
 - Node-level attention: node-level attention can learn the importance of meta-path based neighbors for each node in a heterogeneous graph and aggregate the representation of these meaningful neighbors to form a node
@@ -113,8 +111,6 @@ Close up of meta-path based embedding calculation
 
 <img src="wangHeterogeneousGraphAttention2021.assets/Screenshot_20211102_210011.png" alt="Screenshot_20211102_210011" style="zoom:80%;" />
 
-
-
 <img src="wangHeterogeneousGraphAttention2021.assets/Screenshot_20211102_220150.png" alt="Overall algorithm" style="zoom:80%;" />
 
 ## Evaluation
@@ -144,4 +140,3 @@ Close up of meta-path based embedding calculation
 * Query based attention / importance would be cool
   * But that is a transformer like thing
 * 
-

@@ -5,7 +5,7 @@ author: Yang et al.
 creator: Egor Dmitriev (6100120)
 ---
 
-# Heterogeneous Network Representation Learning: A Unified Framework with Survey and Benchmark - Yang et al. 
+# Heterogeneous Network Representation Learning: A Unified Framework with Survey and Benchmark - Yang et al.
 
 ## Goals
 
@@ -109,8 +109,5 @@ creator: Egor Dmitriev (6100120)
 
 ## Resources
 
-- 
-
-## Note (to self)
-
+- ## Note (to self)
 - Read more about transformers and check out [85]
