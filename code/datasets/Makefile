@@ -132,6 +132,7 @@ export_neo4j:
 	$(PY) scripts/export_to_neo4j.py --dataset=com-youtube
 	$(PY) scripts/export_to_neo4j.py --dataset=star-wars
 	$(PY) scripts/export_to_neo4j.py --dataset=the-marvel-universe-social-network
+	$(PY) scripts/export_to_neo4j.py --dataset=social-distancing-student
 
 export_graphml:
 	$(PY) scripts/export_to_graphml.py --dataset=ucidata-zachary
