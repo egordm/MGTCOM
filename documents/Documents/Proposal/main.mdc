@@ -38,7 +38,7 @@ The task of community detection is often compared to clustering and graph cluste
 % * Introduce notation and important concepts that we use throughout this proposal
 % * Notation is mostly the same as one used in the literature the next chapter is based on
 
-In this section we introduce the notation as well as important concepts that we use throughout this proposal. The notation is mostly the same as one used in the literature the next chapter is based on.
+In this section, we introduce the notation as well as important concepts that we use throughout this proposal. The notation is mostly the same as one used in the literature the next chapter is based on.
 
 
 
@@ -54,7 +54,7 @@ A graph $G$ is a tuple $G = (V, E)$ consisting of $n := |V|$ sequentially number
 
 % * Parallel edges
 
-Multidimensional network is an edge-labeled extension of multigraphs which allow for multiple edges between same nodes (referred to as *parallel edges*). A multidimensional is defined as $G = (V, E, D)$, where $D$ is a set of dimensions. Each link is a triple $(u, v, d) \in E$ where $u, v \in V$ and $d \in D$.
+A multidimensional network is an edge-labeled extension of multigraphs that allows for multiple edges between the same nodes (known as *parallel edges*). A multidimensional is defined as $G = (V, E, D)$, where $D$ is a set of dimensions. Each link is a triple $(u, v, d) \in E$ where $u, v \in V$ and $d \in D$.
 
 
 
@@ -72,19 +72,19 @@ A heterogeneous graph $G = (V, E, O)$ extends the notion of a multidimensional n
 
 #### Temporal Network
 
-A temporal network [@rossettiCommunityDiscoveryDynamic2018] is a graph $G = (V, E, T)$, where $V$ is a set of triplets in form $(v, t_s, t_e)$, with $v$ a node of graph and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding node (with $t_s \leq t_e$); $E$ is a set of quadruplets $(u, v, t_s, t_e)$ with $u, v \in V$ being vertices of the graph, and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding edge (with $t_s \leq t_e$). Networks without edge durations ($t_e = \infty$) are often referred to as *contact sequences* and those with duration as *interval graphs*. Differently, a distinction is made between two types of temporal network, *interaction networks* and *relation networks*. The former model iterations that can repeat as time goes by, while the latter model more stable relationships (friendship, coworker, belonging to same group, etc.).
+A temporal network [@rossettiCommunityDiscoveryDynamic2018] is a graph $G = (V, E, T)$, where $V$ is a set of triplets in form $(v, t_s, t_e)$, with $v$ a node of graph and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding node (with $t_s \leq t_e$); $E$ is a set of quadruplets $(u, v, t_s, t_e)$ with $u, v \in V$ being vertices of the graph, and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding edge (with $t_s \leq t_e$). Networks without edge durations ($t_e = \infty$) are often referred to as *contact sequences* and those with duration as *interval graphs*. Differently, a distinction is made between two types of temporal networks, *interaction networks* and *relation networks*. The former models interactions that may repeat as time goes by, while the latter model more stable relationships (friendship, coworker, belonging to the same group, etc.).
 
 
 
 #### Snapshot Network
 
-A snapshot network $\mathcal{G}_\tau$ [@dakicheTrackingCommunityEvolution2019] is defined by an ordered set $\langle G_1, ... G_\tau \rangle$ of $\tau$ consecutive snapshots, where $G_i = (V_i, E_i)$ represents a graph with only the set of nodes and edges that appear in the interval $(t_i, t_{i+1})$. It is worth noting that a temporal network can be discretized into a snapshot network by partitioning it into a series of snapshots at desired resolution.
+A snapshot network $\mathcal{G}_\tau$ [@dakicheTrackingCommunityEvolution2019] is defined by an ordered set $\langle G_1, ... G_\tau \rangle$ of $\tau$ consecutive snapshots, where $G_i = (V_i, E_i)$ represents a graph with only the set of nodes and edges that appear in the interval $(t_i, t_{i+1})$. It is worth noting that a temporal network can be discretized into a snapshot network by partitioning it into a series of snapshots at the desired resolution.
 
 
 
 #### Complex Network
 
-A complex network is a graph with non-trivial topological features, which do not occur in simple networks such as lattices or random graphs, but often occur in networks representing real systems. A few common features occurring in complex networks include, scale-free networks where the degree distribution follows the power law (implying that degree distribution has no characteristic scale); small-world networks which exhibit small-worldness phenomenen where diameter the network (degree of separation) of is usually small while the clustering coefficient is high; multidimenssional networks; and spatial networks where nodes are embedded in space.
+A complex network is a graph with non-trivial topological features, which do not occur in simple networks such as lattices or random graphs but often occur in networks representing real systems. A few common features occurring in complex networks include scale-free networks where the degree distribution follows the power law (implying that degree distribution has no characteristic scale); small-world networks which exhibit a small-worldness phenomenon where the diameter of the network (degree of separation) is usually small while the clustering coefficient is high; multidimensional networks; and spatial networks where nodes are embedded in space.
 
 
 
@@ -92,7 +92,7 @@ A complex network is a graph with non-trivial topological features, which do not
 
 #### Normalized Mutual Information (NMI)
 
-Normalized Mutual Information is a popular measure used to evaluate network partitioning. It is a variant of a common measure in information theory called Mutual Information defined by $I(X; Y) = H(X) - H(X| Y)$ and representing reduction in entropy of variable $X$ by observing the random variable $Y$ or vice versa. In context of network partitioning it therefore quantifies the information shared between two partitions. A lower value represents a higher quality partitioning. NMI is defined as $NMI(X; Y) = \frac{I(X; Y)}{H(X) + H(Y)}$ and ensures the resulting value is within a $[0, 1]$ range, therefore allowing for comparison of different size partitions. 
+Normalized Mutual Information is a popular measure used to evaluate network partitioning. It is a variant of a common measure in information theory called Mutual Information defined by $I(X; Y) = H(X) - H(X| Y)$ and representing a reduction in entropy of variable $X$ by observing the random variable $Y$ or vice versa. In the context of network partitioning, it, therefore, quantifies the information shared between two partitions. A lower value represents a higher quality partitioning. NMI is defined as $NMI(X; Y) = \frac{I(X; Y)}{H(X) + H(Y)}$ and ensures the resulting value is within a $[0, 1]$ range, therefore allowing for comparison of different size partitions. 
 
 # Literature Review
 
@@ -172,7 +172,7 @@ Finally, it is important to note that dynamic networks can differ in representat
 
 The representation-based approaches stem from the field of computational linguistics which relies heavily on the notion of *distributional semantics* stating that words occurring in similar contexts are semantically similar. Therefore the word representations are learned as dense low-dimensional representation vectors (embeddings) of a word in a latent similarity space by predicting words based on their context or vice versa [@mikolovEfficientEstimationWord2013; @penningtonGloveGlobalVectors2014]. Using the learned representations similarity, clustering and other analytical metrics can be computed.
 
-The success of these representation learning approaches has spread much farther than just linguistics as similar ideas are also applied to other fields including graph representation learning. Methods such as deepwalk [@perozziDeepWalkOnlineLearning2014], LINE [@tangLINELargescaleInformation2015], and node2vec [@groverNode2vecScalableFeature2016] use random walks to sample the neighborhood/context in a graph (analogous to sentences in linguistic methods) and output vector representations (embeddings) that maximize the likelihood of preserving the topological structure of the nodes within the graph.
+The success of these representation learning approaches has spread much farther than just linguistics as similar ideas are also applied to other fields including graph representation learning. Methods such as Deepwalk [@perozziDeepWalkOnlineLearning2014], LINE [@tangLINELargescaleInformation2015], and node2vec [@groverNode2vecScalableFeature2016] uses random walks to sample the neighborhood/context in a graph (analogous to sentences in linguistic methods) and output vector representations (embeddings) that maximize the likelihood of preserving the topological structure of the nodes within the graph.
 
 Whereas previously the structural information features of graph entities had to be hand-engineered, these new approaches are data-driven, save a lot of time labeling the data, and yield superior feature/representation vectors. The methods can be trained to optimize for *homophily* on label prediction or in an unsupervised manner on link prediction tasks.
 
@@ -181,18 +181,18 @@ Newer approaches introduce the possibility for the fusion of different data type
 
 
 % * Goals:
-%   * Introduce common graph represntation learning techniques
+%   * Introduce common graph representation learning techniques
 %   * By covering influential 
 
-In the remainder of this section we briefly describe working of a few selected influential representation learning algorithms. 
+In the remainder of this section, we briefly describe the working of a selection of influential representation learning algorithms. 
 
 
 
 ### Negative Sampling
 
-Negative sampling is a technique used for reducing calculation complexity of loss for link prediction tasks. Originally introduced in @mikolovDistributedRepresentationsWords2013 this technique was used to optimize the *skipgram* algorithm which predicts context words based on a single input word (See +@eq:skipgram). Computing result of this softmax function very expensive as the vocabulary may become very large and the negative samples outnumber the positive ones by a lot. Negative sampling (+@eq:negativesampling) is introduced as an approximation where $w_O$ is the output context word, given the $w_I$ the input word, $v_{w_O}, v_{w_I}$ as their representation vectors respectively, sigmoid function $\sigma$, and a sample of $n$ words sampled from a random distribution weighted by word frequency $P_n(w)$.
+Negative sampling is a technique used for reducing the calculation complexity of loss for link prediction tasks. Originally introduced in @mikolovDistributedRepresentationsWords2013 this technique was used to optimize the *skip-gram* algorithm which predicts context words based on a single input word (See +@eq:skipgram). Computing the result of this softmax function is very expensive as the vocabulary may become very large and the negative samples outnumber the positive ones by a lot. Negative sampling (+@eq:negativesampling) is introduced as an approximation where $w_O$ is the output context word, given the $w_I$ the input word, $v_{w_O}, v_{w_I}$ as their representation vectors respectively, sigmoid function $\sigma$, and a sample of $n$ words sampled from a random distribution weighted by word frequency $P_n(w)$.
 
-Due to its efficiency, negative sampling is also embraced in graph representation learning as the link prediction task is synonymous to the context word prediction.
+Due to its efficiency, negative sampling is also embraced in graph representation learning as the link prediction task is synonymous with context word prediction.
 
 $$
 p\left(w_{O} \mid w_{I}\right)=\frac{\exp \left(v_{w_{O}}^{\prime}{ }^{\top} v_{w_{I}}\right)}{\sum_{w=1}^{W} \exp \left(v_{w}^{\prime} v_{w_{I}}\right)} 
@@ -227,15 +227,15 @@ $$ {#eq:negativesampling}
 %   * introduces an extension that maps different types of node / edge embeddings to a common space
 %   * (for heterogenous networks)
 
-Introduced in @groverNode2vecScalableFeature2016, node2vec learns node representations within a graph by introducing a hybrid *second order* random walk technique. Once random walks are constructed, the *skipgram* approach along with negative sampling is used to learn the node representations. Since, random walks can be efficiently sampled, this helps avoiding memory and runtime complexity issues faced by formerly leading approaches such as spectral/matrix factorization methods.
+Introduced in @groverNode2vecScalableFeature2016, node2vec learns node representations within a graph by introducing a hybrid *second-order* random walk technique. Once random walks are constructed, the *skip-gram* approach along with negative sampling is used to learn the node representations. Since random walks can be efficiently sampled, this helps to avoid memory and runtime complexity issues faced by formerly leading approaches such as spectral/matrix factorization methods.
 
-The random walks start from a random node $u$ and span a length of $k$ nodes. The next node in the walk is chosen by calculating the transition probability for each of the neighbors of the current node. See +@eq:randomwalk1o for calculation of transition probability for first order random walks where next node $u$ is chosen given only the current node $v$ and the corresponding edge weights $w(u, v)$. 
+The random walks start from a random node $u$ and span a length of $k$ nodes. The next node in the walk is chosen by calculating the transition probability for each of the neighbors of the current node. See +@eq:randomwalk1o for calculation of transition probability for first-order random walks where next node $u$ is chosen given only the current node $v$ and the corresponding edge weights $w(u, v)$. 
 
 $$
 p(u \mid v)=\frac{w(u, v)}{\sum_{u^{\prime} \in \mathcal{N} v} w\left(u^{\prime}, v\right)}
 $$ {#eq:randomwalk1o}
 
-Second order random walk (+@eq:randomwalk2o) instead considers last two visited nodes $v, t$ and introduces an additional tradeoff weight $\alpha_{pq}(t,x)$ parametrized by $p$ (*in-out bias*) and $q$ (*return ratio*). See +@eq:node2vectradeoff for the trade-off weight where $d_{tx}$ represents the hop distance between two nodes $t$ and $x$. Given the distance of the two nodes the first order random walk is therefore additionally biased towards two cases: (i) returning to the same node $d_{tx} = 0$, therefore reinforcing exploration of a single neighborhood (BFS), (ii) exiting the neighborhood of a single node (DFS) (See @fig:randomwalk). Their experiments have shown that setting a higher $q$ parameter optimize embeddings for *homophily* and yield better clustering results, while setting a higher $p$ value promotes structural equivalence which aids in node classification tasks.
+Second-order random walk (+@eq:randomwalk2o) instead considers last two visited nodes $v, t$ and introduces an additional tradeoff weight $\alpha_{pq}(t,x)$ parametrized by $p$ (*in-out bias*) and $q$ (*return ratio*). See +@eq:node2vectradeoff for the trade-off weight where $d_{tx}$ represents the hop distance between two nodes $t$ and $x$. Given the distance of the two nodes the first-order random walk is therefore additionally biased towards two cases: (i) returning to the same node $d_{tx} = 0$, therefore reinforcing exploration of a single neighborhood (BFS), (ii) exiting the neighborhood of a single node (DFS) (See @fig:randomwalk). Their experiments have shown that setting a higher $q$ parameter to optimize embeddings for *homophily* and yield better clustering results while setting a higher $p$ value promotes structural equivalence which aids in node classification tasks.
 
 $$
 \alpha_{p q}(t, x)= \begin{cases}\frac{1}{p} & \text { if } d_{t x}=0 \\ 1 & \text { if } d_{t x}=1 \\ \frac{1}{q} & \text { if } d_{t x}=2\end{cases}
@@ -252,21 +252,21 @@ $$ {#eq:randomwalk2o}
 ### Graph Autoencoder (GAE)
 
 % * Applies the idea of Variational Autoencoders to the graph structure
-% * Traditionally autoconcoders consist of
+% * Traditionally autoencoders consist of
 %   * An encoder encoding the input $X$ to a low dimensional latent space
 %   * A decoder decoding the low dimensional vector back to the input space $\hat{X}$
 % * Reconstruction error is calculated $L(X, \hat{X}) = ||X - \hat{X}||^2$
 % * Provides robustness as input can be easily augmented and changes can be measured
 %   * Variational autoencoders produce a distribution instead (to be able to generate new samples)
 % * Their architecture is similar to spectral GCN which work on
-%   * Whole graph laplacian matrix - which provides a mathematical representation of the graph (often in a normalized way)
-%   * Decoder reconsturucts this laplacian matrix by calculating inner product of the latent matrices (stack of low-dim repr vectors)
+%   * Whole graph Laplacian matrix - which provides a mathematical representation of the graph (often in a normalized way)
+%   * Decoder reconstructs this Laplacian matrix by calculating the inner product of the latent matrices (stack of low-dim repr vectors)
 
-In @kipfVariationalGraphAutoEncoders2016 authors describe the application of autoencoder idea for graph representation learning. Traditionally autoencoders consist of an encoder $E: X \rightarrow Z$ translating the input $X$ to a low dimensional latent space vector $Z$, and a decoder $D: Z \rightarrow \hat{X}$ translating the low dimensional vector $Z$ back to the input space as $\hat{X}$. To optimize both components *reconstruction error* $L(X, \hat{X}) = ||X - \hat{X}||^2$ and its variants are employed. This ensures cohesion of the latent space.
+In @kipfVariationalGraphAutoEncoders2016 authors describe the application of the autoencoder concept for graph representation learning. Traditionally autoencoders consist of an encoder $E: X \rightarrow Z$ translating the input $X$ to a low dimensional latent space vector $Z$, and a decoder $D: Z \rightarrow \hat{X}$ translating the low dimensional vector $Z$ back to the input space as $\hat{X}$. To optimize both components *reconstruction error* $L(X, \hat{X}) = ||X - \hat{X}||^2$ and its variants are employed. This ensures cohesion of the latent space.
 
-The architecture for graph autoencoders is similar to the one used in spectral graph convolution networks. The whole graph is represented as a graph Laplacian matrix $S \in \mathbb{R}^{N\times N}$ (mathematical representation of a graph; can be adjacency, similarity matrix or similar). During encoding an efficient factorization approximation of this matrix is produced as $Z \in \mathbb{R}^{N \times d}$, while during decoding the inner product is calculated $ZZ^T$ reconstructing the graph Laplacian.
+The architecture for graph autoencoders is similar to the one used in spectral graph convolution networks. The whole graph is represented as a graph Laplacian matrix $S \in \mathbb{R}^{N\times N}$ (mathematical representation of a graph; can be adjacency, similarity matrix, or similar). During encoding, an efficient factorization approximation of this matrix is produced as $Z \in \mathbb{R}^{N \times d}$, while during decoding the inner product is calculated $ZZ^T$ reconstructing the graph Laplacian.
 
-Employing this approach for graph representation learning yields many benefits such as flexibility for objective definition and robustness against noise. The main downside of this approach is that working on full graph is expensive and doesn't scale well.
+Employing this approach for graph representation learning yields many benefits such as flexibility for objective definition and robustness against noise. The main downside of this approach is that working on a full graph is expensive and doesn't scale well.
 
 
 
@@ -277,40 +277,34 @@ Employing this approach for graph representation learning yields many benefits s
 ### GraphSAGE
 
 % * @hamiltonInductiveRepresentationLearning2018
-%   Was made to tackle issues in existing approaches are *transductive*  
-%   * ie. needs whole graph to learn embedding of a node
-%   * generalize poorly since addition of a node requires rerun of the algorithm
-% * Representation function learning method - referred to as aggergator functions
+%   Was made to tackle issues in existing approaches are *transductive*  
+%   * ie. needs the whole graph to learn to embed a node
+%   * generalize poorly since the addition of a node requires a rerun of the algorithm
+% * Representation function learning method - referred to as aggregator functions
 %   * These functions can be used to predict the embedding rather than statically learning it
 % * Needs a little bit different sampling approach than random walks
 %   * Due to the fact aggregator functions need to be stacked (which need regular input counts)
-%   * Therefore a neighborhood of a node is sampled to the depth $k$ (with $k$ being the amount of aggregator functions)
+%   * Therefore a neighborhood of a node is sampled to the depth $k$ (with $k$ being the number of aggregator functions)
 % * Works by initializing all node embeddings to node features
-%   * For each node its embedding is concatenated with aggregated representation of its neighbors
-%   * And passed to a deep neural network yielding a representation vector at given layer
+%   * For each node its embedding is concatenated with the aggregated representation of its neighbors
+%   * And passed to a deep neural network yielding a representation vector at a given layer
 % * Loss is defined similarly using negative sampling
 % * TODO: Talk about PinSAGE extension
 %   * Introduces a methodology for more efficient sampling and importance weighing
-%   * Introduces a way to learn representations of heterogenous networks
-%     * By using type specific aggregation functions mostly for metapaths
+%   * Introduces a way to learn representations of heterogeneous networks
+%     * By using type-specific aggregation functions mostly for metapaths
 
-Existing graph representation learning approaches are *transductive*, meaning the algorithm needs the whole graph to learn embedding of a node. This approach generalized poorly, since addition of a single node requires rerun of the algorithm. In @hamiltonInductiveRepresentationLearning2018 the authors introduce GraphSAGE representation function learning method which solves this issue by learning a set of aggregator functions to predict the embedding rather than statically learning it (also referred to as *inductive learning*).
+Existing graph representation learning approaches are *transductive*, meaning the algorithm needs the whole graph to learn the embedding of a node. This approach generalizes poorly since the addition of a single node requires a rerun of the algorithm. In @hamiltonInductiveRepresentationLearning2018 the authors introduce the GraphSAGE representation function learning method which solves this issue by learning a set of aggregator functions to predict the embedding rather than statically learning it (also referred to as *inductive learning*).
 
-First, layer count $k$ parameter is specified defining amount of aggregations used, and therefore the aggregation neighborhood size (namely $k$-hop neighborhoods). A forward pass for a "mean" operation based aggregator is defined as +@#eq:graphsageagg. Where $h^{k-1}_v$ is the representation vector of a node $v$ at $k-1$ th layer, $\mathbf{W}$ is the the set of weights, and $\sigma$ is the activation function. By initializing $h^0_v$ using the node's feature vector and applying aggregator functions recursively given a nodes neighborhood $\mathcal{N}(v)$ the final representation vector $h^k_v$ is calculated (See +@fig:graphsage).
+First, the layer count parameter $k$ is specified defining the number of aggregations used, and therefore the aggregation neighborhood size (namely $k$-hop neighborhoods). A forward pass for the "mean" operation-based aggregator is defined as +@#eq:graphsageagg. Where $h^{k-1}_v$ is the representation vector of a node $v$ at $k-1$-th layer, $\mathbf{W}$ is the the set of weights, and $\sigma$ is the activation function. By initializing $h^0_v$ using the node's feature vector and applying aggregator functions recursively given the neighborhood of a node $\mathcal{N}(v)$ the final representation vector $h^k_v$ is calculated (See +@fig:graphsage).
 
-In follow-up work @yingGraphConvolutionalNeural2018 the authors introduce a random walk simulating sampling based aggregation approach which in combination with negative sampling is capable of learning on web scale graphs (> billion nodes).  
+In follow-up work @yingGraphConvolutionalNeural2018 the authors introduce a random walk simulating sampling-based aggregation approach which in combination with negative sampling is capable of learning on web-scale graphs (exceeding > billion nodes).  
 
 $$
 \mathbf{h}_{v}^{k} \leftarrow \sigma\left(\mathbf{W} \cdot \operatorname{MEAN}\left(\left\{\mathbf{h}_{v}^{k-1}\right\} \cup\left\{\mathbf{h}_{u}^{k-1}, \forall u \in \mathcal{N}(v)\right\}\right)\right.
 $$ {#eq:graphsageagg}
 
 ![Overview of GraphSAGE model architecture using depth-2 convolutions ($k=2)](/home/egordm/.config/marktext/images/f844cf41b511a806c4af337a2c48db8da70b89ac.png){#fig:graphsage width=380px}
-
-
-
-
-
-
 
 ## Link-based Approaches
 
@@ -1315,17 +1309,17 @@ While the main task of the algorithm is to find high-quality dynamic communities
 # Approach
 
 % * Split our task into multiple sections:
-%   * Final result will be Framework for DCD in heterogenous graphs
-%   * Set of results comparing this algorithm on current state of the art
+%   * Final result will be Framework for DCD in heterogeneous graphs
+%   * Set of results comparing this algorithm on the current state of the art
 %   * Ablation tests in-line with research questions providing evidence for our choices
 % * First we talk about setup for experimentation and benchmarking
-% * Then we talk about strategy for extracting representation learning and graph / data sampling
+% * Then we talk about strategy for extracting representation learning and graph/data sampling
 % * Then we will define components for our objective function
 % * Finally we will discuss how community detection results are extracted 
 
-To answer to our research questions, the methodology is split into multiple parts which address the algorithm architecture, construction of the objective function, DCD result extraction, selection of the baselines and setup of evaluation benchmarks. While split, it is important to note that these tasks have a large overlap and won't be considered in isolation.
+To answer our research questions, the methodology is split into multiple parts which address the algorithm architecture, construction of the objective function, DCD result extraction, selection of the baselines, and setup of evaluation benchmarks. While split, it is important to note that these tasks have a large overlap and won't be considered in isolation.
 
-The final result of my thesis will consist of the graph representation learning based framework for DCD within dynamic heterogeneous graphs, a set of results comparing the algorithm to the current state-of-the-art approaches on various related tasks, and a set of ablation tests providing empirical corroboration for important design choices.
+The final result of my thesis will consist of the graph representation learning-based framework for DCD within dynamic heterogeneous graphs, a set of results comparing the algorithm to the current state-of-the-art approaches on various related tasks, and a set of ablation tests providing empirical corroboration for important design choices.
 
 
 
@@ -1341,15 +1335,15 @@ The core part of the proposed framework is the representation learning algorithm
 
 ### Graph Sampling
 
-Graph sampling is a way to enforce learning of desired topological properties from the network. Various ways to sample graphs can be found in the literature. For both shallow as well as graph representation function learning approaches the trade-off lies between depth-first search (DFS) [@tangLINELargescaleInformation2015; @groverNode2vecScalableFeature2016] and breadth-first search (BFS) [@perozziDeepWalkOnlineLearning2014] based approaches. While literature has shown that DFS based approaches work better for optimizing homophily [@groverNode2vecScalableFeature2016], our goal is to explore the benefits of both as a hybrid approach within our multi-objective setting. Additionally, we plan on supporting both support heterogeneous graph sampling [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018; @yangHeterogeneousNetworkRepresentation2020; @dongMetapath2vecScalableRepresentation2017; @wangHeterogeneousGraphAttention2019], and temporally aware sampling [@nguyenContinuousTimeDynamicNetwork2018; @wuSageDyNovelSampling2021; @dasguptaHyTEHyperplanebasedTemporally2018] by adopting extensions described in the literature.
+Graph sampling is a way to enforce the learning of desired topological properties from the network. Various ways to sample graphs can be found in the literature. For both shallow as well as graph representation function learning approaches the trade-off lies between depth-first search (DFS) [@tangLINELargescaleInformation2015; @groverNode2vecScalableFeature2016] and breadth-first search (BFS) [@perozziDeepWalkOnlineLearning2014] based approaches. While the literature has shown that DFS based approaches work better for optimizing homophily [@groverNode2vecScalableFeature2016], our goal is to explore the benefits of both as a hybrid approach within our multi-objective setting. Additionally, we plan on supporting both support heterogeneous graph sampling [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018; @yangHeterogeneousNetworkRepresentation2020; @dongMetapath2vecScalableRepresentation2017; @wangHeterogeneousGraphAttention2019] and temporally aware sampling [@nguyenContinuousTimeDynamicNetwork2018; @wuSageDyNovelSampling2021; @dasguptaHyTEHyperplanebasedTemporally2018] by adopting extensions described in the literature.
 
 % * TODO: BFS random walk is not equivalent to graph convolution?
 
 ### Neural Network Architecture
 
-The architecture and training strategy of the underlying neural network are crucial for a well performing algorithm. Many methods introduced in the previous section already outline an effective architecture suitable for training on the introduced sampling method. Because both data and requirements for our task differ, the algorithms can not be used out of the box. The final architecture should support heterogeneous graph samples, temporal-aware samples, and node features.
+The architecture and training strategy of the underlying neural network is crucial for a well-performing algorithm. Many methods introduced in the previous section already outline an effective architecture suitable for training on the introduced sampling method. Because both data and requirements for our task differ, the algorithms can not be used out of the box. The final architecture should support heterogeneous graph samples, temporal-aware samples, and node features.
 
-The core of our network will be a representation function based algorithm [@hamiltonInductiveRepresentationLearning2018; @yingGraphConvolutionalNeural2018] adopted to deal with different node and edge types, therefore generating embeddings for a nodes sampled neighborhood in time. Related literature will be used as inspiration to improve network's performance in content-rich networks [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018], using attention-based mechanisms [@abu-el-haijaWatchYourStep2018; @sankarDynamicGraphRepresentation2019; @wangHeterogeneousGraphAttention2019], and alternative training strategies such (variational or diffusion) auto-encoders, GAN [@liVariationalDiffusionAutoencoders2020; @kipfVariationalGraphAutoEncoders2016].
+The core of our network will be a representation function-based algorithm [@hamiltonInductiveRepresentationLearning2018; @yingGraphConvolutionalNeural2018] adopted to deal with different node and edge types, therefore generating embeddings for a node's sampled neighborhood in time. Related literature will be used as inspiration to improve model's performance in content-rich networks [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018], using attention-based mechanisms [@abu-el-haijaWatchYourStep2018; @sankarDynamicGraphRepresentation2019; @wangHeterogeneousGraphAttention2019], and alternative training strategies such (variational or diffusion) auto-encoders, GAN [@liVariationalDiffusionAutoencoders2020; @kipfVariationalGraphAutoEncoders2016].
 
 ### Feature Fusion
 
@@ -1359,24 +1353,24 @@ Many of the real-world datasets are feature-rich. Some features are structured a
 
 % Build an objective function
 % 
-% * Homophily (First order + Second order?)
+% * Homophily (First order + Second-order?)
 % * Community Cohesion
-%   * Sampling based (pairs or motifs)
+%   * Sampling-based (pairs or motifs)
 %   * Similar to AGM
 %   * or Modeling the clusters explicitly
 % * Temporal Smoothness
 % * Community Temporal Smoothness
-%   * Sampling based (pairs or motifs)
+%   * Sampling-based (pairs or motifs)
 
 A crucial part of representation-based DCD methods is the objective function. By utilizing node (and community) representation vectors one can optimize the network to maximize a differentiable multi-objective function using back-propagation. During the training process, the focus can be shifted between the different objectives. By focusing on defining necessary criteria for dynamic community detection which will give a specification for our multi-objective function.
 
 #### Cohesion
 
-The most common definition states, that communities are characterized by more dense inter-community connections compared to intra-community density. Representation methods extend this definition by noting that the density of the connections is can be represented by the topological similarity measure of two nodes. Clustering methods further extend this definition by defining similarity on multi-modal embeddings, therefore keeping the definition consistent for feature rich networks. A viable choice for community cohesion measure would be the Silhouette Coefficient (See +@evaluation)
+The most common definition states, that communities are characterized by more dense inter-community connections compared to intra-community density. Representation methods extend this definition by noting that the density of the connections is can be represented by the topological similarity measure of two nodes. Clustering methods further extend this definition by defining similarity on multi-modal embeddings, therefore keeping the definition consistent for feature-rich networks. A viable choice for community cohesion measure would be the Silhouette Coefficient (See +@evaluation)
 
 #### Homophily
 
-To ensure reliable computation of the cohesion measure, the representation vectors need to be accurate. A way to train these representations is by assuming homophily which states that the more two nodes occur in the same context, the more similar they are. This is translated to graph representation learning problems by using node neighborhood as context. Either using first-order proximity where nodes should occur in their counterpart's context or by utilizing second-order proximity where two nodes are similar if they share the same context (through common nodes). Hybrid approaches exist which optimize for both as they both model different semantics. Similarly, this idea can also be extended to feature aware embeddings, therefore, extending the definition of a community through transitivity when the above definition for cohesion is utilized. Homophily is usually measured by the distance of connected node their embeddings within a similarity space (euclidean, cosine, etc.). 
+To ensure reliable computation of the cohesion measure, the representation vectors need to be accurate. A way to train these representations is by assuming homophily which states that the more two nodes occur in the same context, the more similar they are. This is translated to graph representation learning problems by using node neighborhood as context. Either using first-order proximity where nodes should occur in their counterpart's context or by utilizing second-order proximity where two nodes are similar if they share the same context (through common nodes). Hybrid approaches exist which optimize for both as they both model different semantics. Similarly, this idea can also be extended to feature aware embeddings, therefore, extending the definition of a community through transitivity when the above definition for cohesion is utilized. Homophily is usually measured by the distance of connected nodes their embeddings within a similarity space (euclidean, cosine, etc.). 
 
 #### Temporal Smoothness
 
@@ -1388,7 +1382,7 @@ In most of the literature, this temporal smoothness is indirectly handled by res
 
 % Pick a community detection/grouping algorithm
 % 
-% * May be by using KNN and fixed-size groups
+% * Maybe by using KNN and fixed-size groups
 % * May be using BIRCH or OPTICS
 % * May be using augmentation based method
 % * Depending on implementation communities may already be found
@@ -1416,14 +1410,14 @@ In our approach, we plan to focus on direct community optimization, while avoidi
 % * Implement evaluation benchmarks:
 %   * These are meant to provide empircal evidence providing answer to the posed research questions
 %     * Research questions are of an Explorative and Quantitative nature
-%   * Generic:    
+%   * Generic:    
 %     * Annotated community detection
 %     * Quality metric community detection (Modularity)
 %   * Task specific: (on public datasets / on own dataset)
 %     * Link prediction
 %     * Link recommendation
 
-As the research questions posed in +@research-questions are all mostly of a quantitative nature, it is very important to set up appropriate benchmarks in order to provide a valid answer. As a direct comparison between methods is not always possible, we define auxiliary task benchmarks testing algorithms on desired properties as well as reuse benchmarks used in previous literature to provide a fair comparison.
+As the research questions posed in +@research-questions are all mostly of a quantitative nature, it is very important to set up appropriate benchmarks to provide a valid answer. As a direct comparison between methods is not always possible, we define auxiliary task benchmarks for testing algorithms on desired properties as well as reuse benchmarks used in previous literature to provide a fair comparison.
 
 
 
@@ -1445,13 +1439,13 @@ As the research questions posed in +@research-questions are all mostly of a quan
 
 To provide an answer for @rqq:rq1, the quality of the algorithm on both static and dynamic communities needs to be compared against the benchmarks for various configurations (considering the content and/or meta-topological data). As our baselines include both representation- as well as link-based approaches, the benchmarks should cover measures used in both groups. To evaluate the quality of the communities, annotation-based approaches (computing NMI and NF1) and quality metric-based evaluation approaches will be employed (See +@evaluation). Since our definition of community slightly differs from the literature as it encompasses network external information (content) we will also employ task-based evaluation such as recommendation tasks (follower recommendation, hashtag recommendation - depending on the dataset).
 
-The @rqq:rq3  is of a more exploratory nature concerning the modeling of temporal information. It aims to determine whether having the ability to track the communities through time yields better results in practice, as opposed to having communities incorporate their temporal information implicitly in their definition. This evaluation is conducted as an ablation test and similarly focuses on the quality measures and task-based evaluation.
+The @rqq:rq3 is of a more exploratory nature concerning the modeling of temporal information. It aims to determine whether having the ability to track the communities through time yields better results in practice, as opposed to having communities incorporate their temporal information implicitly in their definition. This evaluation is conducted as an ablation test and similarly focuses on quality measures and task-based evaluation.
 
 The @rqq:rq2 aims to compare the scalability of our approach to the current representation-based approaches. Therefore a rough complexity analysis, as well as performance benchmarking (computation time), shall be conducted.
 
 Finally, @rqq:rq4 addresses the usability of our dynamic community detection results to other tasks concerning dynamic node representation learning. Here we, make use of defined auxiliary tasks (recommendation and link-prediction) to compare our method against other dynamic node representation learning algorithms.
 
-For benchmarking the datasets of different scale and properties are chosen (+@tbl:benchmarkdatasets). Synthetic dataset generation method introduced in @greeneTrackingEvolutionCommunities2010 will be used to create additional networks with ground-truth communities.
+For benchmarking the datasets of different scales and properties are chosen (+@tbl:benchmarkdatasets). The synthetic dataset generation method introduced in @greeneTrackingEvolutionCommunities2010 will be used to create additional networks with ground-truth communities.
 
 
 
@@ -1472,7 +1466,7 @@ For benchmarking the datasets of different scale and properties are chosen (+@tb
 | [116th House of Representatives](https://www.kaggle.com/aavigan/house-of-representatives-congress-116) | 6249                                      | 12K         | N        | N                |
 | [social-distancing-student]()                                                                          | 93K                                       | 3.7M        | Y        | N                |
 
-Table: Overview of the datasets used for evaluation. All the datasets will be used for quality measure as well as auxiliary task based evaluation. Annotated column indicates whether a dataset is eligible for annotation-based evaluation, ie. it contains ground truth communities. {#tbl:benchmarkdatasets}
+Table: Overview of the datasets used for evaluation. All the datasets will be used for the quality measure-based as well as auxiliary task-based evaluation. Annotated column indicates whether a dataset is eligible for annotation-based evaluation, ie. it contains ground-truth communities. {#tbl:benchmarkdatasets}
 
 
 
@@ -1507,11 +1501,11 @@ For @rqq:rq1 we will evaluate our algorithm against baselines in @tbl:baselinesc
 | @wangEvolutionaryAutoencoderDynamic2020  | Y       | Representation-based |
 | @maCommunityawareDynamicNetwork2020      | Y       | Representation-based |
 
-Table: List of community detection methods we will use as baselines. Dynamic column indicates whether the algorithm is capable of detecting dynamic communities, and method indicates whether it is a link-based or representation-based algorithm. {#tbl:baselinescd}
+Table: List of community detection methods we will use as baselines. The "dynamic" column indicates whether the algorithm is capable of detecting dynamic communities, and the "method" column indicates whether it is a link-based or representation-based algorithm. {#tbl:baselinescd}
 
 #### Dynamic Representation Learning
 
-To answer @rqq:rq3 we will evaluate the algorithm against other dynamic representation learning algorithms to verify that learned node embeddings are still usable for node level predictions tasks as well as community level tasks. 
+To answer @rqq:rq3 we will evaluate the algorithm against other dynamic representation learning algorithms to verify that learned node embeddings are still usable for node-level predictions tasks as well as community-level tasks. 
 
 * @nguyenContinuousTimeDynamicNetwork2018
 * @wuSageDyNovelSampling2021

@@ -1,17 +1,17 @@
 # Approach
 
 % * Split our task into multiple sections:
-%   * Final result will be Framework for DCD in heterogenous graphs
-%   * Set of results comparing this algorithm on current state of the art
+%   * Final result will be Framework for DCD in heterogeneous graphs
+%   * Set of results comparing this algorithm on the current state of the art
 %   * Ablation tests in-line with research questions providing evidence for our choices
 % * First we talk about setup for experimentation and benchmarking
-% * Then we talk about strategy for extracting representation learning and graph / data sampling
+% * Then we talk about strategy for extracting representation learning and graph/data sampling
 % * Then we will define components for our objective function
 % * Finally we will discuss how community detection results are extracted 
 
-To answer to our research questions, the methodology is split into multiple parts which address the algorithm architecture, construction of the objective function, DCD result extraction, selection of the baselines and setup of evaluation benchmarks. While split, it is important to note that these tasks have a large overlap and won't be considered in isolation.
+To answer our research questions, the methodology is split into multiple parts which address the algorithm architecture, construction of the objective function, DCD result extraction, selection of the baselines, and setup of evaluation benchmarks. While split, it is important to note that these tasks have a large overlap and won't be considered in isolation.
 
-The final result of my thesis will consist of the graph representation learning based framework for DCD within dynamic heterogeneous graphs, a set of results comparing the algorithm to the current state-of-the-art approaches on various related tasks, and a set of ablation tests providing empirical corroboration for important design choices.
+The final result of my thesis will consist of the graph representation learning-based framework for DCD within dynamic heterogeneous graphs, a set of results comparing the algorithm to the current state-of-the-art approaches on various related tasks, and a set of ablation tests providing empirical corroboration for important design choices.
 
 
 
@@ -27,15 +27,15 @@ The core part of the proposed framework is the representation learning algorithm
 
 ### Graph Sampling
 
-Graph sampling is a way to enforce learning of desired topological properties from the network. Various ways to sample graphs can be found in the literature. For both shallow as well as graph representation function learning approaches the trade-off lies between depth-first search (DFS) [@tangLINELargescaleInformation2015; @groverNode2vecScalableFeature2016] and breadth-first search (BFS) [@perozziDeepWalkOnlineLearning2014] based approaches. While literature has shown that DFS based approaches work better for optimizing homophily [@groverNode2vecScalableFeature2016], our goal is to explore the benefits of both as a hybrid approach within our multi-objective setting. Additionally, we plan on supporting both support heterogeneous graph sampling [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018; @yangHeterogeneousNetworkRepresentation2020; @dongMetapath2vecScalableRepresentation2017; @wangHeterogeneousGraphAttention2019], and temporally aware sampling [@nguyenContinuousTimeDynamicNetwork2018; @wuSageDyNovelSampling2021; @dasguptaHyTEHyperplanebasedTemporally2018] by adopting extensions described in the literature.
+Graph sampling is a way to enforce the learning of desired topological properties from the network. Various ways to sample graphs can be found in the literature. For both shallow as well as graph representation function learning approaches the trade-off lies between depth-first search (DFS) [@tangLINELargescaleInformation2015; @groverNode2vecScalableFeature2016] and breadth-first search (BFS) [@perozziDeepWalkOnlineLearning2014] based approaches. While the literature has shown that DFS based approaches work better for optimizing homophily [@groverNode2vecScalableFeature2016], our goal is to explore the benefits of both as a hybrid approach within our multi-objective setting. Additionally, we plan on supporting both support heterogeneous graph sampling [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018; @yangHeterogeneousNetworkRepresentation2020; @dongMetapath2vecScalableRepresentation2017; @wangHeterogeneousGraphAttention2019] and temporally aware sampling [@nguyenContinuousTimeDynamicNetwork2018; @wuSageDyNovelSampling2021; @dasguptaHyTEHyperplanebasedTemporally2018] by adopting extensions described in the literature.
 
 % * TODO: BFS random walk is not equivalent to graph convolution?
 
 ### Neural Network Architecture
 
-The architecture and training strategy of the underlying neural network are crucial for a well performing algorithm. Many methods introduced in the previous section already outline an effective architecture suitable for training on the introduced sampling method. Because both data and requirements for our task differ, the algorithms can not be used out of the box. The final architecture should support heterogeneous graph samples, temporal-aware samples, and node features.
+The architecture and training strategy of the underlying neural network is crucial for a well-performing algorithm. Many methods introduced in the previous section already outline an effective architecture suitable for training on the introduced sampling method. Because both data and requirements for our task differ, the algorithms can not be used out of the box. The final architecture should support heterogeneous graph samples, temporal-aware samples, and node features.
 
-The core of our network will be a representation function based algorithm [@hamiltonInductiveRepresentationLearning2018; @yingGraphConvolutionalNeural2018] adopted to deal with different node and edge types, therefore generating embeddings for a nodes sampled neighborhood in time. Related literature will be used as inspiration to improve network's performance in content-rich networks [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018], using attention-based mechanisms [@abu-el-haijaWatchYourStep2018; @sankarDynamicGraphRepresentation2019; @wangHeterogeneousGraphAttention2019], and alternative training strategies such (variational or diffusion) auto-encoders, GAN [@liVariationalDiffusionAutoencoders2020; @kipfVariationalGraphAutoEncoders2016].
+The core of our network will be a representation function-based algorithm [@hamiltonInductiveRepresentationLearning2018; @yingGraphConvolutionalNeural2018] adopted to deal with different node and edge types, therefore generating embeddings for a node's sampled neighborhood in time. Related literature will be used as inspiration to improve model's performance in content-rich networks [@wuAuthor2VecFrameworkGenerating2020; @yingGraphConvolutionalNeural2018], using attention-based mechanisms [@abu-el-haijaWatchYourStep2018; @sankarDynamicGraphRepresentation2019; @wangHeterogeneousGraphAttention2019], and alternative training strategies such (variational or diffusion) auto-encoders, GAN [@liVariationalDiffusionAutoencoders2020; @kipfVariationalGraphAutoEncoders2016].
 
 ### Feature Fusion
 
@@ -45,24 +45,24 @@ Many of the real-world datasets are feature-rich. Some features are structured a
 
 % Build an objective function
 % 
-% * Homophily (First order + Second order?)
+% * Homophily (First order + Second-order?)
 % * Community Cohesion
-%   * Sampling based (pairs or motifs)
+%   * Sampling-based (pairs or motifs)
 %   * Similar to AGM
 %   * or Modeling the clusters explicitly
 % * Temporal Smoothness
 % * Community Temporal Smoothness
-%   * Sampling based (pairs or motifs)
+%   * Sampling-based (pairs or motifs)
 
 A crucial part of representation-based DCD methods is the objective function. By utilizing node (and community) representation vectors one can optimize the network to maximize a differentiable multi-objective function using back-propagation. During the training process, the focus can be shifted between the different objectives. By focusing on defining necessary criteria for dynamic community detection which will give a specification for our multi-objective function.
 
 #### Cohesion
 
-The most common definition states, that communities are characterized by more dense inter-community connections compared to intra-community density. Representation methods extend this definition by noting that the density of the connections is can be represented by the topological similarity measure of two nodes. Clustering methods further extend this definition by defining similarity on multi-modal embeddings, therefore keeping the definition consistent for feature rich networks. A viable choice for community cohesion measure would be the Silhouette Coefficient (See +@evaluation)
+The most common definition states, that communities are characterized by more dense inter-community connections compared to intra-community density. Representation methods extend this definition by noting that the density of the connections is can be represented by the topological similarity measure of two nodes. Clustering methods further extend this definition by defining similarity on multi-modal embeddings, therefore keeping the definition consistent for feature-rich networks. A viable choice for community cohesion measure would be the Silhouette Coefficient (See +@evaluation)
 
 #### Homophily
 
-To ensure reliable computation of the cohesion measure, the representation vectors need to be accurate. A way to train these representations is by assuming homophily which states that the more two nodes occur in the same context, the more similar they are. This is translated to graph representation learning problems by using node neighborhood as context. Either using first-order proximity where nodes should occur in their counterpart's context or by utilizing second-order proximity where two nodes are similar if they share the same context (through common nodes). Hybrid approaches exist which optimize for both as they both model different semantics. Similarly, this idea can also be extended to feature aware embeddings, therefore, extending the definition of a community through transitivity when the above definition for cohesion is utilized. Homophily is usually measured by the distance of connected node their embeddings within a similarity space (euclidean, cosine, etc.). 
+To ensure reliable computation of the cohesion measure, the representation vectors need to be accurate. A way to train these representations is by assuming homophily which states that the more two nodes occur in the same context, the more similar they are. This is translated to graph representation learning problems by using node neighborhood as context. Either using first-order proximity where nodes should occur in their counterpart's context or by utilizing second-order proximity where two nodes are similar if they share the same context (through common nodes). Hybrid approaches exist which optimize for both as they both model different semantics. Similarly, this idea can also be extended to feature aware embeddings, therefore, extending the definition of a community through transitivity when the above definition for cohesion is utilized. Homophily is usually measured by the distance of connected nodes their embeddings within a similarity space (euclidean, cosine, etc.). 
 
 #### Temporal Smoothness
 
@@ -74,7 +74,7 @@ In most of the literature, this temporal smoothness is indirectly handled by res
 
 % Pick a community detection/grouping algorithm
 % 
-% * May be by using KNN and fixed-size groups
+% * Maybe by using KNN and fixed-size groups
 % * May be using BIRCH or OPTICS
 % * May be using augmentation based method
 % * Depending on implementation communities may already be found
@@ -102,14 +102,14 @@ In our approach, we plan to focus on direct community optimization, while avoidi
 % * Implement evaluation benchmarks:
 %   * These are meant to provide empircal evidence providing answer to the posed research questions
 %     * Research questions are of an Explorative and Quantitative nature
-%   * Generic:    
+%   * Generic:    
 %     * Annotated community detection
 %     * Quality metric community detection (Modularity)
 %   * Task specific: (on public datasets / on own dataset)
 %     * Link prediction
 %     * Link recommendation
 
-As the research questions posed in +@research-questions are all mostly of a quantitative nature, it is very important to set up appropriate benchmarks in order to provide a valid answer. As a direct comparison between methods is not always possible, we define auxiliary task benchmarks testing algorithms on desired properties as well as reuse benchmarks used in previous literature to provide a fair comparison.
+As the research questions posed in +@research-questions are all mostly of a quantitative nature, it is very important to set up appropriate benchmarks to provide a valid answer. As a direct comparison between methods is not always possible, we define auxiliary task benchmarks for testing algorithms on desired properties as well as reuse benchmarks used in previous literature to provide a fair comparison.
 
 
 
@@ -131,13 +131,13 @@ As the research questions posed in +@research-questions are all mostly of a quan
 
 To provide an answer for @rqq:rq1, the quality of the algorithm on both static and dynamic communities needs to be compared against the benchmarks for various configurations (considering the content and/or meta-topological data). As our baselines include both representation- as well as link-based approaches, the benchmarks should cover measures used in both groups. To evaluate the quality of the communities, annotation-based approaches (computing NMI and NF1) and quality metric-based evaluation approaches will be employed (See +@evaluation). Since our definition of community slightly differs from the literature as it encompasses network external information (content) we will also employ task-based evaluation such as recommendation tasks (follower recommendation, hashtag recommendation - depending on the dataset).
 
-The @rqq:rq3  is of a more exploratory nature concerning the modeling of temporal information. It aims to determine whether having the ability to track the communities through time yields better results in practice, as opposed to having communities incorporate their temporal information implicitly in their definition. This evaluation is conducted as an ablation test and similarly focuses on the quality measures and task-based evaluation.
+The @rqq:rq3 is of a more exploratory nature concerning the modeling of temporal information. It aims to determine whether having the ability to track the communities through time yields better results in practice, as opposed to having communities incorporate their temporal information implicitly in their definition. This evaluation is conducted as an ablation test and similarly focuses on quality measures and task-based evaluation.
 
 The @rqq:rq2 aims to compare the scalability of our approach to the current representation-based approaches. Therefore a rough complexity analysis, as well as performance benchmarking (computation time), shall be conducted.
 
 Finally, @rqq:rq4 addresses the usability of our dynamic community detection results to other tasks concerning dynamic node representation learning. Here we, make use of defined auxiliary tasks (recommendation and link-prediction) to compare our method against other dynamic node representation learning algorithms.
 
-For benchmarking the datasets of different scale and properties are chosen (+@tbl:benchmarkdatasets). Synthetic dataset generation method introduced in @greeneTrackingEvolutionCommunities2010 will be used to create additional networks with ground-truth communities.
+For benchmarking the datasets of different scales and properties are chosen (+@tbl:benchmarkdatasets). The synthetic dataset generation method introduced in @greeneTrackingEvolutionCommunities2010 will be used to create additional networks with ground-truth communities.
 
 
 
@@ -158,7 +158,7 @@ For benchmarking the datasets of different scale and properties are chosen (+@tb
 | [116th House of Representatives](https://www.kaggle.com/aavigan/house-of-representatives-congress-116) | 6249                                      | 12K         | N        | N                |
 | [social-distancing-student]()                                                                          | 93K                                       | 3.7M        | Y        | N                |
 
-Table: Overview of the datasets used for evaluation. All the datasets will be used for quality measure as well as auxiliary task based evaluation. Annotated column indicates whether a dataset is eligible for annotation-based evaluation, ie. it contains ground truth communities. {#tbl:benchmarkdatasets}
+Table: Overview of the datasets used for evaluation. All the datasets will be used for the quality measure-based as well as auxiliary task-based evaluation. Annotated column indicates whether a dataset is eligible for annotation-based evaluation, ie. it contains ground-truth communities. {#tbl:benchmarkdatasets}
 
 
 
@@ -193,11 +193,11 @@ For @rqq:rq1 we will evaluate our algorithm against baselines in @tbl:baselinesc
 | @wangEvolutionaryAutoencoderDynamic2020  | Y       | Representation-based |
 | @maCommunityawareDynamicNetwork2020      | Y       | Representation-based |
 
-Table: List of community detection methods we will use as baselines. Dynamic column indicates whether the algorithm is capable of detecting dynamic communities, and method indicates whether it is a link-based or representation-based algorithm. {#tbl:baselinescd}
+Table: List of community detection methods we will use as baselines. The "dynamic" column indicates whether the algorithm is capable of detecting dynamic communities, and the "method" column indicates whether it is a link-based or representation-based algorithm. {#tbl:baselinescd}
 
 #### Dynamic Representation Learning
 
-To answer @rqq:rq3 we will evaluate the algorithm against other dynamic representation learning algorithms to verify that learned node embeddings are still usable for node level predictions tasks as well as community level tasks. 
+To answer @rqq:rq3 we will evaluate the algorithm against other dynamic representation learning algorithms to verify that learned node embeddings are still usable for node-level predictions tasks as well as community-level tasks. 
 
 * @nguyenContinuousTimeDynamicNetwork2018
 * @wuSageDyNovelSampling2021
