@@ -79,7 +79,7 @@ In most of the literature, this temporal smoothness is indirectly handled by res
 % * May be using augmentation based method
 % * Depending on implementation communities may already be found
 
-As the final step of the framework, the viable dynamic communities need to be extracted. This may be done by simultaneously training community embeddings along with the node embeddings [@maCommunityawareDynamicNetwork2020; @limBlackHoleRobustCommunity2016; @wangEvolutionaryAutoencoderDynamic2020], therefore having the advantage that objective function can directly influence the resulting communities. Other approaches instead operate on the resulting embedding space or the augmented graphs to extract the resulting communities using link-based methods such as the Louvain method or density-based clustering algorithms such as K-means, BIRCH [@zhangBIRCHEfficientData1996], or OPTICS [@ankerstOPTICSOrderingPoints1999] yielding the benefit of losing the community count assumption.
+In the final step of the framework, dynamic communities need to be identified. This may be done by simultaneously training community embeddings along with the node embeddings [@maCommunityawareDynamicNetwork2020; @limBlackHoleRobustCommunity2016; @wangEvolutionaryAutoencoderDynamic2020], therefore having the advantage that objective function can directly influence the resulting communities. Other approaches instead operate on the resulting embedding space or the augmented graphs to extract the resulting communities using link-based methods such as the Louvain method or density-based clustering algorithms such as K-means, BIRCH [@zhangBIRCHEfficientData1996], or OPTICS [@ankerstOPTICSOrderingPoints1999] yielding the benefit of losing the community count assumption.
 
 In our approach, we plan to focus on direct community optimization, while avoiding hard-coding the model to specific assumptions using spectral clustering-based techniques and soft assignment clustering [@liDivideandconquerBasedLargeScale2021; @maCommunityawareDynamicNetwork2020].
 
@@ -131,11 +131,34 @@ As the research questions posed in +@research-questions are all mostly of a quan
 
 To provide an answer for @rqq:rq1, the quality of the algorithm on both static and dynamic communities needs to be compared against the benchmarks for various configurations (considering the content and/or meta-topological data). As our baselines include both representation- as well as link-based approaches, the benchmarks should cover measures used in both groups. To evaluate the quality of the communities, annotation-based approaches (computing NMI and NF1) and quality metric-based evaluation approaches will be employed (See +@evaluation). Since our definition of community slightly differs from the literature as it encompasses network external information (content) we will also employ task-based evaluation such as recommendation tasks (follower recommendation, hashtag recommendation - depending on the dataset).
 
-A similar evaluation methodology will be employed for @rqq:rq3, though the question is of a more exploratory nature concerning the modeling of temporal information, and therefore will be conducted as an ablation test with a focus on stability measures.
+The @rqq:rq3  is of a more exploratory nature concerning the modeling of temporal information. It aims to determine whether having the ability to track the communities through time yields better results in practice, as opposed to having communities incorporate their temporal information implicitly in their definition. This evaluation is conducted as an ablation test and similarly focuses on the quality measures and task-based evaluation.
 
 The @rqq:rq2 aims to compare the scalability of our approach to the current representation-based approaches. Therefore a rough complexity analysis, as well as performance benchmarking (computation time), shall be conducted.
 
-Finally, @rqq:rq4 addresses the usability of our dynamic community detection results to other tasks concerning dynamic node representation learning. Here we, make use of defined auxiliary tasks (recommendation and link-prediction) to compare our method against more popular dynamic node representation learning algorithms.
+Finally, @rqq:rq4 addresses the usability of our dynamic community detection results to other tasks concerning dynamic node representation learning. Here we, make use of defined auxiliary tasks (recommendation and link-prediction) to compare our method against other dynamic node representation learning algorithms.
+
+For benchmarking the datasets of different scale and properties are chosen (+@tbl:benchmarkdatasets). Synthetic dataset generation method introduced in @greeneTrackingEvolutionCommunities2010 will be used to create additional networks with ground-truth communities.
+
+
+
+| Dataset                                                                                                | Nodes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Edges&nbsp; | Temporal | Annotated &nbsp; |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------- | ----------- | -------- | ---------------- |
+| [Zachary karate club](http://konect.cc/networks/ucidata-zachary/)                                      | 34                                        | 78          | N        | Y                |
+| [Football](https://networkrepository.com/misc-football.php)                                            | 115                                       | 613         | N        | N                |
+| [Star Wars Social](https://www.kaggle.com/ruchi798/star-wars)                                          | 113                                       | 1599        | Y        | N                |
+| [Enron](https://www.kaggle.com/wcukierski/enron-email-dataset/)                                        | 605K                                      | 4.1M        | Y        | Y                |
+| [IMDB 5000](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset)                               | 16K                                       | 52K         | Y        | N                |
+| [DBLP-HCN](https://data.mendeley.com/datasets/t4xmpbrr6v/1)                                            | 11K                                       | 16K         | Y        | Y                |
+| [DBLP-V1](https://www.aminer.org/citation)                                                             | 1.2M                                      | 2.4M        | Y        | Y                |
+| [DBLP-V3](https://www.aminer.org/citation)                                                             | 2.7M                                      | 8.2M        | Y        | Y                |
+| [sx-mathoverflow](https://snap.stanford.edu/data/sx-mathoverflow.html)                                 | 24K                                       | 506K        | Y        | N                |
+| [sx-superuser](https://snap.stanford.edu/data/sx-superuser.html)                                       | 194K                                      | 1.4M        | Y        | N                |
+| [Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html)                                   | 1005                                      | 25K         | N        | Y                |
+| [com-Youtube](https://snap.stanford.edu/data/com-Youtube.html)                                         | 1.1M                                      | 298K        | N        | Y                |
+| [116th House of Representatives](https://www.kaggle.com/aavigan/house-of-representatives-congress-116) | 6249                                      | 12K         | N        | N                |
+| [social-distancing-student]()                                                                          | 93K                                       | 3.7M        | Y        | N                |
+
+Table: Overview of the datasets used for evaluation. All the datasets will be used for quality measure as well as auxiliary task based evaluation. Annotated column indicates whether a dataset is eligible for annotation-based evaluation, ie. it contains ground truth communities. {#tbl:benchmarkdatasets}
 
 
 
@@ -153,28 +176,32 @@ Finally, @rqq:rq4 addresses the usability of our dynamic community detection res
 
 To give a fair representation of the state-of-the-art the following methods are selected as baselines. The selection is based on the category of communities they learn, diversification of techniques, and competitiveness with the ideas introduced as part of our framework.
 
-#### Static Community Detection:
+#### Static Community Detection
 
-* Link-based: 
-  * @heFastAlgorithmCommunity2015
-  * @rossettiANGELEfficientEffective2020
-* Representation-based:
-  * @rozemberczkiGEMSECGraphEmbedding2019    
-  * @cavallariLearningCommunityEmbedding2017
-  * @jiaCommunityGANCommunityDetection2019
+For @rqq:rq1 we will evaluate our algorithm against baselines in @tbl:baselinescd. We use both static as well as dynamic algorithms as baselines to identify the benefit of dynamic community detection over static communities.
 
-#### Dynamic Community Detection:
+| Reference                                | Dynamic | Method               |
+| ---------------------------------------- | ------- | -------------------- |
+| @heFastAlgorithmCommunity2015            | N       | Link-based           |
+| @blondelFastUnfoldingCommunities2008     | N       | Link-based           |
+| @rozemberczkiGEMSECGraphEmbedding2019    | N       | Representation-based |
+| @cavallariLearningCommunityEmbedding2017 | N       | Representation-based |
+| @jiaCommunityGANCommunityDetection2019   | N       | Representation-based |
+| @rossettiANGELEfficientEffective2020     | Y       | Link-based           |
+| @wangDynamicCommunityDetection2017       | Y       | Link-based           |
+| @greeneTrackingEvolutionCommunities2010  | Y       | Link-based           |
+| @wangEvolutionaryAutoencoderDynamic2020  | Y       | Representation-based |
+| @maCommunityawareDynamicNetwork2020      | Y       | Representation-based |
 
-* Link-based:
-  * @rossettiANGELEfficientEffective2020
-* Representation-based:
-  * @wangEvolutionaryAutoencoderDynamic2020
-  * @maCommunityawareDynamicNetwork2020
+Table: List of community detection methods we will use as baselines. Dynamic column indicates whether the algorithm is capable of detecting dynamic communities, and method indicates whether it is a link-based or representation-based algorithm. {#tbl:baselinescd}
 
-#### Dynamic Representation Learning:
+#### Dynamic Representation Learning
+
+To answer @rqq:rq3 we will evaluate the algorithm against other dynamic representation learning algorithms to verify that learned node embeddings are still usable for node level predictions tasks as well as community level tasks. 
 
 * @nguyenContinuousTimeDynamicNetwork2018
-* @wuSageDyNovelSampling2021  
+* @wuSageDyNovelSampling2021
+* @parejaEvolveGCNEvolvingGraph2020
   
   
 
