@@ -102,6 +102,12 @@ data/raw/star-wars:
 		&& unzip -d star-wars star-wars.zip \
 		&& rm star-wars.zip
 
+data/raw/house-of-representatives-congress-116:
+	cd data/raw \
+		&& kaggle datasets download aavigan/house-of-representatives-congress-116 \
+		&& unzip -d house-of-representatives-congress-116 house-of-representatives-congress-116.zip \
+		&& rm house-of-representatives-congress-116.zip
+
 download: \
 	data/raw/ucidata-zachary \
 	data/raw/enron-mail-20150507 \
@@ -115,7 +121,7 @@ download: \
 	data/raw/email-Eu-core \
 	data/raw/com-youtube \
 	data/raw/star-wars \
-	data/raw/the-marvel-universe-social-network
+	data/raw/house-of-representatives-congress-116
 
 
 export_neo4j:
@@ -131,7 +137,7 @@ export_neo4j:
 	$(PY) scripts/export_to_neo4j.py --dataset=email-Eu-core
 	$(PY) scripts/export_to_neo4j.py --dataset=com-youtube
 	$(PY) scripts/export_to_neo4j.py --dataset=star-wars
-	$(PY) scripts/export_to_neo4j.py --dataset=the-marvel-universe-social-network
+	$(PY) scripts/export_to_neo4j.py --dataset=house-of-representatives-congress-116
 	$(PY) scripts/export_to_neo4j.py --dataset=social-distancing-student
 
 export_graphml:
@@ -147,4 +153,5 @@ export_graphml:
 	$(PY) scripts/export_to_graphml.py --dataset=email-Eu-core
 	$(PY) scripts/export_to_graphml.py --dataset=com-youtube
 	$(PY) scripts/export_to_graphml.py --dataset=star-wars
-	$(PY) scripts/export_to_graphml.py --dataset=the-marvel-universe-social-network
+	$(PY) scripts/export_to_graphml.py --dataset=house-of-representatives-congress-116
+	$(PY) scripts/export_to_graphml.py --dataset=social-distancing-student

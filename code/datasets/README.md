@@ -1,34 +1,22 @@
 # Datasets
 ## Used Datasets
-* [Zachary karate club](http://konect.cc/networks/ucidata-zachary/)
-* [Enron email network](https://www.kaggle.com/wcukierski/enron-email-dataset/)
-* [Football network](https://networkrepository.com/misc-football.php)
-* [IMDB 5000 Movie Dataset](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset)
-* [DBLP-V1](https://www.aminer.org/citation)
-* [DBLP-V3](https://www.aminer.org/citation)
-* [DBLP-HCN](https://data.mendeley.com/datasets/t4xmpbrr6v/1)
-* [sx-mathoverflow](https://snap.stanford.edu/data/sx-mathoverflow.html)
-* [sx-superuser](https://snap.stanford.edu/data/sx-superuser.html)
-* [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html)
-* [com-Youtube](https://snap.stanford.edu/data/com-Youtube.html)
-* [the-marvel-universe-social-network](https://www.kaggle.com/csanhueza/the-marvel-universe-social-network)
 
-| Dataset                                                                                                   | Temporal | Heterogenous | Content | Nodes   | Edges   |
-|-----------------------------------------------------------------------------------------------------------|----------|--------------|---------|---------|---------|
-| [Zachary karate club](http://konect.cc/networks/ucidata-zachary/)                                         | 0        | 0            | 0       | 34      | 78      |
-| [Enron email network](https://www.kaggle.com/wcukierski/enron-email-dataset/)                             | 1        | 1            | 1       | 605076  | 4179878 |
-| [Football network](https://networkrepository.com/misc-football.php)                                       | 0        | 0            | 0       | 115     | 613     |
- | [IMDB 5000 Movie Dataset](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset)                    | 1        | 1            | 1       | 16615   | 52251   |
- | [DBLP-V1](https://www.aminer.org/citation)                                                                | 1        | 1            | 1       | 1238145 | 2475740 |
- | [DBLP-HCN](https://data.mendeley.com/datasets/t4xmpbrr6v/1)                                               | 1        | 1            | 0       | 10687   | 16533   |
-| [DBLP-V3](https://www.aminer.org/citation)                                                                | 1        | 1            | 1       | 2677098 | 8225508 |
-| [sx-mathoverflow](https://snap.stanford.edu/data/sx-mathoverflow.html)                                    | 1        | 1            | 0       | 24818   | 506550  |
- | [sx-superuser](https://snap.stanford.edu/data/sx-superuser.html)                                          | 1        | 1            | 0       | 194085  | 1443339 |
- | [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html)                                | 0        | 0            | 0       | 1005    | 25571   |
- | [com-Youtube](https://snap.stanford.edu/data/com-Youtube.html)                                            | 0        | 0            | 0       | 1134891 | 298762  |
- | [star-wars](https://www.kaggle.com/ruchi798/star-wars)                                                    | 1        | 1            | 0       | 113     | 1599    |
- | [the-marvel-universe-social-network](https://www.kaggle.com/csanhueza/the-marvel-universe-social-network) | 0        | 1            | 0       |         |         |
- | [social-distancing-student]()                                                                             | 0        | 1            | 0       | 93433   | 3710183 |
+| Dataset                                                                                                | Reference                                                                 | Nodes   | Edges   | Node/Edge Types | Properties |
+|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|---------|---------|-----------------|------------|
+| [Zachary karate club](http://konect.cc/networks/ucidata-zachary/)                                      | [@zacharyInformationFlowModel1976]                                        | 34      | 78      | 1/1             | S/Y        |
+| [Football](https://networkrepository.com/misc-football.php)                                            | [@girvanCommunityStructureSocial2002]                                     | 115     | 613     | 1/1             | S/N        |
+| [Star Wars Social](https://www.kaggle.com/ruchi798/star-wars)                                          | [@StarWarsSocial]                                                         | 113     | 1599    | 1/2             | T/N        |
+| [Enron](https://www.kaggle.com/wcukierski/enron-email-dataset/)                                        | [@vanburenEnronDatasetResearch2009]                                       | 605076  | 4179878 | 2/3             | T/Y        |
+| [IMDB 5000](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset)                               | [@IMDB5000Movie]                                                          | 16615   | 52251   | 4/4             | T/N        |
+| [DBLP-HCN](https://data.mendeley.com/datasets/t4xmpbrr6v/1)                                            | [@tangArnetMinerExtractionMining2008; @yangDefiningEvaluatingNetwork2012] | 10687   | 16533   | 3/2             | T/N        |
+| [DBLP-V1](https://www.aminer.org/citation)                                                             | [@tangArnetMinerExtractionMining2008; @yangDefiningEvaluatingNetwork2012] | 1238145 | 2475740 | 3/3             | T/N        |
+| [DBLP-V3](https://www.aminer.org/citation)                                                             | [@tangArnetMinerExtractionMining2008; @yangDefiningEvaluatingNetwork2012] | 2677098 | 8225508 | 3/3             | T/N        |
+| [sx-mathoverflow](https://snap.stanford.edu/data/sx-mathoverflow.html)                                 | [@SNAPNetworkDatasets]                                                    | 24818   | 506550  | 1/3             | T/N        |
+| [sx-superuser](https://snap.stanford.edu/data/sx-superuser.html)                                       | [@SNAPNetworkDatasets]                                                    | 194085  | 1443339 | 1/3             | T/N        |
+| [Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html)                                   | [@SNAPNetworkDatasets]                                                    | 1005    | 25571   | 1/1             | S/Y        |
+| [com-Youtube](https://snap.stanford.edu/data/com-Youtube.html)                                         | [@SNAPNetworkDatasets]                                                    | 1134891 | 298762  | 1/1             | S/Y        |
+| [116th House of Representatives](https://www.kaggle.com/aavigan/house-of-representatives-congress-116) | [@116thHouseRepresentatives]                                              | 1134891 | 298762  | 1/1             | S/Y        |
+| [social-distancing-student]()                                                                          | [@wangPublicSentimentGovernmental2020]                                    | 93433   | 3710183 | 3/7             | T/N        |
 
 ## Wishlist
 - [ ] https://www.kaggle.com/phamvudung/imdb-dataset
@@ -39,3 +27,4 @@
 - [ ] https://www.kaggle.com/lakritidis/identifying-influential-bloggers-techcrunch
 - [ ] https://www.kaggle.com/andreagarritano/deezer-social-networks
 - [ ] https://www.kaggle.com/ellipticco/elliptic-data-set
+- [ ] https://www.kaggle.com/hugomathien/soccer

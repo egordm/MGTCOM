@@ -190,7 +190,7 @@ In the remainder of this section we briefly describe working of a few selected i
 
 ### Negative Sampling
 
-Negative sampling is a technique used for reducing calculation complexity of loss for link prediction tasks. Originally introduced in @mikolovDistributedRepresentationsWords2013 this technique was used to optimize the *skipgram* algorithm which predicts context words based on a single word (See +@eq:skipgram). Computing result of this softmax function very expensive as the vocabulary may become very large and the negative samples outnumber the positive ones by a lot. Negative sampling (+@eq:negativesampling) is introduced as an approximation where $w_O$ is the output context word, given the $w_I$ the input word, $v_{w_O}, v_{w_I}$ as their representation vectors respectively, sigmoid function $\sigma$, and a sample of $n$ words sampled from a random distribution weighted by word frequency $P_n(w)$.
+Negative sampling is a technique used for reducing calculation complexity of loss for link prediction tasks. Originally introduced in @mikolovDistributedRepresentationsWords2013 this technique was used to optimize the *skipgram* algorithm which predicts context words based on a single input word (See +@eq:skipgram). Computing result of this softmax function very expensive as the vocabulary may become very large and the negative samples outnumber the positive ones by a lot. Negative sampling (+@eq:negativesampling) is introduced as an approximation where $w_O$ is the output context word, given the $w_I$ the input word, $v_{w_O}, v_{w_I}$ as their representation vectors respectively, sigmoid function $\sigma$, and a sample of $n$ words sampled from a random distribution weighted by word frequency $P_n(w)$.
 
 Due to its efficiency, negative sampling is also embraced in graph representation learning as the link prediction task is synonymous to the context word prediction.
 
@@ -1361,6 +1361,10 @@ The final result of my thesis will consist of the said framework for DCD within 
 %     * Link recommendation
 
 As the research questions posed in +@research-questions are all mostly of a quantitative nature, it is very important to set up appropriate benchmarks in order to provide a valid answer. As a direct comparison between methods is not always possible, we define auxiliary task benchmarks testing algorithms on desired properties as well as reuse benchmarks used in previous literature to provide a fair comparison.
+
+
+
+
 
 ### Benchmarks and Evaluation
 

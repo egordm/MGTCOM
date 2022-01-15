@@ -39,6 +39,10 @@ The final result of my thesis will consist of the said framework for DCD within 
 
 As the research questions posed in +@research-questions are all mostly of a quantitative nature, it is very important to set up appropriate benchmarks in order to provide a valid answer. As a direct comparison between methods is not always possible, we define auxiliary task benchmarks testing algorithms on desired properties as well as reuse benchmarks used in previous literature to provide a fair comparison.
 
+
+
+
+
 ### Benchmarks and Evaluation
 
 % RQ 1 (@rqq:rq1)
