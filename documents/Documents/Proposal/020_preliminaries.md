@@ -15,13 +15,13 @@ In this section, we introduce the notation as well as important concepts that we
 %   * Attributed edges
 %   * Parallel edges
 
-A graph $G$ is a tuple $G = (V, E)$ consisting of $n := |V|$ sequentially numbered nodes $V = \{v_1, ..., v_n\}$ and $m := |E|$ edges. Edges can be directed or undirected, represented as either ordered tuples $(u, v) \in E$ or unordered sets $\{u, v\} \in E$ respectively. Unless stated otherwise we assume that graphs are undirected. An edge $\{u, v\} \in E$ is *incident* to a node $v_i$, if $v_i \in \{u, v\}$. Two nodes $v_i$ and $v_j$ are *adjacent if they are connected by an edge, i.e., $\{v_i, v_j\} \in E$.  The neighbors*  $\mathcal{N}(v_i) = \{v_j|\{v_i, v_j\} \in E\}$ of a node $v_i$ are nodes that are adjacent to it. The *degree* $k_v := |\mathcal{N}(v)|$ of a node $v$ is its number of neighbors. In more mathematical context a graph can represented as an *adjacency matrix* $A$ where $A_{ij}$-th cell is valued $1$ iff edge $\{v_i, v_j\} \in E$. In some cases we also consider *weighted graphs* $G = (V, E, w)$ with weights $w(v_i, v_j) \in \mathbb{R}$. 
+A graph $G$ is a tuple $G = (V, E)$ consisting of $n := |V|$ sequentially numbered nodes $V = \{v_1, ..., v_n\}$ and $m := |E|$ edges. Edges can be directed or undirected, represented as either ordered tuples $(u, v) \in E$ or unordered sets $\{u, v\} \in E$ respectively. Unless stated otherwise, we assume that graphs are undirected. An edge $\{u, v\} \in E$ is *incident* to a node $v_i$, if $v_i \in \{u, v\}$. Two nodes $v_i$ and $v_j$ are *adjacent if they are connected by an edge, i.e., $\{v_i, v_j\} \in E$.  The neighbors*  $\mathcal{N}(v_i) = \{v_j|\{v_i, v_j\} \in E\}$ of a node $v_i$ are nodes that are adjacent to it. The *degree* $k_v := |\mathcal{N}(v)|$ of a node $v$ is its number of neighbors. In more mathematical context a graph can be represented as an *adjacency matrix* $A$ where $A_{ij}$-th cell is valued $1$ iff edge $\{v_i, v_j\} \in E$. In some cases we also consider *weighted graphs* $G = (V, E, w)$ with weights $w(v_i, v_j) \in \mathbb{R}$. 
 
 #### Multidimensional Networks
 
 % * Parallel edges
 
-A multidimensional network is an edge-labeled extension of multigraphs that allows for multiple edges between the same nodes (known as *parallel edges*). A multidimensional is defined as $G = (V, E, D)$, where $D$ is a set of dimensions. Each link is a triple $(u, v, d) \in E$ where $u, v \in V$ and $d \in D$.
+A multidimensional network is an edge-labeled extension of multigraphs that allows for multiple edges between the same nodes (known as *parallel edges*). A multidimensional network is defined as $G = (V, E, D)$, where $D$ is a set of dimensions. Each link is a triple $(u, v, d) \in E$ where $u, v \in V$ and $d \in D$.
 
 
 
@@ -39,7 +39,7 @@ A heterogeneous graph $G = (V, E, O)$ extends the notion of a multidimensional n
 
 #### Temporal Network
 
-A temporal network [@rossettiCommunityDiscoveryDynamic2018] is a graph $G = (V, E, T)$, where $V$ is a set of triplets in form $(v, t_s, t_e)$, with $v$ a node of graph and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding node (with $t_s \leq t_e$); $E$ is a set of quadruplets $(u, v, t_s, t_e)$ with $u, v \in V$ being vertices of the graph, and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding edge (with $t_s \leq t_e$). Networks without edge durations ($t_e = \infty$) are often referred to as *contact sequences* and those with duration as *interval graphs*. Differently, a distinction is made between two types of temporal networks, *interaction networks* and *relation networks*. The former models interactions that may repeat as time goes by, while the latter model more stable relationships (friendship, coworker, belonging to the same group, etc.).
+A temporal network [@rossettiCommunityDiscoveryDynamic2018] is a graph $G = (V, E, T)$, where $V$ is a set of triplets in form $(v, t_s, t_e)$, with $v$ a being a graph node and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding node (with $t_s \leq t_e$); $E$ is a set of quadruplets $(u, v, t_s, t_e)$ with $u, v \in V$ being graph vertices, and $t_s, t_e \in T$ respectively being the birth and death timestamps of the corresponding edge (with $t_s \leq t_e$). Networks without edge durations ($t_e = \infty$) are often referred to as *contact sequences* and those with duration as *interval graphs*. Differently, a distinction is made between two types of temporal networks, *interaction networks* and *relation networks*. The former models interactions that may repeat as time goes by, while the latter model more stable relationships (friendship, coworker, belonging to the same group, etc.).
 
 
 
@@ -51,7 +51,7 @@ A snapshot network $\mathcal{G}_\tau$ [@dakicheTrackingCommunityEvolution2019] i
 
 #### Complex Network
 
-A complex network is a graph with non-trivial topological features, which do not occur in simple networks such as lattices or random graphs but often occur in networks representing real systems. A few common features occurring in complex networks include scale-free networks where the degree distribution follows the power law (implying that degree distribution has no characteristic scale); small-world networks which exhibit a small-worldness phenomenon where the diameter of the network (degree of separation) is usually small while the clustering coefficient is high; multidimensional networks; and spatial networks where nodes are embedded in space.
+A complex network is a graph with non-trivial topological features, which do not occur in simple networks such as lattices or random graphs but often occur in networks representing real systems. A few common features occurring in complex networks include scale-free networks where the degree distribution follows the power law (implying that the degree distribution has no characteristic scale); small-world networks which exhibit a small-worldness phenomenon where the diameter of the network (degree of separation) is usually small while the clustering coefficient is high; multidimensional networks; and spatial networks where nodes are embedded in space.
 
 
 

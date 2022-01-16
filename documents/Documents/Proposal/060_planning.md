@@ -23,7 +23,7 @@ Finishing up the benchmark implementation. Conducting the evaluation and collect
 
 ### February 19 - 2 weeks
 
-% * Setting up graph sampling pipeline a dataset
+% * Setting up graph sampling pipeline 
 % * Experimentation with representation based approaches (performance comparison)
 
 Setting up graph sampling pipeline and experimentation with various representation-based approaches. Collecting performance results for ablation tests.

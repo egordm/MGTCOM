@@ -14,7 +14,7 @@
 
 The main difference between Representation-based approaches and link-based approaches is the fact that they usually don't directly model the network based on connections. Instead, they learn an intermediate representation of the graph or its components to which CD detection can be applied to. While also relying on the idea of *homophily*, most methods define additional objectives to improve community quality.
 
-The main reasoning for this is the fact that real-world networks are non-linear, meaning that there may be no connections when they make sense and vice versa [@wangEvolutionaryAutoencoderDynamic2020]. By using deep neural networks to learn these embeddings one can address such non-linearity as they are in general very robust against noise. Other notable benefits to using representation-based approaches include the fact that they compress the data efficiently as real-world networks are very sparse. They can also represent multi-modal features, network (meta) structure, and temporal dimension by defining them all in a compatible similarity space or learning mappings to this space. Finally, representations are naturally easy to compute similarity on.
+The main reasoning for this is the fact that real-world networks are non-linear, meaning that there may be no connections when they make sense and vice versa [@wangEvolutionaryAutoencoderDynamic2020]. By using deep neural networks to learn these embeddings one can address such non-linearity as they are in general very robust against noise. Other notable benefits to using representation-based approaches include the fact that they compress the data efficiently, as real-world networks are very sparse. They can also represent multi-modal features, network (meta) structure, and temporal dimension by defining them all in a compatible similarity space or learning mappings to this space. Finally, representations are naturally easy to compute similarity on.
 
 In this section, we describe representation-based approaches by covering both CD and DCD approaches. To provide a more cohesive overview of the methods, we group them by their innovations instead.
 
@@ -40,18 +40,17 @@ In this section, we describe representation-based approaches by covering both CD
 %   * Graph Fitting: using max likelihood estimation
 %     * Given a model, it can be compared to data using log likelihood
 %     * AGM is relaxed to have edge strength
-%     * Using the relaxed model memberships now have strengths $F_uC$
+%     * Using the relaxed model, memberships now have strengths $F_uC$
 %     * Probability of two nodes connecting is defined in terms of them connecting through a community
 %     * Gradient descent is used to find the optimal parameters
 
 While arguably not being representational by itself, Affiliation Graph Network (AGM) model introduced in @yangCommunityAffiliationGraphModel2012 is very influential within the deep learning/representation learning CD field.
 
-The AGM models a network as a bipartite graph with communities as first-class citizens and is represented by the following equation $B(V, C, M, \{p_c\})$, where $V$ represents nodes, $C$ set of communities, $M$ node-community memberships and $\{p_c\}$ model parameters (a single probability $p_c$ per community). It can model non-overlapping, overlapping, and hierarchical communities by defining rules on membership sets in $M$. AGM can be used in both generative and discriminative settings.
+The AGM models a network as a bipartite graph and is represented by the following equation $B(V, C, M, \{p_c\})$, where $V$ represents nodes, $C$ set of communities, $M$ node-community memberships and $\{p_c\}$ model parameters (a single probability $p_c$ per community). It can model non-overlapping, overlapping, and hierarchical communities by defining rules on membership sets in $M$. AGM can be used in both generative and discriminative settings.
 
 The generative scenario works as follows: Given an AGM $F(V, C, M, {p_c})$, generate links between each pair of nodes exceeding a baseline probability $p$. This is done by considering that, according to AGM, each pair of nodes in community $C_i$ is connected with a probability $p_{c_i}$. Therefore, the probability of two nodes having a connection is proportional to the number of communities they share (which can be derived from the model).
 
-The discriminative scenario is defined as: Given a graph $G$, find a model $F(V, C, M, {p_c})$ that may have generated it. By assuming that the graph was generated using an AGM, the parameters $M$, number of communities $|C|$ and $\{p_c\}$ have to be found. Process for finding such a model to the graph involves max likelihood fitting. AGM is relaxed to have membership strengths $F_{uC}$, which helps to define the probability of nodes $u$ and $v$ connecting through community $C$ as $P_{C}(u, v)$, and by themselves $P(u, v)$ (by marginalizing over communities). Using this, a probability $P(G|F)$ can be constructed quantifying how well the model fits the data. Finally, gradient ascent can be applied to optimize for the model's parameters.
-
+The discriminative scenario is defined as: Given a graph $G$, find a model $F(V, C, M, {p_c})$ that may have generated it. By assuming that the graph was generated using an AGM, the parameters $M$, number of communities $|C|$ and $\{p_c\}$ have to be found. The process for finding such a model to the graph involves max likelihood fitting. AGM is relaxed to have membership strengths $F_{uC}$, which helps to define the probability of nodes $u$ and $v$ connecting through community $C$ as $P_{C}(u, v)$, and by themselves $P(u, v)$ (by marginalizing over communities). Using this, a probability $P(G|F)$ can be constructed, quantifying how well the model fits the data. Finally, gradient ascent can be applied to optimize for the model's parameters.
 
 
 ### Graph Reinforcement
@@ -71,12 +70,12 @@ The first class of methods we consider are Graph Reinforcement methods. These me
 % 
 % * Present a **Community Reinforcement** approach
 % * Is CD algorithm agnostic
-%   * Shown in experiments - therefore the graph itself benefits
+%   * Shown in experiments—therefore, the graph itself benefits
 % * Reinforces the Graph by
-%   * Creating inter-community edges
-%   * Deleting intra-community edges
+%   * Creating intercommunity edges
+%   * Deleting intracommunity edges
 %   * Determines the appropriate amount of reinforcement a graph needs
-% * Which helps the dense inter-community and sparse intra-community property of the graph
+% * Which helps the dense inter-community and sparse intracommunity property of the graph
 %   * Can effectively turn difficult-to-detect community situation into that of easy-to-detect communities
 % * Challenges:
 %   * Needs to be unsupervised (doesn't need community annotations to work)
@@ -85,14 +84,14 @@ The first class of methods we consider are Graph Reinforcement methods. These me
 % * Methodology:
 %   * Edge Addition / Deletion
 %     * Based on node similarity of connected pairs
-%       * Similar nodes are likely to be in a community (intra edges)
+%       * Similar nodes are likely to be in a community (intra-edges)
 %       * Dissimilar ones are less likely to be in a community (inter edges)
 %     * Employ graph embedding to generate topological embeddings
 %       * Adamic/Adar (local link-based)
-%       * SimRank (gloabl link-based)
-%       * Node2vec graph embedding based
+%       * SimRank (global link-based)
+%       * Node2Vec graph embedding based
 %     * Predict similarities and bucket them
-%       * Use similarity buckets to select intra and inter edges - and to tune the model
+%       * Use similarity buckets to select intra and inter edges—and to tune the model
 %       * Buckets are selected on how well they predict current edges
 %   * Detect the right amount of addition
 %     * Use a gradual reinforcement strategy by generating a series of graphs (adding top x inter and removing intra edges)
@@ -102,14 +101,14 @@ The first class of methods we consider are Graph Reinforcement methods. These me
 %     * Using a greedy similarity computation
 %     * Prefer nodes which are likely to be in same community of inter similarity detection
 
-@kangCommunityReinforcementEffective2021 present a pre-processing method for strengthening the community structure of a graph by adding non-existing predicted intra-community edges and deleting existing predicted inter-community edges. Their strategy is to learn topological embedding using a graph representation learning algorithm (node2vec) based on the existing link prediction task. The similarity is computed between different node pairs and put into buckets. Then with the assumption of *homophily* the buckets with a higher value can be considered holding intra-community while buckets with lower inter-community connections. Right buckets are picked from both extremes to create or delete edges. The preemptive CD is done to greedily guide pair-wise similarity computation and avoid a high complexity. Once the reinforced graph is constructed, already existing CD algorithms can be applied.
+@kangCommunityReinforcementEffective2021 present a pre-processing method for strengthening the community structure of a graph by adding non-existing predicted intracommunity edges and deleting existing predicted inter-community edges. Their strategy is to learn topological embedding using a graph representation learning algorithm (Node2Vec) based on the existing link prediction task. The similarity is computed between different node pairs and put into buckets. Then with the assumption of *homophily*, the buckets with a higher value can be considered holding intracommunity while buckets with lower inter-community connections. Right buckets are picked from both extremes to create or delete edges. The preemptive CD is done to greedily guide pair-wise similarity computation and avoid a high complexity. Once the reinforced graph is constructed, already existing CD algorithms can be applied.
 
 
 
 % @jiaCommunityGANCommunityDetection2019
 % 
 % * Has some info in related work to extend on graph representation learning
-% * Solves issue of detecting overlapping communities:
+% * solves issue of detecting overlapping communities:
 %   * K-means and Gaussian Mixture Model cant do that
 % * Proposes CommunityGAN:
 %   * Solves graph representation learning and community detection jointly
@@ -117,10 +116,10 @@ The first class of methods we consider are Graph Reinforcement methods. These me
 %   * Make use of Affiliation Graph Model AGM for community (detection) assignment
 %   * Uses GAN structure to:
 %     * Generate most likely vertex subset s to compose a specified kind of motif
-%       * "Graph AGM" motif generation model
+%       * “Graph AGM” motif generation model
 %     * Discriminate whether vertex subset s is a real motif or not
 %     * Motif = in this case is an n-clique
-%   * Study motif distribution among ground truth communities to analyse how they impact quality of detected communities
+%   * Study motif distribution among ground truth communities to analyze how they impact quality of detected communities
 % * Methodology:
 %   * Define a method to efficiently random walk such cliques / motifs
 %   * Generator tries to learn $p_{true}(m|v_c)$ as preference distribution of motifs containing $v_c$ vs all the motifs
@@ -134,16 +133,15 @@ The first class of methods we consider are Graph Reinforcement methods. These me
 %       * The affiliation is defined now in form of a motif in community
 %   * Amount of communities are chosen by hyperparameter tuning
 
-@jiaCommunityGANCommunityDetection2019 solves the issue of detecting overlapping communities by proposing the CommunityGAN algorithm which jointly optimizes for node and community representations. First, they define a method for efficient motif (in their case clique) sampling from the graph (true/clique, and false/vertex subset). Then, they define a GAN based structure for learning representational vectors where the generator $G$ tries to learn $p_{true}(m|\mathbf{v}_c)$ as preference distribution of motifs to generate most likely vertex subsets most likely to be real motifs. Discriminator $D$ tries to learn the probability of a vertex subset being a real motif, therefore creating a minimax game of progressively optimizing embeddings to be able to encode rich information about network topology.
+@jiaCommunityGANCommunityDetection2019 solves the issue of detecting overlapping communities by proposing the CommunityGAN algorithm, which jointly optimizes for node and community representations. First, they define a method for efficient motif (in their case clique) sampling from the graph (true/clique, and false/vertex subset). Then, they define a GAN based structure for learning representational vectors where the generator $G$ tries to learn $p_{true}(m|\mathbf{v}_c)$ as preference distribution of motifs to generate most likely vertex subsets most likely to be real motifs. Discriminator $D$ tries to learn the probability of a vertex subset being a real motif, therefore creating a minimax game of progressively optimizing embeddings to be able to encode rich information about network topology.
 
 Both components ($G$ and $D$) are implemented as a modified relaxed AGM model with a more general definition to be able to handle the motif generation (rather than edge generation). The probability of a set of vertices being a motif is defined in terms of their probability being a motif through a community, therefore making them community-aware as they now represent the affiliation weight between a vertex and a community. The number of communities is chosen by training and testing part of data on link prediction task.
-
 
 
 ### Multi-objective optimization
 
 % * Is another subject where representation based approaches excel
-% * Usually multiple objectives are defined such as:
+% * Usually multiple objectives are defined, such as:
 %   * Homophily
 %   * Community Quality
 %   * Temporal Consistency
@@ -163,13 +161,13 @@ Another subject where representation-based approaches excel is multi-objective o
 % * Weights are randomly initialized
 % * Clustering coefficient is annealed (changes overtime)
 % * Uses negative sampling to avoid huge cost of softmax
-% * Adds regularizer "social network cost" to optimize for homophily
+% * Adds a regularizer called “social network cost” to optimize for homophily
 %   * weighs distance in latent space by neighborhood overlap
 %   * Makes algorithm more robust to changes in hyperparameters
 % * Evaluate cluster quality by modularity
 % * Evaluate embeddings by genre prediction / recommendation
 
-In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cluster centers along with node embeddings. They define an objective function as a combination of three terms: normalization term (ensures embeddings are centered at the origin), proximity term (forces nodes with similar neighborhoods to be embedded close), cluster quality term (forces nodes to be close to their nearest cluster). Additionally, a "social network cost" term is added as a regularizer to optimize for proximity between nodes within the same cluster. During training, the clustering coefficient is annealed to ensure convergence and negative sampling is employed to avoid large softmax costs.
+In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cluster centers along with node embeddings. They define an objective function as a combination of three terms: normalization term (ensures embeddings are centered at the origin), proximity term (forces nodes with similar neighborhoods to be embedded close), cluster quality term (forces nodes to be close to their nearest cluster). Additionally, a “social network cost” term is added as a regularizer to optimize for proximity between nodes within the same cluster. During training, the clustering coefficient is annealed to ensure convergence and negative sampling is employed to avoid large softmax costs.
 
 
 
@@ -177,29 +175,29 @@ In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cl
 % 
 % * Goal: unsupervised clustering on networks with contents
 %   * Propose a way to utilize deep embedding for graph clustering
-% * Simultaneously solve node representation problem and find optimal clustering in a e2e manner
+% * Simultaneously solve node representation problem and find optimal clustering in an e2e manner
 %   * Jointly learns embeddings X and soft clustering $q_i \in Q$
-%   * $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$: probablility of node $v_i$ belonging to kth cluster
+%   * $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$: probability of node $v_i$ belonging to k-th cluster
 %   * K is known a-priori
-% * Employ Deep Denoise Autoencoder (DAE) - good for features with high-dimensional sparse noisy inputs
+% * Employ Deep Denoise Autoencoder (DAE) – good for features with high-dimensional sparse noisy inputs
 % * Use stable influence propagation technique (for computing embeddings)
 %   * Use a transition matrix for a single step embedding propagation
 %   * Because:
 %     * Random walk requires more tuning
 %     * Their transition matrix is very similar to a spectral method (symmetric Laplacian matrix)
-%     * Influence propagation is like kipf and welling - doenst require matrix decomposition
+%     * Influence propagation is like Kipf and Welling – doesn't require matrix decomposition
 %   * Embedding loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
 % * Introduce GRACE cluster module:
 %   * Computes soft clustering Q from: $q_{i k}=\frac{\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{k}\right|^{2}\right)^{-1}}{\sum_{j}\left(1+\left|\mathbf{x}*{i}-\mathbf{u}*{j}\right|^{2}\right)^{-1}}$
-%   * Learn clustering results by learning distribuition P where $p_{i k}=\frac{q_{i k}^{2} / f_{k}}{\sum_{j} q_{i j}^{2} / f_{j}}$
-%     * and $f_{k}=\sum_{i} q_{i k}$ total number of nodes softly assigned to kth cluster
+%   * Learn clustering results by learning distribution P where $p_{i k}=\frac{q_{i k}^{2} / f_{k}}{\sum_{j} q_{i j}^{2} / f_{j}}$
+%     * and $f_{k}=\sum_{i} q_{i k}$ total number of nodes softly assigned to k-th cluster
 %   * Clustering Loss: $\mathcal{J}*{2}=K L(\mathcal{P} | Q)=\sum*{i} \sum_{k} p_{i k} \log \frac{p_{i k}}{q_{i k}}$
 %   * Training is done in alternating steps:
-%     * Macrostep: Compute: P and fix it
-%     * S Microsteps: Update node embeddings S and cluster centers U
+%     * Macro step: Compute: P and fix it
+%     * S Micro steps: Update node embeddings S and cluster centers U
 %       * Tries to make Q catch up with P
 
-@yangGraphClusteringDynamic2017 propose a similar idea of combining embedding and clustering tasks and solving them in an end-to-end manner. In their work, they employ a Deep Denoise Autoencoder (DAE) to learn topological information of the network by optimizing for reconstruction loss. To learn cluster/community centers they define GRACE cluster module which first computes soft cluster assignment matrix $Q$ by utilizing the embeddings and cluster centers which contain probabilities $q_{ik}$ of node $i$ belonging to cluster $k$. The clustering loss is defined as (Kullback Leiber) KL-divergence between the soft clustering $Q$ and auxiliary target distribution $P$ which is computed by squaring and normalizing the soft assignments to reinforce more confident clustering results while preventing the formation of excessively large clusters. Both embeddings and clustering are optimized alternatively until convergence.
+@yangGraphClusteringDynamic2017 suggest a similar idea of combining embedding and clustering tasks and solving them in an end-to-end manner. In their work, they employ a Deep Denoise Autoencoder (DAE) to learn topological information of the network by optimizing for reconstruction loss. To learn cluster/community centers they define GRACE cluster module which first computes soft cluster assignment matrix $Q$ by utilizing the embeddings and cluster centers which contain probabilities $q_{ik}$ of node $i$ belonging to cluster $k$. The clustering loss is defined as (Kullback–Leibler) KL-divergence between the soft clustering $Q$ and auxiliary target distribution $P$ which is computed by squaring and normalizing the soft assignments to reinforce more confident clustering results while preventing the formation of excessively large clusters. Both embeddings and clustering are optimized alternatively until convergence.
 
 
 
@@ -213,29 +211,28 @@ In @rozemberczkiGEMSECGraphEmbedding2019 authors propose a method that learns cl
 %   * Adopt a stacked autoencoder to learn low-dimensional (generic) representations of nodes
 % * They define loss in terms of:
 %   * Reconstruction Error: How well the graph can be reconstructed from the representation
-%   * Local structure preservation: Preservation of homophiliy - connected nodes are similar
+%   * Local structure preservation: Preservation of homophily – connected nodes are similar
 %   * Community evolution preservation: Preservation of smoothness of communities in time at multiple granularity levels
 % * The communities are initialized using classical methods:
-%   * First large communities are detected using Genlouvin (fast and doesnt require priors)
+%   * First large communities are detected using Genlouvin (fast and doesn't require priors)
 %   * Then small scale communities are detected using k-means by defining a max community size w
-%     * Which provides more fine tuned communities
+%     * Which provides more fine-tuned communities
 % * Using the initial embeddings the temporal embeddings are optimized
-%   * Done by optimizing all at once - therefore maintaining the stability
+%   * Done by optimizing all at once – therefore maintaining the stability
 %   * And use of the mentioned combined objective
 % * Though they present / evaluate their algorithm in terms of Dynamic Representation Algorithms
 %   * Therefore the actual quality of communities remains to be known
 
-@maCommunityawareDynamicNetwork2020 proposed a novel approach to constructing community-aware dynamic network embeddings by leveraging multi-objective optimization and extending it into a temporal dimension. They adopt a Graph Autoencoder structure which works by encoding the full graph into a lower-dimensional structure and decoding it again into a graph. Assuming a well-tuned autoencoder, this allows authors to encode the input network (and its nodes) into a more efficient representation vectors which characterize the network well.
+@maCommunityawareDynamicNetwork2020 proposed a novel approach to constructing community-aware dynamic network embeddings by leveraging multi-objective optimization and extending it into a temporal dimension. They adopt a Graph Autoencoder structure, which works by encoding the full graph into a lower-dimensional structure and decoding it again into a graph. Assuming a well-tuned autoencoder, this allows authors to encode the input network (and its nodes) into a more efficient representation of vectors which characterize the network well.
 
-The objective function they use is defined by three terms: the reconstruction error term minimizing the distance between the ground-truth and the autoencoder output, local structure/homophily preservation term minimizing first- and second-order proximity between connected nodes, and the community evolution preservation term maximizing temporal smoothness of communities at different granularity levels given their representation as an aggregation of their members.
+The objective function they use is defined by three terms (i) the reconstruction error term minimizing the distance between the ground-truth and the autoencoder output, (ii) the local structure/homophily preservation term minimizing first- and second-order proximity between connected nodes, and (iii) the community evolution preservation term maximizing temporal smoothness of communities at different granularity levels given their representation as an aggregation of their members.
 
-The initial community assignment is generated using the Louvain method for high-level communities and using K-means for fine-grained communities given a max community size parameter $w$. After that, embeddings at each snapshot are optimized by employing a dependent community detection-like strategy.
-
+The initial community assignment is generated using the Louvain method for high-level communities and using K-means for fine-grained communities, given a max community size parameter $w$. After that, embeddings at each snapshot are optimized by employing a dependent community detection-like strategy.
 
 
 % @wangEvolutionaryAutoencoderDynamic2020
 % 
-% * Approach is similar to to @maCommunityawareDynamicNetwork2020
+% * Approach is similar to @maCommunityawareDynamicNetwork2020
 % * Defines a unified objective where
 %   * community characteristics
 %   * previous clustering
@@ -245,11 +242,11 @@ The initial community assignment is generated using the Louvain method for high-
 % * Methodology:
 %   * Construct a similarity matrix using Dice Coefficient (handles varying degrees well)
 %   * Apply stacked (deep) autoencoders to learn the low-dimensional representation
-%   * Characterizes tradeoff between two costs:
+%   * characterizes tradeoff between two costs:
 %     * Snapshot cost (SC):
 %       * Reconstruction loss
-%       * Node embedding similarity (homophiliy) between connected nodes
-%       * Node embedding similarity (homophiliy) between nodes in same community
+%       * Node embedding similarity (homophily) between connected nodes
+%       * Node embedding similarity (homophily) between nodes in same community
 %     * Temporal cost (TC)
 %       * Temporal smoothness of node embeddings
 %   * Adopt K-means to discover community structure
@@ -274,13 +271,13 @@ Another way to improve community quality is by incorporating multi-modal feature
 
 % @faniUserCommunityDetection2020
 % 
-% * Propose a new method of identifying user communities through multi-modal feature learning:
+% * propose a new method of identifying user communities through multi-modal feature learning:
 %   * learn user embeddings based on their **temporal content similarity**
 %     * Base on topics of interest
 %     * Users are considered like-minded if they are interested in similar topics at similar times
 %     * Learn embeddings using a context modelling approach
 %   * learn user embeddings based on their **social network connections**
-%     * Use GNN which works as a skip-gram like approach by generating context using random walks
+%     * Use GNN, which works as a skip-gram like approach by generating context using random walks
 %   * **interpolate** temporal content-based embeddings and social link-based embeddings
 % * Then they use these multi-modal embeddings to detect dynamic communities\
 %   * Communities are detected on a modified graph
@@ -292,21 +289,21 @@ Another way to improve community quality is by incorporating multi-modal feature
 % * Note: **This approach detects static communities**
 %   * But the communities implicitly take time into account
 
-In @faniUserCommunityDetection2020 the authors describe their method for identifying user communities through multi-modal feature learning. First user embeddings are learned based on their temporal content similarity by looking at topics of interest. Per-user, a heat map is constructed measuring the user's interest over time and topic axes. By considering users like-minded if their heat maps overlap enough they train low-dimensional content embeddings spanning this user similarity space. Next, they use random walk-based GNN methods to learn topological similarity embeddings for network nodes. Finally, they modify the graph by setting edge weights proportionally to node proximity in this combined embeddings space. After that, the Louvain method is applied to extract these time and content-aware communities.
+In @faniUserCommunityDetection2020 the authors describe their method for identifying user communities through multi-modal feature learning. First, user embeddings are learned based on their temporal content similarity by looking at topics of interest. Per-user, a heat map is constructed, measuring the user's interest over time and topic axes. By considering users like-minded if their heat maps overlap enough, they train low-dimensional content embeddings spanning this user similarity space. Next, they use random walk-based GNN methods to learn topological similarity embeddings for network nodes. Finally, they modify the graph by setting edge weights proportionally to node proximity in this combined embeddings space. After that, the Louvain method is applied to extract these time and content-aware communities.
 
 
 
 % @wangVehicleTrajectoryClustering2020
 % 
 % * Transform task of trajectory clustering into one of Dynamic Community Detection
-%   * discretion the trajectories by recording entity their current neigbors at each time interval
+%   * discretion the trajectories by recording entity their current neighbors at each time interval
 %   * Edge streaming network is created
 % * Use representation learning to learn node their embeddings
-%   * Use dyn walks to perform random walks in time dimenstion
+%   * Use dyn walks to perform random walks in time dimension
 %   * Use negative sampling to avoid the softmax cost
 % * Then use K-means to find the communities
 %   * Try K-means, K-medioids and GMM (Gaussian Mixture Models)
-%   * Initalize the centers at the previous timestamp centers
+%   * Initialize the centers at the previous timestamp centers
 % * Use quality measures to establish quality of results
 
 
