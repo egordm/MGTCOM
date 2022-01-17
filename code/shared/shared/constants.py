@@ -10,6 +10,12 @@ DATASETS_DATA_RAW = DATASETS_PATH.joinpath('data/raw')
 DATASETS_DATA_PROCESSED = DATASETS_PATH.joinpath('data/processed')
 DATASETS_DATA_EXPORT = DATASETS_PATH.joinpath('data/export')
 
+BENCHMARKS_PATH = BASE_PATH.joinpath('benchmarks')
+BENCHMARKS_CONFIGS = BENCHMARKS_PATH.joinpath('config')
+BENCHMARKS_OUTPUTS = BENCHMARKS_PATH.joinpath('outputs')
+BENCHMARKS_LOGS = BENCHMARKS_OUTPUTS.joinpath('logs')
+BENCHMARKS_RESULTS = BENCHMARKS_OUTPUTS.joinpath('results')
+
 
 class DatasetPath:
     def __init__(self, name):

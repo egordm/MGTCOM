@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, ClassVar, Callable, Any, Iterator
 
 from simple_parsing.helpers import Serializable
 
-from shared.constants import DATASETS_PATH
+from shared.constants import DATASETS_PATH, DatasetPath
 
 
 @dataclass
@@ -101,7 +101,7 @@ class EdgeSchema(Serializable, Mergeable):
     }
 
 
-SCHEMA_DIR = os.path.join(DATASETS_PATH, 'schema')
+SCHEMA_DIR = os.path.join(DATASETS_PATH, 'schemas')
 
 
 @dataclass(order=True)
@@ -140,3 +140,6 @@ class DatasetSchema(Serializable, Mergeable):
         Saves the schema to the given path.
         """
         self.save(os.path.join(SCHEMA_DIR, f'{self.name}.yml'), sort_keys=False)
+
+    def paths(self) -> DatasetPath:
+        return DatasetPath(self.name)

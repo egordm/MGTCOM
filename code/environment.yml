@@ -25,4 +25,6 @@ dependencies:
   - fsspec
   - pip:
       - neo4j
+      - typeguard
       - -r datasets/requirements.txt
+      - -r benchmarks/requirements.txt
