@@ -9,9 +9,9 @@
 % * Start with community detection
 % * Expand by covering different **strategies to tackle tracking instability**
 
-Link-based approaches to (Dynamic) Community Detection rely on connection strength to find communities within the network. The main criteria for communities are the assumed property that intragroup connections are denser than intergroup ones. The networks are partitioned in such a way, that optimizes for a defined measure characterizing this property.
+Link-based approaches to (Dynamic) Community Detection rely on connection strength to find communities within the network. The main criteria for communities is the assumed property that intragroup connections are denser than intergroup ones. The networks are partitioned in such a way, that optimizes for a defined measure characterizing this property.
 
-We start this section by covering the fundamentals of link-based community detection by introducing commonly used community quality measures and algorithms for optimizing them. Next, we introduce the link-based DCD problem and the unique challenges that arise as opposed to CD. Then we proceed to cover the current state of the art by describing the related works, their solutions to the said challenges, and possible extensions to the problem.
+We start this section by covering the fundamentals of link-based community detection by describing commonly used community quality measures and algorithms for optimizing them. Next, we introduce the link-based DCD problem and the unique challenges that arise as opposed to CD. Then we proceed to cover the current state of the art by describing the related works, their solutions to the said challenges, and possible extensions to the problem.
 
 
 
@@ -20,7 +20,7 @@ We start this section by covering the fundamentals of link-based community detec
 % * Talk about basic and common CD techniques
 % * Introduce notion of modularity
 
-Different metrics exist, quantifying the characteristic of *homophily* over edge strength. The most common metric is modularity, which measures the strength of the division of a network into modules (communities). Its popularity stems from the fact that it is bounded and cheap to compute, though it has other issues such as resolution limit (making detecting smaller communities difficult). Other metrics that can be found in the literature include but are not limited to:
+Different metrics exist for quantifying the characteristic of *homophily* over the connection strength. The most common metric is modularity, which measures the strength of the division of a network into modules (communities). Its popularity stems from the fact that it is bounded and cheap to compute, though it has other issues such as resolution limit (making detecting smaller communities difficult). Other metrics that can be found in the literature include but are not limited to:
 
 * Conductance: the percentage of edges that cross the cluster border
 * Expansion: the number of edges that cross the community border
@@ -39,7 +39,7 @@ Different metrics exist, quantifying the characteristic of *homophily* over edge
 %   * It is positive if number of edges within a group exceeds expected number on basis of chance
 %   * [Explanations of terms in equations](https://latex.org/forum/viewtopic.php?t=11318)
 
-Modularity directly measures the density of links inside a graph and is therefore computed on communities (sets of nodes) individually by weighing edges based on community similarity (or exact matching). Calculation of modularity is done by aggregating per each community $r$ and for each pair of nodes $vw$ the difference between the expected connectivity $\frac{k_{v} k_{w}}{2 m}$ (amount of edges between the nodes) and the actual connectivity $A_{vw}$ (existence of an edge) given their degrees ($k_v$ and $k_w$). The final result represents the connectivity difference by how much the given graph exceeds a random graph, as expected connectivity is determined by a random rewiring graph. Because intracommunity pairs are weighted lower than intercommunity pairs, the score can vary. See +@eq:modularity, where $S_{vr}$ indicates membership of node $v$ for community $r$ and $m$ represents the total edge count.
+Modularity directly measures the density of links inside a graph and is therefore computed on communities (sets of nodes) individually by weighing edges using community similarity (or exact matching). Calculation of modularity is done by aggregating per community $r$ for each pair of nodes $vw$ the difference between the expected connectivity $\frac{k_{v} k_{w}}{2 m}$ (expected amount of edges between the nodes) and the actual connectivity $A_{vw}$ (existence of an edge) given their degrees ($k_v$ and $k_w$). The final result represents the connectivity difference between the current and a random graph, as expected connectivity is determined by random rewirings. Because intracommunity pairs are weighted less than intercommunity pairs, the score can vary. See +@eq:modularity, where $S_{vr}$ indicates membership of node $v$ for community $r$, and $m$ represents the total edge count.
 
 $$
 Q=\frac{1}{2 m}\sum_{v w}\sum_{r}\left[\overbrace{A_{v w}}^{\text{Connectivity}}-\underbrace{\frac{k_{v} k_{w}}{2 m}}_{\text{Expected Connectivity}}\right] \overbrace{S_{v r} S_{w r}}^{\text{Community Similarity}}
@@ -65,7 +65,7 @@ Finding an optimal partition of a graph into communities is an NP-hard problem. 
 
 Louvain method [@blondelFastUnfoldingCommunities2008] is a heuristic-based hierarchical clustering algorithm. It starts by assigning each node in the graph to its own community. Then it merges these communities by checking for each node the change in modularity score produced by assigning it to a neighbor community (based on the existence of a connection). Once the optimal merges are performed, the resulting communities are grouped into single nodes and the process is repeated.
 
-Since modularity changes can be computed incrementally, the complexity of this method is $O\left(n \log n\right)$. Additionally, due to the flexibility of the modularity measure, it allows detecting communities in graphs with weighted edges.
+Since modularity changes can be computed incrementally, the complexity of this method is $O\left(n \log n\right)$. Additionally, due to the flexibility of the modularity measure, it allows detection of communities in directed and/or weighted graphs.
 
 
 
@@ -86,9 +86,10 @@ Since modularity changes can be computed incrementally, the complexity of this m
 %   * Stops when convergence is reached, or max iterations
 % * Preliminary solution can be assigned before run
 
-Another way to sidestep the complexity issue is using the Label Propagation algorithm, as it uses the network structure directly to define partitions and doesn't require any priors (quality metrics). The intuition for the Label Propagation algorithm is as follows: When propagating a label through connections in the network, a single label quickly becomes dominant within a group of densely connected nodes, but these labels usually have trouble crossing sparsely connected regions.
+Another way to sidestep the complexity issue is using the Label Propagation algorithm, as it uses the network structure directly to define partitions and doesn't require any priors (such as quality metrics). The intuition for the Label Propagation algorithm is as follows: A single label quickly becomes dominant within a group of densely connected nodes, but usually has trouble crossing sparsely connected regions.
 
 The algorithm starts by assigning each node their own label. After that, for each iteration, each node updates its label to the majority label among its neighbors where ties are broken deterministically. The algorithm stops after a fixed amount of iterations or once it has converged. An important feature of this algorithm is that a preliminary solution can be assigned before each run, therefore only updating existing membership assignments.
+
 
 
 ### Dynamic Community Detection
@@ -101,7 +102,7 @@ The algorithm starts by assigning each node their own label. After that, for eac
 %   * Caused by relying on the previously found communities
 %   * Can cause avalanche of wrong detection
 
-Dynamic Community Detection can be seen as an extension to community detection by the addition of the Community Tracking task. Tracking relies on the coherency and stability of found communities to define their evolution through time. The said properties can not be taken for granted and introduce new challenges when designing DCD methods. The main issue is in fact that they are competitive with each other, causing a trade-off between community coherency/quality and community temporal stability.
+Dynamic Community Detection can be seen as an extension of Community Detection by the addition of the Community Tracking task. Tracking relies on the coherency and stability of found communities to define their evolution through time. The said properties can not be taken for granted and introduce new challenges when designing DCD methods. The main issue is in fact that they are competitive with each other, causing a trade-off between community coherency and temporal stability.
 
 Various strategies dealing with this trade-off are categorized by @rossettiCommunityDiscoveryDynamic2018 and @dakicheTrackingCommunityEvolution2019 where authors reach a consensus over three main groups. In the following sections, we briefly introduce these strategies and describe the current state of the art in similar order.
 
@@ -119,7 +120,7 @@ Various strategies dealing with this trade-off are categorized by @rossettiCommu
 
 Also referred to as the two-stage approach. Works by splitting the DCD task into two stages. The first stage applies CD directly to every snapshot of the network. Followed by the second stage, matching the detected communities between the subsequent snapshots.
 
-The advantages of this approach include the fact that it allows for use of mostly unmodified CD algorithms for the first step and that it is highly parallelizable as both detection and matching steps can be applied to each snapshot independently. The main disadvantage is the instability of underlying CD algorithms, which may disrupt the community matching process. Many CD methods may give drastically different results in response to slight changes in the network. During the matching, it becomes difficult to distinguish between this algorithm instability and the evolution of the network.
+The advantages of this approach include, the fact that it allows use of unmodified CD algorithms for the first step, and that it is highly parallelizable, as both detection and matching steps can be applied to each snapshot independently. The main disadvantage is the instability of underlying CD algorithms, which may disrupt the community matching process. Many CD methods may give drastically different results in response to slight changes in the network. During matching, it becomes difficult to distinguish between algorithm's instability and the evolution of the network.
 
 
 
@@ -157,7 +158,9 @@ In @wangCommunityEvolutionSocial2008 the authors circumvent this instability iss
 % * The resulting communities are merged into larger ones
 %   * By checking if their overlap exceeds a threshold
 
-@rossettiANGELEfficientEffective2020 proposes a way to detect overlapping communities in dynamic networks. A more robust two-phase community detection method (ANGEL) is proposed to ensure the stability of the found communities. The first phase extracts and aggregates local communities by applying Label Propagation on the Ego-Graph (graph excluding a single node) for each node in the network. The found communities are biased due to their partial view of the network and are merged in the second step based on their overlap, yielding more stable communities with the possibility of overlap. During the matching for each snapshot, a step forward and backward in time is considered where community splits and merges are detected by reusing the matching criteria of the second phase of the CD step.
+@rossettiANGELEfficientEffective2020 proposes a way to detect overlapping communities in dynamic networks. A more robust two-phase community detection method (ANGEL) is proposed to ensure the stability of the found communities. The first phase extracts and aggregates local communities by applying Label Propagation on the Ego-Graph [^1] for each node in the network. The found communities are biased due to their partial view of the network and are merged in the second step based on their overlap, yielding more stable communities with the possibility of overlap. During the matching for each snapshot, a step forward and backward in time is considered where community splits and merges are detected by reusing the matching criteria of the second phase of the CD step.
+
+
 
 
 
@@ -191,7 +194,7 @@ To lessen the complexity of continuous re-detection of the communities, some alg
 %   * Louvain method algorithm is run on the newly constructed graph
 % * Therefore introducing temporal smoothness and high efficiency
 
-@heFastAlgorithmCommunity2015 introduces an efficient algorithm by modifying the Louvain method. Based on the observation that between consecutive timesteps only a fraction of connections changes and do not affect communities dramatically, they argue that if all community nodes remain unchanged, the community also remains unchanged. With this in mind, they make a distinction between two types of nodes, ones that change the connection in a snapshot transition and ones that do not. The former have to be recomputed, while the latter maintain their community label. The nodes that maintain their community are merged into community nodes with edges to other community nodes and changed nodes weighted proportionally to their real connectivity (amount of edges when ungrouped). This simplified graph is passed to the Louvain method algorithm for community detection. By reusing the community assignments temporal smoothness is maintained and due to the incremental nature of this algorithm, the overall complexity remains low.
+@heFastAlgorithmCommunity2015 introduces an efficient algorithm by modifying the Louvain method. Based on the observation that between consecutive timesteps only a fraction of connections changes and do not affect communities dramatically, they argue that if all community nodes remain unchanged, the community also remains unchanged. With this in mind, they make a distinction between two types of nodes, ones that change the connection in a snapshot transition and ones that do not. The former have to be recomputed, while the latter maintain their community label. The nodes that maintain their community are merged into community nodes, where edges are grouped into intercommunity edges and are weighted according to their real connectivity (amount of edges when ungrouped). This simplified graph is passed to the Louvain method algorithm for community detection. By reusing the community assignments temporal smoothness is maintained and due to the incremental nature of this algorithm, the overall complexity remains low.
 
 
 
@@ -206,7 +209,7 @@ To lessen the complexity of continuous re-detection of the communities, some alg
 % * Increments can be treated as network disturbance
 %   * They can be limited to a certain area by a disturbance factor
 
-@guoDynamicCommunityDetection2016 envision the target network as an adaptive dynamical system, where each node interacts with its neighbors. The interaction will change the distances among nodes, while the distances will affect the interactions. The intuition is that nodes sharing the same community move together, and the nodes in different communities keep far away from each other. This is modeled by defining the so-called Attractor algorithm, which consists of three interaction patterns that describe how node connection strength is influenced by neighboring nodes. The edge weights are initialized using Jaccard distance and the propagation is run until convergence. The communities can be extracted by thresholding on edge weight/distance. Thereafter, all changes are treated as network disturbances. The disturbance can be limited to a certain area using a disturbance factor which defines a bound on the possible propagation.
+@guoDynamicCommunityDetection2016 envision the target network as an adaptive dynamical system, where each node interacts with its neighbors. The interaction will change the distances among nodes, while the distances affect the interactions. The intuition is that nodes sharing the same community move together, and the nodes in different communities keep far away from each other. This is modeled by defining the so-called Attractor algorithm, which consists of three interaction patterns that describe how node connection strength is influenced by neighboring nodes. The edge weights are initialized using Jaccard distance and the propagation is run until convergence. The communities can be extracted by thresholding on edge weight/distance. Thereafter, all changes are treated as network disturbances. The disturbances can be limited to a certain area using a disturbance factor, which defines a bound on the possible propagation.
 
 
 
@@ -229,7 +232,8 @@ To lessen the complexity of continuous re-detection of the communities, some alg
 
 
 
-More recently, the @yinMultiobjectiveEvolutionaryClustering2021 has proposed an evolutionary algorithm by looking at the DCD from an Evolutionary Clustering Perspective. They detect community structure at the current time under the guidance of one obtained immediately in the past by simultaneously optimizing for community quality score (modularity) and community similarity between subsequent time steps (NMI). In the methodology, a way is proposed to encode a graph efficiently into a genetic sequence. Additionally, new mutation and crossover operators are suggested which maximize either of the two objectives. By using a local search algorithm, building a diverse initial population, and selecting for dominant candidates, the communities maximizing both objectives are obtained.
+More recently, the @yinMultiobjectiveEvolutionaryClustering2021 has proposed an evolutionary algorithm by looking at the DCD from an Evolutionary Clustering Perspective. They detect community structure at the current time under the guidance of one obtained immediately in the past by simultaneously optimizing for community quality score (modularity) and community similarity between subsequent time steps (NMI). In the methodology, they describe a method to encode a graph efficiently into a *genetic sequence*. Additionally, new mutation and crossover operators are suggested which maximize either of the two objectives. By using a local search algorithm, building a diverse initial population, and selecting for dominant candidates, the communities maximizing both objectives are obtained.
+
 
 
 #### Simultaneous community detection
@@ -244,7 +248,7 @@ More recently, the @yinMultiobjectiveEvolutionaryClustering2021 has proposed an 
 %   * Not based on usual principle of a unique partition with each timestep
 %   * Cant handle real time community detection
 
-The final strategy we consider sidesteps the matching issue by considering all snapshots of the dynamic network at once. This is done by flattening the network in the temporal dimension and coupling edges between the same nodes at different timesteps. These approaches usually don't suffer from instability or community drift. The disadvantages include that the standard principle of a unique partition for each time step can't be applied, as only the combined network is used, therefore limiting the number of possible algorithms. Handling real-time changes to the graph are also often not considered.
+The final strategy we consider, sidesteps the matching issue by considering all snapshots of the dynamic network at once. This is done by flattening the network in the temporal dimension and coupling edges between the same nodes at different timesteps. These approaches usually don't suffer from instability or community drift. The disadvantages include that the standard principle of a unique partition for each time step can't be applied, as only the combined network is used, therefore limiting the number of possible algorithms. Handling real-time changes to the graph is often not considered.
 
 % @muchaCommunityStructureTimeDependent2009
 % 
@@ -266,7 +270,7 @@ The final strategy we consider sidesteps the matching issue by considering all s
 %   * The use two edge types, spatial edges and temporal edges
 %   * Similar to spectral clustering
 
-@ghasemianDetectabilityThresholdsOptimal2016 apply stochastic block model-based approach. They make a distinction between two edge types: (i) spatial edges (edges between neighbors) and (ii) temporal edges (edges between nodes in subsequent timesteps). Using this distinction, they define a Belief Propagation equation to learn marginal probabilities of node labels over time. Additionally, in their research, they introduce a way to derive a limit to the detectability of communities. This is, because some communities may not be detectable as their probability nears that of random chance.
+@ghasemianDetectabilityThresholdsOptimal2016 apply stochastic block model-based approach. They make a distinction between two edge types: (i) spatial edges (edges between neighbors) and (ii) temporal edges (edges between nodes in subsequent timesteps). Using this distinction, they define a *Belief Propagation* equation to learn marginal probabilities of node labels over time. Additionally, in their research, they introduce a way to derive a limit to the detectability of communities. This is, because some communities may not be detectable as their probability nears that of random chance.
 
 
 
@@ -274,3 +278,5 @@ The final strategy we consider sidesteps the matching issue by considering all s
 % 
 % * @liuCommunityDetectionMultiPartite2016  - Heterogeneous Networks
 % * @wanyeTopologyGuidedSamplingFast2021 - Sampling
+
+[^1]: Graph excluding a single node. More formally $G = (V', E)$ is an Ego-Graph of $v$ if  $V' = V \setminus \{v\}$ 

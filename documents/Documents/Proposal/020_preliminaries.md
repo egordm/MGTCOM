@@ -5,7 +5,7 @@
 % * Introduce notation and important concepts that we use throughout this proposal
 % * Notation is mostly the same as one used in the literature the next chapter is based on
 
-In this section, we introduce the notation as well as important concepts that we use throughout this proposal. The notation is mostly the same as one used in the literature the next chapter is based on.
+In this section, we introduce the notation as well as important concepts that we use throughout this proposal. For notation we try to stay consistent with the literature covered in the next section.
 
 
 
@@ -15,7 +15,7 @@ In this section, we introduce the notation as well as important concepts that we
 %   * Attributed edges
 %   * Parallel edges
 
-A graph $G$ is a tuple $G = (V, E)$ consisting of $n := |V|$ sequentially numbered nodes $V = \{v_1, ..., v_n\}$ and $m := |E|$ edges. Edges can be directed or undirected, represented as either ordered tuples $(u, v) \in E$ or unordered sets $\{u, v\} \in E$ respectively. Unless stated otherwise, we assume that graphs are undirected. An edge $\{u, v\} \in E$ is *incident* to a node $v_i$, if $v_i \in \{u, v\}$. Two nodes $v_i$ and $v_j$ are *adjacent if they are connected by an edge, i.e., $\{v_i, v_j\} \in E$.  The neighbors*  $\mathcal{N}(v_i) = \{v_j|\{v_i, v_j\} \in E\}$ of a node $v_i$ are nodes that are adjacent to it. The *degree* $k_v := |\mathcal{N}(v)|$ of a node $v$ is its number of neighbors. In more mathematical context a graph can be represented as an *adjacency matrix* $A$ where $A_{ij}$-th cell is valued $1$ iff edge $\{v_i, v_j\} \in E$. In some cases we also consider *weighted graphs* $G = (V, E, w)$ with weights $w(v_i, v_j) \in \mathbb{R}$. 
+A graph $G$ is a tuple $G = (V, E)$ consisting of $n := |V|$ sequentially numbered nodes $V = \{v_1, ..., v_n\}$ and $m := |E|$ edges. Edges can be directed or undirected, represented as either ordered tuples $(u, v) \in E$ or unordered sets $\{u, v\} \in E$ respectively. Unless stated otherwise, we assume that graphs are undirected. An edge $\{u, v\} \in E$ is *incident* to a node $v_i$, if $v_i \in \{u, v\}$. Two nodes $v_i$ and $v_j$ are *adjacent* if they are connected by an edge, i.e., $\{v_i, v_j\} \in E$.  The *neighbors*  $\mathcal{N}(v_i) = \{v_j|\{v_i, v_j\} \in E\}$ of a node $v_i$ are nodes that are adjacent to it. The *degree* $k_v := |\mathcal{N}(v)|$ of a node $v$ is equal to its neighbors count. In more mathematical context a graph can be represented as an *adjacency matrix* $A$ where $A_{ij}$-th cell is valued $1$ iff edge $\{v_i, v_j\} \in E$. In some cases we also consider *weighted graphs* $G = (V, E, w)$ with weights $w(v_i, v_j) \in \mathbb{R}$. 
 
 #### Multidimensional Networks
 
@@ -27,7 +27,7 @@ A multidimensional network is an edge-labeled extension of multigraphs that allo
 
 #### Heterogeneous Graph
 
-A heterogeneous graph $G = (V, E, O)$ extends the notion of a multidimensional network by defining a node type mapping function $\phi: V \rightarrow O_V$ and an edge type mapping function $\psi: E \rightarrow O_E$. Where $O_V$ and $O_E$ denote sets of predefined node and edge types, where $|O_V| + |O_E| > 2$. A *meta-path* $\mathcal{P}$ of length $l$ within a heterogeneous graph is defined in form of $V_{1} \stackrel{R_{1}}{\longrightarrow} V_{2} \stackrel{R_{2}}{\longrightarrow} \cdots \stackrel{R_{l}}{\longrightarrow} V_{l+1}$  (abbreviated as $V_1V_2...V_{l+1}$) which describes a composite relation $\mathcal{R} = R_1 \circ R_2 \circ \cdots \circ R_{l+1}$ between node types $V_1$ till $V_l$. Meta-path based neighbor set $\mathcal{N}^\mathcal{P}(v_i)$ is defned as a set of nodes which connect node $v_i$ via meta-path $\mathcal{P}$.
+A heterogeneous graph $G = (V, E, O)$ extends the notion of a multidimensional network by defining a node type mapping function $\phi: V \rightarrow O_V$ and an edge type mapping function $\psi: E \rightarrow O_E$. $O_V$ and $O_E$ denote sets of predefined node and edge types, where $|O_V| + |O_E| > 2$. A *meta-path* $\mathcal{P}$ of length $l$ within a heterogeneous graph is defined in form of $V_{1} \stackrel{R_{1}}{\longrightarrow} V_{2} \stackrel{R_{2}}{\longrightarrow} \cdots \stackrel{R_{l}}{\longrightarrow} V_{l+1}$  (abbreviated as $V_1V_2...V_{l+1}$) which describes a composite relation $\mathcal{R} = R_1 \circ R_2 \circ \cdots \circ R_{l+1}$ between node types $V_1$ till $V_l$. Meta-path based neighbor set $\mathcal{N}^\mathcal{P}(v_i)$ is defined as a set of nodes which connect node $v_i$ via meta-path $\mathcal{P}$.
 
 
 
@@ -51,7 +51,7 @@ A snapshot network $\mathcal{G}_\tau$ [@dakicheTrackingCommunityEvolution2019] i
 
 #### Complex Network
 
-A complex network is a graph with non-trivial topological features, which do not occur in simple networks such as lattices or random graphs but often occur in networks representing real systems. A few common features occurring in complex networks include scale-free networks where the degree distribution follows the power law (implying that the degree distribution has no characteristic scale); small-world networks which exhibit a small-worldness phenomenon where the diameter of the network (degree of separation) is usually small while the clustering coefficient is high; multidimensional networks; and spatial networks where nodes are embedded in space.
+A complex network is a graph with non-trivial topological features, which don't occur in simple networks such as lattices or random graphs, but often occur in networks representing real systems. A few common features occurring in complex networks include *scale-free networks* where the degree distribution follows the power law (implying that the degree distribution has no characteristic scale); *small-world networks* which exhibit a *small-worldness* phenomenon where the diameter of the network (degree of separation) is usually small while the clustering coefficient is high; *multidimensional networks*; and *spatial networks* where nodes are embedded in space.
 
 
 

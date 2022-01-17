@@ -13,7 +13,7 @@
 
 The main goal of my thesis is to build a framework for community detection and representation in dynamic heterogeneous networks.
 
-This is, to enable dynamic community analysis on the datasets proposed in @wangPublicSentimentGovernmental2020. The data described is collected from the Twitter social platform and is dynamic, heterogeneous, and rich in content-based (unstructured text) data. To the best of our knowledge, there are currently no dynamic community detection algorithms that can handle this data without relaxing its rich data representation (data loss).
+This is, to enable dynamic community analysis on the datasets described in @wangPublicSentimentGovernmental2020. The data described is collected from the Twitter social platform and is dynamic, heterogeneous, and rich in content-based (unstructured text) data. To the best of our knowledge, there are currently no dynamic community detection algorithms that can handle this data without information loss.
 
 As there are no alike algorithms, direct comparison is not possible. To both validate the merit of our methods as well as the quality of the results, we spread our research over four research questions.
 
@@ -54,7 +54,7 @@ Similarly, recent improvements in natural text processing allow for efficient re
 %   * allow for parameter sharing across timesteps
 %   * Allow for streaming graphs
 
-The previously mentioned representation-based DCD method use spectral graph representation methods which operate on the whole network at once. More recent graph representation approaches instead learn a graph representation function by sampling the network using random walks or convolutions.
+The previously mentioned representation-based DCD method use spectral graph representation methods which operate on the whole network at once. More recent graph representation approaches instead, learn a graph representation function by sampling the network using random walks or convolutions.
 
 This has a two-fold positive effect on the scalability of the algorithms. Computation can be done more efficiently as opposed to spectral methods which rely on adjacency matrices. By learning a representation function, embeddings are computed on-demand instead of being held in memory for the entire network, therefore, limiting the impact of big networks. Other benefits may include the fact that they would be a suitable choice for processing streaming edge network variants.
 
