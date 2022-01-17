@@ -31,6 +31,10 @@ A heterogeneous graph $G = (V, E, O)$ extends the notion of a multidimensional n
 
 
 
+![An illustrative example of a heterogenous graph (IMDB). (a) Three types of nodes (i.e., actor, movie, director). (b) A heterogenous graph IMDB consists three types of nodes and two types of connections. (c) Two metapaths: Movie-Actor-Movie and Movie-Director-Movie. (d) Movie $m 1$ and its meta-path based neighbors (i.e., $m_1$, $m 2$ and $m 3$). Source: @wangHeterogeneousGraphAttention2019](/home/egordm/.config/marktext/images/e88fcd011c20074a1b3798f07a76b6f1f21c01bc.png){#fig:heterograph width=350px}
+
+
+
 % * Knowledge Graph
 % * $KG = (E, R, A, T^R, T^A)$
 % * 
