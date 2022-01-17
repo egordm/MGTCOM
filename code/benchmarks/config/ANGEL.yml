@@ -1,0 +1,20 @@
+name: ANGEL
+description: "Angel benchmark"
+tags: [angel, benchmark]
+input:
+  type: edgelist
+  dynamic: false
+  input_prefix: /input
+  output_prefix: /output
+
+execution:
+  cwd: baselines/ANGEL
+  entrypoint: [docker-compose, run, angel, --angel]
+
+parameters:
+  threshold: 0.4
+  min_comsize: 3
+
+datasets:
+  star-wars:
+    min_comsize: [3, 4, 5]
