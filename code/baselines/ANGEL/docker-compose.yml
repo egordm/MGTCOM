@@ -3,5 +3,5 @@ services:
   angel:
     build: .
     volumes:
-      - ../../benchmarks/outputs/ANGEL/:/output
       - ../../datasets/data/export/:/input
+      - ../../benchmarks/outputs/:/output
