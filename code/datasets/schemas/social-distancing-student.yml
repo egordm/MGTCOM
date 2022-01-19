@@ -1,158 +1,192 @@
 name: social-distancing-student
 prefix: SocialDistancingStudent
 database: social-distancing-student
-description: null
+description: None
 nodes:
-  - label: User
-    path: data/processed/social-distancing-student/nodes_User
-    properties:
-      - name: name
-        type: string
-        ignore: false
-        label: true
-      - name: screen_name
-        type: string
-        ignore: false
-        label: true
-      - name: id
-        type: string
-        ignore: false
-        label: false
-  - label: Hashtag
-    path: data/processed/social-distancing-student/nodes_Hashtag
-    properties:
-      - name: id
-        type: string
-        ignore: false
-        label: false
-      - name: name
-        type: string
-        ignore: false
-        label: true
-  - label: Tweet
-    path: data/processed/social-distancing-student/nodes_Tweet
-    properties:
-      - name: id
-        type: string
-        ignore: false
-        label: false
-      - name: text
-        type: string
-        ignore: false
-        label: true
-      - name: label_social_distancing
-        type: string
-        ignore: false
-        label: false
-      - name: prob_supports
-        type: float
-        ignore: false
-        label: false
-      - name: prob_irrelevant
-        type: float
-        ignore: false
-        label: false
-      - name: prob_rejects
-        type: float
-        ignore: false
-        label: false
-      - name: sentiment
-        type: double
-        ignore: false
-        label: false
-      - name: created_at
-        type: datetime
-        ignore: false
-        label: false
+- properties:
+  - name: name
+    type: string
+    ignore: false
+    label: true
+    timestamp: false
+  - name: screen_name
+    type: string
+    ignore: false
+    label: true
+    timestamp: false
+  - name: id
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  label: User
+  path: data/processed/social-distancing-student/nodes_User
+- properties:
+  - name: id
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: name
+    type: string
+    ignore: false
+    label: true
+    timestamp: false
+  label: Hashtag
+  path: data/processed/social-distancing-student/nodes_Hashtag
+- properties:
+  - name: id
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: text
+    type: string
+    ignore: false
+    label: true
+    timestamp: false
+  - name: label_social_distancing
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: prob_supports
+    type: float
+    ignore: false
+    label: false
+    timestamp: false
+  - name: prob_irrelevant
+    type: float
+    ignore: false
+    label: false
+    timestamp: false
+  - name: prob_rejects
+    type: float
+    ignore: false
+    label: false
+    timestamp: false
+  - name: sentiment
+    type: double
+    ignore: false
+    label: false
+    timestamp: false
+  - name: created_at
+    type: datetime
+    ignore: false
+    label: false
+    timestamp: true
+  label: Tweet
+  path: data/processed/social-distancing-student/nodes_Tweet
 edges:
-  - type: TWEETED
-    source: User
-    target: Tweet
-    path: data/processed/social-distancing-student/edges_TWEETED
-    properties:
-      - name: src
-        type: string
-        ignore: false
-        label: false
-      - name: dst
-        type: string
-        ignore: false
-        label: false
-  - type: REPLIES_TO_USER
-    source: Tweet
-    target: User
-    path: data/processed/social-distancing-student/edges_REPLIES_TO_USER
-    properties:
-      - name: src
-        type: string
-        ignore: false
-        label: false
-      - name: dst
-        type: string
-        ignore: false
-        label: false
-  - type: REPLIES_TO_TWEET
-    source: Tweet
-    target: Tweet
-    path: data/processed/social-distancing-student/edges_REPLIES_TO_TWEET
-    properties:
-      - name: src
-        type: string
-        ignore: false
-        label: false
-      - name: dst
-        type: string
-        ignore: false
-        label: false
-  - type: QUOTES_TWEET
-    source: Tweet
-    target: Tweet
-    path: data/processed/social-distancing-student/edges_QUOTES_TWEET
-    properties:
-      - name: src
-        type: string
-        ignore: false
-        label: false
-      - name: dst
-        type: string
-        ignore: false
-        label: false
-  - type: MENTIONS_USER
-    source: Tweet
-    target: User
-    path: data/processed/social-distancing-student/edges_MENTIONS_USER
-    properties:
-      - name: src
-        type: string
-        ignore: false
-        label: false
-      - name: dst
-        type: string
-        ignore: false
-        label: false
-  - type: MENTIONS_HASHTAG
-    source: Tweet
-    target: Hashtag
-    path: data/processed/social-distancing-student/edges_MENTIONS_HASHTAG
-    properties:
-      - name: src
-        type: string
-        ignore: false
-        label: false
-      - name: dst
-        type: string
-        ignore: false
-        label: false
-  - type: FOLLOWS
-    source: User
-    target: User
-    path: data/processed/social-distancing-student/edges_FOLLOWS
-    properties:
-      - name: src
-        type: string
-        ignore: false
-        label: false
-      - name: dst
-        type: string
-        ignore: false
-        label: false
+- properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: TWEETED
+  source: User
+  target: Tweet
+  path: data/processed/social-distancing-student/edges_TWEETED
+  directed: true
+- properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: REPLIES_TO_USER
+  source: Tweet
+  target: User
+  path: data/processed/social-distancing-student/edges_REPLIES_TO_USER
+  directed: true
+- properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: REPLIES_TO_TWEET
+  source: Tweet
+  target: Tweet
+  path: data/processed/social-distancing-student/edges_REPLIES_TO_TWEET
+  directed: true
+- properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: QUOTES_TWEET
+  source: Tweet
+  target: Tweet
+  path: data/processed/social-distancing-student/edges_QUOTES_TWEET
+  directed: true
+- properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: MENTIONS_USER
+  source: Tweet
+  target: User
+  path: data/processed/social-distancing-student/edges_MENTIONS_USER
+  directed: true
+- properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: MENTIONS_HASHTAG
+  source: Tweet
+  target: Hashtag
+  path: data/processed/social-distancing-student/edges_MENTIONS_HASHTAG
+  directed: true
+- properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: FOLLOWS
+  source: User
+  target: User
+  path: data/processed/social-distancing-student/edges_FOLLOWS
+  directed: true

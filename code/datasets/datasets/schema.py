@@ -1,7 +1,8 @@
 import os.path
 from dataclasses import dataclass, field, fields
-from typing import List, Optional, Dict, ClassVar, Callable, Any, Iterator
+from typing import List, Optional, Dict, ClassVar, Callable, Any, Iterator, Union
 
+import pandas as pd
 from simple_parsing.helpers import Serializable
 
 from shared.constants import DATASETS_PATH, DatasetPath
@@ -61,8 +62,9 @@ class Property(Serializable, Mergeable):
     type: str
     ignore: Optional[bool] = False
     label: Optional[bool] = False
+    timestamp: Optional[bool] = False
 
-    IGNORE_PROPS = ["ignore", "label"]
+    IGNORE_PROPS = ["ignore", "label", "timestamp"]
 
     def is_id(self):
         return self.name == 'id'
@@ -78,7 +80,34 @@ class Property(Serializable, Mergeable):
 
 
 @dataclass(order=True)
-class NodeSchema(Serializable, Mergeable):
+class HasPropertiesMixin:
+    properties: List[Property]
+
+    def iter_properties(self, predicate: Callable[[Property], bool] = None) -> Iterator[Property]:
+        for prop in self.properties:
+            if predicate is None or predicate(prop):
+                yield prop
+
+    def get_label(self) -> Optional[Property]:
+        return next(self.iter_properties(lambda prop: prop.label), None)
+
+    def get_timestamp(self) -> Optional[Property]:
+        return next(self.iter_properties(lambda prop: prop.timestamp), None)
+
+
+@dataclass(order=True)
+class LoadableDataframeMixin:
+    path: str
+
+    def get_path(self):
+        return os.path.join(DATASETS_PATH, self.path)
+
+    def load_df(self) -> pd.DataFrame:
+        return pd.read_parquet(self.get_path())
+
+
+@dataclass(order=True)
+class NodeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeMixin):
     label: str
     path: str
     properties: List[Property]
@@ -87,21 +116,38 @@ class NodeSchema(Serializable, Mergeable):
         'properties': merge_list_by_key(lambda p: p.name)
     }
 
+    def get_type(self) -> str:
+        return self.label
+
+    def __str__(self):
+        return f'{self.label}'
+
 
 @dataclass(order=True)
-class EdgeSchema(Serializable, Mergeable):
+class EdgeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeMixin):
     type: str
     source: str
     target: str
     path: str
     properties: List[Property]
+    directed: bool = True
 
+    IGNORE_PROPS = ["directed"]
     MERGE_FN = {
         'properties': merge_list_by_key(lambda p: p.name)
     }
 
+    def get_type(self) -> str:
+        return self.type
+
+    def __str__(self):
+        template = '({})-[{}]->({})' if self.directed else '({})-[{}]-({})'
+        return template.format(self.source, self.type, self.target)
+
 
 SCHEMA_DIR = os.path.join(DATASETS_PATH, 'schemas')
+
+EntitySchema = Union[NodeSchema, EdgeSchema]
 
 
 @dataclass(order=True)
@@ -143,3 +189,15 @@ class DatasetSchema(Serializable, Mergeable):
 
     def paths(self) -> DatasetPath:
         return DatasetPath(self.name)
+
+    def get_node_schema(self, label: str) -> NodeSchema:
+        return next(filter(lambda node: node.label == label, self.nodes), None)
+
+    def get_edge_schema(self, type: str) -> EdgeSchema:
+        return next(filter(lambda edge: edge.type == type, self.edges), None)
+
+    def get_node_types(self):
+        return [node.get_type() for node in self.nodes]
+
+    def get_edge_types(self):
+        return [edge.get_type() for edge in self.edges]
