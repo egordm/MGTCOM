@@ -32,8 +32,8 @@
   - [x] Amount of connected components (and their side distribution)
   - [x] Temporal Distribution (Histogram of nodes and edges)
   - [x] Degree Distribution
-  - [ ] Modularity
+  - [x] Modularity
   - [x] List most central nodes (Degree centrality, Betweenness centrality, Closeness centrality)
-  - [ ] Per cluster statistics (Node/Edge counts, Temporal Distribution, Degree Distribution, Modularity)
-  - [ ] Centrality etc per node type
-  - [ ] Clustering statistics per edge type
+  - [x] Per cluster statistics (Node/Edge counts, Temporal Distribution, Degree Distribution, Modularity)
+  - [x] Centrality etc per node type
+  - [x] Clustering statistics per edge type

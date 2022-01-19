@@ -1,5 +1,3 @@
-from typing import Any
-
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -34,10 +32,11 @@ def plot_explore_dual_histogram(
         data=data,
         bins=max(1, min(bins[1], len(data.value_counts()))),
         log_scale=True,
+        cumulative=True,
         ax=axes[1],
         stat='density' if normalize else 'count',
     )
-    ax.set_title(f'Log {title_short or title}')
+    ax.set_title(f'Cumulative Log {title_short or title}')
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
@@ -49,11 +48,13 @@ def show_top_k_nodes(
         labels: dict = None,
         title: str = '',
         k: int = 10,
+        show=True,
 ):
     top_k = series.sort_values(ascending=False).head(k).index
 
-    print('==============================')
-    print(f'Top {k} {title}')
+    if show:
+        print('==============================')
+        print(f'Top {k} {title}')
     df_tmp = pd.DataFrame([
         {
             'value': series[i],
@@ -61,4 +62,36 @@ def show_top_k_nodes(
         }
         for i in top_k
     ])
-    display(df_tmp.head(k))
+    if show:
+        display(df_tmp.head(k))
+
+    if not show:
+        return df_tmp
+
+
+def show_top_k_stacked_nodes(
+        data: pd.DataFrame,
+        labels: dict = None,
+        title: str = '',
+        k: int = 10,
+        show=True,
+        item_title='Item',
+):
+    dfs = []
+    for col in data.columns:
+        col_title = col.replace('_', ' ').title()
+        df = show_top_k_nodes(
+            data[col],
+            labels,
+            title=col_title,
+            show=False
+        ).rename(columns={'value': col_title, 'label': f'{col_title} {item_title}'})
+        dfs.append(df)
+
+    df = pd.concat(dfs, axis=1)
+    if show:
+        print('==============================')
+        print(f'Top {k} {title}')
+        display(df.head(k))
+    else:
+        return df
