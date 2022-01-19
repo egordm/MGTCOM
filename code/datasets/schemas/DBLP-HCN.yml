@@ -1,86 +1,102 @@
 name: DBLP-HCN
 prefix: DBLP_HCN
 database: DBLP-HCN
-description: null
+description: None
 nodes:
-- label: Author
-  path: data/processed/DBLP-HCN/nodes_Author
+- path: data/processed/DBLP-HCN/nodes_Author
   properties:
   - name: name
     type: string
     ignore: false
     label: true
+    timestamp: false
   - name: id
     type: string
     ignore: false
     label: true
-- label: Venue
-  path: data/processed/DBLP-HCN/nodes_Venue
+    timestamp: false
+  label: Author
+- path: data/processed/DBLP-HCN/nodes_Venue
   properties:
   - name: id
     type: string
     ignore: false
     label: false
+    timestamp: false
   - name: name
     type: string
     ignore: false
     label: true
-- label: Paper
-  path: data/processed/DBLP-HCN/nodes_Paper
+    timestamp: false
+  label: Venue
+- path: data/processed/DBLP-HCN/nodes_Paper
   properties:
   - name: id
     type: int
     ignore: false
     label: false
+    timestamp: false
   - name: title
     type: string
     ignore: false
     label: true
+    timestamp: false
   - name: authors
     type: string[]
     ignore: false
     label: false
+    timestamp: false
   - name: venue
     type: string
     ignore: false
     label: false
+    timestamp: false
   - name: year
     type: int
     ignore: false
     label: false
+    timestamp: false
   - name: abstract
     type: string
     ignore: false
     label: false
+    timestamp: false
   - name: timestamp
     type: datetime
     ignore: false
     label: false
     timestamp: true
+  label: Paper
 edges:
-- type: AUTHORED
+- path: data/processed/DBLP-HCN/edges_AUTHORED
+  properties:
+  - name: src
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: int
+    ignore: false
+    label: false
+    timestamp: false
+  type: AUTHORED
   source: Author
   target: Paper
-  path: data/processed/DBLP-HCN/edges_AUTHORED
+  directed: true
+- path: data/processed/DBLP-HCN/edges_PUBLISHED_IN
   properties:
   - name: src
-    type: string
-    ignore: false
-    label: false
-  - name: dst
     type: int
     ignore: false
     label: false
-- type: PUBLISHED_IN
+    timestamp: false
+  - name: dst
+    type: string
+    ignore: false
+    label: false
+    timestamp: false
+  type: PUBLISHED_IN
   source: Paper
   target: Venue
-  path: data/processed/DBLP-HCN/edges_PUBLISHED_IN
-  properties:
-  - name: src
-    type: int
-    ignore: false
-    label: false
-  - name: dst
-    type: string
-    ignore: false
-    label: false
+  directed: true

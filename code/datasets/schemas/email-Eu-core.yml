@@ -9,7 +9,7 @@ nodes:
   - name: id
     type: int
     ignore: false
-    label: false
+    label: true
 edges:
 - type: COMMUNICATES
   source: User

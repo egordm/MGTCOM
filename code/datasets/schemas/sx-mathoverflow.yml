@@ -9,7 +9,7 @@ nodes:
   - name: id
     type: int
     ignore: false
-    label: false
+    label: true
 edges:
 - type: ANSWERED_QUESTION
   source: User
@@ -28,6 +28,7 @@ edges:
     type: datetime
     ignore: false
     label: false
+    timestamp: true
 - type: COMMENTED_ON_QUESTION
   source: User
   target: User
@@ -45,6 +46,7 @@ edges:
     type: datetime
     ignore: false
     label: false
+    timestamp: true
 - type: COMMENTED_ON_ANSWER
   source: User
   target: User
@@ -62,3 +64,4 @@ edges:
     type: datetime
     ignore: false
     label: false
+    timestamp: true
