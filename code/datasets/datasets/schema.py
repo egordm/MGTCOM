@@ -78,6 +78,9 @@ class Property(Serializable, Mergeable):
     def is_array(self):
         return '[]' in self.type
 
+    def is_temporal(self):
+        return self.timestamp
+
 
 @dataclass(order=True)
 class HasPropertiesMixin:
@@ -93,6 +96,9 @@ class HasPropertiesMixin:
 
     def get_timestamp(self) -> Optional[Property]:
         return next(self.iter_properties(lambda prop: prop.timestamp), None)
+
+    def is_temporal(self):
+        return self.get_timestamp() is not None
 
 
 @dataclass(order=True)
@@ -201,3 +207,12 @@ class DatasetSchema(Serializable, Mergeable):
 
     def get_edge_types(self):
         return [edge.get_type() for edge in self.edges]
+
+    def is_node_temporal(self):
+        return any(node.is_temporal() for node in self.nodes)
+
+    def is_edge_temporal(self):
+        return any(edge.is_temporal() for edge in self.edges)
+
+    def is_temporal(self):
+        return self.is_node_temporal() or self.is_edge_temporal()
