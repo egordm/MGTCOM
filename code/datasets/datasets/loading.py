@@ -45,10 +45,13 @@ def load_edges(
     props = {'src', 'dst', 'timestamp', *(include_properties or [])} & set(df.columns)
     df.drop(columns=set(df.columns).difference(props), inplace=True)
 
-    src = df.pop('src')
-    df.insert(0, 'src', src)
     dst = df.pop('dst')
     df.insert(0, 'dst', dst)
+    src = df.pop('src')
+    df.insert(0, 'src', src)
+
+    if not schema.directed:
+        df = pd.concat([df, df.rename(columns={'src': 'dst', 'dst': 'src'})])
 
     return df
 
@@ -56,6 +59,7 @@ def load_edges(
 def schema_to_pandas_graph(
         schema: DatasetSchema,
         include_properties: List[str] = None,
+        prefix_id: bool = False,
 ):
     nodes_dfs = []
     edges_dfs = []
@@ -66,6 +70,8 @@ def schema_to_pandas_graph(
             include_properties=include_properties,
         )
         df['type'] = node_schema.label
+        if prefix_id:
+            df['id'] = df[['type', 'id']].apply(lambda x: '_'.join(x), axis=1)
 
         nodes_dfs.append(df)
 
@@ -75,12 +81,16 @@ def schema_to_pandas_graph(
             include_properties=include_properties,
         )
         df['type'] = edge_schema.type
+        if prefix_id:
+            df['src'] = df['src'].apply(lambda x: '_'.join([edge_schema.source, x]))
+            df['dst'] = df['dst'].apply(lambda x: '_'.join([edge_schema.target, x]))
 
         edges_dfs.append(df)
 
     nodes_df = pd.concat(nodes_dfs)
     edges_df = pd.concat(edges_dfs)
 
+    # print(edges_df[~edges_df.iloc[:, 1].isin(nodes_df.iloc[:, 0])])
     return nodes_df, edges_df
 
 
@@ -88,10 +98,12 @@ def load_igraph(
         schema: DatasetSchema,
         include_properties: List[str] = None,
         directed: bool = False,
+        prefix_id: bool = False,
 ):
     nodes_df, edges_df = schema_to_pandas_graph(
         schema,
         include_properties=include_properties,
+        prefix_id=prefix_id,
     )
 
     return ig.Graph.DataFrame(
