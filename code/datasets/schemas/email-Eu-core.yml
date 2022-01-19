@@ -15,6 +15,7 @@ edges:
   source: User
   target: User
   path: data/processed/email-Eu-core/edges_COMMUNITCATES
+  directed: false
   properties:
   - name: src
     type: int

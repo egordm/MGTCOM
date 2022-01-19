@@ -15,6 +15,7 @@ edges:
     source: Team
     target: Team
     path: data/processed/misc-football/edges_PLAYS
+    directed: false
     properties:
       - name: src
         type: int

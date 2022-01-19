@@ -15,6 +15,7 @@ edges:
   source: Pupil
   target: Pupil
   path: data/processed/ucidata-zachary/nodes_TRAINS
+  directed: false
   properties:
   - name: src
     type: int

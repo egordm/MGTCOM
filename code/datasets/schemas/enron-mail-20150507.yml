@@ -10,13 +10,14 @@ nodes:
       - name: email
         type: string
         ignore: false
+        label: true
       - name: is_internal
         type: boolean
         ignore: false
       - name: id
         type: string
         ignore: false
-        label: true
+        label: false
   - label: Email
     id: id
     path: data/processed/enron-mail-20150507/nodes_Email
@@ -24,7 +25,7 @@ nodes:
       - name: id
         type: string
         ignore: false
-        label: true
+        label: false
       - name: content
         type: string
         ignore: true
@@ -46,6 +47,7 @@ nodes:
       - name: Date
         type: datetime
         ignore: false
+        timestamp: true
       - name: Subject
         type: string
         ignore: false
