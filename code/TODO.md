@@ -27,3 +27,13 @@
 - [ ] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD 
 - [ ] Run thesis through GeCTOR 
 - [ ] Update thesis with parejaEvolveGCNEvolvingGraph2020, acharyaCommunityDetectionClustering2020
+- [ ] Collect dataset statistics
+  - [x] Node/Edge counts (global and per type)
+  - [x] Amount of connected components (and their side distribution)
+  - [x] Temporal Distribution (Histogram of nodes and edges)
+  - [x] Degree Distribution
+  - [ ] Modularity
+  - [x] List most central nodes (Degree centrality, Betweenness centrality, Closeness centrality)
+  - [ ] Per cluster statistics (Node/Edge counts, Temporal Distribution, Degree Distribution, Modularity)
+  - [ ] Centrality etc per node type
+  - [ ] Clustering statistics per edge type
