@@ -27,13 +27,13 @@ def plot_explore_dual_histogram(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    data = series
+    data = series[series != 0]
     ax = sns.histplot(
         data=data,
         bins=max(1, min(bins[1], len(data.value_counts()))),
-        log_scale=True,
         cumulative=True,
         ax=axes[1],
+        log_scale=(True, False),
         stat='density' if normalize else 'count',
     )
     ax.set_title(f'Cumulative Log {title_short or title}')
