@@ -71,7 +71,7 @@ def schema_to_pandas_graph(
         )
         df['type'] = node_schema.label
         if prefix_id:
-            df['id'] = df[['type', 'id']].apply(lambda x: '_'.join(x), axis=1)
+            df['id'] = df[['type', 'id']].apply(lambda x: '_'.join(map(str, x)), axis=1)
 
         nodes_dfs.append(df)
 
@@ -82,14 +82,15 @@ def schema_to_pandas_graph(
         )
         df['type'] = edge_schema.type
         if prefix_id:
-            df['src'] = df['src'].apply(lambda x: '_'.join([edge_schema.source, x]))
-            df['dst'] = df['dst'].apply(lambda x: '_'.join([edge_schema.target, x]))
+            df['src'] = df['src'].apply(lambda x: '_'.join([edge_schema.source, str(x)]))
+            df['dst'] = df['dst'].apply(lambda x: '_'.join([edge_schema.target, str(x)]))
 
         edges_dfs.append(df)
 
     nodes_df = pd.concat(nodes_dfs)
     edges_df = pd.concat(edges_dfs)
 
+    # print(nodes_df[nodes_df['id'].duplicated(keep=False)].head(5))
     # print(edges_df[~edges_df.iloc[:, 1].isin(nodes_df.iloc[:, 0])])
     return nodes_df, edges_df
 
