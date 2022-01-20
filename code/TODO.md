@@ -7,7 +7,7 @@
   - [ ] SageDy
   - [ ] EvolveGCN
   - [ ] CTDNE
-- [ ] Add dataset export to edge list
+- [x] Add dataset export to edge list
 - [ ] Find ground truth communities if applicable on current datasets
   - [ ] Karate Club
   - [ ] Enron
@@ -15,6 +15,7 @@
   - [ ] com-* datasets
   - [ ] sx-mathoverflow
 - [x] Add baseline config format (and add configs)
+- [ ] Add dynamic community file format holding inter time community id matches
 - [ ] Add baseline benchmarking based on config
 - [ ] Add W&B support for running baselines
 - [ ] Add evaluation metrics to the baselines

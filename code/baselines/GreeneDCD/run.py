@@ -20,6 +20,16 @@ if mode is None:
     print("Please specify a mode: {}".format(MODES))
     sys.exit(1)
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description='GreeneDCD')
 parser.add_argument('--verbose', action='store_true', default=False, help='verbose output')
 parser.add_argument('--dynamic', action='store_true', default=False, help='calculate dynamic communities')
@@ -27,9 +37,9 @@ parser.add_argument('--input', type=str, default='/input', help='input directory
 parser.add_argument('--output', type=str, default='/output', help='output directory')
 
 if mode == 'louvain':
-    parser.add_argument('--weighted', action='store_true', default=False, help='use weighted graph')
+    parser.add_argument('--weighted', type=str2bool, default=False, help='use weighted graph')
     parser.add_argument('--epsilon', type=float, default=0.001, help='epsilon for modularity optimization')
-    parser.add_argument('--reuse_partition', action='store_true', default=False,
+    parser.add_argument('--reuse_partition', type=str2bool, default=False,
                         help='reuse partition between consecutive timesteps')
     parser.add_argument('--level', type=int, default=-2,
                         help='level of coarseness to use from the hierarchy. -1 is the highest level, -2 is prompt at runtime')
@@ -54,11 +64,14 @@ LOG.addHandler(ch)
 
 input_dir = pathlib.Path(args.input)
 output_dir = pathlib.Path(args.output)
-input_files = list(sorted(input_dir.glob('*.txt')))
+input_files = list(sorted(input_dir.glob('*.edgelist')))
 
 if len(input_files) == 0:
     LOG.error('No input files found in {}'.format(input_dir))
     sys.exit(1)
+
+tmp_dir = output_dir.joinpath('tmp')
+tmp_dir.mkdir(exist_ok=True)
 
 # Run community detection
 community_files = []
@@ -67,7 +80,7 @@ if mode == 'louvain':
     snapshot_files = []
     for f in input_files:
         LOG.info(f'Converting input file {f} to binary format')
-        output_file = output_dir.joinpath(f.with_suffix('.bin').name)
+        output_file = tmp_dir.joinpath(f.with_suffix('.bin').name)
         p = subprocess.Popen(
             [
                 './louvain-generic/convert',
@@ -117,10 +130,13 @@ if mode == 'louvain':
         p.wait()
 
         if level == -2:
-            inp = input('Enter level of coarseness to use [-1]: ')
+            if sys.stdout.isatty():
+                inp = input('Enter level of coarseness to use [-1]: ')
+            else:
+                LOG.warning('Not running in a terminal, using default level of -1')
             level = int(inp) if inp else -1
 
-        output_file = f.with_suffix('.communities.txt')
+        output_file = output_dir.joinpath(f.name).with_suffix('.comlist')
         with open(str(output_file), 'w') as fout:
             p = subprocess.Popen(
                 [
@@ -153,13 +169,14 @@ elif mode == 'moses':
     community_files = []
     for f in input_files:
         LOG.info(f'Running Moses on {f}')
-        output_file = output_dir.joinpath(f.with_suffix('.communities.txt').name)
+        output_file = output_dir.joinpath(f.with_suffix('.comlist').name)
+        scores_file = tmp_dir.joinpath(f.with_suffix('.scores').name)
         p = subprocess.Popen(
             [
                 './MOSES/moses',
                 str(f),
                 str(output_file),
-                '--saveMOSESscores', output_file.with_suffix('.scores'),
+                '--saveMOSESscores', str(scores_file),
             ],
             shell=False,
             stdout=sys.stdout, stderr=sys.stderr,
@@ -169,14 +186,14 @@ elif mode == 'moses':
 
 if args.dynamic:
     LOG.info('Running dynamic community detection')
-    output_file = f.with_suffix('.dynamic.communities.txt')
+    output_file = tmp_dir.joinpath('communities')
     p = subprocess.Popen(
         [
             './tracker',
             '-t', str(args.matching_threshold),
-            '-o', str(output_dir.joinpath('dynamic')),
+            '-o', str(output_file),
             '--death', str(args.death),
-            *list(sorted(map(str, output_dir.glob('*.communities.txt')))),
+            *list(sorted(map(str, output_dir.glob('*.comlist')))),
         ],
         shell=False,
         stdout=sys.stdout, stderr=sys.stderr,
@@ -188,11 +205,11 @@ if args.dynamic:
         [
             './aggregator',
             '-i', str(output_dir.joinpath('dynamic.timeline')),
-            '-o', str(output_dir.joinpath('dynamic.communities')),
+            '-o', str(tmp_dir.joinpath('aggregated_communities.comlist')),
             '--persist', str(args.persist_threshold),
             '--max', str(args.max_step),
             '--length', str(args.min_length),
-            *list(sorted(map(str, output_dir.glob('*.communities.txt')))),
+            *list(sorted(map(str, output_dir.glob('*.comlist')))),
         ],
         shell=False,
         stdout=sys.stdout, stderr=sys.stderr,

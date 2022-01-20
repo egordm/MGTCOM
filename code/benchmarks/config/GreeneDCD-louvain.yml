@@ -1,0 +1,24 @@
+name: GreeneDCD Louvain
+description: "GreeneDCD benchmark"
+tags: [dynamic, link-based]
+
+execution:
+  cwd: baselines/GreeneDCD
+  entrypoint: [docker-compose, run, greenedcd, louvain, --dynamic]
+  containerized: true
+
+parameters:
+  weighted: false
+  epsilon: 0.001
+  reuse_partition: false
+  level: -1
+  matching_threshold: 0.1
+  death: 3
+  persist_threshold: 1
+  min_length: 2
+  max_step: -1
+
+datasets:
+  star-wars:
+    parameters:
+      weighted: false

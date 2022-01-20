@@ -1,12 +1,12 @@
 import pathlib
 from dataclasses import dataclass
-from typing import Dict, Optional, Union, List
+from typing import Dict, Optional, Union, List, Any
 
 from simple_parsing import Serializable, field
 
 from shared.constants import BENCHMARKS_CONFIGS, BASE_PATH, DATASETS_DATA_EXPORT, BENCHMARKS_OUTPUTS
 
-RawParameterValue = Union[str, int, float, bool, List[str], List[int], List[float], List[bool]]
+RawParameterValue = Any
 
 
 @dataclass

@@ -3,5 +3,5 @@ services:
   greenedcd:
     build: .
     volumes:
-      - ../../benchmarks/outputs/GreeneDCD/:/output
       - ../../datasets/data/export/:/input
+      - ../../benchmarks/outputs/:/output

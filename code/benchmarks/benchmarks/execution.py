@@ -19,10 +19,8 @@ def params_to_args(params: ParameterConfig):
         if check_type(k, v, RawParameterValue):
             raise Exception("Only raw parameter values are supported")
 
-        result.extend([
-            f'--{k}',
-            str(v),
-        ])
+        value = str(v) if not isinstance(v, bool) else str(v).lower()
+        result.append(f'--{k}={value}')
     return result
 
 
