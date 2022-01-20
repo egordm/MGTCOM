@@ -50,7 +50,7 @@ else:
             edges = []
             with open(in_f, 'r') as rf:
                 for line in rf.readlines():
-                    u, v = line.split()
+                    u, v = line.split('\t')
                     edges.append((u, v, i))
 
             for u, v, i in edges:

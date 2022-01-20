@@ -35,7 +35,8 @@ print(
 
 execute_benchmark(
     config,
-    config.get_params('ucidata-zachary'),
-    DatasetSchema.load_schema('ucidata-zachary'),
+    config.get_params('star-wars'),
+    DatasetSchema.load_schema('star-wars'),
+    'snapshots_k=5',
     'test'
 )
