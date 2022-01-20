@@ -94,7 +94,7 @@ def build_schema(
         name=name,
         prefix=stringcase.pascalcase(to_identifier(name)),
         database=to_identifier(name).replace('_', '-'),
-        description=None,
+        description='',
         nodes=[
             df_to_node_schema(name, path, spark)
             for (name, path) in nodes

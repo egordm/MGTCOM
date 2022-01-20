@@ -3,23 +3,49 @@ prefix: StarWars
 database: star-wars
 description: None
 nodes:
-- label: Character
-  path: data/processed/star-wars/nodes_Characters
+- path: data/processed/star-wars/nodes_Characters
   properties:
   - name: name
     type: string
     ignore: false
     label: true
+    timestamp: false
   - name: id
     type: long
     ignore: false
     label: false
+    timestamp: false
+  label: Character
+  interaction: false
 edges:
-- type: INTERACTS_WITH
+- path: data/processed/star-wars/edges_INTERACTIONS
+  properties:
+  - name: time
+    type: long
+    ignore: false
+    label: false
+    timestamp: true
+  - name: src
+    type: long
+    ignore: false
+    label: false
+    timestamp: false
+  - name: dst
+    type: long
+    ignore: false
+    label: false
+    timestamp: false
+  - name: weight
+    type: long
+    ignore: false
+    label: false
+    timestamp: false
+  type: INTERACTS_WITH
   source: Character
   target: Character
-  path: data/processed/star-wars/edges_INTERACTIONS
   directed: false
+  interaction: false
+- path: data/processed/star-wars/edges_MENTIONS
   properties:
   - name: time
     type: long
@@ -30,33 +56,22 @@ edges:
     type: long
     ignore: false
     label: false
+    timestamp: false
   - name: dst
     type: long
     ignore: false
     label: false
+    timestamp: false
   - name: weight
     type: long
     ignore: false
     label: false
-- type: MENTIONS
+    timestamp: false
+  type: MENTIONS
   source: Character
   target: Character
-  path: data/processed/star-wars/edges_MENTIONS
-  properties:
-  - name: time
-    type: long
-    ignore: false
-    label: false
-    timestamp: true
-  - name: src
-    type: long
-    ignore: false
-    label: false
-  - name: dst
-    type: long
-    ignore: false
-    label: false
-  - name: weight
-    type: long
-    ignore: false
-    label: false
+  directed: true
+  interaction: false
+versions:
+  snapshots_k=5:
+    path: data/export/star-wars/snapshots/split_5

@@ -188,4 +188,4 @@ def tuple_to_dict(data: tuple, keys) -> dict:
 
 def write_edgelist(edges: Iterator[Tuple[int, int]], f):
     for edge in sorted(edges):
-        f.write('{} {}\n'.format(*edge))
+        f.write('{}\t{}\n'.format(*edge))

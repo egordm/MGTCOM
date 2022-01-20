@@ -1,6 +1,6 @@
 import os.path
+import pathlib
 from dataclasses import dataclass, field, fields
-from functools import cache
 from typing import List, Optional, Dict, ClassVar, Callable, Any, Iterator, Union
 
 import pandas as pd
@@ -40,6 +40,10 @@ class Mergeable:
 def merge_by_value(self_value, other_value):
     if isinstance(self_value, Mergeable):
         return self_value.merge(other_value)
+    if isinstance(self_value, list):
+        return self_value + other_value
+    if isinstance(self_value, dict):
+        return {**self_value, **other_value}
     else:
         return other_value
 
@@ -57,7 +61,7 @@ def merge_list_by_key(key_fn: Callable[[Any], str]):
     return merge_fn
 
 
-@dataclass(order=True)
+@dataclass
 class Property(Serializable, Mergeable):
     name: str
     type: str
@@ -83,7 +87,7 @@ class Property(Serializable, Mergeable):
         return self.timestamp
 
 
-@dataclass(order=True)
+@dataclass
 class HasPropertiesMixin:
     properties: List[Property]
 
@@ -102,7 +106,7 @@ class HasPropertiesMixin:
         return self.get_timestamp() is not None
 
 
-@dataclass(order=True)
+@dataclass
 class LoadableDataframeMixin:
     path: str
 
@@ -113,7 +117,7 @@ class LoadableDataframeMixin:
         return pd.read_parquet(self.get_path())
 
 
-@dataclass(order=True)
+@dataclass
 class NodeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeMixin):
     label: str
     path: str
@@ -132,7 +136,7 @@ class NodeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeM
         return f'{self.label}'
 
 
-@dataclass(order=True)
+@dataclass
 class EdgeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeMixin):
     type: str
     source: str
@@ -160,7 +164,15 @@ SCHEMA_DIR = os.path.join(DATASETS_PATH, 'schemas')
 EntitySchema = Union[NodeSchema, EdgeSchema]
 
 
-@dataclass(order=True)
+@dataclass
+class DatasetVersion(Serializable, Mergeable):
+    path: str
+
+    def get_path(self) -> pathlib.Path:
+        return pathlib.Path(os.path.join(DATASETS_PATH, self.path))
+
+
+@dataclass
 class DatasetSchema(Serializable, Mergeable):
     name: str
     prefix: str
@@ -168,6 +180,7 @@ class DatasetSchema(Serializable, Mergeable):
     description: str = ''
     nodes: List[NodeSchema] = field(default_factory=list)
     edges: List[EdgeSchema] = field(default_factory=list)
+    versions: Dict[str, DatasetVersion] = field(default_factory=dict)
 
     IGNORE_PROPS = ["description"]
     MERGE_FN = {
@@ -220,3 +233,6 @@ class DatasetSchema(Serializable, Mergeable):
 
     def is_temporal(self):
         return self.is_node_temporal() or self.is_edge_temporal()
+
+    def get_version(self, version: str) -> DatasetVersion:
+        return self.versions[version]

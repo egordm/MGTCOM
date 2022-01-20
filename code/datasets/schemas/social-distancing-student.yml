@@ -190,3 +190,8 @@ edges:
   target: User
   path: data/processed/social-distancing-student/edges_FOLLOWS
   directed: true
+
+
+versions:
+  'snapshots_k=5':
+    path: data/export/social-distancing-student/snapshots/split_5
