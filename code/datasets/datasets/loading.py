@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Tuple, Iterator
 
 import igraph as ig
 import networkx as nx
+import numpy as np
 import pandas as pd
 
 from datasets.schema import DatasetSchema, NodeSchema, EdgeSchema
@@ -10,6 +11,7 @@ from datasets.schema import DatasetSchema, NodeSchema, EdgeSchema
 def load_nodes(
         schema: NodeSchema,
         include_properties: List[str] = None,
+        unix_timestamp: bool = False,
 ):
     label_prop = schema.get_label()
     timestamp_prop = schema.get_timestamp()
@@ -19,6 +21,8 @@ def load_nodes(
         df['label'] = df[label_prop.name]
     if timestamp_prop:
         df['timestamp'] = df[timestamp_prop.name]
+        if unix_timestamp and str(df['timestamp'].dtype).startswith('datetime'):
+            df['timestamp'] = df['timestamp'].apply(lambda x: x.timestamp() if not pd.isnull(x) else np.NAN)
 
     # df['index'] = df['id']
     # df.set_index('index', inplace=True)
@@ -35,12 +39,15 @@ def load_nodes(
 def load_edges(
         schema: EdgeSchema,
         include_properties: List[str] = None,
+        unix_timestamp: bool = False,
 ):
     timestamp_prop = schema.get_timestamp()
 
     df = schema.load_df()
     if timestamp_prop:
         df['timestamp'] = df[timestamp_prop.name]
+        if unix_timestamp and str(df['timestamp'].dtype).startswith('datetime'):
+            df['timestamp'] = df['timestamp'].apply(lambda x: x.timestamp() if not pd.isnull(x) else np.NAN)
 
     props = {'src', 'dst', 'timestamp', *(include_properties or [])} & set(df.columns)
     df.drop(columns=set(df.columns).difference(props), inplace=True)
@@ -60,6 +67,7 @@ def schema_to_pandas_graph(
         schema: DatasetSchema,
         include_properties: List[str] = None,
         prefix_id: bool = False,
+        unix_timestamp: bool = False,
 ):
     nodes_dfs = []
     edges_dfs = []
@@ -68,6 +76,7 @@ def schema_to_pandas_graph(
         df = load_nodes(
             node_schema,
             include_properties=include_properties,
+            unix_timestamp=unix_timestamp,
         )
         df['type'] = node_schema.label
         if prefix_id:
@@ -79,6 +88,7 @@ def schema_to_pandas_graph(
         df = load_edges(
             edge_schema,
             include_properties=include_properties,
+            unix_timestamp=unix_timestamp,
         )
         df['type'] = edge_schema.type
         if prefix_id:
@@ -100,11 +110,13 @@ def load_igraph(
         include_properties: List[str] = None,
         directed: bool = False,
         prefix_id: bool = False,
+        unix_timestamp: bool = False,
 ):
     nodes_df, edges_df = schema_to_pandas_graph(
         schema,
         include_properties=include_properties,
         prefix_id=prefix_id,
+        unix_timestamp=unix_timestamp,
     )
 
     return ig.Graph.DataFrame(
@@ -172,3 +184,8 @@ def igraph_to_nx(
 
 def tuple_to_dict(data: tuple, keys) -> dict:
     return dict(zip(keys, data))
+
+
+def write_edgelist(edges: Iterator[Tuple[int, int]], f):
+    for edge in sorted(edges):
+        f.write('{} {}\n'.format(*edge))

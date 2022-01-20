@@ -1,5 +1,6 @@
 import os.path
 from dataclasses import dataclass, field, fields
+from functools import cache
 from typing import List, Optional, Dict, ClassVar, Callable, Any, Iterator, Union
 
 import pandas as pd
@@ -117,7 +118,9 @@ class NodeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeM
     label: str
     path: str
     properties: List[Property]
+    interaction: bool = False
 
+    IGNORE_PROPS = ["directed", "interaction"]
     MERGE_FN = {
         'properties': merge_list_by_key(lambda p: p.name)
     }
@@ -137,8 +140,9 @@ class EdgeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeM
     path: str
     properties: List[Property]
     directed: bool = True
+    interaction: bool = False
 
-    IGNORE_PROPS = ["directed"]
+    IGNORE_PROPS = ["directed", "interaction"]
     MERGE_FN = {
         'properties': merge_list_by_key(lambda p: p.name)
     }

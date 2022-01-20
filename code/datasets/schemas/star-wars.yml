@@ -25,6 +25,7 @@ edges:
     type: long
     ignore: false
     label: false
+    timestamp: true
   - name: src
     type: long
     ignore: false
