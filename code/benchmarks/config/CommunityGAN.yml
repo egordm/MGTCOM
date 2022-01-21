@@ -48,5 +48,7 @@ parameters:
 
 datasets:
   star-wars:
+    versions:
+      - static
     parameters:
       overlap_threshold: 1.0

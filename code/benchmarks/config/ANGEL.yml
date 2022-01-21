@@ -13,5 +13,7 @@ parameters:
 
 datasets:
   star-wars:
+    versions:
+      - static
     parameters:
       min_comsize: 5

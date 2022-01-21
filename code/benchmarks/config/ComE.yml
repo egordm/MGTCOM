@@ -27,5 +27,7 @@ parameters:
 
 datasets:
   star-wars:
+    versions:
+      - static
     parameters:
       table_size: 100

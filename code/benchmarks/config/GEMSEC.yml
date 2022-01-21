@@ -20,5 +20,7 @@ parameters:
 
 datasets:
   star-wars:
+    versions:
+      - static
     parameters:
       seed: 42

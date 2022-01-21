@@ -13,5 +13,7 @@ parameters:
 
 datasets:
   star-wars:
+    versions:
+      - snapshots_k=5
     parameters:
       alpha: 0.8

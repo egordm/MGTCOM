@@ -1,10 +1,11 @@
 import pathlib
 from dataclasses import dataclass
-from typing import Dict, Optional, Union, List, Any
+from typing import Dict, Optional, Union, List, Any, Type
 
 from simple_parsing import Serializable, field
 
 from shared.constants import BENCHMARKS_CONFIGS, BASE_PATH, DATASETS_DATA_EXPORT, BENCHMARKS_OUTPUTS
+from shared.structs import filter_none_values
 
 RawParameterValue = Any
 
@@ -16,9 +17,28 @@ class TunedParameterValue(Serializable):
     min: Optional[RawParameterValue] = None
     max: Optional[RawParameterValue] = None
 
+    def to_dict(self, dict_factory: Type[Dict] = dict, recurse: bool = True) -> Dict:
+        return filter_none_values(super().to_dict(dict_factory, recurse))
+
 
 ParameterValue = Union[RawParameterValue, TunedParameterValue]
-ParameterConfig = Dict[str, ParameterValue]
+
+
+# ParameterConfig = Dict[str, ParameterValue]
+
+class ParameterConfig(dict, Serializable):
+    @classmethod
+    def from_dict(cls: Type['ParameterConfig'], obj: Dict, drop_extra_fields: bool = None) -> 'ParameterConfig':
+        return ParameterConfig(**{
+            key: TunedParameterValue.from_dict(value) if isinstance(value, dict) else TunedParameterValue(value=value)
+            for key, value in obj.items()
+        })
+
+    def to_dict(self, dict_factory: Type[Dict] = dict, recurse: bool = True) -> Dict:
+        return {
+            key: value.to_dict()
+            for key, value in self.items()
+        }
 
 
 @dataclass
@@ -57,10 +77,10 @@ class BenchmarkConfig(Serializable):
     datasets: Dict[str, DatasetRunConfig] = field(default_factory=dict)
 
     def get_params(self, dataset_name: str) -> ParameterConfig:
-        return {
+        return ParameterConfig(**{
             **self.parameters,
             **self.datasets.get(dataset_name, DatasetRunConfig()).parameters
-        }
+        })
 
     @staticmethod
     def from_name(name) -> 'BenchmarkConfig':
@@ -68,3 +88,5 @@ class BenchmarkConfig(Serializable):
         if not path.exists():
             raise FileNotFoundError(f'{path} does not exist')
         return BenchmarkConfig.load(path)
+
+# def
