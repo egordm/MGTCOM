@@ -29,7 +29,7 @@ class CommunityEval(object):
             row.extend([com_idx] * len(line))
             com_idx += 1
             data.extend([1] * len(line))
-        self.ground_truth_m = sp.csr_matrix((data, (row, col)), shape=(com_idx, max(col) + 1), dtype=np.uint32)
+        self.ground_truth_m = sp.csr_matrix((data, (row, col)), shape=(com_idx, self.n_node), dtype=np.uint32)
 
     def load_embed(self):
         self.emb = utils.read_embeddings(self.embed_filename, n_node=self.n_node, n_embed=self.n_embed)

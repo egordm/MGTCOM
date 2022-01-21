@@ -18,7 +18,7 @@ class Config():
         self.gen_interval = self.n_epochs_gen  # sample new nodes for the generator for every gen_interval iterations
         self.dis_interval = self.n_epochs_dis  # sample new nodes for the discriminator for every dis_interval iterations
         self.update_ratio = 1    # updating ratio when choose the trees
-        self.max_value = 1000  # max value in embedding matrix
+        self.max_value = 1000.0  # max value in embedding matrix
 
         # model saving
         self.load_model = True  # whether loading existing model for initialization

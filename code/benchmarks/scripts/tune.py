@@ -37,6 +37,7 @@ execute_benchmark(
     config,
     config.get_params('star-wars'),
     DatasetSchema.load_schema('star-wars'),
-    'snapshots_k=5',
+    # 'snapshots_k=5',
+    'static',
     'test'
 )

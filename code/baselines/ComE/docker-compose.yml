@@ -3,5 +3,5 @@ services:
   come:
     build: .
     volumes:
-      - ../../benchmarks/outputs/ComE/:/output
       - ../../datasets/data/export/:/input
+      - ../../benchmarks/outputs/:/output

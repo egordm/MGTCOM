@@ -1,0 +1,24 @@
+name: GEMSEC
+description: "GEMSEC benchmark"
+tags: [static, link-based]
+
+execution:
+  cwd: baselines/KarateClub
+  entrypoint: [docker-compose, run, karateclub, GEMSEC]
+  containerized: true
+
+parameters:
+  walk_number: 5
+  walk_length: 80
+  dimensions: 32
+  negative_samples: 5
+  window_size: 5
+  learning_rate: 0.1
+  clusters: 10
+  gamma: 0.1
+  seed: 42
+
+datasets:
+  star-wars:
+    parameters:
+      seed: 42

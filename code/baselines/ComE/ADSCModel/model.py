@@ -20,7 +20,9 @@ class Model(object):
                  down_sampling=0,
                  seed=1,
                  table_size=100000000,
-                 path_labels='data/'):
+                 path_labels='data/',
+                 k=5,
+                 ):
         '''
         :param nodes_degree: Dict with node_id: degree of node
         :param size: projection space
@@ -41,7 +43,9 @@ class Model(object):
 
         if nodes_degree is not None:
             self.build_vocab_(nodes_degree)
-            self.ground_true, self.k = load_ground_true(path=path_labels)
+            # No groundtruth is available for communities
+            # self.ground_true, self.k = load_ground_true(path=path_labels)
+            self.k = k
             # inizialize node and context embeddings
             self.make_table()
             self.precalc_sampling()

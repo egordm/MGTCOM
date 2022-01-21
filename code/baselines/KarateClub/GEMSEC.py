@@ -15,7 +15,7 @@ ch.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s] %(mess
 LOG.addHandler(ch)
 
 parser = argparse.ArgumentParser(description="GEMSEC")
-parser.add_argument('--input', type=str, default='/input/graph.edgelist', help='input graph edgelist file')
+parser.add_argument('--input', type=str, default='/input', help='driectory containing input edgelist file')
 parser.add_argument('--output', type=str, default='/output', help='output directory')
 parser.add_argument('--walk_number', type=int, default=5, help='number of random walks')
 parser.add_argument('--walk_length', type=int, default=80, help='length of random walks')
@@ -30,10 +30,15 @@ args = parser.parse_args()
 
 output_dir = pathlib.Path(args.output)
 output_dir.mkdir(parents=True, exist_ok=True)
+tmp_dir = output_dir.joinpath('tmp')
+tmp_dir.mkdir(parents=True, exist_ok=True)
+
+input_dir = pathlib.Path(args.input)
+input_file = next(input_dir.glob('*.edgelist'))
 
 # Read graph
 LOG.info('Reading graph...')
-G = nx.read_edgelist(args.input, nodetype=int, create_using=nx.Graph())
+G = nx.read_edgelist(str(input_file), nodetype=int, create_using=nx.Graph())
 G = nx.convert_node_labels_to_integers(G, first_label=0, ordering='sorted')
 G.to_undirected()
 
@@ -56,7 +61,7 @@ memberships = model.get_memberships()
 
 # Save embeddings
 LOG.info('Saving embeddings...')
-np.savez(output_dir.joinpath('embeddings.npz'), embedding=embedding)
+np.savez(tmp_dir.joinpath('embeddings.npz'), embedding=embedding)
 
 # Save communities
 LOG.info('Saving communities...')
@@ -64,6 +69,6 @@ communities = defaultdict(list)
 for node, community in memberships.items():
     communities[community].append(node)
 
-with output_dir.joinpath('communities.txt').open('w') as fout:
+with output_dir.joinpath('default.comlist').open('w') as fout:
     for community, nodes in communities.items():
         fout.write(' '.join(map(str, nodes)) + '\n')

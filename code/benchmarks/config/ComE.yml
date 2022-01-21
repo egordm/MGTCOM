@@ -1,0 +1,31 @@
+name: ComE
+description: "ComE benchmark"
+tags: [static, representation-based]
+
+execution:
+  cwd: baselines/ComE
+  entrypoint: [docker-compose, run, come]
+  containerized: true
+
+parameters:
+  number_walks: 10
+  walk_length: 80
+  representation_size: 128
+  num_workers: 10
+  num_iter: 1
+  reg_covar: 0.00001
+  batch_size: 50
+  window_size: 10
+  negative: 5
+  lr: 0.025
+  alpha: 0.1
+  beta: 0.1
+  down_sampling: 0.0
+  ks: 5
+  table_size: 100000000
+  k: 5
+
+datasets:
+  star-wars:
+    parameters:
+      table_size: 100

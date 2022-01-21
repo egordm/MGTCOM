@@ -1,6 +1,7 @@
 import argparse
 import logging
 import pathlib
+import re
 import subprocess
 import sys
 from collections import defaultdict
@@ -112,9 +113,13 @@ input_file = pathlib.Path(args.input_file)
 if not input_file.exists():
     LOG.error("Input file does not exist: %s", input_file)
     exit(1)
+if input_file.is_dir():
+    input_file = next(input_file.glob('*.edgelist'))
 
 output_dir = pathlib.Path(args.output_dir)
 output_dir.mkdir(parents=True, exist_ok=True)
+tmp_dir = output_dir.joinpath("tmp")
+tmp_dir.mkdir(parents=True, exist_ok=True)
 
 # Make sure nodes start with 0 index
 LOG.info("Checking input file: %s", input_file)
@@ -122,7 +127,7 @@ edges = []
 with input_file.open('r') as f:
     min_node_id = 999999
     for line in f.readlines():
-        u, v = map(int, line.strip().split(' '))
+        u, v = map(int, re.split(r'\s|\t', line.strip()))
         if u < min_node_id:
             min_node_id = u
         if v < min_node_id:
@@ -130,11 +135,11 @@ with input_file.open('r') as f:
         edges.append((u, v))
 
 if min_node_id != 0:
-    LOG.warning("Nodes start with index 0, but %d found. Fixing...", min_node_id)
+    LOG.warning("Nodes should start with index 0, but %d found. Fixing...", min_node_id)
     for i, (u, v) in enumerate(edges):
         edges[i] = (u - min_node_id, v - min_node_id)
 
-    input_file = output_dir.joinpath("fixed_" + input_file.name)
+    input_file = tmp_dir.joinpath("fixed_" + input_file.name)
     with input_file.open('w') as f:
         for u, v in edges:
             f.write("{} {}\n".format(u, v))
@@ -147,7 +152,7 @@ for (u, v) in edges:
     bidir_edges.append((u, v))
     bidir_edges.append((v, u))
 
-bidir_edges_file = output_dir / 'bidir_edges.txt'
+bidir_edges_file = tmp_dir / 'bidir_edges.txt'
 with bidir_edges_file.open('w') as f:
     for u, v in bidir_edges:
         f.write("%s %s\n" % (u, v))
@@ -157,7 +162,7 @@ del bidir_edges
 
 # Run pretraining
 prefix = 'input-ds_'
-pretrain_dir = output_dir / 'pretrain'
+pretrain_dir = tmp_dir / 'pretrain'
 pretrain_dir.mkdir(parents=True, exist_ok=True)
 LOG.info("Running pretraining...")
 p = subprocess.Popen(
@@ -190,7 +195,7 @@ LOG.info("Pretraining finished.")
 
 # Convert pretrain results
 LOG.info("Converting PreTrain embeddings to CommunityGAN embeddings...")
-input_embeddings_file = output_dir / 'input-ds_final.embeddings.txt'
+input_embeddings_file = tmp_dir / 'input-ds_final.embeddings.txt'
 p = subprocess.Popen(
     [
         'python', './scripts/format_transform.py',
@@ -214,12 +219,15 @@ else:
                 [x[1:] for x in line.strip().split('\t') if x.strip() != '']
             )
 
-    ground_truth_file = output_dir / 'ground_truth.txt'
+    ground_truth_file = tmp_dir / 'ground_truth.txt'
     with ground_truth_file.open('w') as f:
         for community in communities:
             f.write('\t'.join(community) + '\n')
 
 # Run CommunityGAN
+result_filename = tmp_dir / 'result.txt'
+emb_filenames_g_file = tmp_dir / '{prefix}_gen_.emb'.format(prefix=prefix)
+emb_filenames_d_file = tmp_dir / '{prefix}_dis_.emb'.format(prefix=prefix)
 LOG.info("Running CommunityGAN...")
 p = subprocess.Popen(
     [
@@ -251,9 +259,9 @@ p = subprocess.Popen(
         'community_filename', str(ground_truth_file),
         'log', str(output_dir / 'log'),
         'cache_filename_prefix', str(output_dir / 'cache' / prefix),
-        'result_filename', str(output_dir / 'result.txt'),
-        'emb_filenames_g', str(output_dir / '{prefix}_gen_.emb'.format(prefix=prefix)),
-        'emb_filenames_d', str(output_dir / '{prefix}_dis_.emb'.format(prefix=prefix)),
+        'result_filename', str(result_filename),
+        'emb_filenames_g', str(emb_filenames_g_file),
+        'emb_filenames_d', str(emb_filenames_d_file),
     ],
     shell=False,
     stdout=sys.stdout, stderr=sys.stderr,
@@ -263,7 +271,7 @@ p.wait()
 
 
 LOG.info('Extracting communities from CommunityGAN embeddings...')
-embeddings_file = output_dir / '{prefix}_gen_.emb'.format(prefix=prefix)
+embeddings_file = emb_filenames_g_file
 with embeddings_file.open('r') as f:
     n_node, n_embed = map(int, f.readline().strip().split('\t'))
     embedding_matrix = np.random.rand(n_node, n_embed)
@@ -276,7 +284,7 @@ communities = defaultdict(list)
 for i, ci in enumerate(embedding_matrix.argmax(axis=1)):
     communities[ci].append(i)
 
-with (output_dir / 'communities.txt').open('w') as f:
+with (output_dir / 'default.comlist').open('w') as f:
     for community in communities.values():
         f.write(' '.join(map(str, community)) + '\n')
 
@@ -287,6 +295,6 @@ for i in range(n_node):
     for ci in cis:
         communities_overlapping[ci].append(i)
 
-with (output_dir / 'overlapping_communities.txt').open('w') as f:
+with (output_dir / 'overlapping.comlist').open('w') as f:
     for community in communities_overlapping.values():
         f.write(' '.join(map(str, community)) + '\n')

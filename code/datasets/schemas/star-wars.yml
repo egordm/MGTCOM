@@ -75,3 +75,5 @@ edges:
 versions:
   snapshots_k=5:
     path: data/export/star-wars/snapshots/split_5
+  static:
+    path: data/export/star-wars/edgelist/default

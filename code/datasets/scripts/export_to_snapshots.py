@@ -109,7 +109,7 @@ for i, (snapshot_start, snapshot_end) in enumerate(snapshot_ranges):
     G_snapshot = G.induced_subgraph(nodes).subgraph_edges(edges)
     gids = G_snapshot.vs['gid']
     edges = {
-        (gids[s], gids[t])
+        (gids[s] + 1, gids[t] + 1)
         for (s, t) in G_snapshot.get_edgelist()
     }
 

@@ -60,9 +60,9 @@ def save_communities(model, output_file):
 if __name__ == "__main__":
     # Reading the input parameters form the configuration files
     parser = argparse.ArgumentParser(description='ComE')
-    parser.add_argument('--input_file', type=str, default='/input/graph.edgelist', help='input file')
-    parser.add_argument('--ground_truth', type=str, default='/input/ground_truth.txt', help='input format')
-    parser.add_argument('--output_file', type=str, default='/output/communities.txt', help='output file')
+    parser.add_argument('--input', type=str, default='/input', help='input directory to search for input file')
+    parser.add_argument('--output', type=str, default='/output', help='output directory to save the output file')
+    # parser.add_argument('--ground_truth', type=str, default='/input/ground_truth.txt', help='input ground truth co')
     parser.add_argument('--number_walks', type=int, default=10, help='number of walks')
     parser.add_argument('--walk_length', type=int, default=80, help='length of each walk')
     parser.add_argument('--representation_size', type=int, default=128, help='size of the embedding')
@@ -80,7 +80,13 @@ if __name__ == "__main__":
     parser.add_argument('--down_sampling', type=float, default=0.0, help='down sampling rate')
     parser.add_argument('--ks', type=int, default=5, help='k values')
     parser.add_argument('--table_size', type=int, default=100000000, help='Table size for the node2vec')
+    parser.add_argument('--k', type=int, default=5, help='Amount of communities to be found')
     args = parser.parse_args()
+
+    input_dir = pathlib.Path(args.input)
+    output_dir = pathlib.Path(args.output)
+    tmp_dir = output_dir.joinpath('tmp')
+    tmp_dir.mkdir(parents=True, exist_ok=True)
 
     number_walks = args.number_walks
     walk_length = args.walk_length
@@ -88,8 +94,6 @@ if __name__ == "__main__":
     num_workers = args.num_workers
     num_iter = args.num_iter
     reg_covar = args.reg_covar
-    input_file = args.input_file
-    output_file = args.output_file
     batch_size = args.batch_size
     window_size = args.window_size
     negative = args.negative
@@ -97,10 +101,13 @@ if __name__ == "__main__":
     alpha_betas = [(args.alpha, args.beta)]
     down_sampling = args.down_sampling
     ks = [args.ks]
+    k = args.k
 
-    walks_filebase = os.path.join('data', output_file)  # where read/write the sampled path
+    walks_filebase = tmp_dir.joinpath('randomwalks')  # where read/write the sampled path
+    walks_filebase.mkdir(parents=True, exist_ok=True)
 
     # CONSTRUCT THE GRAPH
+    input_file = str(next(input_dir.glob('*.edgelist')))
     with open(input_file, 'rb') as f:
         G = nx.read_edgelist(f, create_using=nx.Graph(), nodetype=int)
         G.to_undirected()
@@ -108,7 +115,7 @@ if __name__ == "__main__":
     # G = graph_utils.load_matfile(os.path.join('./data', input_file, input_file + '.mat'), undirected=True)
     # Sampling the random walks for context
     log.info("sampling the paths")
-    walk_files = graph_utils.write_walks_to_disk(G, os.path.join(walks_filebase, "{}.walks".format(output_file)),
+    walk_files = graph_utils.write_walks_to_disk(G, str(walks_filebase.joinpath('walks')),
                                                  num_paths=number_walks,
                                                  path_length=walk_length,
                                                  alpha=0,
@@ -120,7 +127,10 @@ if __name__ == "__main__":
                   size=representation_size,
                   down_sampling=down_sampling,
                   table_size=args.table_size,
-                  path_labels=args.ground_truth)
+                  # path_labels=args.ground_truth,
+                  path_labels='none',
+                  k=k
+                  )
 
     # Learning algorithm
     node_learner = Node2Vec(workers=num_workers, negative=negative, lr=lr)
@@ -148,7 +158,8 @@ if __name__ == "__main__":
                        alpha=1,
                        chunksize=batch_size)
     #
-    model.save("{}_pre-training".format(output_file))
+    model.save(str(tmp_dir.joinpath('pre-training')))
+
 
     ###########################
     #   EMBEDDING LEARNING    #
@@ -161,7 +172,7 @@ if __name__ == "__main__":
     for it in range(num_iter):
         for alpha, beta in alpha_betas:
             for k in ks:
-                output_file_path = pathlib.Path(output_file).with_name(
+                output_file_path = tmp_dir.joinpath(
                     "alpha-{}_beta-{}_ws-{}_neg-{}_lr-{}_icom-{}_ind-{}_k-{}_ds-{}".format(
                         alpha,
                         beta,
@@ -176,7 +187,7 @@ if __name__ == "__main__":
                 output_file_path.mkdir(parents=True, exist_ok=True)
                 log.info('\n_______________________________________\n')
                 log.info('\t\tITER-{}\n'.format(it))
-                model = model.load_model("{}_pre-training".format(output_file))
+                model = model.load_model(str(tmp_dir.joinpath('pre-training')))
                 model.reset_communities_weights(k)
                 log.info('using alpha:{}\tbeta:{}\titer_com:{}\titer_node: {}'.format(alpha, beta, iter_com, iter_node))
                 start_time = timeit.default_timer()
@@ -202,4 +213,5 @@ if __name__ == "__main__":
 
                 io_utils.save_embedding(model.centroid, list(range(len(model.centroid))),
                                         file_name=str(output_file_path.joinpath('community_centroids')))
-                save_communities(model, output_file_path.joinpath('communities.txt'))
+                save_communities(model, output_file_path.joinpath('default.comlist'))
+                save_communities(model, output_dir.joinpath('default.comlist'))

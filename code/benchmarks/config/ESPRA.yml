@@ -1,0 +1,17 @@
+name: ESPRA
+description: "ESPRA"
+tags: [dynamic, link-based]
+
+execution:
+  cwd: baselines/ESPRA
+  entrypoint: [python, run.py]
+  containerized: false
+
+parameters:
+  alpha: 0.8
+  beta: 0.5
+
+datasets:
+  star-wars:
+    parameters:
+      alpha: 0.8
