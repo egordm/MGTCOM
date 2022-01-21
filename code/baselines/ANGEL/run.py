@@ -1,7 +1,9 @@
 import argparse
+import re
 import sys
 import pathlib
 from collections import defaultdict
+import csv
 
 import angel as a
 
@@ -44,14 +46,14 @@ else:
     output_dir = pathlib.Path(args.output)
     tmp_dir = pathlib.Path(args.output).joinpath('tmp')
     tmp_dir.mkdir(exist_ok=True)
-    output_file = tmp_dir.joinpath('temporal_network.out')
+    output_file = tmp_dir.joinpath('temporal_network.tsv')
     with output_file.open('w') as wf:
         for i, in_f in enumerate(sorted(map(str, input_dir.glob('*.edgelist')))):
             edges = []
             with open(in_f, 'r') as rf:
                 for line in rf.readlines():
-                    u, v = line.split('\t')
-                    edges.append((u, v, i))
+                    u, v = re.split(r'\s|\t', line.strip())
+                    edges.append((u.strip(), v.strip(), i))
 
             for u, v, i in edges:
                 wf.write('{}\t{}\t{}\n'.format(u, v, i))
@@ -67,6 +69,14 @@ else:
     aa.execute()
     outputs = list(sorted(map(str, tmp_dir.glob('*_coms_*.txt'))))
 
+    print('Converting community tracking results...')
+    with output_dir.joinpath('tracking.tsv').open('w') as wf:
+        tsv_writer = csv.writer(wf, delimiter='\t')
+        tsv_writer.writerow(['t_from', 't_to', 'cid_from', 'cid_to'])
+        with tmp_dir.joinpath('output_ArchAngel_coms_ct_matches.csv').open('r', newline='') as rf:
+            reader = csv.DictReader(rf)
+            for row in reader:
+                tsv_writer.writerow([row['snapshot_from'], row['snapshot_to'], row['cid_from'], row['cid_to']])
 
 print('Converting communities to list format...')
 for i, output in enumerate(outputs):

@@ -3,6 +3,7 @@ import logging
 import pathlib
 import subprocess
 import sys
+import csv
 from collections import defaultdict
 
 # Determine the mode to use
@@ -185,6 +186,8 @@ elif mode == 'moses':
         community_files.append(output_file)
 
 if args.dynamic:
+    N_TIMESTEPS = len(list(output_dir.glob('*.comlist')))
+
     LOG.info('Running dynamic community detection')
     output_file = tmp_dir.joinpath('communities')
     p = subprocess.Popen(
@@ -200,12 +203,39 @@ if args.dynamic:
     )
     p.wait()
 
+    print('Converitng dynamic community timeline to dynamic community format')
+    community_timeline = []
+    with tmp_dir.joinpath('communities.timeline').open('r') as f:
+        for line in f.readlines():
+            cid, timeline = line.strip()[1:].split(':')
+            timeline_tokens = dict([tuple(map(int, token.split('='))) for token in timeline.split(',')])
+            community_timeline.append((int(cid), timeline_tokens))
+
+    with tmp_dir.joinpath('tracking.comtrack').open('w') as f:
+        tsv_writer = csv.writer(f, delimiter='\t')
+        tsv_writer.writerow(['dcid', *(f'cid_t{i}' for i in range(N_TIMESTEPS))])
+        for dcid, timeline in community_timeline:
+            tsv_writer.writerow([dcid] + [timeline.get(i+1, '-') for i in range(N_TIMESTEPS)])
+
+    print('Converting dynamic community timeline to pairwise matching format')
+    match_list = set()
+    for dcid, timeline in community_timeline:
+        for i in range(N_TIMESTEPS - 1):
+            if timeline.get(i+1, None) and timeline.get(i+2, None):
+                match_list.add((i, i+1, timeline[i+1], timeline[i+2]))
+
+    with output_dir.joinpath('tracking.tsv').open('w') as f:
+        tsv_writer = csv.writer(f, delimiter='\t')
+        tsv_writer.writerow(['t_from', 't_to', 'cid_from', 'cid_to'])
+        for t1, t2, c1, c2 in sorted(match_list):
+            tsv_writer.writerow([t1, t2, c1 - 1, c2 - 1])
+
     LOG.info('Converting dynamic communities timeline to communities')
     p = subprocess.Popen(
         [
             './aggregator',
-            '-i', str(output_dir.joinpath('dynamic.timeline')),
-            '-o', str(tmp_dir.joinpath('aggregated_communities.comlist')),
+            '-i', str(tmp_dir.joinpath('communities.timeline')),
+            '-o', str(tmp_dir.joinpath('aggregated.comlist')),
             '--persist', str(args.persist_threshold),
             '--max', str(args.max_step),
             '--length', str(args.min_length),
