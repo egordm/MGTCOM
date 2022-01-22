@@ -1,4 +1,4 @@
-from typing import List, Tuple, Iterator, Iterable
+from typing import List
 
 import igraph as ig
 import networkx as nx
@@ -182,15 +182,6 @@ def igraph_to_nx(
     return nx_G
 
 
-def tuple_to_dict(data: tuple, keys) -> dict:
-    return dict(zip(keys, data))
-
-
-def write_edgelist(edges: Iterable[Tuple[int, int]], f):
-    for edge in sorted(edges):
-        f.write('{}\t{}\n'.format(*edge))
-
-
 def igraph_to_edgelist(graph: ig.Graph):
     if 'gid' not in graph.vs.attributes() or 'gid' not in graph.es.attributes():
         raise ValueError('igraph graph must have gid attributes')
@@ -202,3 +193,5 @@ def igraph_to_edgelist(graph: ig.Graph):
     }
 
     return edges
+
+
