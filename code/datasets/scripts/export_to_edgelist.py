@@ -4,7 +4,8 @@ from typing import Optional
 
 from simple_parsing import field
 
-from datasets.loading import load_igraph, igraph_to_edgelist, write_edgelist
+from datasets.loading import load_igraph, igraph_to_edgelist
+from datasets.formats import write_edgelist
 from datasets.schema import DatasetSchema
 from shared.cli import parse_args
 from shared.constants import DatasetPath

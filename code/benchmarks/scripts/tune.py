@@ -20,7 +20,7 @@ args: Args = parse_args(Args)[0]
 global_config = ConnectionConfig.load_config()
 config = BenchmarkConfig.from_name(args.config)
 
-# global_config.wandb.open()
+global_config.wandb.open()
 
 print(
     args

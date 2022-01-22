@@ -8,12 +8,10 @@
   - [ ] EvolveGCN
   - [ ] CTDNE
 - [x] Add dataset export to edge list
-- [ ] Find ground truth communities if applicable on current datasets
-  - [ ] Karate Club
-  - [ ] Enron
-  - [ ] DBLP
-  - [ ] com-* datasets
-  - [ ] sx-mathoverflow
+- [x] Find ground truth communities if applicable on current datasets
+  - [x] Karate Club
+  - [x] DBLP
+  - [x] com-* datasets
 - [x] Add baseline config format (and add configs)
 - [ ] Add dynamic community file format holding inter time community id matches
 - [ ] Add baseline benchmarking based on config
@@ -26,6 +24,10 @@
 - [ ] Run Representation Learning on benchmark datasets
 - [ ] Implement remaining DCD methods
 - [ ] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD 
+- [ ] Document used data formats: (and their standards / invariants)
+  - [ ] Edgelist (1 indexed)
+  - [ ] Comlist (1 indexed?)
+  - [ ] tracking.tsv
 - [x] Run thesis through GeCTOR 
 - [x] Collect dataset statistics
   - [x] Node/Edge counts (global and per type)

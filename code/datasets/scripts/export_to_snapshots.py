@@ -7,7 +7,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from simple_parsing import field
 
-from datasets.loading import load_igraph, write_edgelist
+from datasets.loading import load_igraph
+from datasets.formats import write_edgelist
 from datasets.processing import drop_infna
 from datasets.schema import DatasetSchema
 from shared.cli import parse_args
