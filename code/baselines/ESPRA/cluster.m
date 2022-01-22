@@ -135,10 +135,14 @@ if (NCLUST > 2)
     NCLUST = length(centers);
 end
 fprintf('NUMBER OF CLUSTERS: %i \n', NCLUST);
+Q = modularity(result, simMatrix);
+fprintf('Modularity: %f \n', Q);
 
 for i = 1:Ncount
     cluster_result(i,:) = [nodeIDs(i),clusters(i)];
 end
+
+u = 0
 
 end
 

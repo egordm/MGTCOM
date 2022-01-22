@@ -119,6 +119,9 @@ def load_igraph(
         unix_timestamp=unix_timestamp,
     )
 
+    nodes_df.sort_values(by=['id'], inplace=True)
+    edges_df.sort_values(by=['src', 'dst'], inplace=True)
+
     return ig.Graph.DataFrame(
         vertices=nodes_df,
         edges=edges_df,

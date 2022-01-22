@@ -16,6 +16,22 @@
 - [ ] Add dynamic community file format holding inter time community id matches
 - [ ] Add baseline benchmarking based on config
 - [ ] Add W&B support for running baselines
+- [ ] Implement evaluation metrics:
+  - Annotated:
+  - [x] NMI
+  - [x] NF1
+  - [ ] Jaccard Coefficient
+  - [ ] Rand-Index
+  - [ ] Overlapping-NMI
+  - [ ] Omega-Index
+  - Metric based:
+  - [x] Modularity
+  - [ ] Conductance
+  - [ ] Expansion
+  - [ ] Internal Density
+  - [ ] Cut Ratio/Normalized Cut
+  - [ ] Maximum/Average ODF
+  - [ ] Triangle Participation Ratio (probably wont - high computation complexity)
 - [ ] Add evaluation metrics to the baselines
 - [ ] Add a way to visualize CD results
 - [ ] Implementation overlapping NMI - [LINK](https://github.com/ponxosio/pyonmi)
