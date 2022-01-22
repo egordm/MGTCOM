@@ -40,7 +40,7 @@ for file in tmp_dir.glob('dynamic.*.communities.txt'):
 
     index = file.name.split('.')[1]
     community_count = max(communities.keys())
-    with output_dir.joinpath(str(index).zfill(2) + '_snapshot.comlist').open('w') as f:
+    with output_dir.joinpath(str(index).zfill(2) + '_snapshot.coms').open('w') as f:
         for community in range(community_count):
             nodes = communities.get(community + 1, [])
             f.write(' '.join(map(str, nodes)) + '\n')

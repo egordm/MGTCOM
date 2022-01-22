@@ -137,7 +137,7 @@ if mode == 'louvain':
                 LOG.warning('Not running in a terminal, using default level of -1')
             level = int(inp) if inp else -1
 
-        output_file = output_dir.joinpath(f.name).with_suffix('.comlist')
+        output_file = output_dir.joinpath(f.name).with_suffix('.coms')
         with open(str(output_file), 'w') as fout:
             p = subprocess.Popen(
                 [
@@ -170,7 +170,7 @@ elif mode == 'moses':
     community_files = []
     for f in input_files:
         LOG.info(f'Running Moses on {f}')
-        output_file = output_dir.joinpath(f.with_suffix('.comlist').name)
+        output_file = output_dir.joinpath(f.with_suffix('.coms').name)
         scores_file = tmp_dir.joinpath(f.with_suffix('.scores').name)
         p = subprocess.Popen(
             [
@@ -186,7 +186,7 @@ elif mode == 'moses':
         community_files.append(output_file)
 
 if args.dynamic:
-    N_TIMESTEPS = len(list(output_dir.glob('*.comlist')))
+    N_TIMESTEPS = len(list(output_dir.glob('*.coms')))
 
     LOG.info('Running dynamic community detection')
     output_file = tmp_dir.joinpath('communities')
@@ -196,7 +196,7 @@ if args.dynamic:
             '-t', str(args.matching_threshold),
             '-o', str(output_file),
             '--death', str(args.death),
-            *list(sorted(map(str, output_dir.glob('*.comlist')))),
+            *list(sorted(map(str, output_dir.glob('*.coms')))),
         ],
         shell=False,
         stdout=sys.stdout, stderr=sys.stderr,
@@ -235,11 +235,11 @@ if args.dynamic:
         [
             './aggregator',
             '-i', str(tmp_dir.joinpath('communities.timeline')),
-            '-o', str(tmp_dir.joinpath('aggregated.comlist')),
+            '-o', str(tmp_dir.joinpath('aggregated.coms')),
             '--persist', str(args.persist_threshold),
             '--max', str(args.max_step),
             '--length', str(args.min_length),
-            *list(sorted(map(str, output_dir.glob('*.comlist')))),
+            *list(sorted(map(str, output_dir.glob('*.coms')))),
         ],
         shell=False,
         stdout=sys.stdout, stderr=sys.stderr,

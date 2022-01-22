@@ -89,6 +89,6 @@ for i, output in enumerate(outputs):
             ci, nodes = line.strip().split('\t')
             communities.append(eval(nodes))
 
-    with output_dir.joinpath(str(i).zfill(2) + '.comlist').open('w') as f:
+    with output_dir.joinpath(str(i).zfill(2) + '.coms').open('w') as f:
         for ci, nodes in enumerate(communities):
             f.write(' '.join(nodes) + '\n')

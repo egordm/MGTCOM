@@ -69,6 +69,6 @@ communities = defaultdict(list)
 for node, community in memberships.items():
     communities[community].append(node)
 
-with output_dir.joinpath('default.comlist').open('w') as fout:
+with output_dir.joinpath('default.coms').open('w') as fout:
     for community, nodes in communities.items():
         fout.write(' '.join(map(str, nodes)) + '\n')

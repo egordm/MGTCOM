@@ -213,5 +213,5 @@ if __name__ == "__main__":
 
                 io_utils.save_embedding(model.centroid, list(range(len(model.centroid))),
                                         file_name=str(output_file_path.joinpath('community_centroids')))
-                save_communities(model, output_file_path.joinpath('default.comlist'))
-                save_communities(model, output_dir.joinpath('default.comlist'))
+                save_communities(model, output_file_path.joinpath('default.coms'))
+                save_communities(model, output_dir.joinpath('default.coms'))

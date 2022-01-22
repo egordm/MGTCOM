@@ -284,7 +284,7 @@ communities = defaultdict(list)
 for i, ci in enumerate(embedding_matrix.argmax(axis=1)):
     communities[ci].append(i)
 
-with (output_dir / 'default.comlist').open('w') as f:
+with (output_dir / 'default.coms').open('w') as f:
     for community in communities.values():
         f.write(' '.join(map(str, community)) + '\n')
 
@@ -295,6 +295,6 @@ for i in range(n_node):
     for ci in cis:
         communities_overlapping[ci].append(i)
 
-with (output_dir / 'overlapping.comlist').open('w') as f:
+with (output_dir / 'overlapping.coms').open('w') as f:
     for community in communities_overlapping.values():
         f.write(' '.join(map(str, community)) + '\n')
