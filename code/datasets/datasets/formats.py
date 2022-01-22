@@ -13,11 +13,13 @@ def read_edgelist(filepath: str) -> EdgeList:
         return pd.DataFrame([
             tuple(map(int, re.split(r'\s|\t', line.strip())))[:2]
             for line in f.readlines()
-        ], columns=['src', 'dst'])
+        ], columns=['src', 'dst']) \
+            .sort_values(by=['src', 'dst'], ignore_index=True)
 
 
 def read_comlist(filepath: str, delimiter='\t') -> ComList:
-    return pd.read_csv(filepath, sep=delimiter, header=None, names=['nid', 'cid'])
+    return pd.read_csv(filepath, sep=delimiter, header=None, names=['nid', 'cid'])\
+        .sort_values(by=['nid', 'cid'], ignore_index=True)
 
 
 def write_comlist(comlist: ComList, filepath: str):
@@ -43,15 +45,13 @@ def coms_to_comlist(coms: Coms) -> ComList:
         (nid, cid)
         for cid, nids in coms.items()
         for nid in nids
-    ], columns=['nid', 'cid'])
+    ], columns=['nid', 'cid'])\
+        .sort_values(by=['nid', 'cid'], ignore_index=True)
 
 
 def comlist_to_coms(comlist: ComList) -> Coms:
-    raise NotImplementedError()
-    # return {
-    #     cid: nids
-    #     for row in comlist.groupby('cid').apply(lambda x: x.nid.tolist()).iterrows()
-    # }
+    grouped_coms = comlist.groupby('cid').apply(lambda x: x.nid.tolist())
+    return dict(grouped_coms.iteritems())
 
 
 def write_edgelist(edges: Iterable[Tuple[int, int]], f):
