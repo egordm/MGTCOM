@@ -4,7 +4,7 @@ from typing import Optional
 
 from simple_parsing import field
 
-from datasets.loading import load_igraph, igraph_to_edgelist
+from datasets.formats import schema_to_igraph, igraph_to_edgelist
 from datasets.formats import write_edgelist
 from datasets.schema import DatasetSchema
 from shared.cli import parse_args
@@ -32,12 +32,11 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 # Load the graph
 LOG.info('Loading graph...')
-G = load_igraph(schema, unix_timestamp=True)
+G = schema_to_igraph(schema, unix_timestamp=True)
 G.vs['gid'] = range(G.vcount())
 G.es['gid'] = range(G.ecount())
 
 # Export to edgelist
 LOG.info(f'Exporting to edgelist...')
 edges = igraph_to_edgelist(G)
-with output_dir.joinpath('default.edgelist').open('w') as f:
-    write_edgelist(edges, f)
+write_edgelist(edges, str(output_dir.joinpath('default.edgelist')))

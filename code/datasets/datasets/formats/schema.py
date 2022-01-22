@@ -105,7 +105,7 @@ def schema_to_pandas_graph(
     return nodes_df, edges_df
 
 
-def load_igraph(
+def schema_to_igraph(
         schema: DatasetSchema,
         include_properties: List[str] = None,
         directed: bool = False,
@@ -129,7 +129,7 @@ def load_igraph(
     )
 
 
-def load_nx(
+def schema_to_nx(
         schema: DatasetSchema,
         include_properties: List[str] = None,
         directed: bool = False,
@@ -184,17 +184,5 @@ def igraph_to_nx(
 
     return nx_G
 
-
-def igraph_to_edgelist(graph: ig.Graph):
-    if 'gid' not in graph.vs.attributes() or 'gid' not in graph.es.attributes():
-        raise ValueError('igraph graph must have gid attributes')
-
-    gids = graph.vs['gid']
-    edges = {
-        (gids[s] + 1, gids[t] + 1)
-        for (s, t) in graph.get_edgelist()
-    }
-
-    return edges
 
 

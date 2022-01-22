@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Iterable, Tuple
+from typing import Dict, List
 
 import igraph as ig
 import pandas as pd
@@ -9,7 +9,7 @@ ComList = pd.DataFrame
 Coms = Dict[int, List[int]]
 
 
-def read_edgelist(filepath: str) -> EdgeList:
+def read_edgelist(filepath: str, delimiter='\t') -> EdgeList:
     """
     Reads an edgelist from a file.
 
@@ -21,21 +21,42 @@ def read_edgelist(filepath: str) -> EdgeList:
     - all indices should be 1-indexed
 
     :param filepath: path to the edgelist file
+    :param delimiter:
     :return:
     """
 
-    with open(filepath, 'r') as f:
-        result = pd.DataFrame([
-            tuple(map(int, re.split(r'\s|\t', line.strip())))[:2]
-            for line in f.readlines()
-        ], columns=['src', 'dst']) \
-            .sort_values(by=['src', 'dst'], ignore_index=True)
+    result = pd.read_csv(filepath, sep=delimiter, header=None, names=['src', 'dst']) \
+        .sort_values(by=['src', 'dst'], ignore_index=True)
 
     # Make sure all indices are 0-indexed
     result['src'] -= 1
     result['dst'] -= 1
 
     return result
+
+
+def write_edgelist(edges: EdgeList, filepath: str, delimiter='\t'):
+    """
+    Writes an edgelist to a file.
+
+    edgelist specification:
+    - have two columns, separated by a tab
+    - have no header
+    - have no comments
+    - all indices should be integers
+    - all indices should be 1-indexed
+
+    :param edges:
+    :param filepath:
+    :param delimiter:
+    :return:
+    """
+
+    # Make sure all indices are 1-indexed
+    df = edges.sort_values(by=['src', 'dst'], ignore_index=True)
+    df['src'] += 1
+    df['dst'] += 1
+    df.to_csv(filepath, sep=delimiter, index=False, header=False, columns=['src', 'dst'])
 
 
 def read_edgelist_graph(filepath: str, directed=False) -> ig.Graph:
@@ -67,7 +88,6 @@ def read_comlist(filepath: str, delimiter='\t') -> ComList:
     result['cid'] -= 1
 
     return result
-
 
 
 def write_comlist(comlist: ComList, filepath: str):
@@ -141,9 +161,3 @@ def coms_to_comlist(coms: Coms) -> ComList:
 def comlist_to_coms(comlist: ComList) -> Coms:
     grouped_coms = comlist.groupby('cid').apply(lambda x: x.nid.tolist())
     return dict(grouped_coms.iteritems())
-
-
-def write_edgelist(edges: Iterable[Tuple[int, int]], f):
-    # TODO: change usages to use the above type definition
-    for edge in sorted(edges):
-        f.write('{}\t{}\n'.format(*edge))

@@ -1,5 +1,6 @@
 import os.path
 import pathlib
+from abc import abstractmethod
 from dataclasses import dataclass, field, fields
 from typing import List, Optional, Dict, ClassVar, Callable, Any, Iterator, Union
 
@@ -88,7 +89,9 @@ class Property(Serializable, Mergeable):
 
 
 @dataclass
-class HasPropertiesMixin:
+class EntitySchema:
+    path: str
+    interaction: bool = False
     properties: List[Property]
 
     def iter_properties(self, predicate: Callable[[Property], bool] = None) -> Iterator[Property]:
@@ -105,24 +108,23 @@ class HasPropertiesMixin:
     def is_temporal(self):
         return self.get_timestamp() is not None
 
-
-@dataclass
-class LoadableDataframeMixin:
-    path: str
-
     def get_path(self):
         return os.path.join(DATASETS_PATH, self.path)
 
     def load_df(self) -> pd.DataFrame:
         return pd.read_parquet(self.get_path())
 
+    @abstractmethod
+    def get_type(self):
+        return None
+
+
 
 @dataclass
-class NodeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeMixin):
+class NodeSchema(Serializable, Mergeable, EntitySchema):
     label: str
     path: str
     properties: List[Property]
-    interaction: bool = False
 
     IGNORE_PROPS = ["directed", "interaction"]
     MERGE_FN = {
@@ -137,14 +139,13 @@ class NodeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeM
 
 
 @dataclass
-class EdgeSchema(Serializable, Mergeable, HasPropertiesMixin, LoadableDataframeMixin):
+class EdgeSchema(Serializable, Mergeable, EntitySchema):
     type: str
     source: str
     target: str
     path: str
     properties: List[Property]
     directed: bool = True
-    interaction: bool = False
 
     IGNORE_PROPS = ["directed", "interaction"]
     MERGE_FN = {
@@ -165,11 +166,40 @@ EntitySchema = Union[NodeSchema, EdgeSchema]
 
 
 @dataclass
+class DatasetVersionPart:
+    path: pathlib.Path
+
+    def get_path(self):
+        return self.path
+
+    def exists(self):
+        return self.path.exists()
+
+    @property
+    def snapshots(self):
+        return self.path.joinpath('snapshots')
+
+    @property
+    def static(self):
+        return self.path.joinpath('static.edgelist')
+
+    @property
+    def ground_truth(self):
+        return self.path.joinpath('ground_truth.comlist')
+
+
+@dataclass
 class DatasetVersion(Serializable, Mergeable):
     path: str
 
     def get_path(self) -> pathlib.Path:
         return pathlib.Path(os.path.join(DATASETS_PATH, self.path))
+
+    def train_part(self) -> DatasetVersionPart:
+        return DatasetVersionPart(self.get_path().joinpath('train'))
+
+    def test_part(self) -> DatasetVersionPart:
+        return DatasetVersionPart(self.get_path().joinpath('test'))
 
 
 @dataclass

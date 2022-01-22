@@ -3,6 +3,22 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 
 
+def plot_value_distribution_histogram(
+        series: pd.Series,
+        bins: int = 20,
+        title: str = '',
+        xlabel: str = '',
+        ylabel: str = 'Count',
+):
+    ax = series.dropna().hist(
+        bins=max(1, min(bins, len(series.dropna().value_counts()))),
+    )
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    return ax
+
+
 def plot_explore_dual_histogram(
         series: pd.Series,
         quantile=0.75,
