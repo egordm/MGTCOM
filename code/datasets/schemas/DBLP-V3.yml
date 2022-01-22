@@ -16,6 +16,7 @@ nodes:
     label: false
     timestamp: false
   label: Author
+  interaction: false
 - path: data/processed/DBLP-V3/nodes_Venue
   properties:
   - name: id
@@ -29,6 +30,7 @@ nodes:
     label: true
     timestamp: false
   label: Venue
+  interaction: false
 - path: data/processed/DBLP-V3/nodes_Paper
   properties:
   - name: id
@@ -67,6 +69,7 @@ nodes:
     label: false
     timestamp: true
   label: Paper
+  interaction: false
 edges:
 - path: data/processed/DBLP-V3/edges_AUTHORED
   properties:
@@ -84,6 +87,7 @@ edges:
   source: Author
   target: Paper
   directed: true
+  interaction: false
 - path: data/processed/DBLP-V3/edges_PUBLISHED_IN
   properties:
   - name: src
@@ -100,6 +104,7 @@ edges:
   source: Paper
   target: Venue
   directed: true
+  interaction: false
 - path: data/processed/DBLP-V3/edges_CITED
   properties:
   - name: src
@@ -116,3 +121,6 @@ edges:
   source: Paper
   target: Paper
   directed: true
+  interaction: false
+ground_truth: null
+versions: {}

@@ -180,6 +180,7 @@ class DatasetSchema(Serializable, Mergeable):
     description: str = ''
     nodes: List[NodeSchema] = field(default_factory=list)
     edges: List[EdgeSchema] = field(default_factory=list)
+    ground_truth: Optional[str] = None
     versions: Dict[str, DatasetVersion] = field(default_factory=dict)
 
     IGNORE_PROPS = ["description"]

@@ -1,27 +1,34 @@
 name: email-Eu-core
 prefix: Email_EuCore
 database: email-Eu-core
-description: null
+description: None
 nodes:
-- label: User
-  path: data/processed/email-Eu-core/nodes_User
+- path: data/processed/email-Eu-core/nodes_User
   properties:
   - name: id
     type: int
     ignore: false
     label: true
+    timestamp: false
+  label: User
+  interaction: false
 edges:
-- type: COMMUNICATES
-  source: User
-  target: User
-  path: data/processed/email-Eu-core/edges_COMMUNITCATES
-  directed: false
+- path: data/processed/email-Eu-core/edges_COMMUNITCATES
   properties:
   - name: src
     type: int
     ignore: false
     label: false
+    timestamp: false
   - name: dst
     type: int
     ignore: false
     label: false
+    timestamp: false
+  type: COMMUNICATES
+  source: User
+  target: User
+  directed: false
+  interaction: false
+ground_truth: data/processed/email-Eu-core/ground_truth.comlist
+versions: {}

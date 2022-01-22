@@ -3,25 +3,32 @@ prefix: UcidataZachary
 database: ucidata-zachary
 description: Zachary's karate club dataset
 nodes:
-- label: Pupil
-  path: data/processed/ucidata-zachary/nodes_Pupil
+- path: data/processed/ucidata-zachary/nodes_Pupil
   properties:
   - name: id
     type: int
     ignore: false
     label: true
+    timestamp: false
+  label: Pupil
+  interaction: false
 edges:
-- type: TRAINS
-  source: Pupil
-  target: Pupil
-  path: data/processed/ucidata-zachary/nodes_TRAINS
-  directed: false
+- path: data/processed/ucidata-zachary/nodes_TRAINS
   properties:
   - name: src
     type: int
     ignore: false
     label: false
+    timestamp: false
   - name: dst
     type: int
     ignore: false
     label: false
+    timestamp: false
+  type: TRAINS
+  source: Pupil
+  target: Pupil
+  directed: false
+  interaction: false
+ground_truth: data/processed/ucidata-zachary/ground_truth.comlist
+versions: {}

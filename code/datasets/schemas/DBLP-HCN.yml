@@ -16,6 +16,7 @@ nodes:
     label: true
     timestamp: false
   label: Author
+  interaction: false
 - path: data/processed/DBLP-HCN/nodes_Venue
   properties:
   - name: id
@@ -29,6 +30,7 @@ nodes:
     label: true
     timestamp: false
   label: Venue
+  interaction: false
 - path: data/processed/DBLP-HCN/nodes_Paper
   properties:
   - name: id
@@ -67,6 +69,7 @@ nodes:
     label: false
     timestamp: true
   label: Paper
+  interaction: false
 edges:
 - path: data/processed/DBLP-HCN/edges_AUTHORED
   properties:
@@ -84,6 +87,7 @@ edges:
   source: Author
   target: Paper
   directed: true
+  interaction: false
 - path: data/processed/DBLP-HCN/edges_PUBLISHED_IN
   properties:
   - name: src
@@ -100,3 +104,6 @@ edges:
   source: Paper
   target: Venue
   directed: true
+  interaction: false
+ground_truth: data/processed/DBLP-HCN/ground_truth.comlist
+versions: {}

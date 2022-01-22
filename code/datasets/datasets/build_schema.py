@@ -1,6 +1,7 @@
 import os.path
+import pathlib
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import pyspark.sql.types as T
 import stringcase
@@ -80,6 +81,7 @@ def build_schema(
         name: str,
         nodes: List[Tuple[str, File]],
         edges: List[Tuple[str, str, str, File]],
+        ground_truth: Optional[str] = None,
 ) -> DatasetSchema:
     # Sanity check naming
     node_names = [name for name, _ in nodes]
@@ -103,6 +105,7 @@ def build_schema(
             df_to_edge_schema(name, src, dst, path, spark)
             for (name, src, dst, path) in edges
         ],
+        ground_truth=pathlib.Path(ground_truth).relative_to(DATASETS_PATH) if ground_truth else None,
     )
 
     # Load and merge old schema

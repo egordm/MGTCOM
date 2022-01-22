@@ -28,3 +28,6 @@
 - [ ] https://www.kaggle.com/andreagarritano/deezer-social-networks
 - [ ] https://www.kaggle.com/ellipticco/elliptic-data-set
 - [ ] https://www.kaggle.com/hugomathien/soccer
+- [ ] https://github.com/GiulioRossetti/cdlib_datasets (the synthetically generated datasets)
+- [ ] https://github.com/PanShi2016/Community_Detection/tree/master/Datasets/Real_Data/Original_Data/Flickr]
+- [ ] https://networkrepository.com/citeseer.php

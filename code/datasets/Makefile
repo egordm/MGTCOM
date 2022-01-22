@@ -3,7 +3,9 @@ PY := source ../activate.sh && python
 
 data/raw/ucidata-zachary:
 	cd data/raw \
-		&& wget -c http://konect.cc/files/download.tsv.ucidata-zachary.tar.bz2 -O - | tar -xvjf -
+		&& wget -c http://konect.cc/files/download.tsv.ucidata-zachary.tar.bz2 -O - | tar -xvjf - \
+		&& wget -c https://github.com/GiulioRossetti/cdlib_datasets/raw/main/networks/karate_club.csv.gz -O - | gunzip -c > ucidata-zachary/karate_club.csv \
+		&& wget -c https://github.com/GiulioRossetti/cdlib_datasets/raw/main/ground_truth/karate_club.json.gz -O - | gunzip -c > ucidata-zachary/karate_club.json \
 
 data/raw/enron-mail-20150507:
 	cd data/raw \
