@@ -9,7 +9,7 @@ ComList = pd.DataFrame
 Coms = Dict[int, List[int]]
 
 
-def read_comlist(filepath: str, delimiter='\t') -> ComList:
+def read_comlist(filepath: str, delimiter='\t', named=False) -> ComList:
     """
     Reads a community lists from a file.
 
@@ -21,22 +21,25 @@ def read_comlist(filepath: str, delimiter='\t') -> ComList:
     - all indices should be integers
     - all indices should be 1-indexed
 
+    if named is True, then numeric index contraints are ignored
+
     :param filepath:
     :param delimiter:
     :return:
     """
 
     result = pd.read_csv(filepath, sep=delimiter, header=None, names=['nid', 'cid']) \
-        .sort_values(by=['nid', 'cid'], ignore_index=True)
+        .set_index('nid').sort_index()
 
-    # Make sure all indices are 0-indexed
-    result['nid'] -= 1
-    result['cid'] -= 1
+    if not named:
+        # Make sure all indices are 0-indexed
+        result.index -= 1
+        result['cid'] -= 1
 
     return result
 
 
-def write_comlist(comlist: ComList, filepath: str):
+def write_comlist(comlist: ComList, filepath: str, named=False):
     """
     Writes a community list to a file.
 
@@ -47,11 +50,20 @@ def write_comlist(comlist: ComList, filepath: str):
     - all indices should be integers
     - all indices should be 1-indexed
 
+    if named is True, then numeric index contraints are ignored
+
     :param comlist:
     :param filepath:
     :return:
     """
-    comlist.to_csv(filepath, sep='\t', index=False, header=False, columns=['nid', 'cid'])
+    result = comlist.sort_index().reset_index()
+
+    if not named:
+        # Make sure all indices are 1-indexed
+        result['nid'] += 1
+        result['cid'] += 1
+
+    result.to_csv(filepath, sep='\t', index=False, header=False, columns=['nid', 'cid'])
 
 
 def read_coms(filepath: str) -> Coms:
@@ -100,12 +112,11 @@ def coms_to_comlist(coms: Coms) -> ComList:
         (nid, cid)
         for cid, nids in coms.items()
         for nid in nids
-    ], columns=['nid', 'cid']) \
-        .sort_values(by=['nid', 'cid'], ignore_index=True)
+    ], columns=['nid', 'cid']).set_index('nid').sort_index()
 
 
 def comlist_to_coms(comlist: ComList) -> Coms:
-    grouped_coms = comlist.groupby('cid').apply(lambda x: x.nid.tolist())
+    grouped_coms = comlist.reset_index().groupby('cid').apply(lambda x: x.nid.tolist())
     return dict(grouped_coms.iteritems())
 
 
