@@ -2,4 +2,12 @@ database: email-Eu-core
 description: ''
 name: email-Eu-core
 tags: [static, ground-truth]
-versions: {}
+versions:
+  static:
+    parameters: { }
+    type: static
+  split_5:
+    type: snapshots
+    parameters:
+      snapshot_count: 5
+      snapshot_coverage: 0.95

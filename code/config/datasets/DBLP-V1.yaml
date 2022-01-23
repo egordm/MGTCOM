@@ -2,4 +2,13 @@ database: DBLP-V1
 description: ''
 name: DBLP-V1
 tags: [dynamic]
-versions: {}
+versions:
+  static:
+    parameters: { }
+    type: static
+  split_5:
+    type: snapshots
+    parameters:
+      snapshot_count: 5
+      snapshot_coverage: 0.95
+

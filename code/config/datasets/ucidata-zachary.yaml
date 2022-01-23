@@ -2,4 +2,7 @@ database: ucidata-zachary
 description: ''
 name: ucidata-zachary
 tags: [static, ground-truth]
-versions: {}
+versions:
+  static:
+    parameters: { }
+    type: static
