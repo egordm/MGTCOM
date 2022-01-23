@@ -5,8 +5,10 @@ import wandb
 from simple_parsing import field
 
 from benchmarks.benchmarks.config import BenchmarkConfig
+from benchmarks.benchmarks.execution import execute_benchmark
 from shared.cli import parse_args
 from shared.config import ConnectionConfig
+from shared.schema import DatasetSchema
 
 
 @dataclass
@@ -18,9 +20,9 @@ class Args:
 args: Args = parse_args(Args)[0]
 
 global_config = ConnectionConfig.load_config()
-config = BenchmarkConfig.from_name(args.config)
+config = BenchmarkConfig.load_config(args.config)
 
-global_config.wandb.open()
+# global_config.wandb.open()
 
 print(
     args
@@ -29,7 +31,16 @@ print(
     config
 )
 
+execute_benchmark(
+    config,
+    config.get_params('ucidata-zachary').to_simple_dict(),
+    DatasetSchema.load_schema('ucidata-zachary'),
+    # 'snapshots_k=5',
+    'static',
+    'test'
+)
 
+exit(0)
 
 sweep_config = {
     "name": "my-sweep",

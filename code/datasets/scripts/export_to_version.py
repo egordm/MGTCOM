@@ -42,11 +42,11 @@ G.save_nodemapping(str(VERSION.train_part().nodemapping))
 nodemapping = G.to_nodemapping()
 
 if 'ground-truth' in DATASET.tags:
-    LOG.info(f'Saving ground-truth to {VERSION.train_part().ground_truth}')
+    LOG.info(f'Saving ground-truth to {VERSION.train_part().static_ground_truth}')
     comms = CommunityAssignment.load_comlist(str(DATASET.processed('ground_truth.ncomlist')), named=True)
     comms = comms.remap_nodes(nodemapping).renumber_communities()
     comms.named = False
-    comms.save_comlist(str(VERSION.train_part().ground_truth))
+    comms.save_comlist(str(VERSION.train_part().static_ground_truth))
 
 if VERSION.type == DatasetVersionType.SNAPSHOTS:
     LOG.info(f'Setting time ranges for snapshots')

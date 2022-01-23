@@ -35,8 +35,8 @@ class DatasetVersionPart:
         return self.path.joinpath('static.edgelist')
 
     @property
-    def ground_truth(self) -> Path:
-        return self.path.joinpath('ground_truth.comlist')
+    def static_ground_truth(self) -> Path:
+        return self.path.joinpath('static.comlist')
 
     @property
     def nodemapping(self) -> Path:

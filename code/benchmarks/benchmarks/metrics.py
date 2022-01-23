@@ -3,7 +3,7 @@ import numpy as np
 from nf1 import NF1
 from sklearn.metrics import normalized_mutual_info_score
 
-from datasets.formats import ComList, Coms
+from shared.graph import ComList, Coms
 
 
 def nmi(x: ComList, y: ComList) -> float:
@@ -84,9 +84,9 @@ def assert_comlists_aligned(x: ComList, y: ComList):
     :param x:
     :param y:
     """
-    if (x['nid'] != y['nid']).any():
-        x.sort_values('nid', inplace=True)
-        y.sort_values('nid', inplace=True)
+    if (x.index != y.index).any():
+        x.sort_index(inplace=True)
+        y.sort_index(inplace=True)
 
-        if (x['nid'] != y['nid']).any():
+        if (x.index != y.index).any():
             raise ValueError('x and y must have the same nid')

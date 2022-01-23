@@ -65,7 +65,10 @@ LOG.addHandler(ch)
 
 input_dir = pathlib.Path(args.input)
 output_dir = pathlib.Path(args.output)
-input_files = list(sorted(input_dir.glob('*.edgelist')))
+if args.dynamic:
+    input_files = list(sorted(input_dir.glob('snapshots/*.edgelist')))
+else:
+    input_files = list(sorted(input_dir.glob('*.edgelist')))
 
 if len(input_files) == 0:
     LOG.error('No input files found in {}'.format(input_dir))

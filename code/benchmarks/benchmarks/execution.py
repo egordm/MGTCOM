@@ -2,13 +2,14 @@ import datetime as dt
 import logging
 import os
 import subprocess
+from typing import Dict, Any
 
 from typeguard import check_type
 
 from benchmarks.benchmarks.config import BenchmarkConfig, ParameterConfig, RawParameterValue
-from datasets.schema import DatasetSchema
 from shared.constants import BENCHMARKS_RESULTS, BASE_PATH
 from shared.logger import get_logger, get_logpipe
+from shared.schema import DatasetSchema
 
 LOG = get_logger('Executor')
 
@@ -26,15 +27,15 @@ def params_to_args(params: ParameterConfig):
 
 def execute_benchmark(
         config: BenchmarkConfig,
-        params: ParameterConfig,
+        params: Dict[str, Any],
         dataset: DatasetSchema,
         dataset_version: str,
         prefix: str,
 ):
     run_name = f'{prefix}_{dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}'
 
-    dataset_version = dataset.get_version(dataset_version)
-    input_dir = dataset_version.get_path()
+    version = dataset.get_version(dataset_version)
+    input_dir = version.train_part().get_path()
     output_dir = BENCHMARKS_RESULTS.joinpath(config.name, dataset.name, run_name)
     output_dir.mkdir(parents=True, exist_ok=True)
 

@@ -65,10 +65,6 @@ np.savez(tmp_dir.joinpath('embeddings.npz'), embedding=embedding)
 
 # Save communities
 LOG.info('Saving communities...')
-communities = defaultdict(list)
-for node, community in memberships.items():
-    communities[community].append(node)
-
-with output_dir.joinpath('default.coms').open('w') as fout:
-    for community, nodes in communities.items():
-        fout.write(' '.join(map(str, nodes)) + '\n')
+with output_dir.joinpath(input_file.name).with_suffix('.comlist').open('w') as fout:
+    for node, community in memberships.items():
+        fout.write('{}\t{}\n'.format(node + 1, community + 1))

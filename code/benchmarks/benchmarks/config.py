@@ -4,7 +4,7 @@ from typing import Dict, Optional, Union, List, Any, Type
 
 from simple_parsing import Serializable, field
 
-from shared.constants import BENCHMARKS_CONFIGS, BASE_PATH, DATASETS_DATA_EXPORT, BENCHMARKS_OUTPUTS
+from shared.constants import CONFIG_BENCHMARKS, BASE_PATH, DATASETS_DATA_EXPORT, BENCHMARKS_OUTPUTS
 from shared.structs import filter_none_values
 
 RawParameterValue = Any
@@ -37,6 +37,12 @@ class ParameterConfig(dict, Serializable):
     def to_dict(self, dict_factory: Type[Dict] = dict, recurse: bool = True) -> Dict:
         return {
             key: value.to_dict()
+            for key, value in self.items()
+        }
+
+    def to_simple_dict(self) -> Dict:
+        return {
+            key: value.value
             for key, value in self.items()
         }
 
@@ -83,8 +89,8 @@ class BenchmarkConfig(Serializable):
         })
 
     @staticmethod
-    def from_name(name) -> 'BenchmarkConfig':
-        path = BENCHMARKS_CONFIGS.joinpath(f'{name}.yml')
+    def load_config(name) -> 'BenchmarkConfig':
+        path = CONFIG_BENCHMARKS.joinpath(f'{name}.yml')
         if not path.exists():
             raise FileNotFoundError(f'{path} does not exist')
         return BenchmarkConfig.load(path)
