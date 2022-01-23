@@ -10,6 +10,7 @@ import pyspark.sql.types as T
 import yaml
 from simple_parsing import Serializable as Serializable, field
 
+from shared.schema import DatasetSchema
 from shared.structs import filter_none_values_recursive
 
 EntityType = str
@@ -74,15 +75,19 @@ class GraphProperty(Serializable):
     _name: str = field(init=False, default=None, to_dict=False)
     dtype: DType
 
+    @property
+    def name(self):
+        return self._name
+
 
 @dataclass
 class DynamicConfig(Serializable):
-    timestamp: Optional[PropertyName]
-    interaction: Optional[bool]
+    timestamp: PropertyName
+    interaction: bool = False
 
 
 @dataclass
-class GraphEntitySchema(Serializable):
+class EntitySchema(Serializable):
     _type: Optional[EntityType] = field(init=False, default=None, to_dict=False)
     _schema: Optional['GraphSchema'] = field(init=False, default=None, to_dict=False)
     label: PropertyName = None
@@ -115,18 +120,24 @@ class GraphEntitySchema(Serializable):
             timestamp: Optional[PropertyName] = None,
             interaction: Optional[bool] = False,
             **kwargs,
-    ) -> 'GraphEntitySchema':
+    ) -> 'EntitySchema':
         properties = {
-            inflection.underscore(name): GraphProperty(DType.from_spark(stype.dataType))
+            name: GraphProperty(DType.from_spark(stype.dataType))
             for name, stype in zip(schema.names, schema.fields)
         }
-        label_prop = inflection.underscore(label) if label else None
+        label_prop = label if label else None
+        if label_prop and label_prop not in properties:
+            raise ValueError(f'Label property {label_prop} not found in schema')
+
         dynamic = DynamicConfig(timestamp, interaction) if timestamp else None
+        if dynamic and dynamic.timestamp not in properties:
+            raise ValueError(f'Timestamp property {dynamic.timestamp} not found in schema')
+
         return cls(label=label_prop, properties=properties, dynamic=dynamic, **kwargs)
 
 
 @dataclass
-class NodeSchema(GraphEntitySchema):
+class NodeSchema(EntitySchema):
     def __str__(self):
         return f'({self.get_type()})'
 
@@ -135,7 +146,7 @@ class NodeSchema(GraphEntitySchema):
 
 
 @dataclass
-class EdgeSchema(GraphEntitySchema):
+class EdgeSchema(EntitySchema):
     source_type: EntityType = None
     target_type: EntityType = None
     directed: bool = False
@@ -179,7 +190,7 @@ class GraphSchema(Serializable):
             entity_schema._schema = self
             entity_schema._type = entity_type
 
-    def add_node_schema(self, type_name: EntityType, schema: NodeSchema):
+    def add_node_schema(self, type_name: EntityType, schema: NodeSchema) -> 'GraphSchema':
         if inflection.camelize(type_name, True) != type_name:
             raise ValueError(f'Invalid type name: {type_name}. Must be PascalCase.')
 
@@ -187,16 +198,20 @@ class GraphSchema(Serializable):
         schema._schema = self
         schema._type = type_name
 
+        return self
+
     def get_node_schema(self, node_type: EntityType) -> NodeSchema:
         return self.nodes[node_type]
 
-    def add_edge_schema(self, type_name: EntityType, schema: EdgeSchema):
+    def add_edge_schema(self, type_name: EntityType, schema: EdgeSchema) -> 'GraphSchema':
         if inflection.underscore(type_name).upper() != type_name:
             raise ValueError(f'Invalid type name: {type_name}. Must be CONST_CASE.')
 
         self.edges[type_name] = schema
         schema._schema = self
         schema._type = type_name
+
+        return self
 
     def get_edge_schema(self, edge_type: EntityType) -> EdgeSchema:
         return self.edges[edge_type]
@@ -215,15 +230,24 @@ class GraphSchema(Serializable):
     def set_path(self, path: Path) -> None:
         self._path = path
 
+    def is_dynamic(self) -> bool:
+        return any(schema.dynamic is not None for schema in it.chain(self.nodes.values(), self.edges.values()))
+
+    def is_node_temporal(self) -> bool:
+        return any(schema.dynamic is not None for schema in self.nodes.values())
+
+    def is_edge_temporal(self) -> bool:
+        return any(schema.dynamic is not None for schema in self.edges.values())
+
     @classmethod
     def load_schema(cls: Type['GraphSchema'], path: Union[str, Path], **kwargs) -> 'GraphSchema':
         path = Path(path) if isinstance(path, str) else path
-        data = yaml.load(path.joinpath('schema.yaml').read_text(), **kwargs)
+        data = yaml.safe_load(path.joinpath('schema.yaml').read_text(), **kwargs)
         result = cls.from_dict(data)
         result._path = path
         return result
 
-    def save_schema(self, path: Optional[Union[str, Path]] = None, **kwargs) -> None:
+    def save_schema(self, path: Optional[Union[str, Path]] = None, **kwargs) -> 'GraphSchema':
         if path is None:
             path = self.get_path()
 
@@ -234,6 +258,11 @@ class GraphSchema(Serializable):
             if not schema.get_path().exists():
                 raise ValueError(f'Path for subschema not exist: {schema.get_path()}')
 
-
         data = filter_none_values_recursive(self.to_dict())
         self._path.joinpath('schema.yaml').write_text(yaml.dump(data, **kwargs))
+        return self
+
+    @classmethod
+    def from_dataset(cls, schema: DatasetSchema) -> 'GraphSchema':
+        return GraphSchema.load_schema(schema.processed())
+
