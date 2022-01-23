@@ -1,19 +1,27 @@
+import os
 from dataclasses import dataclass
+
+import pandas as pd
 
 from shared.graph import ComList, read_comlist, write_comlist, read_coms, coms_to_comlist, comlist_to_coms, write_coms, \
     Coms
+from shared.logger import get_logger
 
 NodeId = int
+
+LOG = get_logger(os.path.basename(__file__))
 
 
 @dataclass
 class CommunityAssignment:
     data: ComList
+    named: bool = False
 
     @classmethod
-    def load(cls, filepath: str) -> 'CommunityAssignment':
+    def load_comlist(cls, filepath: str, named=False) -> 'CommunityAssignment':
         return CommunityAssignment(
-            read_comlist(filepath)
+            read_comlist(filepath, named=named),
+            named
         )
 
     @classmethod
@@ -22,11 +30,36 @@ class CommunityAssignment:
             coms_to_comlist(read_coms(filepath))
         )
 
-    def write(self, filepath: str) -> None:
-        write_comlist(self.data, filepath)
+    def clone(self) -> 'CommunityAssignment':
+        return CommunityAssignment(self.data.copy())
 
-    def write_comms(self, filepath: str) -> None:
-        write_coms(comlist_to_coms(self.data), filepath)
+    def remap_nodes(self, nodemapping: pd.Series) -> 'CommunityAssignment':
+        result = self.data.join(nodemapping, how='inner')
+        if result.isnull().any().any():
+            LOG.warning("Some nodes were not found in the nodemapping and thus have no community assignment.")
+            result = result.dropna()
+
+        result.set_index('gid', inplace=True)
+        result.index.name = 'nid'
+
+        return CommunityAssignment(result)
+
+    def renumber_communities(self) -> 'CommunityAssignment':
+        com_names = self.data['cid'].unique()
+        data = self.data.copy()
+        data['cid'] = data['cid'].replace(com_names, range(len(com_names)))
+        return CommunityAssignment(data)
+
+    def to_comlist(self) -> ComList:
+        return self.data
+
+    def save_comlist(self, filepath: str) -> None:
+        write_comlist(self.data, filepath, named=self.named)
 
     def to_comms(self) -> Coms:
         return comlist_to_coms(self.data)
+
+    def save_comms(self, filepath: str) -> None:
+        write_coms(self.to_comms(), filepath)
+
+
