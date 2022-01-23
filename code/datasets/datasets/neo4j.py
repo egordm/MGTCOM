@@ -2,9 +2,9 @@ import datetime as dt
 from typing import Any
 
 from pypher import Pypher, __
-from pypher.builder import Statement, create_statement
+from pypher.builder import create_statement
 
-from datasets.schema import DatasetSchema
+from shared.schema import DatasetSchema
 
 
 def value_to_neo4j(x):
@@ -26,6 +26,7 @@ def value_to_neo4j(x):
 
 
 create_statement('RawValue', {'name': ''})
+
 
 def query_snapshot(
         schema: DatasetSchema,

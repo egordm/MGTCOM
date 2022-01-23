@@ -89,4 +89,3 @@ class BenchmarkConfig(Serializable):
             raise FileNotFoundError(f'{path} does not exist')
         return BenchmarkConfig.load(path)
 
-# def

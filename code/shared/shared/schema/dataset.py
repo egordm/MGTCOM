@@ -1,14 +1,19 @@
-import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 from astropy.io.misc import yaml
-from simple_parsing import Serializable
+from simple_parsing import Serializable, field
 
-from shared.constants import DATASETS_PATH, CONFIG_DATASETS, DATASETS_DATA_RAW, DATASETS_DATA_PROCESSED, \
+from shared.constants import CONFIG_DATASETS, DATASETS_DATA_RAW, DATASETS_DATA_PROCESSED, \
     DATASETS_DATA_EXPORT
 from shared.string import to_identifier
+
+
+class DatasetVersionType(Enum):
+    SNAPSHOTS = 'snapshots'
+    STATIC = 'static'
 
 
 @dataclass
@@ -22,21 +27,26 @@ class DatasetVersionPart:
         return self.path.exists()
 
     @property
-    def snapshots(self):
+    def snapshots(self) -> Path:
         return self.path.joinpath('snapshots')
 
     @property
-    def static(self):
+    def static(self) -> Path:
         return self.path.joinpath('static.edgelist')
 
     @property
-    def ground_truth(self):
+    def ground_truth(self) -> Path:
         return self.path.joinpath('ground_truth.comlist')
+
+    @property
+    def nodemapping(self) -> Path:
+        return self.path.joinpath('nodemapping.tsv')
 
 
 @dataclass
 class DatasetVersion(Serializable):
     _path: Path = field(init=False, default=None, to_dict=False)
+    type: DatasetVersionType = field(decoding_fn=lambda x: DatasetVersionType(x), encoding_fn=lambda x: x.value)
     parameters: Dict[str, Any] = field(default_factory=dict)
 
     def get_path(self) -> Path:
@@ -47,6 +57,9 @@ class DatasetVersion(Serializable):
 
     def test_part(self) -> DatasetVersionPart:
         return DatasetVersionPart(self.get_path().joinpath('test'))
+
+    def get_param(self, name: str, default=None) -> Optional[Any]:
+        return self.parameters.get(name, default)
 
 
 @dataclass
@@ -85,7 +98,7 @@ class DatasetSchema(DatasetPath, Serializable):
 
     def __post_init__(self):
         for name, version in self.versions.items():
-            version._path = self.processed('versions').joinpath(name)
+            version._path = self.export('versions').joinpath(name)
 
     @classmethod
     def load_schema(cls, name, **kwargs) -> 'DatasetSchema':

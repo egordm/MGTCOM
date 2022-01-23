@@ -2,4 +2,7 @@ database: com-youtube
 description: ''
 name: com-youtube
 tags: [static, ground-truth]
-versions: {}
+versions:
+  static:
+    parameters: {}
+    type: static

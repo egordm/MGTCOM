@@ -7,15 +7,13 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from simple_parsing import field
 
-from datasets.formats import schema_to_igraph, igraph_to_edgelist
-from datasets.formats import write_edgelist
-from datasets.graphs import graph_add_timeranges, graph_split_into_snapshots
-from datasets.schema import DatasetSchema
+from datasets.graph_processing import graph_add_timeranges, graph_split_into_snapshots
 from datasets.visualization import plot_value_distribution_histogram
 from shared.cli import parse_args
-from shared.constants import DatasetPath
+from shared.graph import DataGraph, igraph_to_edgelist, write_edgelist
 from shared.logger import get_logger
 from shared.pandas import drop_infna
+from shared.schema import DatasetSchema, GraphSchema
 
 
 @dataclass
@@ -31,8 +29,8 @@ if not args.prefix:
     args.prefix = f'split_{args.k}'
 
 LOG = get_logger(os.path.basename(__file__))
-DATASET = DatasetPath(args.dataset)
-schema: DatasetSchema = DatasetSchema.load_schema(args.dataset)
+DATASET = DatasetSchema(args.dataset)
+schema = GraphSchema.from_dataset(args.dataset)
 
 output_dir = DATASET.export('snapshots' if not args.output else args.output).joinpath(args.prefix)
 output_dir.mkdir(parents=True, exist_ok=True)
@@ -40,7 +38,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 filename = '{}_snapshot.edgelist'
 
 # Load the graph
-G = schema_to_igraph(schema, unix_timestamp=True)
+G = DataGraph.from_schema(schema, unix_timestamp=True)
 G.vs['gid'] = range(G.vcount())
 G.es['gid'] = range(G.ecount())
 

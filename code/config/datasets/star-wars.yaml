@@ -4,7 +4,10 @@ name: star-wars
 tags: [dynamic]
 versions:
   split_5:
+    type: snapshots
     parameters:
-      test_ratio: 0
       snapshot_count: 5
       snapshot_coverage: 0.95
+  static:
+    type: static
+    parameters: {}

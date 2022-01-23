@@ -14,7 +14,7 @@ def pd_from_entity_schema(
         unix_timestamp: bool = False,
         prefix_id: bool = False,
 ) -> pd.DataFrame:
-    df = pd.read_parquet(schema.get_path())
+    df = pd.read_parquet(schema.get_path(), engine='pyarrow', use_nullable_dtypes=True)
 
     # Move explicit properties to their own column
     if explicit_label and schema.label:

@@ -99,7 +99,7 @@ def get_context_pairs(graphs, num_time_steps):
     """ Load/generate context pairs for each snapshot through random walk sampling."""
     load_path = "data/{}/train_pairs_n2v_{}.pkl".format(FLAGS.dataset, str(num_time_steps - 2))
     try:
-        context_pairs_train = dill.load(open(load_path, 'rb'))
+        context_pairs_train = dill.load_comlist(open(load_path, 'rb'))
         print("Loaded context pairs from pkl file directly")
     except (IOError, EOFError):
         print("Computing training pairs ...")
