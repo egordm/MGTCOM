@@ -2,40 +2,40 @@ import os.path
 import subprocess
 import sys
 from dataclasses import dataclass
+from typing import Iterable
 
 import pyspark.sql.functions as F
 from pyspark.sql import SparkSession
-from simple_parsing import ArgumentParser
+from simple_parsing import ArgumentParser, field
 
-from datasets.schema import DatasetSchema
+from shared.cli import parse_args
 from shared.config import ConnectionConfig
-from shared.constants import DatasetPath, DATASETS_PATH
+from shared.constants import DATASETS_PATH
 from shared.logger import get_logger
+from shared.schema import GraphSchema, DatasetSchema, GraphProperty
 
 
 @dataclass
 class Args:
-    dataset: str
+    dataset: str = field(positional=True)
 
 
-parser = ArgumentParser()
-parser.add_arguments(Args, dest="args")
-args: Args = parser.parse_args().args
+args: Args = parse_args(Args)[0]
 connections = ConnectionConfig.load_config()
 
 LOG = get_logger(os.path.basename(__file__))
-DATASET = DatasetPath(args.dataset)
-schema = DatasetSchema.load_schema(args.dataset)
+DATASET = DatasetSchema.load_schema(args.dataset)
+schema = GraphSchema.from_dataset(DATASET)
 
 driver = connections.neo4j.open()
 
 # Check if the database already exists
 with driver.session(database='system') as session:
     # Check if database already exists
-    result = session.run(f'SHOW DATABASE `{schema.database}`')
-    if result.peek():
-        LOG.info(f'Database {schema.database} already exists')
-        proceed = input(f'Do you want to overwrite {schema.database}? [y/N] ')
+    result = session.run(f'SHOW DATABASE `{DATASET.database}`')
+    if result.peek() and not os.getenv('FORCE', True):
+        LOG.info(f'Database {DATASET.database} already exists')
+        proceed = input(f'Do you want to overwrite {DATASET.database}? [y/N] ')
         if proceed.lower() != 'y':
             sys.exit(0)
 
@@ -49,23 +49,20 @@ spark = (SparkSession.builder
          .getOrCreate())
 
 
-def properties_to_neo4j(properties):
+def properties_to_neo4j(properties: Iterable[GraphProperty]):
     select = []
 
     for property in properties:
-        if property.ignore:
-            continue
-
-        if property.is_id():
+        if property.name == 'id':
             select.append(F.col(property.name).alias(f'{property.name}:ID'))
-        elif property.is_src():
+        elif property.name == 'src':
             select.append(F.col(property.name).alias(f':START_ID'))
-        elif property.is_dst():
+        elif property.name == 'dst':
             select.append(F.col(property.name).alias(f':END_ID'))
-        elif property.is_array():
-            select.append(F.concat_ws(';', F.col(property.name)).alias(f'{property.name}:{property.type}'))
+        elif property.dtype.array:
+            select.append(F.concat_ws(';', F.col(property.name)).alias(f'{property.name}:{property.dtype}'))
         else:
-            select.append(F.col(property.name).alias(f'{property.name}:{property.type}'))
+            select.append(F.col(property.name).alias(f'{property.name}:{property.dtype}'))
     return select
 
 
@@ -77,33 +74,33 @@ def export_csv(input: str, output: str, mapping):
 
 
 nodes = []
-for node_schema in schema.nodes:
-    path = DATASETS_PATH.joinpath(node_schema.path)
-    output_path = DATASET.export('neo4j', f'{node_schema.label}.csv.gz')
-    LOG.info(f'Exporting NODES {node_schema.label} to {output_path}')
+for node_schema in schema.nodes.values():
+    path = DATASETS_PATH.joinpath(node_schema.get_path())
+    output_path = DATASET.export('neo4j', f'{node_schema.get_type()}.csv.gz')
+    LOG.info(f'Exporting NODES {node_schema.get_type()} to {output_path}')
 
-    mapping = properties_to_neo4j(node_schema.properties)
+    mapping = properties_to_neo4j(node_schema.properties.values())
     mapping.append(F.lit(node_schema.label).alias(':LABEL'))
     export_csv(str(path), str(output_path), mapping)
 
     nodes.extend(map(str, output_path.glob('*.csv.gz')))
 
 relationships = []
-for edge_schema in schema.edges:
-    path = DATASETS_PATH.joinpath(edge_schema.path)
-    output_path = DATASET.export('neo4j', f'{edge_schema.type}.csv.gz')
-    LOG.info(f'Exporting EDGES {edge_schema.type} to {output_path}')
+for edge_schema in schema.edges.values():
+    path = DATASETS_PATH.joinpath(edge_schema.get_path())
+    output_path = DATASET.export('neo4j', f'{edge_schema.get_type()}.csv.gz')
+    LOG.info(f'Exporting EDGES {edge_schema.get_type()} to {output_path}')
 
-    mapping = properties_to_neo4j(edge_schema.properties)
-    mapping.append(F.lit(edge_schema.type).alias(':TYPE'))
+    mapping = properties_to_neo4j(edge_schema.properties.values())
+    mapping.append(F.lit(edge_schema.get_type()).alias(':TYPE'))
     export_csv(str(path), str(output_path), mapping)
     relationships.extend(map(str, output_path.glob('*.csv.gz')))
 
 with driver.session(database='system') as session:
     LOG.info('Stopping and deleting existing database')
     try:
-        session.run(f'STOP DATABASE `{schema.database}`')
-        session.run(f'DROP DATABASE `{schema.database}`')
+        session.run(f'STOP DATABASE `{DATASET.database}`')
+        session.run(f'DROP DATABASE `{DATASET.database}`')
     except Exception as e:
         LOG.warning(f'Failed to stop and delete existing database: {e}')
 
@@ -114,7 +111,7 @@ with driver.session(database='system') as session:
         'bin/neo4j-admin import --database={database} --legacy-style-quoting=true --multiline-fields=true '
         '--verbose --trim-strings=false --ignore-empty-strings=true --normalize-types=true '
         '--skip-bad-relationships=true --skip-duplicate-nodes=true {nodes} {relationships}'.format(
-            database=schema.database,
+            database=DATASET.database,
             nodes=' '.join(node_args),
             relationships=' '.join(relationship_args),
         ),
@@ -133,16 +130,16 @@ with driver.session(database='system') as session:
 
     LOG.info('Creating database and indexes')
     try:
-        session.run(f'CREATE DATABASE `{schema.database}`')
+        session.run(f'CREATE DATABASE `{DATASET.database}`')
     except Exception as e:
         LOG.warning(f'Failed to create new database: {e}')
 
-LOG.info(f'Connecting to database: {schema.database}')
-with driver.session(database=schema.database) as session:
+LOG.info(f'Connecting to database: {DATASET.database}')
+with driver.session(database=DATASET.database) as session:
     LOG.info('Creating contraints')
-    for node_schema in schema.nodes:
+    for node_schema in schema.nodes.values():
         try:
             session.run(
-                f'CREATE CONSTRAINT {node_schema.label}_unique_id ON (n:{node_schema.label}) ASSERT n.id IS UNIQUE')
+                f'CREATE CONSTRAINT {node_schema.get_type()}_unique_id ON (n:{node_schema.get_type()}) ASSERT n.id IS UNIQUE')
         except Exception as e:
             LOG.error(f'Failed to create constraint: {e}')

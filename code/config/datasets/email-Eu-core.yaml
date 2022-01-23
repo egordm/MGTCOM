@@ -1,0 +1,5 @@
+database: email-Eu-core
+description: ''
+name: email-Eu-core
+tags: [static, ground-truth]
+versions: {}

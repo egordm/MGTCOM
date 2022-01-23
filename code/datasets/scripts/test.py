@@ -1,32 +1,15 @@
-from pypher import Pypher, __
+import networkx as nx
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import networkx as nx
+from shared.schema import DatasetSchema, GraphSchema
+from shared.graph import DataGraph, igraph_to_nx
 
-from datasets.neo4j import query_snapshot
-from datasets.schema import DatasetSchema
-from shared.constants import DatasetPath
+from datasets.visualization import plot_explore_dual_histogram, show_top_k_nodes, show_top_k_stacked_nodes
+DATASET = DatasetSchema.load_schema('imdb-5000-movie-dataset')
+schema = GraphSchema.from_dataset(DATASET)
+G = DataGraph.from_schema(schema)
 
-# DATASET = DatasetPath('star-wars')
-DATASET = DatasetPath('social-distancing-student')
-schema = DatasetSchema.load_schema(DATASET.name)
-
-range_start = 0
-range_end = 10
-
-
-
-print(query_snapshot(
-schema, range_start, range_end, raw_vars=True,
-))
-
-# MATCH (a)-[r]-(b)
-# WHERE
-#  ((
-#     r:ANSWERED_QUESTION AND
-#     r.timestamp > datetime({year: 2011}) AND
-#     r.timestamp <= datetime({year: 2012})
-#
-# ) OR (
-#     r:COMMENTED_ON_QUESTION AND
-#     r.timestamp > datetime({year: 2012}) AND
-#     r.timestamp <= datetime({year: 2013})
-# )) AND id(b) = 98220 AND id(a) =  91828
-# RETURN r LIMIT 10
+u = 0

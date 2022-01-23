@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 PY := source ../activate.sh && python
+CONFIG_DIR := ../config/datasets
 
 data/raw/ucidata-zachary:
 	cd data/raw \
@@ -125,35 +126,12 @@ download: \
 	data/raw/star-wars \
 	data/raw/house-of-representatives-congress-116
 
-
 export_neo4j:
-	$(PY) scripts/export_to_neo4j.py --dataset=ucidata-zachary
-	$(PY) scripts/export_to_neo4j.py --dataset=enron-mail-20150507
-	$(PY) scripts/export_to_neo4j.py --dataset=misc-football
-	$(PY) scripts/export_to_neo4j.py --dataset=imdb-5000-movie-dataset
-	$(PY) scripts/export_to_neo4j.py --dataset=DBLP-V1
-	$(PY) scripts/export_to_neo4j.py --dataset=DBLP-V3
-	$(PY) scripts/export_to_neo4j.py --dataset=DBLP-HCN
-	$(PY) scripts/export_to_neo4j.py --dataset=sx-mathoverflow
-	$(PY) scripts/export_to_neo4j.py --dataset=sx-superuser
-	$(PY) scripts/export_to_neo4j.py --dataset=email-Eu-core
-	$(PY) scripts/export_to_neo4j.py --dataset=com-youtube
-	$(PY) scripts/export_to_neo4j.py --dataset=star-wars
-	$(PY) scripts/export_to_neo4j.py --dataset=house-of-representatives-congress-116
-	$(PY) scripts/export_to_neo4j.py --dataset=social-distancing-student
+	for target in $(CONFIG_DIR)/* ; do \
+  		$(PY) scripts/export_to_neo4j.py $$(basename -s .yaml $$target); \
+  	done
 
 export_graphml:
-	$(PY) scripts/export_to_graphml.py --dataset=ucidata-zachary
-	$(PY) scripts/export_to_graphml.py --dataset=enron-mail-20150507
-	$(PY) scripts/export_to_graphml.py --dataset=misc-football
-	$(PY) scripts/export_to_graphml.py --dataset=imdb-5000-movie-dataset
-	$(PY) scripts/export_to_graphml.py --dataset=DBLP-V1
-	$(PY) scripts/export_to_graphml.py --dataset=DBLP-V3
-	$(PY) scripts/export_to_graphml.py --dataset=DBLP-HCN
-	$(PY) scripts/export_to_graphml.py --dataset=sx-mathoverflow
-	$(PY) scripts/export_to_graphml.py --dataset=sx-superuser
-	$(PY) scripts/export_to_graphml.py --dataset=email-Eu-core
-	$(PY) scripts/export_to_graphml.py --dataset=com-youtube
-	$(PY) scripts/export_to_graphml.py --dataset=star-wars
-	$(PY) scripts/export_to_graphml.py --dataset=house-of-representatives-congress-116
-	$(PY) scripts/export_to_graphml.py --dataset=social-distancing-student
+	@for target in $(CONFIG_DIR)/* ; do \
+  		$(PY) scripts/export_to_graphml.py $$(basename -s .yaml $$target); \
+  	done

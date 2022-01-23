@@ -1,0 +1,5 @@
+database: ucidata-zachary
+description: ''
+name: ucidata-zachary
+tags: [static, ground-truth]
+versions: {}

@@ -1,37 +1,36 @@
 import os
 import sys
 from dataclasses import dataclass
+from itertools import chain
 from typing import List, Optional
 
 import neo4j
-from simple_parsing import ArgumentParser
+from simple_parsing import ArgumentParser, field
 
-from datasets.schema import DatasetSchema
+from shared.cli import parse_args
 from shared.config import ConnectionConfig
-from shared.constants import DatasetPath
 from shared.logger import get_logger
+from shared.schema import DatasetSchema, GraphSchema
 
 
 @dataclass
 class Args:
-    dataset: str
+    dataset: str = field(positional=True)
     edges: Optional[List[str]] = None
     split: bool = False
     output: Optional[str] = None
 
 
-parser = ArgumentParser()
-parser.add_arguments(Args, dest="args")
-args: Args = parser.parse_args().args
+args: Args = parse_args(Args)[0]
 connections = ConnectionConfig.load_config()
 
 LOG = get_logger(os.path.basename(__file__))
-DATASET = DatasetPath(args.dataset)
-schema: DatasetSchema = DatasetSchema.load_schema(args.dataset)
+DATASET = DatasetSchema.load_schema(args.dataset)
+schema = GraphSchema.from_dataset(DATASET)
 
 export_options = {
     'format': 'gephi',
-    'caption': [property.name for property in schema.all_properties() if property.label],
+    'caption': [subschema.label for subschema in chain(schema.nodes.values(), schema.edges.values()) if subschema.label],
     'useTypes': True,
     'separateFiles': args.split,
 }
@@ -39,22 +38,22 @@ export_options = {
 output_file = DATASET.export_str('graphml', 'default.graphml' if not args.output else args.output)
 os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-if os.path.exists(output_file):
+if os.path.exists(output_file) and not os.getenv('FORCE', True):
     proceed = input(f'Do you want to overwrite {output_file}? [y/N] ')
     if proceed.lower() != 'y':
         sys.exit(0)
 
 driver = connections.neo4j.open()
-with driver.session(database=schema.database) as session:
+with driver.session(database=DATASET.database) as session:
     session: neo4j.Session = session
-    LOG.info(f'Exporting {schema.database} to {output_file}')
+    LOG.info(f'Exporting {DATASET.database} to {output_file}')
     if not args.edges:
         result = session.run(
             query='CALL apoc.export.graphml.all($output_file, $export_options)',
             parameters={'output_file': output_file, 'export_options': export_options}
         )
     else:
-        edge_labels = [s.type for s in schema.edges if s.type in args.edges]
+        edge_labels = schema.get_edge_types()
         if len(edge_labels) != len(args.edges):
             LOG.error(f'Could not find some edges: {args.edges} vs {edge_labels}')
             sys.exit(1)
@@ -73,4 +72,4 @@ with driver.session(database=schema.database) as session:
         )
 
     if result.peek():
-        LOG.info(f'Successfully exported {schema.database} to {output_file}')
+        LOG.info(f'Successfully exported {DATASET.database} to {output_file}')

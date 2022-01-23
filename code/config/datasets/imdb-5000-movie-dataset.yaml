@@ -1,0 +1,5 @@
+database: imdb-5000-movie-dataset
+description: ''
+name: imdb-5000-movie-dataset
+tags: [dynamic]
+versions: {}
