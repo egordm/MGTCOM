@@ -82,7 +82,9 @@ class DataGraph(BaseGraph):
         return result
 
     def save_nodemapping(self, path: str):
-        self.to_nodemapping().to_csv(str(path), sep='\t', index=True, header=True, index_label='id', columns=['gid'])
+        nodemapping = self.to_nodemapping()
+        nodemapping += 1
+        nodemapping.to_csv(str(path), sep='\t', index=True, header=True, index_label='id', columns=['gid'])
 
     def add_timeranges(self):
         graph_add_timeranges(self.schema, self.graph)

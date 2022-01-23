@@ -4,9 +4,9 @@ from dataclasses import dataclass
 import pandas as pd
 from simple_parsing import field
 
-from datasets.graph_processing import graph_split_snapshot_ranges, graph_add_timeranges, graph_split_into_snapshots
+from datasets.graph_processing import graph_split_snapshot_ranges, graph_add_timeranges
 from shared.cli import parse_args
-from shared.graph import DataGraph, igraph_to_edgelist, write_edgelist, CommunityAssignment
+from shared.graph import DataGraph, CommunityAssignment
 from shared.logger import get_logger
 from shared.schema import DatasetSchema, GraphSchema, DatasetVersionType
 
@@ -41,6 +41,13 @@ LOG.info(f'Saved node mapping to {VERSION.train_part().nodemapping}')
 G.save_nodemapping(str(VERSION.train_part().nodemapping))
 nodemapping = G.to_nodemapping()
 
+if 'ground-truth' in DATASET.tags:
+    LOG.info(f'Saving ground-truth to {VERSION.train_part().ground_truth}')
+    comms = CommunityAssignment.load_comlist(str(DATASET.processed('ground_truth.ncomlist')), named=True)
+    comms = comms.remap_nodes(nodemapping).renumber_communities()
+    comms.named = False
+    comms.save_comlist(str(VERSION.train_part().ground_truth))
+
 if VERSION.type == DatasetVersionType.SNAPSHOTS:
     LOG.info(f'Setting time ranges for snapshots')
     graph_add_timeranges(schema, G)
@@ -60,14 +67,11 @@ if VERSION.type == DatasetVersionType.SNAPSHOTS:
         LOG.info(f'Writing snapshot {i} to {output_file}')
         G_snapshot.save_edgelist(str(output_file))
 
+        if 'ground-truth' in DATASET.tags:
+            LOG.info(f'Saving ground-truth to {output_file.with_suffix(".comlist")}')
+            comms_snapshot = comms.filter_nodes(G_snapshot.vs['gid'])
+            comms_snapshot.save_comlist(str(output_file.with_suffix(".comlist")))
+
 elif VERSION.type == DatasetVersionType.STATIC:
     LOG.info(f'Saving static graph to {VERSION.train_part().static}')
     G.save_edgelist(str(VERSION.train_part().static))
-
-    if 'ground-truth' in DATASET.tags:
-        LOG.info(f'Saving ground-truth to {VERSION.train_part().ground_truth}')
-        comms = CommunityAssignment.load_comlist(str(DATASET.processed('ground_truth.ncomlist')), named=True)
-        comms = comms.remap_nodes(nodemapping).renumber_communities()
-        comms.named = False
-        comms.save_comlist(str(VERSION.train_part().ground_truth))
-

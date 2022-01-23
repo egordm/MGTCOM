@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from typing import List
 
 import pandas as pd
 
@@ -48,6 +49,11 @@ class CommunityAssignment:
         com_names = self.data['cid'].unique()
         data = self.data.copy()
         data['cid'] = data['cid'].replace(com_names, range(len(com_names)))
+        return CommunityAssignment(data)
+
+    def filter_nodes(self, gid: List[NodeId]) -> 'CommunityAssignment':
+        data = self.data.copy()
+        data = data[data.index.isin(gid)]
         return CommunityAssignment(data)
 
     def to_comlist(self) -> ComList:
