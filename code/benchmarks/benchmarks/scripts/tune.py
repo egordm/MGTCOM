@@ -6,7 +6,7 @@ from simple_parsing import field
 
 import wandb
 from benchmarks.benchmarks.config import BenchmarkConfig
-from benchmarks.benchmarks.scripts import execute, evaluate
+from benchmarks.benchmarks.scripts import execute, evaluate, execute_evaluate
 from shared.cli import parse_args
 from shared.config import ConnectionConfig
 from shared.constants import BENCHMARKS_LOGS, WANDB_PROJECT, BENCHMARKS_RESULTS
@@ -25,7 +25,6 @@ class Args:
 
 
 def run(args: Args):
-    global_config = ConnectionConfig.load_config()
     baseline = BenchmarkConfig.load_config(args.baseline)
     dataset = DatasetSchema.load_schema(args.dataset)
 
@@ -71,8 +70,7 @@ def run(args: Args):
                 for param in baseline.get_params(dataset.name).to_dict().keys()
                 if param in config
             }
-            LOG.info(f"Running {run_name} with params {params}")
-            execute.run(
+            result = execute_evaluate.run(
                 execute.Args(
                     baseline=args.baseline,
                     dataset=args.dataset,
@@ -80,16 +78,6 @@ def run(args: Args):
                     run_name=run_name,
                 ),
                 params=params,
-            )
-            LOG.info(f"Running evaluation of {run_name}")
-            run_dir = BENCHMARKS_RESULTS.joinpath(baseline.name, run_name)
-            result = evaluate.run(
-                evaluate.Args(
-                    baseline=args.baseline,
-                    dataset=args.dataset,
-                    version=args.version,
-                    run_dir=run_dir,
-                )
             )
             LOG.info(f"Evaluation of {run_name} finished with result {result}")
             wandb.log(result)

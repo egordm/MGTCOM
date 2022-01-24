@@ -20,6 +20,14 @@ class TunedParameterValue(Serializable):
     def to_dict(self, dict_factory: Type[Dict] = dict, recurse: bool = True) -> Dict:
         return filter_none_values(super().to_dict(dict_factory, recurse))
 
+    def to_simple(self):
+        if self.values is not None:
+            return self.values[0]
+        elif self.value is not None:
+            return self.value
+        else:
+            return self.min
+
 
 ParameterValue = Union[RawParameterValue, TunedParameterValue]
 
@@ -42,7 +50,7 @@ class ParameterConfig(dict, Serializable):
 
     def to_simple_dict(self) -> Dict:
         return {
-            key: value.value
+            key: value.to_simple()
             for key, value in self.items()
         }
 

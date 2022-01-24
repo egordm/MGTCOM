@@ -60,5 +60,8 @@ def execute_benchmark(
                     }
                 )
                 p.wait()
+
+                if p.returncode != 0:
+                    raise Exception(f'Benchmark failed with exit code {p.returncode}')
     else:
         raise Exception("No entrypoint defined")
