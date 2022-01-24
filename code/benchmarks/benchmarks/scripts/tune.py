@@ -2,13 +2,14 @@ import datetime as dt
 import os
 from dataclasses import dataclass
 
-import wandb
 from simple_parsing import field
 
+import wandb
 from benchmarks.benchmarks.config import BenchmarkConfig
-from benchmarks.benchmarks.scripts import execute
+from benchmarks.benchmarks.scripts import execute, evaluate
 from shared.cli import parse_args
 from shared.config import ConnectionConfig
+from shared.constants import BENCHMARKS_LOGS, WANDB_PROJECT, BENCHMARKS_RESULTS
 from shared.logger import get_logger
 from shared.schema import DatasetSchema
 
@@ -25,35 +26,73 @@ class Args:
 
 def run(args: Args):
     global_config = ConnectionConfig.load_config()
-    global_config.wandb.open(config={
-        "baseline": args.baseline,
-        "dataset": args.dataset,
-        "version": args.version,
-    })
-
     baseline = BenchmarkConfig.load_config(args.baseline)
     dataset = DatasetSchema.load_schema(args.dataset)
 
+    tags = [
+        'baseline',
+        args.baseline,
+        args.dataset,
+        f'{args.dataset}:{args.version}',
+        *{*baseline.tags, *dataset.tags}
+    ]
+
+    os.environ['WANDB_DIR'] = str(BENCHMARKS_LOGS)
+    os.environ['WANDB_TAGS'] = ','.join(tags)
+
     current_dt = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    sweep_config = {
-        "name": f"sweep-{args.baseline}-{args.dataset}:{args.version}-{current_dt}",
+    sweep_id = wandb.sweep({
+        "name": f"sweep-{current_dt}-{args.baseline}-{args.dataset}:{args.version}",
         "method": "random",
-        "parameters": baseline.get_params(dataset.name).to_dict(),
-    }
-    sweep_id = wandb.sweep(sweep_config)
+        "parameters": {
+            **baseline.get_params(dataset.name).to_dict(),
+            "baseline": {
+                'value': args.baseline
+            },
+            "dataset": {
+                'value': args.dataset
+            },
+            "version": {
+                'value': args.version
+            },
+        },
+    }, project=WANDB_PROJECT)
 
     def runner():
-        with wandb.init() as run:
+        current_dt = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        run_name = f"{current_dt}-{args.baseline}-{args.dataset}:{args.version}"
+
+        with wandb.init(
+                name=run_name,
+        ) as run:
             config = wandb.config
-            u = 0
+            params = {
+                param: config[param]
+                for param in baseline.get_params(dataset.name).to_dict().keys()
+                if param in config
+            }
+            LOG.info(f"Running {run_name} with params {params}")
             execute.run(
                 execute.Args(
                     baseline=args.baseline,
                     dataset=args.dataset,
                     version=args.version,
+                    run_name=run_name,
                 ),
-
+                params=params,
             )
+            LOG.info(f"Running evaluation of {run_name}")
+            run_dir = BENCHMARKS_RESULTS.joinpath(baseline.name, run_name)
+            result = evaluate.run(
+                evaluate.Args(
+                    baseline=args.baseline,
+                    dataset=args.dataset,
+                    version=args.version,
+                    run_dir=run_dir,
+                )
+            )
+            LOG.info(f"Evaluation of {run_name} finished with result {result}")
+            wandb.log(result)
 
     wandb.agent(sweep_id, function=runner, count=args.run_count)
 

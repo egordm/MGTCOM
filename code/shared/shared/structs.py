@@ -15,3 +15,16 @@ def filter_none_values_recursive(d: Any) -> Any:
         return [filter_none_values_recursive(v) for v in d if v is not None]
     else:
         return d
+
+def dict_deep_merge(a: dict, b: dict) -> dict:
+    """
+    Recursively merge dicts a and b.
+    Keys in b take precedence over keys in a.
+    """
+    result = a.copy()
+    for k, v in b.items():
+        if k in result and isinstance(result[k], dict):
+            result[k] = dict_deep_merge(result[k], v)
+        else:
+            result[k] = v
+    return result

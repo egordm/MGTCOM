@@ -9,7 +9,7 @@ from benchmarks.benchmarks.evaluation import EvaluationContext, ANNOTATED_METRIC
 from shared.cli import parse_args
 from shared.logger import get_logger
 from shared.schema import DatasetSchema, TAG_GROUND_TRUTH
-
+from shared.structs import dict_deep_merge
 
 LOG = get_logger(os.path.basename(__file__))
 
@@ -40,9 +40,14 @@ def run(args: Args):
         metrics.extend(ANNOTATED_METRICS)
     metrics.extend(QUALITY_METRICS)
 
+    result = {}
     for metric_cls in metrics:
         metric = metric_cls(context)
-        print(metric.evaluate())
+        metric_result = metric.evaluate()
+        LOG.info('Evaluation result for metric %s: %s', metric.metric_name(), metric_result)
+        result = dict_deep_merge(result, metric_result)
+
+    return result
 
 
 if __name__ == "__main__":

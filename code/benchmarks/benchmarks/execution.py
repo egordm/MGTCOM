@@ -24,7 +24,7 @@ def params_to_args(params: Dict[str, Any]):
 
 
 def execute_benchmark(
-        config: BenchmarkConfig,
+        baseline: BenchmarkConfig,
         params: Dict[str, Any],
         dataset: DatasetSchema,
         dataset_version: str,
@@ -35,28 +35,28 @@ def execute_benchmark(
 
     version = dataset.get_version(dataset_version)
     input_dir = version.train.get_path()
-    output_dir = BENCHMARKS_RESULTS.joinpath(config.name, run_name)
+    output_dir = BENCHMARKS_RESULTS.joinpath(baseline.name, run_name)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     command = [
-        *config.execution.entrypoint,
+        *baseline.execution.entrypoint,
         *params_to_args(params),
-        '--input', str(config.execution.input_path(input_dir)),
-        '--output', str(config.execution.output_path(output_dir)),
+        '--input', str(baseline.execution.input_path(input_dir)),
+        '--output', str(baseline.execution.output_path(output_dir)),
     ]
     LOG.debug(f'Executing command: {" ".join(command)}')
 
-    if config.execution.entrypoint:
+    if baseline.execution.entrypoint:
         with get_logpipe('Baseline') as outpipe:
             with get_logpipe('Baseline', logging.ERROR) as errorpipe:
                 p = subprocess.Popen(
                     command,
                     shell=False,
                     stdout=outpipe, stderr=errorpipe,
-                    cwd=str(BASE_PATH.joinpath(config.execution.cwd)),
+                    cwd=str(BASE_PATH.joinpath(baseline.execution.cwd)),
                     env={
                         **os.environ,
-                        **config.execution.env,
+                        **baseline.execution.env,
                     }
                 )
                 p.wait()

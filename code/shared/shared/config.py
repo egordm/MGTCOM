@@ -1,10 +1,11 @@
+import os
 from dataclasses import dataclass
 from typing import Optional
 
 from neo4j import GraphDatabase, BoltDriver
 from simple_parsing import Serializable
 
-from shared.constants import GLOBAL_CONFIG_PATH, BENCHMARKS_LOGS
+from shared.constants import GLOBAL_CONFIG_PATH, BENCHMARKS_LOGS, WANDB_PROJECT
 from shared.logger import get_logger
 
 LOG = get_logger('config')
@@ -35,24 +36,12 @@ class WandbConfig(Serializable):
     api_key: str = ''
     mode: str = 'online'
 
-    def open(self, **kwargs) -> None:
-        global wandb_initialized
-        if not wandb_initialized:
-            LOG.info('Initializing wandb')
-            import wandb
-
-            if self.mode == 'online':
-                LOG.info('wadb Running in online mode')
-                wandb.login(key=self.api_key)
-
-            BENCHMARKS_LOGS.mkdir(exist_ok=True, parents=True)
-            wandb.init(
-                mode=self.mode,
-                dir=BENCHMARKS_LOGS,
-                project='Thesis',
-                **kwargs
-            )
-            wandb_initialized = True
+    def config(self):
+        return dict(
+            mode=self.mode,
+            dir=BENCHMARKS_LOGS,
+            project=WANDB_PROJECT,
+        )
 
 
 @dataclass
