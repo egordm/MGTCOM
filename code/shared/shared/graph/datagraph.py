@@ -1,4 +1,6 @@
+import pathlib
 from typing import List, Union, Tuple, Iterator
+import yaml
 
 import igraph as ig
 import pandas as pd
@@ -68,6 +70,7 @@ class DataGraph(BaseGraph):
     def save_edgelist(self, path: str):
         edges = self.to_edgelist()
         write_edgelist(edges, str(path))
+        self.write_graph_info(str(pathlib.Path(str(path)).with_suffix('.info.yaml')))
 
     def to_edgelist(self) -> EdgeList:
         if not self.valid_gids():
@@ -83,7 +86,6 @@ class DataGraph(BaseGraph):
 
     def save_nodemapping(self, path: str):
         nodemapping = self.to_nodemapping()
-        nodemapping += 1
         nodemapping.to_csv(str(path), sep='\t', index=True, header=True, index_label='id', columns=['gid'])
 
     def add_timeranges(self):
@@ -95,3 +97,15 @@ class DataGraph(BaseGraph):
     def to_snapshots(self, snapshot_ranges: List[Tuple[int, int]]) -> Iterator[Tuple[int, 'DataGraph']]:
         for i, G in graph_split_into_snapshots(self.schema, self.graph, snapshot_ranges):
             yield i, DataGraph(self.schema, G)
+
+    def write_graph_info(self, path: str):
+        data = {
+            'nodes': self.vcount(),
+            'edges': self.ecount(),
+        }
+        with open(str(path), 'w') as f:
+            yaml.dump(data, f)
+
+
+
+

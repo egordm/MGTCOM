@@ -19,7 +19,7 @@ def read_comlist(filepath: str, delimiter='\t', named=False) -> ComList:
     - first column is the node index
     - second column is the community index
     - all indices should be integers
-    - all indices should be 1-indexed
+    - all indices should be 0-indexed
 
     if named is True, then numeric index contraints are ignored
 
@@ -30,16 +30,10 @@ def read_comlist(filepath: str, delimiter='\t', named=False) -> ComList:
 
     result = pd.read_csv(filepath, sep=delimiter, header=None, names=['nid', 'cid']) \
         .set_index('nid').sort_index()
-
-    if not named:
-        # Make sure all indices are 0-indexed
-        result.index -= 1
-        result['cid'] -= 1
-
     return result
 
 
-def write_comlist(comlist: ComList, filepath: str, named=False):
+def write_comlist(comlist: ComList, filepath: str):
     """
     Writes a community list to a file.
 
@@ -48,7 +42,7 @@ def write_comlist(comlist: ComList, filepath: str, named=False):
     - have no header
     - have no comments
     - all indices should be integers
-    - all indices should be 1-indexed
+    - all indices should be 0-indexed
 
     if named is True, then numeric index contraints are ignored
 
@@ -56,14 +50,8 @@ def write_comlist(comlist: ComList, filepath: str, named=False):
     :param filepath:
     :return:
     """
-    result = comlist.sort_index().reset_index()
-
-    if not named:
-        # Make sure all indices are 1-indexed
-        result['nid'] += 1
-        result['cid'] += 1
-
-    result.to_csv(filepath, sep='\t', index=False, header=False, columns=['nid', 'cid'])
+    result = comlist.sort_index()
+    result.to_csv(filepath, sep='\t', index=True, header=False, columns=['cid'], index_label='nid')
 
 
 def read_coms(filepath: str) -> Coms:
@@ -75,14 +63,14 @@ def read_coms(filepath: str) -> Coms:
     - have one community per line
     - each line contains a tab-separated list of node indexes
     - all indices should be integers
-    - all indices should be 1-indexed
+    - all indices should be 0-indexed
 
     :param filepath:
     :return:
     """
     with open(filepath, 'r') as f:
         return {
-            i: [int(x) - 1 for x in re.split(r'\s|\t', line.strip())]
+            i: [int(x) for x in re.split(r'\s|\t', line.strip())]
             for i, line in enumerate(f.readlines())
         }
 
@@ -96,7 +84,7 @@ def write_coms(coms: Coms, filepath: str):
     - have one community per line
     - each line contains a tab-separated list of node indexes
     - all indices should be integers
-    - all indices should be 1-indexed
+    - all indices should be 0-indexed
 
     :param coms:
     :param filepath:
@@ -104,7 +92,7 @@ def write_coms(coms: Coms, filepath: str):
     """
     with open(filepath, 'w') as f:
         for _, coms in sorted(coms.items()):
-            f.write(' '.join(map(lambda x: x + 1, coms)))
+            f.write(' '.join(map(lambda x: x, coms)))
 
 
 def coms_to_comlist(coms: Coms) -> ComList:
@@ -137,11 +125,6 @@ def read_edgelist(filepath: str, delimiter='\t') -> EdgeList:
     """
     result = pd.read_csv(filepath, sep=delimiter, header=None, names=['src', 'dst']) \
         .sort_values(by=['src', 'dst'], ignore_index=True)
-
-    # Make sure all indices are 0-indexed
-    result['src'] -= 1
-    result['dst'] -= 1
-
     return result
 
 
@@ -163,8 +146,6 @@ def write_edgelist(edges: EdgeList, filepath: str, delimiter='\t'):
     """
     # Make sure all indices are 1-indexed
     df = edges.sort_values(by=['src', 'dst'], ignore_index=True)
-    df['src'] += 1
-    df['dst'] += 1
     df.to_csv(filepath, sep=delimiter, index=False, header=False, columns=['src', 'dst'])
 
 

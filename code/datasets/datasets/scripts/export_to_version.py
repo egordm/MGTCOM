@@ -6,7 +6,7 @@ from typing import Optional
 import pandas as pd
 from simple_parsing import field
 
-from datasets.graph_processing import graph_split_snapshot_ranges, graph_add_timeranges
+from datasets.graph_processing import graph_split_snapshot_ranges, graph_add_timeranges, graph_remove_loose_nodes
 from shared.cli import parse_args
 from shared.graph import DataGraph, CommunityAssignment
 from shared.logger import get_logger
@@ -33,9 +33,7 @@ def run(args: Args):
     # Load the graph
     LOG.info(f"Loading datagraph")
     G = DataGraph.from_schema(schema, unix_timestamp=True)
-
-    LOG.info('Adding GIDs')
-    G.add_gids()
+    graph_remove_loose_nodes(G)
 
     TRAIN_PART = VERSION.train
     TRAIN_PART.get_path().mkdir(parents=True, exist_ok=True)
@@ -44,13 +42,16 @@ def run(args: Args):
     # component_size = pd.Series(map(len, G.components('weak')))
 
     # Lock down node mapping. After this, we can't change the node graph anymore
+    LOG.info('Adding GIDs')
+    G.add_gids()
+
     LOG.info(f'Saving node mapping to {TRAIN_PART.nodemapping}')
     G.save_nodemapping(str(TRAIN_PART.nodemapping))
     nodemapping = G.to_nodemapping()
 
     if TAG_GROUND_TRUTH in DATASET.tags:
         LOG.info(f'Loading ground-truth')
-        comms = CommunityAssignment.load_comlist(str(DATASET.processed('ground_truth.ncomlist')), named=True)
+        comms = CommunityAssignment.load_comlist(str(DATASET.processed('ground_truth.ncomlist')))
         comms = comms.remap_nodes(nodemapping).renumber_communities()
         comms.named = False
 
