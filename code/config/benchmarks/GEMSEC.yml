@@ -16,7 +16,7 @@ parameters:
   learning_rate: 0.1
   clusters: 10
   gamma: 0.1
-  seed: [42, 1337]
+  seed: 42
 
 datasets:
   star-wars:

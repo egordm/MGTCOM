@@ -1,7 +1,7 @@
 database: DBLP-HCN
 description: ''
 name: DBLP-HCN
-tags: [dynamic, ground-truth]
+tags: [dynamic, ground-truth, overlapping]
 versions:
   static:
     parameters: { }

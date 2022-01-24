@@ -66,7 +66,7 @@ LOG.addHandler(ch)
 input_dir = pathlib.Path(args.input)
 output_dir = pathlib.Path(args.output)
 if args.dynamic:
-    input_files = list(sorted(input_dir.glob('snapshots/*.edgelist')))
+    input_files = list(sorted(input_dir.glob('*.edgelist')))
 else:
     input_files = list(sorted(input_dir.glob('*.edgelist')))
 
@@ -140,7 +140,7 @@ if mode == 'louvain':
                 LOG.warning('Not running in a terminal, using default level of -1')
             level = int(inp) if inp else -1
 
-        output_file = output_dir.joinpath(f.name).with_suffix('.coms')
+        output_file = tmp_dir.joinpath(f.name).with_suffix('.coms')
         with open(str(output_file), 'w') as fout:
             p = subprocess.Popen(
                 [
@@ -157,12 +157,15 @@ if mode == 'louvain':
     for f in community_files:
         LOG.info(f'Converting communities file {f} to row format')
         communities = defaultdict(list)
-        with f.open('r') as fin:
-            for line in fin:
-                line = line.strip()
-                if line:
-                    node, community = line.split()
-                    communities[int(community)].append(int(node))
+        comlist_file = output_dir.joinpath(f.with_suffix('.comlist').name)
+        with comlist_file.open('w') as fout:
+            with f.open('r') as fin:
+                for line in fin:
+                    line = line.strip()
+                    if line:
+                        node, community = line.split()
+                        communities[int(community)].append(int(node))
+                        fout.write(f'{int(node)}\t{int(community)}\n')
 
         with f.open('w') as fout:
             for community, nodes in sorted(communities.items()):
@@ -173,7 +176,7 @@ elif mode == 'moses':
     community_files = []
     for f in input_files:
         LOG.info(f'Running Moses on {f}')
-        output_file = output_dir.joinpath(f.with_suffix('.coms').name)
+        output_file = tmp_dir.joinpath(f.with_suffix('.coms').name)
         scores_file = tmp_dir.joinpath(f.with_suffix('.scores').name)
         p = subprocess.Popen(
             [
@@ -188,8 +191,23 @@ elif mode == 'moses':
         p.wait()
         community_files.append(output_file)
 
+    for f in community_files:
+        LOG.info(f'Converting communities file {f} to comlist format')
+        comlist_file = output_dir.joinpath(f.with_suffix('.comlist').name)
+        communities = defaultdict(list)
+        with comlist_file.open('w') as fout:
+            with f.open('r') as fin:
+                for cid, line in enumerate(fin):
+                    nids = [int(nid) for nid in line.strip().split()]
+                    communities[cid] = nids
+
+            for cid, nodes in sorted(communities.items()):
+                for nid in nodes:
+                    fout.write(f'{nid}\t{cid}\n')
+
+
 if args.dynamic:
-    N_TIMESTEPS = len(list(output_dir.glob('*.coms')))
+    N_TIMESTEPS = len(list(tmp_dir.glob('*.coms')))
 
     LOG.info('Running dynamic community detection')
     output_file = tmp_dir.joinpath('communities')
@@ -199,7 +217,7 @@ if args.dynamic:
             '-t', str(args.matching_threshold),
             '-o', str(output_file),
             '--death', str(args.death),
-            *list(sorted(map(str, output_dir.glob('*.coms')))),
+            *list(sorted(map(str, tmp_dir.glob('*.coms')))),
         ],
         shell=False,
         stdout=sys.stdout, stderr=sys.stderr,
@@ -242,7 +260,7 @@ if args.dynamic:
             '--persist', str(args.persist_threshold),
             '--max', str(args.max_step),
             '--length', str(args.min_length),
-            *list(sorted(map(str, output_dir.glob('*.coms')))),
+            *list(sorted(map(str, tmp_dir.glob('*.coms')))),
         ],
         shell=False,
         stdout=sys.stdout, stderr=sys.stderr,

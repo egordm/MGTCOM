@@ -1,6 +1,6 @@
 name: CommunityGAN
 description: "CommunityGAN"
-tags: [static, representation-based]
+tags: [static, representation-based, overlapping]
 
 execution:
   cwd: baselines/CommunityGAN
@@ -50,5 +50,4 @@ datasets:
   star-wars:
     versions:
       - static
-    parameters:
-      overlap_threshold: 1.0
+    parameters: {}

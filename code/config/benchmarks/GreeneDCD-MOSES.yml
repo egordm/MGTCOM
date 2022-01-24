@@ -1,17 +1,13 @@
-name: GreeneDCD-louvain
+name: GreeneDCD-MOSES
 description: "GreeneDCD benchmark"
-tags: [dynamic, link-based]
+tags: [dynamic, link-based, overlapping]
 
 execution:
   cwd: baselines/GreeneDCD
-  entrypoint: [docker-compose, run, greenedcd, louvain, --dynamic]
+  entrypoint: [docker-compose, run, greenedcd, moses, --dynamic]
   containerized: true
 
 parameters:
-  weighted: false
-  epsilon: 0.001
-  reuse_partition: false
-  level: -1
   matching_threshold: 0.1
   death:
     values: [3, 4]
@@ -24,4 +20,4 @@ datasets:
     versions:
       - snapshots_k=5
     parameters:
-      weighted: false
+      max_step: -1
