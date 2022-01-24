@@ -2,22 +2,20 @@ import datetime as dt
 import logging
 import os
 import subprocess
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
-from typeguard import check_type
-
-from benchmarks.benchmarks.config import BenchmarkConfig, ParameterConfig, RawParameterValue
+from benchmarks.benchmarks.config import BenchmarkConfig
 from shared.constants import BENCHMARKS_RESULTS, BASE_PATH
 from shared.logger import get_logger, get_logpipe
 from shared.schema import DatasetSchema
 
-LOG = get_logger('Executor')
+LOG = get_logger(os.path.basename(__file__))
 
 
-def params_to_args(params: ParameterConfig):
+def params_to_args(params: Dict[str, Any]):
     result = []
     for k, v in params.items():
-        if check_type(k, v, RawParameterValue):
+        if not isinstance(v, (int, float, str, bool)):
             raise Exception("Only raw parameter values are supported")
 
         value = str(v) if not isinstance(v, bool) else str(v).lower()
@@ -30,13 +28,14 @@ def execute_benchmark(
         params: Dict[str, Any],
         dataset: DatasetSchema,
         dataset_version: str,
-        prefix: str,
+        run_name: Optional[str] = None,
 ):
-    run_name = f'{prefix}_{dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}'
+    if run_name is None:
+        run_name = f'run_{dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{dataset}_{dataset_version}'
 
     version = dataset.get_version(dataset_version)
-    input_dir = version.train_part().get_path()
-    output_dir = BENCHMARKS_RESULTS.joinpath(config.name, dataset.name, run_name)
+    input_dir = version.train.get_path()
+    output_dir = BENCHMARKS_RESULTS.joinpath(config.name, run_name)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     command = [

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Iterator
 
 from astropy.io.misc import yaml
 from simple_parsing import Serializable, field
@@ -10,10 +10,14 @@ from shared.constants import CONFIG_DATASETS, DATASETS_DATA_RAW, DATASETS_DATA_P
     DATASETS_DATA_EXPORT
 from shared.string import to_identifier
 
+TAG_DYNAMIC = 'dynamic'
+TAG_STATIC = 'static'
+TAG_GROUND_TRUTH = 'ground-truth'
+
 
 class DatasetVersionType(Enum):
-    SNAPSHOTS = 'snapshots'
-    STATIC = 'static'
+    EDGELIST_SNAPSHOTS = 'edgelist_snapshots'
+    EDGELIST_STATIC = 'edgelist_static'
 
 
 @dataclass
@@ -26,17 +30,22 @@ class DatasetVersionPart:
     def exists(self):
         return self.path.exists()
 
-    @property
-    def snapshots(self) -> Path:
-        return self.path.joinpath('snapshots')
+    def snapshot_edgelist(self, i: int) -> Path:
+        return self.path.joinpath(f'{str(i).zfill(2)}_snapshot.edgelist')
+
+    def get_snapshot_edgelists(self) -> Iterator[Path]:
+        return self.path.glob('*_snapshot.edgelist')
+
+    def snapshot_ground_truth(self, i: int) -> Path:
+        return self.snapshot_edgelist(i).with_suffix('.comlist')
 
     @property
-    def static(self) -> Path:
+    def static_edgelist(self) -> Path:
         return self.path.joinpath('static.edgelist')
 
     @property
     def static_ground_truth(self) -> Path:
-        return self.path.joinpath('static.comlist')
+        return self.static_edgelist.with_suffix('.comlist')
 
     @property
     def nodemapping(self) -> Path:
@@ -53,9 +62,17 @@ class DatasetVersion(Serializable):
         return self._path
 
     def train_part(self) -> DatasetVersionPart:
+        return self.train
+
+    @property
+    def train(self):
         return DatasetVersionPart(self.get_path().joinpath('train'))
 
     def test_part(self) -> DatasetVersionPart:
+        return self.test
+
+    @property
+    def test(self):
         return DatasetVersionPart(self.get_path().joinpath('test'))
 
     def get_param(self, name: str, default=None) -> Optional[Any]:

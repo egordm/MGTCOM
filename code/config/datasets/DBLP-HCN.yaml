@@ -5,9 +5,9 @@ tags: [dynamic, ground-truth]
 versions:
   static:
     parameters: { }
-    type: static
+    type: edgelist_static
   split_5:
-    type: snapshots
+    type: edgelist_snapshots
     parameters:
       snapshot_count: 5
       snapshot_coverage: 0.95

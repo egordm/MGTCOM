@@ -51,7 +51,7 @@ class AnnotatedEvaluationMetric(EvaluationMetric):
             self.LOG.debug('Evaluating dynamic benchmark')
             scores = []
             for i, ground_truth_file in enumerate(
-                    sorted(self.context.version.train_part().snapshots.glob('*.comlist'))):
+                    sorted(self.context.version.train_part().snapshot_edgelist.glob('*.comlist'))):
                 LOG.debug(f'Evaluating snapshot {i}')
                 prediction_file = self.context.output_dir.joinpath(ground_truth_file.name)
                 ground_truth = CommunityAssignment.load_comlist(str(ground_truth_file))
@@ -94,7 +94,7 @@ class QualityMetric(EvaluationMetric):
             self.LOG.debug('Evaluating dynamic benchmark')
             scores = []
             for i, graph_file in enumerate(
-                    sorted(self.context.version.train_part().snapshots.glob('*.edgelist'))):
+                    sorted(self.context.version.train_part().snapshot_edgelist.glob('*.edgelist'))):
                 LOG.debug(f'Evaluating snapshot {i}')
                 prediction_file = self.context.output_dir.joinpath(graph_file.name).with_suffix('.comlist')
                 prediction = CommunityAssignment.load_comlist(str(prediction_file))
@@ -117,7 +117,7 @@ class QualityMetric(EvaluationMetric):
             )
             prediction = CommunityAssignment.load_comlist(str(prediction_file))
             graph = read_edgelist_graph(
-                str(self.context.version.train_part().static),
+                str(self.context.version.train_part().static_edgelist),
                 directed=self.context.version.get_param('directed', False),
             )
             score = self.evaluate_single(graph, prediction)
@@ -149,6 +149,7 @@ class MetricNF1(AnnotatedEvaluationMetric):
     def metric_name(self) -> str:
         return 'nf1'
 
+
 class MetricModularity(QualityMetric):
     def evaluate_single(
             self,
@@ -159,6 +160,7 @@ class MetricModularity(QualityMetric):
 
     def metric_name(self) -> str:
         return 'modularity'
+
 
 class MetricConductance(QualityMetric):
     def evaluate_single(

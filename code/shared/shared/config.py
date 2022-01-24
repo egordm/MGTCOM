@@ -35,7 +35,7 @@ class WandbConfig(Serializable):
     api_key: str = ''
     mode: str = 'online'
 
-    def open(self) -> None:
+    def open(self, **kwargs) -> None:
         global wandb_initialized
         if not wandb_initialized:
             LOG.info('Initializing wandb')
@@ -49,7 +49,8 @@ class WandbConfig(Serializable):
             wandb.init(
                 mode=self.mode,
                 dir=BENCHMARKS_LOGS,
-                project='Thesis'
+                project='Thesis',
+                **kwargs
             )
             wandb_initialized = True
 

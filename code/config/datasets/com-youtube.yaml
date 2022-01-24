@@ -5,4 +5,4 @@ tags: [static, ground-truth]
 versions:
   static:
     parameters: {}
-    type: static
+    type: edgelist_static
