@@ -11,3 +11,8 @@ versions:
     parameters:
       snapshot_count: 5
       snapshot_coverage: 0.95
+  split_10:
+    type: edgelist_snapshots
+    parameters:
+      snapshot_count: 10
+      snapshot_coverage: 0.95

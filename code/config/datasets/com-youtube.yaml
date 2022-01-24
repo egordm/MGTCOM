@@ -6,3 +6,7 @@ versions:
   static:
     parameters: {}
     type: edgelist_static
+  static_small:
+    parameters:
+      subsample: 0.5
+    type: edgelist_static

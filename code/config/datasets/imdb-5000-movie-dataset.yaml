@@ -2,4 +2,13 @@ database: imdb-5000-movie-dataset
 description: ''
 name: imdb-5000-movie-dataset
 tags: [dynamic]
-versions: {}
+versions:
+  static:
+    parameters: { }
+    type: edgelist_static
+  split_5:
+    type: edgelist_snapshots
+    parameters:
+      snapshot_count: 5
+      snapshot_coverage: 0.95
+

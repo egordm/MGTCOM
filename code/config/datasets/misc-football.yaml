@@ -2,4 +2,7 @@ database: misc-football
 description: ''
 name: misc-football
 tags: [static]
-versions: {}
+versions:
+  static:
+    parameters: { }
+    type: edgelist_static

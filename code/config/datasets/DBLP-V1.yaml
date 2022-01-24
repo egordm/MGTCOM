@@ -6,9 +6,19 @@ versions:
   static:
     parameters: { }
     type: edgelist_static
+  split_5_small:
+    type: edgelist_snapshots
+    parameters:
+      subsample: 0.5
+      snapshot_count: 5
+      snapshot_coverage: 0.95
   split_5:
     type: edgelist_snapshots
     parameters:
       snapshot_count: 5
       snapshot_coverage: 0.95
-
+  split_10:
+    type: edgelist_snapshots
+    parameters:
+      snapshot_count: 10
+      snapshot_coverage: 0.95

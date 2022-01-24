@@ -1,13 +1,19 @@
 database: star-wars
 description: ''
 name: star-wars
-tags: [dynamic]
+tags: [dynamic, interaction]
 versions:
+  static:
+    type: edgelist_static
+    parameters: {}
   split_5:
     type: edgelist_snapshots
     parameters:
       snapshot_count: 5
       snapshot_coverage: 0.95
-  static:
-    type: edgelist_static
-    parameters: {}
+  split_7:
+    type: edgelist_snapshots
+    parameters:
+      snapshot_count: 7
+      snapshot_coverage: 0.95
+
