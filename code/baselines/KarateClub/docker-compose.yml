@@ -3,5 +3,5 @@ services:
   karateclub:
     build: .
     volumes:
-      - ../../datasets/data/export/:/input
-      - ../../benchmarks/outputs/:/output
+      - ../../storage/datasets/versions/:/input
+      - ../../storage/results/:/output

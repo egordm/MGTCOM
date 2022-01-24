@@ -114,4 +114,24 @@ def graph_split_snapshot_ranges(
 
 def graph_remove_loose_nodes(graph: ig.Graph):
     to_delete_ids = [v.index for v in graph.vs if v.degree() == 0]
+    LOG.debug(f'Removing {len(to_delete_ids)} loose nodes')
+    graph.delete_vertices(to_delete_ids)
+
+
+def graph_subsample(graph: ig.Graph, percentage: float) -> ig.Graph:
+    mask = np.random.randint(0, 100, graph.vcount()) < (percentage * 100)
+    nids = np.where(mask)[0]
+    return graph.induced_subgraph(nids)
+
+
+def graph_filter_connected_components(graph: ig.Graph, min_size: int):
+    components = graph.components('weak')
+    n_components_to_remove = len([c for c in components if len(c) < min_size])
+    to_delete_ids = [
+        nid
+        for c in components
+        if len(c) < min_size
+        for nid in c
+    ]
+    LOG.debug(f'(graph_filter_connected_components) Removing {len(to_delete_ids)} nodes and {n_components_to_remove} components')
     graph.delete_vertices(to_delete_ids)

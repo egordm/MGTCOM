@@ -21,10 +21,17 @@ class Args:
     version: Optional[str] = field(default=None, help="Dataset version")
 
 
+DEFAULT_CC_FILTER = 4
+
+
 def run(args: Args):
     DATASET = DatasetSchema.load_schema(args.dataset)
     VERSION = DATASET.get_version(args.version)
     schema = GraphSchema.from_dataset(DATASET)
+
+    if VERSION.get_path().exists() and not os.getenv('FORCE'):
+        LOG.info(f"Dataset version {args.dataset}:{args.version} already exists. Use --force to overwrite.")
+        return
 
     # Delete existing data
     if VERSION.get_path().exists():
@@ -32,7 +39,21 @@ def run(args: Args):
 
     # Load the graph
     LOG.info(f"Loading datagraph")
-    G = DataGraph.from_schema(schema, unix_timestamp=True)
+    G = DataGraph.from_schema(
+        schema,
+        unix_timestamp=True,
+        prefix_id=True if 'DBLP' in DATASET.name else False
+    )
+
+    if VERSION.get_param('subsample', None) is not None:
+        LOG.info(f"Subsampling graph to {VERSION.get_param('subsample') * 100}% nodes")
+        G = G.subsample_nodes(VERSION.get_param('subsample'))
+
+    if VERSION.get_param('cc_filter', DEFAULT_CC_FILTER) is not None:
+        LOG.info(f"Filtering graph connected components. Min size: {VERSION.get_param('cc_filter', DEFAULT_CC_FILTER)}")
+        G.filter_connected_components(VERSION.get_param('cc_filter', DEFAULT_CC_FILTER))
+
+    LOG.info('Removing loose nodes')
     graph_remove_loose_nodes(G)
 
     TRAIN_PART = VERSION.train
@@ -90,7 +111,7 @@ if __name__ == '__main__':
     if args.version is None:
         DATASET = DatasetSchema.load_schema(args.dataset)
         for version in DATASET.versions.keys():
-            LOG.info(f'Exporting version {version}')
+            LOG.info(f'Exporting version {args.dataset}:{version}')
             args.version = version
             run(args)
     else:

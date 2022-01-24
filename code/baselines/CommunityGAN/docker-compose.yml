@@ -3,8 +3,8 @@ services:
   communitygan:
     build: .
     volumes:
-      - ../../datasets/data/export/:/input
-      - ../../benchmarks/outputs/:/output
+      - ../../storage/datasets/versions/:/input
+      - ../../storage/results/:/output
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl

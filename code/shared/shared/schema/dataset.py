@@ -7,7 +7,7 @@ from astropy.io.misc import yaml
 from simple_parsing import Serializable, field
 
 from shared.constants import CONFIG_DATASETS, DATASETS_DATA_RAW, DATASETS_DATA_PROCESSED, \
-    DATASETS_DATA_EXPORT
+    DATASETS_DATA_EXPORT, DATASETS_DATA_VERSIONS
 from shared.string import to_identifier
 
 TAG_DYNAMIC = 'dynamic'
@@ -105,6 +105,12 @@ class DatasetPath:
     def export_str(self, *args: str) -> str:
         return str(self.export(*args))
 
+    def version(self, *args: str) -> Path:
+        return DATASETS_DATA_VERSIONS.joinpath(self.name, *args)
+
+    def version_str(self, *args: str) -> str:
+        return str(self.version(*args))
+
     def __str__(self):
         return self.name
 
@@ -119,7 +125,7 @@ class DatasetSchema(DatasetPath, Serializable):
 
     def __post_init__(self):
         for name, version in self.versions.items():
-            version._path = self.export('versions').joinpath(name)
+            version._path = self.version(name)
 
     @classmethod
     def load_schema(cls, name, **kwargs) -> 'DatasetSchema':

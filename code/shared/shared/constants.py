@@ -7,14 +7,19 @@ GLOBAL_CONFIG_PATH = BASE_PATH.joinpath('config')
 CONFIG_DATASETS = GLOBAL_CONFIG_PATH.joinpath('datasets')
 CONFIG_BENCHMARKS = GLOBAL_CONFIG_PATH.joinpath('benchmarks')
 
+STORAGE_PATH = BASE_PATH.joinpath('storage')
+TMP_PATH = STORAGE_PATH.joinpath('tmp')
+
 DATASETS_PATH = BASE_PATH.joinpath('datasets')
-DATASETS_DATA_RAW = DATASETS_PATH.joinpath('data/raw')
-DATASETS_DATA_PROCESSED = DATASETS_PATH.joinpath('data/processed')
-DATASETS_DATA_EXPORT = DATASETS_PATH.joinpath('data/export')
+DATASETS_DATA = STORAGE_PATH.joinpath('datasets')
+DATASETS_DATA_RAW = DATASETS_DATA.joinpath('raw')
+DATASETS_DATA_PROCESSED = DATASETS_DATA.joinpath('processed')
+DATASETS_DATA_EXPORT = DATASETS_DATA.joinpath('export')
+DATASETS_DATA_VERSIONS = DATASETS_DATA.joinpath('versions')
 
 BENCHMARKS_PATH = BASE_PATH.joinpath('benchmarks')
 BENCHMARKS_OUTPUTS = BENCHMARKS_PATH.joinpath('outputs')
-BENCHMARKS_LOGS = BENCHMARKS_OUTPUTS.joinpath('logs')
-BENCHMARKS_RESULTS = BENCHMARKS_OUTPUTS.joinpath('results')
+BENCHMARKS_LOGS = STORAGE_PATH.joinpath('logs')
+BENCHMARKS_RESULTS = STORAGE_PATH.joinpath('results')
 
 WANDB_PROJECT = 'Thesis'

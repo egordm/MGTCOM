@@ -13,36 +13,35 @@
   - [x] DBLP
   - [x] com-* datasets
 - [x] Add baseline config format (and add configs)
-- [ ] Add dynamic community file format holding inter time community id matches
-- [ ] Add baseline benchmarking based on config
-- [ ] Add W&B support for running baselines
-- [ ] Implement evaluation metrics:
+- [x] Add dynamic community file format holding inter time community id matches
+- [x] Add baseline benchmarking based on config
+- [x] Add W&B support for running baselines
+- [x] Implement evaluation metrics:
   - Annotated:
   - [x] NMI
   - [x] NF1
-  - [ ] Jaccard Coefficient
-  - [ ] Rand-Index
-  - [ ] Overlapping-NMI
-  - [ ] Omega-Index
+  - [x] Jaccard Coefficient
+  - [x] Rand-Index
+  - [x] Overlapping-NMI
+  - [x] Omega-Index
   - Metric based:
   - [x] Modularity
-  - [ ] Conductance
-  - [ ] Expansion
-  - [ ] Internal Density
-  - [ ] Cut Ratio/Normalized Cut
-  - [ ] Maximum/Average ODF
-  - [ ] Triangle Participation Ratio (probably wont - high computation complexity)
-- [ ] Add evaluation metrics to the baselines
+  - [x] Conductance
+  - [x] Expansion
+  - [x] Internal Density
+  - [x] Cut Ratio/Normalized Cut
+  - [x] Maximum/Average ODF
+  - [x] Triangle Participation Ratio (probably wont - high computation complexity)
+- [x] Add evaluation metrics to the baselines
 - [ ] Add a way to visualize CD results
-- [ ] Implementation overlapping NMI - [LINK](https://github.com/ponxosio/pyonmi)
 - [ ] Run Static Community Detection on benchmark datasets
 - [ ] Run Dynamic Community Detection on benchmark datasets
 - [ ] Run Representation Learning on benchmark datasets
 - [ ] Implement remaining DCD methods
 - [ ] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD 
 - [ ] Document used data formats: (and their standards / invariants)
-  - [ ] Edgelist (1 indexed)
-  - [ ] Comlist (1 indexed?)
+  - [ ] Edgelist (0 indexed)
+  - [ ] Comlist (0 indexed)
   - [ ] tracking.tsv
 - [x] Run thesis through GeCTOR 
 - [x] Collect dataset statistics

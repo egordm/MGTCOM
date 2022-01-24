@@ -1,2 +1,9 @@
 ./env
 config/connections.yml
+./storage/datasets/*
+!./storage/datasets/.gitkeep
+./storage/logs/*
+!./storage/logs/.gitkeep
+./storage/results/*
+!./storage/results/.gitkeep
+./storage/tmp

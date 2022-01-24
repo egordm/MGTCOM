@@ -25,5 +25,6 @@ dependencies:
   - fsspec
   - pip:
       - neo4j
+      - cdlib
       - -r datasets/requirements.txt
       - -r benchmarks/requirements.txt

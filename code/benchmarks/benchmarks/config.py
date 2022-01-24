@@ -4,7 +4,8 @@ from typing import Dict, Optional, Union, List, Any, Type
 
 from simple_parsing import Serializable, field
 
-from shared.constants import CONFIG_BENCHMARKS, BASE_PATH, DATASETS_DATA_EXPORT, BENCHMARKS_OUTPUTS
+from shared.constants import CONFIG_BENCHMARKS, BASE_PATH, BENCHMARKS_RESULTS, \
+    DATASETS_DATA_VERSIONS
 from shared.structs import filter_none_values
 
 RawParameterValue = Any
@@ -64,13 +65,13 @@ class ExecutionConfig(Serializable):
 
     def input_path(self, path: pathlib.Path) -> pathlib.Path:
         if self.containerized:
-            return pathlib.Path('/input') / path.relative_to(DATASETS_DATA_EXPORT)
+            return pathlib.Path('/input') / path.relative_to(DATASETS_DATA_VERSIONS)
         else:
             return BASE_PATH.joinpath(path)
 
     def output_path(self, path: pathlib.Path) -> pathlib.Path:
         if self.containerized:
-            return pathlib.Path('/output') / path.relative_to(BENCHMARKS_OUTPUTS)
+            return pathlib.Path('/output') / path.relative_to(BENCHMARKS_RESULTS)
         else:
             return BASE_PATH.joinpath(path)
 
@@ -102,4 +103,3 @@ class BenchmarkConfig(Serializable):
         if not path.exists():
             raise FileNotFoundError(f'{path} does not exist')
         return BenchmarkConfig.load(path)
-

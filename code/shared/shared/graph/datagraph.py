@@ -5,7 +5,8 @@ import yaml
 import igraph as ig
 import pandas as pd
 
-from datasets.graph_processing import graph_add_timeranges, graph_split_into_snapshots
+from datasets.graph_processing import graph_add_timeranges, graph_split_into_snapshots, graph_subsample, \
+    graph_filter_connected_components
 from shared.graph import igraph_to_edgelist, write_edgelist, EdgeList
 from shared.graph.loading import pd_from_graph_schema
 from shared.schema import GraphSchema
@@ -105,6 +106,13 @@ class DataGraph(BaseGraph):
         }
         with open(str(path), 'w') as f:
             yaml.dump(data, f)
+
+    def subsample_nodes(self, percentage: float) -> 'DataGraph':
+        return DataGraph(self.schema, graph_subsample(self.graph, percentage))
+
+    def filter_connected_components(self, min_size: int = 1):
+        graph_filter_connected_components(self.graph, min_size)
+
 
 
 
