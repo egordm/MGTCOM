@@ -6,13 +6,13 @@ T = length(snapshotFiles);
 N = 0;
 for i = 1:T
     xx=load(snapshotFiles{i});
-    N = max([N, max(max(xx))]);
+    N = max([N, max(max(xx))]) + 1;
 end
 
 % Load the network snapshots in memory
 adjMatrix=cell(1,T);
 for i = 1:T
-    adjMatrix{i}=edgelistFile2adjMatrix(snapshotFiles{i}, N);
+    adjMatrix{i}=edgelistFile2adjMatrixCustom(snapshotFiles{i}, N);
 end
 
 % evolutionary clustering

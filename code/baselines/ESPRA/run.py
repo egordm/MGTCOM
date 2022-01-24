@@ -32,15 +32,11 @@ eng.runESPRA(
 
 print('Converting output snapshots...')
 for file in tmp_dir.glob('dynamic.*.communities.txt'):
-    with file.open('r') as f:
-        communities = defaultdict(list)
-        for line in f.readlines():
-            node, community = line.split()
-            communities[int(community)].append(int(node))
-
     index = file.name.split('.')[1]
-    community_count = max(communities.keys())
-    with output_dir.joinpath(str(index).zfill(2) + '_snapshot.coms').open('w') as f:
-        for community in range(community_count):
-            nodes = communities.get(community + 1, [])
-            f.write(' '.join(map(str, nodes)) + '\n')
+    out_file = output_dir.joinpath(str(index).zfill(2) + '_snapshot.comlist')
+
+    with out_file.open('w') as fout:
+        with file.open('r') as fin:
+            for line in fin.readlines():
+                node, community = line.split()
+                fout.write(f'{int(node) - 1}\t{int(community) - 1}\n')
