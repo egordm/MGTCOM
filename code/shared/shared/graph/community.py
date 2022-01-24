@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from typing import List
 
 import pandas as pd
+from cachetools import cached
+from cdlib import NodeClustering
 
 from shared.graph import ComList, read_comlist, write_comlist, read_coms, coms_to_comlist, comlist_to_coms, write_coms, \
     Coms
@@ -16,13 +18,11 @@ LOG = get_logger(os.path.basename(__file__))
 @dataclass
 class CommunityAssignment:
     data: ComList
-    named: bool = False
 
     @classmethod
-    def load_comlist(cls, filepath: str, named=False) -> 'CommunityAssignment':
+    def load_comlist(cls, filepath: str) -> 'CommunityAssignment':
         return CommunityAssignment(
-            read_comlist(filepath, named=named),
-            named
+            read_comlist(filepath)
         )
 
     @classmethod
@@ -60,12 +60,25 @@ class CommunityAssignment:
         return self.data
 
     def save_comlist(self, filepath: str) -> None:
-        write_comlist(self.data, filepath, named=self.named)
+        write_comlist(self.data, filepath)
 
     def to_comms(self) -> Coms:
         return comlist_to_coms(self.data)
 
     def save_comms(self, filepath: str) -> None:
         write_coms(self.to_comms(), filepath)
+
+    def overlapping(self):
+        return len(self.data.index) > len(self.data.index.unique())
+
+    def is_empty(self) -> bool:
+        return len(self.data.index) == 0
+
+    def to_nodeclustering(self) -> NodeClustering:
+        return NodeClustering(
+            list(self.to_comms().values()),
+            None
+        )
+
 
 

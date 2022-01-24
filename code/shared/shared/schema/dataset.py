@@ -13,6 +13,7 @@ from shared.string import to_identifier
 TAG_DYNAMIC = 'dynamic'
 TAG_STATIC = 'static'
 TAG_GROUND_TRUTH = 'ground-truth'
+TAG_OVERLAPPING = 'overlapping'
 
 
 class DatasetVersionType(Enum):
@@ -34,10 +35,13 @@ class DatasetVersionPart:
         return self.path.joinpath(f'{str(i).zfill(2)}_snapshot.edgelist')
 
     def get_snapshot_edgelists(self) -> Iterator[Path]:
-        return self.path.glob('*_snapshot.edgelist')
+        return sorted(self.path.glob('*_snapshot.edgelist'))
 
     def snapshot_ground_truth(self, i: int) -> Path:
         return self.snapshot_edgelist(i).with_suffix('.comlist')
+
+    def get_snapshot_ground_truths(self) -> Iterator[Path]:
+        return map(lambda x: x.with_suffix('.comlist'), self.get_snapshot_edgelists())
 
     @property
     def static_edgelist(self) -> Path:

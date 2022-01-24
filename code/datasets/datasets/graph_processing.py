@@ -110,3 +110,8 @@ def graph_split_snapshot_ranges(
         plt.show()
 
     return snapshot_ranges
+
+
+def graph_remove_loose_nodes(graph: ig.Graph):
+    to_delete_ids = [v.index for v in graph.vs if v.degree() == 0]
+    graph.delete_vertices(to_delete_ids)

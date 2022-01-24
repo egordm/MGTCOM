@@ -19,7 +19,7 @@ def igraph_to_edgelist(graph: ig.Graph):
     return df
 
 
-def igraph_to_nx(graph: ig.Graph, create_using=None):
+def igraph_to_nx(graph: ig.Graph):
     names = graph.vs['name']
     edge_df = pd.DataFrame([
         (names[s], names[t])
