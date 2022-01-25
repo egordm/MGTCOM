@@ -40,10 +40,6 @@ def save_communities(model, output_file):
     nn = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(centroids)
     distances, indices = nn.kneighbors(embeddings)
 
-    communities = defaultdict(list)
-    for i, index in enumerate(indices):
-        communities[index[0]].append(i)
-
     vocab = {}
     if isinstance(vocab, dict):
         for i, node in model.vocab.items():
@@ -52,9 +48,13 @@ def save_communities(model, output_file):
         for i in range(embeddings.shape[0]):
             vocab[i] = i
 
+    comlist = []
+    for i, index in enumerate(indices):
+        comlist.append((vocab[i], index[0]))
+
     with open(output_file, 'w') as f:
-        for key, value in communities.items():
-            f.write(' '.join(map(lambda x: str(vocab[x]), value)) + '\n')
+        for nid, cid in sorted(comlist):
+            f.write('{}\t{}\n'.format(nid, cid))
 
 
 if __name__ == "__main__":
@@ -213,5 +213,5 @@ if __name__ == "__main__":
 
                 io_utils.save_embedding(model.centroid, list(range(len(model.centroid))),
                                         file_name=str(output_file_path.joinpath('community_centroids')))
-                save_communities(model, output_file_path.joinpath('default.coms'))
-                save_communities(model, output_dir.joinpath('default.coms'))
+                save_communities(model, output_file_path.joinpath('static.comlist'))
+                save_communities(model, output_dir.joinpath('static.comlist'))

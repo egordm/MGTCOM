@@ -1,10 +1,10 @@
-name: ARCHANGEL
-description: "Archangel benchmark"
-tags: [dynamic, link-based, overlapping]
+name: ANGEL
+description: "Angel benchmark"
+tags: [static, link-based, overlapping]
 
 execution:
   cwd: baselines/ANGEL
-  entrypoint: [docker-compose, run, angel]
+  entrypoint: [docker-compose, run, angel, --angel]
   containerized: true
 
 parameters:
@@ -16,62 +16,46 @@ parameters:
     max: 0.9
   min_comsize: 1
 
+
 datasets:
   com-youtube:
     versions: []
     parameters: {}
   DBLP-HCN:
     versions:
-      - split_5
+      - static
     parameters: {}
   DBLP-V1:
     versions:
-      - split_5_small
-      - split_5
-      - split_10
+      - static
     parameters: { }
   DBLP-V3:
     versions:
-      - split_5
-      - split_10
     parameters: { }
   email-Eu-core:
-    versions: []
+    versions:
+      - static
     parameters: { }
   enron-mail-20150507:
-    versions:
-      - split_10_small
-      - split_5
-      - split_10
-      - split_20
+    versions: []
     parameters: { }
   imdb-5000-movie-dataset:
     versions:
-      - split_5
+      - static
     parameters: { }
   misc-football:
-    versions: []
+    versions:
+      - static
     parameters: { }
   social-distancing-student:
     versions:
-      - split_5
-      - split_10
+      - static
     parameters: { }
   star-wars:
     versions:
-      - split_5
-      - split_7
-    parameters: { }
-  sx-mathoverflow:
-    versions:
-      - split_6
-      - split_10
-    parameters: { }
-  sx-superuser:
-    versions:
-      - split_6
-      - split_10
+      - static
     parameters: { }
   ucidata-zachary:
-    versions: []
+    versions:
+      - static
     parameters: { }

@@ -8,12 +8,18 @@ execution:
   containerized: true
 
 parameters:
+  run_count: 15
+  timeout: 600
   n_communities: -1
   min_communities: 5
   max_communities: 500
   n_trials: 10
-  alpha: 0.05
-  beta: 0.1
+  alpha:
+    min: 0.05
+    max: 0.2
+  beta:
+    min: 0.05
+    max: 0.2
   allow_reference: 0
   disable_eta: 1
   same_eta: 1
@@ -29,8 +35,13 @@ parameters:
   n_sample_gen: 5
   n_sample_dis: 5
   lr_gen: 1e-3
-  lr_dis: 1e-3
+    min: 1e-3
+    max: 1e-2
+  lr_dis:
+    min: 1e-3
+    max: 1e-2
   n_epochs: 10
+    values: [10]
   n_epochs_gen: 3
   n_epochs_dis: 3
   gen_interval: 3
@@ -41,13 +52,49 @@ parameters:
   load_model: True
   save_steps: 10
   # Hyper params
-  n_emb: 100
+  n_emb:
+    values: [32, 64, 128]
   num_threads: 16
-  window_size: 5
+  window_size:
+    values: [5, 10, 15]
   overlap_threshold: 1.0
 
 datasets:
-  star-wars:
+  com-youtube:
+    versions: []
+    parameters: {}
+  DBLP-HCN:
     versions:
       - static
     parameters: {}
+  DBLP-V1:
+    versions:
+      - static
+    parameters: { }
+  DBLP-V3:
+    versions: []
+    parameters: { }
+  email-Eu-core:
+    versions:
+      - static
+    parameters: { }
+  imdb-5000-movie-dataset:
+    versions:
+      - static
+    parameters: { }
+  misc-football:
+    versions:
+      - static
+    parameters: { }
+  social-distancing-student:
+    versions:
+      - static
+    parameters: { }
+  star-wars:
+    versions:
+      - static
+    parameters: { }
+  ucidata-zachary:
+    versions:
+      - static
+    parameters: { }

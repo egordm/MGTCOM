@@ -20,6 +20,7 @@ class Args:
     dataset: str = field(positional=True, help="dataset name")
     version: str = field(positional=True, help="dataset version name")
     run_name: Optional[str] = field(default=None, help="run name")
+    timeout: Optional[int] = field(default=None, help="timeout in seconds")
 
 
 def run(args: Args, params: Optional[Dict[str, Any]] = None):
@@ -40,6 +41,7 @@ def run(args: Args, params: Optional[Dict[str, Any]] = None):
             dataset=args.dataset,
             version=args.version,
             run_name=args.run_name,
+            timeout=args.timeout,
         ),
         params=params,
     )

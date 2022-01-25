@@ -32,7 +32,7 @@ eng.runESPRA(
 
 print('Converting output snapshots...')
 for file in tmp_dir.glob('dynamic.*.communities.txt'):
-    index = file.name.split('.')[1]
+    index = int(file.name.split('.')[1]) - 1
     out_file = output_dir.joinpath(str(index).zfill(2) + '_snapshot.comlist')
 
     with out_file.open('w') as fout:

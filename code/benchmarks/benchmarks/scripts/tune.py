@@ -73,17 +73,26 @@ def run(args: Args):
                 for param in baseline.get_params(dataset.name).to_dict().keys()
                 if param in config
             }
-            run_model_with_parameters = lambda: execute_evaluate.run(
-                execute.Args(
-                    baseline=args.baseline,
-                    dataset=args.dataset,
-                    version=args.version,
-                    run_name=run_name,
-                ),
-                params=params,
-            )
-            async_model = AsyncModelTimeout(run_model_with_parameters, baseline.get_timeout(dataset.name))
-            success, result = async_model.run()
+            try:
+                result = execute_evaluate.run(
+                    execute.Args(
+                        baseline=args.baseline,
+                        dataset=args.dataset,
+                        version=args.version,
+                        run_name=run_name,
+                        timeout=baseline.get_timeout(dataset.name)
+                    ),
+                    params=params,
+                )
+                success = True
+                LOG.info(f"Evaluation of {run_name} finished with result {result}")
+            except TimeoutError as e:
+                LOG.error(f"TimeoutError: {e}")
+                success = False
+            except Exception as e:
+                LOG.error(f"Exception: {e}")
+                raise e
+
             if success:
                 LOG.info(f"Evaluation of {run_name} finished with result {result}")
                 wandb.log(result)

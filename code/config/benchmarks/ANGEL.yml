@@ -19,8 +19,7 @@ parameters:
 
 datasets:
   com-youtube:
-    versions:
-      - static_small
+    versions: []
     parameters: {}
   DBLP-HCN:
     versions:
@@ -31,8 +30,7 @@ datasets:
       - static
     parameters: { }
   DBLP-V3:
-    versions:
-      - static
+    versions: []
     parameters: { }
   email-Eu-core:
     versions:

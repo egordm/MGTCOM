@@ -1,4 +1,6 @@
 import argparse
+import itertools
+import os.path
 import re
 import sys
 import pathlib
@@ -79,16 +81,18 @@ else:
                 tsv_writer.writerow([row['snapshot_from'], row['snapshot_to'], row['cid_from'], row['cid_to']])
 
 print('Converting communities to list format...')
-for i, output in enumerate(outputs):
-    output = pathlib.Path(output)
-    if is_angel:
-        output_file = output_dir.joinpath(output.with_suffix('.comlist').name)
-    else:
-        output_file = output_dir.joinpath(f'{str(i).zfill(2)}_snapshot.comlist')
+for i, (output, input) in enumerate(itertools.zip_longest(outputs, sorted(input_dir.glob('*.edgelist')))):
+    output_file = output_dir.joinpath(input.with_suffix('.comlist').name)
+    # if is_angel:
+    #     output_file = output_dir.joinpath(output.with_suffix('.comlist').name)
+    # else:
+    #     output_file = output_dir.joinpath(f'{str(i).zfill(2)}_snapshot.comlist')
 
     communities = list()
     with output_file.open('w') as wf:
-        if output.exists():
+        print('Writing to {}'.format(output_file))
+        if output is not None and os.path.exists(output):
+            output = pathlib.Path(output)
             with output.open('r') as f:
                 for line in f.readlines():
                     if line.strip() == '':

@@ -19,6 +19,7 @@ LOG = get_logger(os.path.basename(__file__))
 class Args:
     dataset: str = field(positional=True, help="Dataset name")
     version: Optional[str] = field(default=None, help="Dataset version")
+    force: Optional[bool] = field(default=False, help="Force overwrite")
 
 
 DEFAULT_CC_FILTER = 4
@@ -29,9 +30,9 @@ def run(args: Args):
     VERSION = DATASET.get_version(args.version)
     schema = GraphSchema.from_dataset(DATASET)
 
-    if VERSION.get_path().exists() and not os.getenv('FORCE'):
-        LOG.info(f"Dataset version {args.dataset}:{args.version} already exists. Use --force to overwrite.")
-        return
+    # if VERSION.get_path().exists() and not os.getenv('FORCE'):
+    #     LOG.info(f"Dataset version {args.dataset}:{args.version} already exists. Use --force to overwrite.")
+    #     return
 
     # Delete existing data
     if VERSION.get_path().exists():
@@ -42,7 +43,7 @@ def run(args: Args):
     G = DataGraph.from_schema(
         schema,
         unix_timestamp=True,
-        prefix_id=True if 'DBLP' in DATASET.name else False
+        prefix_id=True if 'DBLP-V' in DATASET.name else False
     )
 
     if VERSION.get_param('subsample', None) is not None:

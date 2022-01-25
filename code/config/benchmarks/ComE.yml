@@ -8,26 +8,74 @@ execution:
   containerized: true
 
 parameters:
-  number_walks: 10
-  walk_length: 80
-  representation_size: 128
+  run_count: 15
+  timeout: -1
+  number_walks:
+    values: [5, 15, 30]
+  walk_length:
+    values: [40, 80]
+  representation_size:
+    values: [32, 64, 128]
   num_workers: 10
-  num_iter: 1
+  num_iter:
+    values: [10, 20, 50, 80]
   reg_covar: 0.00001
   batch_size: 50
-  window_size: 10
+  window_size:
+    values: [5, 10, 20, 40]
   negative: 5
-  lr: 0.025
-  alpha: 0.1
-  beta: 0.1
+  lr:
+    min: 0.001
+    max: 0.2
+#    default: 0.025
+  alpha:
+    min: 0.1
+    max: 0.2
+  beta:
+    min: 0.1
+    max: 0.2
   down_sampling: 0.0
   ks: 5
-  table_size: 100000000
-  k: 5
+#  table_size: 100000000
+  table_size:
+    values: [10000, 100000]
+  k:
+    values: [3, 5, 10, 20, 40]
 
 datasets:
+  com-youtube:
+    versions: []
+    parameters: {}
+  DBLP-HCN:
+    versions:
+      - static
+    parameters: {}
+  DBLP-V1:
+    versions: []
+    parameters: { }
+  DBLP-V3:
+    versions: []
+    parameters: { }
+  email-Eu-core:
+    versions:
+      - static
+    parameters: { }
+  imdb-5000-movie-dataset:
+    versions:
+      - static
+    parameters: { }
+  misc-football:
+    versions:
+      - static
+    parameters: { }
+  social-distancing-student:
+    versions: []
+    parameters: { }
   star-wars:
     versions:
       - static
-    parameters:
-      table_size: 100
+    parameters: { }
+  ucidata-zachary:
+    versions:
+      - static
+    parameters: { }
