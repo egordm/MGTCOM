@@ -9,7 +9,7 @@ execution:
 
 parameters:
   run_count: 15
-  timeout: 120
+  timeout: 600
   threshold:
     distribution: uniform
     min: 0.001
@@ -38,7 +38,7 @@ datasets:
     parameters: { }
   house-of-representatives-congress-116:
     versions:
-      - static
+      - static_small
     parameters: { }
   imdb-5000-movie-dataset:
     versions:

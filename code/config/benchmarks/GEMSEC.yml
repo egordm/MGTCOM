@@ -8,6 +8,8 @@ execution:
   containerized: true
 
 parameters:
+  run_count: 15
+  timeout: -1
   walk_number: 5
   walk_length: 80
   dimensions: 32
@@ -19,8 +21,43 @@ parameters:
   seed: 42
 
 datasets:
+  com-youtube:
+    versions: []
+    parameters: {}
+  DBLP-HCN:
+    versions:
+      - static
+    parameters: {}
+  DBLP-V1:
+    versions: []
+    parameters: { }
+  DBLP-V3:
+    versions: []
+    parameters: { }
+  email-Eu-core:
+    versions:
+      - static
+    parameters: { }
+  house-of-representatives-congress-116:
+    versions:
+      - static_small
+    parameters: { }
+  imdb-5000-movie-dataset:
+    versions:
+      - static
+    parameters: { }
+  misc-football:
+    versions:
+      - static
+    parameters: { }
+  social-distancing-student:
+    versions: []
+    parameters: { }
   star-wars:
     versions:
       - static
-    parameters:
-      seed: 42
+    parameters: { }
+  ucidata-zachary:
+    versions:
+      - static
+    parameters: { }

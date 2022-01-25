@@ -78,6 +78,10 @@ datasets:
     versions:
       - static
     parameters: { }
+  house-of-representatives-congress-116:
+    versions:
+      - static_small
+    parameters: { }
   imdb-5000-movie-dataset:
     versions:
       - static

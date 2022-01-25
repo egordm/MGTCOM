@@ -20,6 +20,7 @@ class Args:
     dataset: str = field(positional=True, help="Dataset name")
     version: Optional[str] = field(default=None, help="Dataset version")
     force: Optional[bool] = field(default=False, help="Force overwrite")
+    save_graphml: Optional[bool] = field(default=True, help="Save graphml")
 
 
 DEFAULT_CC_FILTER = 4
@@ -30,9 +31,13 @@ def run(args: Args):
     VERSION = DATASET.get_version(args.version)
     schema = GraphSchema.from_dataset(DATASET)
 
-    # if VERSION.get_path().exists() and not os.getenv('FORCE'):
-    #     LOG.info(f"Dataset version {args.dataset}:{args.version} already exists. Use --force to overwrite.")
-    #     return
+    if DATASET.is_synthetic():
+        LOG.warning(f'Dataset {DATASET.name} is synthetic, skipping')
+        return
+
+    if VERSION.get_path().exists() and not os.getenv('FORCE'):
+        LOG.info(f"Dataset version {args.dataset}:{args.version} already exists. Use --force to overwrite.")
+        return
 
     # Delete existing data
     if VERSION.get_path().exists():
@@ -83,7 +88,10 @@ def run(args: Args):
 
         LOG.info(f'Generating snapshot ranges')
         snapshot_ranges = graph_split_snapshot_ranges(
-            schema, G, VERSION.get_param('snapshot_count', 5), VERSION.get_param('snapshot_coverage', 0.95), plot=True
+            schema, G,
+            VERSION.get_param('snapshot_count', 5),
+            VERSION.get_param('snapshot_coverage', 0.95),
+            plot=str(VERSION.train.get_path().joinpath('snapshot_ranges.png'))
         )
         print(pd.DataFrame(snapshot_ranges, columns=['tstart', 'tend']))
 
@@ -98,6 +106,10 @@ def run(args: Args):
                 comms_snapshot = comms.filter_nodes(G_snapshot.vs['gid'])
                 comms_snapshot.save_comlist(str(TRAIN_PART.snapshot_ground_truth(i)))
 
+            if args.save_graphml:
+                LOG.info(f'Saving graphml to {output_file.with_suffix(".graphml")}')
+                G_snapshot.write_graphml(str(output_file.with_suffix(".graphml")))
+
     elif VERSION.type == DatasetVersionType.EDGELIST_STATIC:
         LOG.info(f'Saving static graph to {TRAIN_PART.static_edgelist}')
         G.save_edgelist(str(TRAIN_PART.static_edgelist))
@@ -105,6 +117,10 @@ def run(args: Args):
         if TAG_GROUND_TRUTH in DATASET.tags:
             LOG.info(f'Saving ground-truth to {TRAIN_PART.static_ground_truth}')
             comms.save_comlist(str(TRAIN_PART.static_ground_truth))
+
+        if args.save_graphml:
+            LOG.info(f'Saving graphml to {TRAIN_PART.static_edgelist.with_suffix(".graphml")}')
+            G.write_graphml(str(TRAIN_PART.static_edgelist.with_suffix(".graphml")))
 
 
 if __name__ == '__main__':

@@ -3,6 +3,9 @@ description: ''
 name: house-of-representatives-congress-116
 tags: [dynamic, interaction]
 versions:
+  test:
+    parameters: { }
+    type: edgelist_static
   static:
     parameters: { }
     type: edgelist_static

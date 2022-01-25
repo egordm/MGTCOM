@@ -10,9 +10,9 @@ from benchmarks.config import BenchmarkConfig
 from benchmarks.scripts import execute, execute_evaluate
 from shared.cli import parse_args
 from shared.constants import BENCHMARKS_LOGS, WANDB_PROJECT
+from shared.exceptions import NoCommunitiesFoundError
 from shared.logger import get_logger
 from shared.schema import DatasetSchema
-from shared.threading import AsyncModelTimeout
 
 LOG = get_logger(os.path.basename(__file__))
 
@@ -56,8 +56,8 @@ def run(args: Args):
             },
         },
         **({
-            'metric': baseline.get_metric(dataset.name),
-        } if baseline.get_metric(dataset.name) else {})
+               'metric': baseline.get_metric(dataset.name),
+           } if baseline.get_metric(dataset.name) else {})
     }, project=WANDB_PROJECT)
 
     def runner():
@@ -88,6 +88,16 @@ def run(args: Args):
                 LOG.info(f"Evaluation of {run_name} finished with result {result}")
             except TimeoutError as e:
                 LOG.error(f"TimeoutError: {e}")
+                wandb.log({
+                    'error': 'timeout',
+                    'timeout': baseline.get_timeout(dataset.name),
+                })
+                success = False
+            except NoCommunitiesFoundError as e:
+                LOG.error(f"NoCommunitiesFoundError: {e}")
+                wandb.log({
+                    'error': 'no_communities',
+                })
                 success = False
             except Exception as e:
                 LOG.error(f"Exception: {e}")
@@ -99,15 +109,11 @@ def run(args: Args):
                 wandb.log(result)
                 wandb.finish(exit_code=0)
             else:
-                LOG.error(f"Evaluation of {run_name} timed out")
-                wandb.log({
-                    'error': 'timeout',
-                    'timeout': baseline.get_timeout(dataset.name),
-                })
+                LOG.error(f"Evaluation of {run_name} failed.")
                 wandb.finish(exit_code=1)
 
-
     wandb.agent(sweep_id, function=runner, count=baseline.get_run_count(dataset.name))
+    wandb.finish(exit_code=0)
 
 
 if __name__ == "__main__":
@@ -119,7 +125,6 @@ if __name__ == "__main__":
     else:
         datasets = baseline.datasets.keys()
 
-    print(datasets)
     for dataset in datasets:
         args.dataset = dataset
 
@@ -130,9 +135,7 @@ if __name__ == "__main__":
                 raise ValueError(f"Dataset {args.dataset} not found in baseline {args.baseline}")
             versions = baseline.datasets[args.dataset].versions
 
-        print(versions)
         for version in versions:
             args.version = version
             LOG.info(f"Running {args.baseline} on {args.dataset}:{args.version}")
             run(args)
-

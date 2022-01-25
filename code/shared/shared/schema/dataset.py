@@ -14,6 +14,7 @@ TAG_DYNAMIC = 'dynamic'
 TAG_STATIC = 'static'
 TAG_GROUND_TRUTH = 'ground-truth'
 TAG_OVERLAPPING = 'overlapping'
+TAG_SYNTHETIC = 'synthetic'
 
 
 class DatasetVersionType(Enum):
@@ -153,3 +154,6 @@ class DatasetSchema(DatasetPath, Serializable):
             raise ValueError(f'Version {version} not found in dataset {self.name}')
 
         return self.versions[version]
+
+    def is_synthetic(self) -> bool:
+        return TAG_SYNTHETIC in self.tags

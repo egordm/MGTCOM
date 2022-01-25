@@ -26,8 +26,8 @@ datasets:
 #      - split_5
     parameters: {}
   DBLP-V1:
-    versions:
-      - split_5_small
+    versions: []
+#      - split_5_small
 #      - split_5
 #      - split_10
     parameters: { }
@@ -40,11 +40,17 @@ datasets:
     versions: []
     parameters: { }
   enron-mail-20150507:
+    versions: []
+#      - split_10_small
+#      - split_5
+#      - split_10
+#      - split_20
+    parameters: { }
+  house-of-representatives-congress-116:
     versions:
       - split_10_small
       - split_5
       - split_10
-      - split_20
     parameters: { }
   imdb-5000-movie-dataset:
     versions:

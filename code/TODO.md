@@ -33,7 +33,10 @@
   - [x] Maximum/Average ODF
   - [x] Triangle Participation Ratio (probably wont - high computation complexity)
 - [x] Add evaluation metrics to the baselines
-- [ ] Add a way to visualize CD results
+- [x] Add a way to visualize CD results
+- [ ] Add a way to generate synthetic benchmarks
+- [ ] Add task specific evalution
+- [ ] Add cluster based evaluation metrics
 - [ ] Run Static Community Detection on benchmark datasets
 - [ ] Run Dynamic Community Detection on benchmark datasets
 - [ ] Run Representation Learning on benchmark datasets

@@ -107,7 +107,11 @@ def graph_split_snapshot_ranges(
         )
         for snapshot_start, snapshot_end in snapshot_ranges[:-1]:
             plt.axvline(x=snapshot_end, color='red')
-        plt.show()
+
+        if isinstance(plot, str):
+            plt.savefig(plot)
+        else:
+            plt.show()
 
     return snapshot_ranges
 

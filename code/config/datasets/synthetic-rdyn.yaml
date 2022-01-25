@@ -1,0 +1,8 @@
+database: synthetic-rdyn
+description: ''
+name: synthetic-rdyn
+tags: [dynamic, ground-truth, synthetic]
+versions:
+  static:
+    parameters: { }
+    type: edgelist_static

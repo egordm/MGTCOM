@@ -32,6 +32,10 @@ def run(args: Args):
     DATASET = DatasetSchema(args.dataset)
     schema = GraphSchema.from_dataset(args.dataset)
 
+    if DATASET.is_synthetic():
+        LOG.warning(f'Dataset {DATASET.name} is synthetic, skipping')
+        return
+
     output_dir = DATASET.export('snapshots' if not args.output else args.output).joinpath(args.prefix)
     output_dir.mkdir(parents=True, exist_ok=True)
 

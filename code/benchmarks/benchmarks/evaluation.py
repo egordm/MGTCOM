@@ -11,6 +11,7 @@ import numpy as np
 import yaml
 
 from benchmarks.config import BenchmarkConfig
+from shared.exceptions import NoCommunitiesFoundError
 from shared.graph import CommunityAssignment, read_edgelist_graph
 from shared.logger import get_logger
 from shared.schema import DatasetSchema, DatasetVersion
@@ -61,19 +62,13 @@ class EvaluationMetric:
     def load_prediction(self, file: Path, info_file: Path) -> Optional[CommunityAssignment]:
         if str(file) in self.context.cache:
             self.LOG.debug('Loading prediction from cache')
-            prediction = self.context.cache[str(file)]
-            if prediction.is_empty() and not self.allow_empty_prediction():
-                self.LOG.warning('No communities are found in the prediction')
-                return None
-
             prediction = self.context.cache[str(file) + "_proc"]
         else:
             prediction = CommunityAssignment.load_comlist(str(file))
             self.context.cache[str(file)] = prediction.clone()
 
-            if prediction.is_empty() and not self.allow_empty_prediction():
-                self.LOG.warning('No communities are found in the prediction')
-                return np.NAN
+            if prediction.is_empty():
+                raise NoCommunitiesFoundError()
 
             # Add missing nodes to community list
             if info_file.exists():
@@ -150,9 +145,6 @@ class AnnotatedEvaluationMetric(EvaluationMetric):
     ) -> float:
         raise NotImplementedError()
 
-    def allow_empty_prediction(self):
-        return False
-
 
 class QualityMetric(EvaluationMetric):
     def evaluate(self) -> dict:
@@ -201,9 +193,6 @@ class QualityMetric(EvaluationMetric):
             prediction: CommunityAssignment,
     ) -> float:
         raise NotImplementedError()
-
-    def allow_empty_prediction(self):
-        return False
 
 
 class MetricNMI(AnnotatedEvaluationMetric):
@@ -377,9 +366,6 @@ class MetricCommunityCount(QualityMetric):
 
     def metric_name(self) -> str:
         return 'community_count'
-
-    def allow_empty_prediction(self):
-        return True
 
 
 def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[EvaluationMetric]]:

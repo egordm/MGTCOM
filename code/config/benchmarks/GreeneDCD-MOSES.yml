@@ -8,7 +8,11 @@ execution:
   containerized: true
 
 parameters:
-  matching_threshold: 0.1
+  run_count: 5
+  timeout: 600
+  matching_threshold:
+    min: 0.05
+    max: 0.3
   death:
     values: [3, 4]
   persist_threshold: 1
@@ -43,6 +47,12 @@ datasets:
       - split_5
       - split_10
       - split_20
+    parameters: { }
+  house-of-representatives-congress-116:
+    versions:
+      - split_10_small
+      - split_5
+      - split_10
     parameters: { }
   imdb-5000-movie-dataset:
     versions:

@@ -27,6 +27,10 @@ def run(args: Args):
     DATASET = DatasetSchema.load_schema(args.dataset)
     schema = GraphSchema.from_dataset(DATASET)
 
+    if DATASET.is_synthetic():
+        LOG.warning(f'Dataset {DATASET.name} is synthetic, skipping')
+        return
+
     driver = connections.neo4j.open()
 
     # Check if the database already exists

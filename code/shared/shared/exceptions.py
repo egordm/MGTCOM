@@ -6,3 +6,8 @@ class Error(Exception):
 class TimeoutError(Error):
     """Timeout error"""
     pass
+
+
+class NoCommunitiesFoundError(Error):
+    """No communities found"""
+    pass
