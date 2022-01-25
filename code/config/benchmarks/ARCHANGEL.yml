@@ -1,6 +1,6 @@
 name: ARCHANGEL
 description: "Archangel benchmark"
-tags: [dynamic, link-based]
+tags: [dynamic, link-based, overlapping]
 
 execution:
   cwd: baselines/ANGEL

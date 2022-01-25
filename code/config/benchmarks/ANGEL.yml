@@ -1,6 +1,6 @@
 name: ANGEL
 description: "Angel benchmark"
-tags: [static, link-based]
+tags: [static, link-based, overlapping]
 
 execution:
   cwd: baselines/ANGEL
@@ -8,12 +8,53 @@ execution:
   containerized: true
 
 parameters:
-  threshold: 0.4
-  min_comsize: 3
+  run_count: 15
+  timeout: 120
+  threshold:
+    distribution: uniform
+    min: 0.001
+    max: 0.9
+  min_comsize: 1
+
 
 datasets:
+  com-youtube:
+    versions:
+      - static_small
+    parameters: {}
+  DBLP-HCN:
+    versions:
+      - static
+    parameters: {}
+  DBLP-V1:
+    versions:
+      - static
+    parameters: { }
+  DBLP-V3:
+    versions:
+      - static
+    parameters: { }
+  email-Eu-core:
+    versions:
+      - static
+    parameters: { }
+  imdb-5000-movie-dataset:
+    versions:
+      - static
+    parameters: { }
+  misc-football:
+    versions:
+      - static
+    parameters: { }
+  social-distancing-student:
+    versions:
+      - static
+    parameters: { }
   star-wars:
     versions:
       - static
-    parameters:
-      min_comsize: 5
+    parameters: { }
+  ucidata-zachary:
+    versions:
+      - static
+    parameters: { }
