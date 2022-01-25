@@ -30,21 +30,14 @@ def run(args: Args, params: Optional[Dict[str, Any]] = None):
     if params is None:
         params = baseline.get_params(str(dataset)).to_simple_dict()
 
-    run_model_with_parameters = lambda: execute_benchmark(
+    execute_benchmark(
         baseline,
         params,
         dataset,
         args.version,
         args.run_name,
+        args.timeout or baseline.get_timeout(dataset.name),
     )
-
-    if args.timeout is not None and args.timeout > 0:
-        async_model = AsyncModelTimeout(run_model_with_parameters, baseline.get_timeout(dataset.name))
-        success, result = async_model.run()
-        if not success:
-            raise TimeoutError(f"Timeout of {args.timeout} seconds exceeded")
-    else:
-        run_model_with_parameters()
 
 
 if __name__ == "__main__":

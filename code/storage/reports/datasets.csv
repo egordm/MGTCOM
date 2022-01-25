@@ -5,6 +5,7 @@ DBLP-V1,dynamic,no,2501669,n,3/3
 DBLP-V3,dynamic,no,8243751,n,3/3
 email-Eu-core,static,y:partition,51142,n,1/1
 enron-mail-20150507,dynamic,no,4179878,y,2/3
+house-of-representatives-congress-116,dynamic,no,404528,y,4/7
 imdb-5000-movie-dataset,dynamic,no,52251,n,4/4
 misc-football,static,no,1226,n,1/1
 social-distancing-student,dynamic,no,3710183,n,3/7

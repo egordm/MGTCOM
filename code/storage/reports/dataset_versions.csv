@@ -15,6 +15,11 @@ enron-mail-20150507,dynamic,no,4179878,y,2/3,split_10_small,snapshots,27726 ± 1
 enron-mail-20150507,dynamic,no,4179878,y,2/3,split_5,snapshots,128808 ± 36994,835578 ± 318338,5.0
 enron-mail-20150507,dynamic,no,4179878,y,2/3,split_10,snapshots,67671 ± 25231,417789 ± 206775,10.0
 enron-mail-20150507,dynamic,no,4179878,y,2/3,split_20,snapshots,36192 ± 15735,208894 ± 123548,20.0
+house-of-representatives-congress-116,dynamic,no,404528,y,4/7,static,static,6986,404528,-
+house-of-representatives-congress-116,dynamic,no,404528,y,4/7,static_small,static,3238,99613,-
+house-of-representatives-congress-116,dynamic,no,404528,y,4/7,split_10_small,snapshots,2001 ± 714,29985 ± 11025,10.0
+house-of-representatives-congress-116,dynamic,no,404528,y,4/7,split_5,snapshots,4573 ± 1459,148213 ± 42052,5.0
+house-of-representatives-congress-116,dynamic,no,404528,y,4/7,split_10,snapshots,4270 ± 1528,114706 ± 40084,10.0
 imdb-5000-movie-dataset,dynamic,no,52251,n,4/4,static,static,16614,52251,-
 imdb-5000-movie-dataset,dynamic,no,52251,n,4/4,split_5,snapshots,7343 ± 5419,19695 ± 18423,5.0
 misc-football,static,no,1226,n,1/1,static,static,115,1226,-

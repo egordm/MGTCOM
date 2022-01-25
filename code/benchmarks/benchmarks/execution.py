@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 import os
 import subprocess
+from threading import Timer
 from typing import Dict, Any, Optional
 
 from benchmarks.config import BenchmarkConfig
@@ -29,6 +30,7 @@ def execute_benchmark(
         dataset: DatasetSchema,
         dataset_version: str,
         run_name: Optional[str] = None,
+        timeout: Optional[int] = None,
 ):
     if run_name is None:
         run_name = f'run_{dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{dataset}_{dataset_version}'
@@ -59,7 +61,27 @@ def execute_benchmark(
                         **baseline.execution.env,
                     }
                 )
-                p.wait()
+
+                timed_out = False
+
+                def timeout_fn():
+                    nonlocal timed_out
+                    p.kill()
+                    timed_out = True
+
+                if timeout:
+                    timer = Timer(timeout, timeout_fn)
+
+                try:
+                    if timeout:
+                        timer.start()
+                    p.wait()
+                finally:
+                    if timeout:
+                        timer.cancel()
+
+                if timed_out:
+                    raise TimeoutError(f"Timeout of {timeout} seconds exceeded")
 
                 if p.returncode != 0:
                     raise Exception(f'Benchmark failed with exit code {p.returncode}')

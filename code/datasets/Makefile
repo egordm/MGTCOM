@@ -129,16 +129,16 @@ download: \
 
 export_neo4j:
 	for target in $(CONFIG_DIR)/* ; do \
-  		$(PY) scripts/export_to_neo4j.py $$(basename -s .yaml $$target); \
+  		$(PY) datasets/scripts/export_to_neo4j.py $$(basename -s .yaml $$target); \
   	done
 
 export_graphml:
 	@for target in $(CONFIG_DIR)/* ; do \
-  		$(PY) scripts/export_to_graphml.py $$(basename -s .yaml $$target); \
+  		$(PY) datasets/scripts/export_to_graphml.py $$(basename -s .yaml $$target); \
   	done
 
 
 version:
 	@for target in $(CONFIG_DIR)/* ; do \
-  		$(PY) datasets/scripts/export_to_version.py $$(basename -s .yaml $$target); \
+  		$(PY) datasets/scripts/scripts/export_to_version.py $$(basename -s .yaml $$target); \
   	done

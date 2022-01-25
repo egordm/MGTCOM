@@ -1,0 +1,28 @@
+database: house-of-representatives-congress-116
+description: ''
+name: house-of-representatives-congress-116
+tags: [dynamic, interaction]
+versions:
+  static:
+    parameters: { }
+    type: edgelist_static
+  static_small:
+    parameters:
+      subsample: 0.5
+    type: edgelist_static
+  split_10_small:
+    type: edgelist_snapshots
+    parameters:
+      subsample: 0.5
+      snapshot_count: 10
+      snapshot_coverage: 0.95
+  split_5:
+    type: edgelist_snapshots
+    parameters:
+      snapshot_count: 5
+      snapshot_coverage: 0.95
+  split_10:
+    type: edgelist_snapshots
+    parameters:
+      snapshot_count: 10
+      snapshot_coverage: 0.95

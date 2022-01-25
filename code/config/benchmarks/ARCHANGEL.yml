@@ -25,15 +25,15 @@ datasets:
       - split_5
     parameters: {}
   DBLP-V1:
-    versions:
+    versions: []
       - split_5_small
-      - split_5
-      - split_10
+#      - split_5
+#      - split_10
     parameters: { }
   DBLP-V3:
-    versions:
-      - split_5
-      - split_10
+    versions: []
+#      - split_5
+#      - split_10
     parameters: { }
   email-Eu-core:
     versions: []
@@ -41,9 +41,9 @@ datasets:
   enron-mail-20150507:
     versions:
       - split_10_small
-      - split_5
-      - split_10
-      - split_20
+#      - split_5
+#      - split_10
+#      - split_20
     parameters: { }
   imdb-5000-movie-dataset:
     versions:
@@ -68,9 +68,9 @@ datasets:
       - split_10
     parameters: { }
   sx-superuser:
-    versions:
-      - split_6
-      - split_10
+    versions: []
+#      - split_6
+#      - split_10
     parameters: { }
   ucidata-zachary:
     versions: []

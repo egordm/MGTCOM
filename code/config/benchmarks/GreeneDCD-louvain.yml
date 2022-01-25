@@ -8,6 +8,8 @@ execution:
   containerized: true
 
 parameters:
+  run_count: 15
+  timeout: 120
   weighted: false
   epsilon: 0.001
   reuse_partition: false

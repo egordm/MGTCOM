@@ -22,17 +22,21 @@ datasets:
     versions: []
     parameters: {}
   DBLP-HCN:
-    versions:
-      - static
+    versions: []
+#      - static
     parameters: {}
   DBLP-V1:
-    versions:
-      - static
+    versions: []
+#      - static
     parameters: { }
   DBLP-V3:
     versions: []
     parameters: { }
   email-Eu-core:
+    versions:
+      - static
+    parameters: { }
+  house-of-representatives-congress-116:
     versions:
       - static
     parameters: { }
@@ -45,8 +49,8 @@ datasets:
       - static
     parameters: { }
   social-distancing-student:
-    versions:
-      - static
+    versions: []
+#      - static
     parameters: { }
   star-wars:
     versions:

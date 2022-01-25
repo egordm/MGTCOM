@@ -20,8 +20,8 @@ LOG = get_logger(os.path.basename(__file__))
 @dataclass
 class Args:
     baseline: str = field(positional=True, help="baseline config name")
-    dataset: str = field(positional=True, help="dataset name")
-    version: Optional[str] = field(default=None, help="dataset version name")
+    dataset: Optional[str] = field(alias='d', default=None, help="dataset name")
+    version: Optional[str] = field(alias='v', default=None, help="dataset version name")
 
 
 def run(args: Args):
@@ -91,32 +91,48 @@ def run(args: Args):
                 success = False
             except Exception as e:
                 LOG.error(f"Exception: {e}")
+                wandb.finish(exit_code=1)
                 raise e
 
             if success:
                 LOG.info(f"Evaluation of {run_name} finished with result {result}")
                 wandb.log(result)
+                wandb.finish(exit_code=0)
             else:
                 LOG.error(f"Evaluation of {run_name} timed out")
                 wandb.log({
                     'error': 'timeout',
                     'timeout': baseline.get_timeout(dataset.name),
                 })
+                wandb.finish(exit_code=1)
+
 
     wandb.agent(sweep_id, function=runner, count=baseline.get_run_count(dataset.name))
 
 
 if __name__ == "__main__":
     args: Args = parse_args(Args)[0]
-    if args.version:
-        LOG.info(f"Running {args.baseline} on {args.dataset}:{args.version}")
-        run(args)
-    else:
-        baseline = BenchmarkConfig.load_config(args.baseline)
-        if not baseline.datasets.get(args.dataset, None):
-            raise ValueError(f"Dataset {args.dataset} not found in baseline {args.baseline}")
+    baseline = BenchmarkConfig.load_config(args.baseline)
 
-        for version in baseline.datasets[args.dataset].versions:
-            LOG.info(f"Running {args.baseline} on {args.dataset}:{args.version}")
+    if args.dataset:
+        datasets = [args.dataset]
+    else:
+        datasets = baseline.datasets.keys()
+
+    print(datasets)
+    for dataset in datasets:
+        args.dataset = dataset
+
+        if args.version:
+            versions = [args.version]
+        else:
+            if not baseline.datasets.get(args.dataset, None):
+                raise ValueError(f"Dataset {args.dataset} not found in baseline {args.baseline}")
+            versions = baseline.datasets[args.dataset].versions
+
+        print(versions)
+        for version in versions:
             args.version = version
+            LOG.info(f"Running {args.baseline} on {args.dataset}:{args.version}")
             run(args)
+
