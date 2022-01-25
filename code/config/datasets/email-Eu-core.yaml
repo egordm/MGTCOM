@@ -4,5 +4,5 @@ name: email-Eu-core
 tags: [static, ground-truth]
 versions:
   static:
-    parameters: { }
+    parameters: {}
     type: edgelist_static
