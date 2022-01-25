@@ -239,6 +239,13 @@ class GraphSchema(Serializable):
     def is_edge_temporal(self) -> bool:
         return any(schema.dynamic is not None for schema in self.edges.values())
 
+    def is_node_interaction(self) -> bool:
+        return any(
+            schema.dynamic.interaction
+            for schema in it.chain(self.nodes.values(), self.edges.values())
+            if schema.dynamic is not None
+        )
+
     @classmethod
     def load_schema(cls: Type['GraphSchema'], path: Union[str, Path], **kwargs) -> 'GraphSchema':
         path = Path(path) if isinstance(path, str) else path

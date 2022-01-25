@@ -50,7 +50,7 @@ class EvaluationMetric:
 
     def load_ground_truth(self, file: Path) -> CommunityAssignment:
         if str(file) in self.context.cache:
-            LOG.debug('Loading ground truth from cache')
+            self.LOG.debug('Loading ground truth from cache')
             ground_truth = self.context.cache[str(file)]
         else:
             ground_truth = CommunityAssignment.load_comlist(str(file))
@@ -60,10 +60,10 @@ class EvaluationMetric:
 
     def load_prediction(self, file: Path, info_file: Path) -> Optional[CommunityAssignment]:
         if str(file) in self.context.cache:
-            LOG.debug('Loading prediction from cache')
+            self.LOG.debug('Loading prediction from cache')
             prediction = self.context.cache[str(file)]
             if prediction.is_empty() and not self.allow_empty_prediction():
-                LOG.warning('No communities are found in the prediction')
+                self.LOG.warning('No communities are found in the prediction')
                 return None
 
             prediction = self.context.cache[str(file) + "_proc"]
@@ -72,12 +72,12 @@ class EvaluationMetric:
             self.context.cache[str(file)] = prediction.clone()
 
             if prediction.is_empty() and not self.allow_empty_prediction():
-                LOG.warning('No communities are found in the prediction')
+                self.LOG.warning('No communities are found in the prediction')
                 return np.NAN
 
             # Add missing nodes to community list
             if info_file.exists():
-                LOG.debug('Loading missing nodes if applicable')
+                self.LOG.debug('Loading missing nodes if applicable')
                 graph_info = yaml.safe_load(info_file.read_text())
                 prediction.add_missing_nodes(graph_info['nodes'])
 
@@ -87,7 +87,7 @@ class EvaluationMetric:
 
     def load_graph(self, file: Path) -> ig.Graph:
         if str(file) in self.context.cache:
-            LOG.debug('Loading graph from cache')
+            self.LOG.debug('Loading graph from cache')
             graph = self.context.cache[str(file)]
         else:
             graph = read_edgelist_graph(
@@ -139,7 +139,7 @@ class AnnotatedEvaluationMetric(EvaluationMetric):
 
         ground_truth = self.load_ground_truth(ground_truth_file)
 
-        LOG.debug(f'Evaluating the metric')
+        self.LOG.debug(f'Evaluating the metric')
         return self.evaluate_single(prediction, ground_truth)
 
     @abstractmethod

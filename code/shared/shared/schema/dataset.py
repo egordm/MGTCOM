@@ -20,6 +20,12 @@ class DatasetVersionType(Enum):
     EDGELIST_SNAPSHOTS = 'edgelist_snapshots'
     EDGELIST_STATIC = 'edgelist_static'
 
+    def pretty(self) -> str:
+        if self == DatasetVersionType.EDGELIST_SNAPSHOTS:
+            return 'snapshots'
+        elif self == DatasetVersionType.EDGELIST_STATIC:
+            return 'static'
+
 
 @dataclass
 class DatasetVersionPart:
