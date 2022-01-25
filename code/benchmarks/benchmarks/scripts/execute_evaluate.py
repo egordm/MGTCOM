@@ -5,8 +5,8 @@ from typing import Optional, Dict, Any
 
 from simple_parsing import field
 
-from benchmarks.benchmarks.config import BenchmarkConfig
-from benchmarks.benchmarks.scripts import execute, evaluate
+from benchmarks.config import BenchmarkConfig
+from benchmarks.scripts import execute, evaluate
 from shared.cli import parse_args
 from shared.logger import get_logger
 from shared.schema import DatasetSchema

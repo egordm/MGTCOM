@@ -4,7 +4,7 @@ import os
 import subprocess
 from typing import Dict, Any, Optional
 
-from benchmarks.benchmarks.config import BenchmarkConfig
+from benchmarks.config import BenchmarkConfig
 from shared.constants import BENCHMARKS_RESULTS, BASE_PATH
 from shared.logger import get_logger, get_logpipe
 from shared.schema import DatasetSchema

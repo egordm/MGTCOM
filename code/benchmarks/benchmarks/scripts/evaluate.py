@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 from simple_parsing import field
 
-from benchmarks.benchmarks.config import BenchmarkConfig
-from benchmarks.benchmarks.evaluation import EvaluationContext, get_metric_list
+from benchmarks.config import BenchmarkConfig
+from benchmarks.evaluation import EvaluationContext, get_metric_list
 from shared.cli import parse_args
 from shared.constants import BENCHMARKS_RESULTS
 from shared.logger import get_logger

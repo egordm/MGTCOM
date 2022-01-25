@@ -17,6 +17,10 @@ class TunedParameterValue(Serializable):
     values: Optional[List[RawParameterValue]] = None
     min: Optional[RawParameterValue] = None
     max: Optional[RawParameterValue] = None
+    distribution: Optional[str] = None
+    mu: Optional[float] = None
+    sigma: Optional[float] = None
+    q: Optional[float] = None
 
     def to_dict(self, dict_factory: Type[Dict] = dict, recurse: bool = True) -> Dict:
         return filter_none_values(super().to_dict(dict_factory, recurse))
@@ -29,11 +33,17 @@ class TunedParameterValue(Serializable):
         else:
             return self.min
 
+    @staticmethod
+    def from_value(value: RawParameterValue) -> 'TunedParameterValue':
+        return TunedParameterValue(value=value)
+
 
 ParameterValue = Union[RawParameterValue, TunedParameterValue]
 
 
 # ParameterConfig = Dict[str, ParameterValue]
+
+SKIP_KEYS = ['run_count', 'metric', 'timeout']
 
 class ParameterConfig(dict, Serializable):
     @classmethod
@@ -47,12 +57,14 @@ class ParameterConfig(dict, Serializable):
         return {
             key: value.to_dict()
             for key, value in self.items()
+            if key not in SKIP_KEYS
         }
 
     def to_simple_dict(self) -> Dict:
         return {
             key: value.to_simple()
             for key, value in self.items()
+            if key not in SKIP_KEYS
         }
 
 
@@ -75,7 +87,6 @@ class ExecutionConfig(Serializable):
         else:
             return BASE_PATH.joinpath(path)
 
-
 @dataclass
 class DatasetRunConfig(Serializable):
     parameters: ParameterConfig = field(default_factory=dict)
@@ -96,6 +107,19 @@ class BenchmarkConfig(Serializable):
             **self.parameters,
             **self.datasets.get(dataset_name, DatasetRunConfig()).parameters
         })
+
+    def get_run_count(self, dataset_name: str) -> List[str]:
+        return self.get_params(dataset_name).get('run_count', TunedParameterValue.from_value(10)).to_simple()
+
+    def get_metric(self, dataset_name: str) -> str:
+        result = self.get_params(dataset_name).get('metric', None)
+        if result is not None:
+            return result.to_simple()
+        else:
+            return None
+
+    def get_timeout(self, dataset_name: str) -> int:
+        return self.get_params(dataset_name).get('timeout', TunedParameterValue.from_value(30)).to_simple()
 
     @staticmethod
     def load_config(name) -> 'BenchmarkConfig':

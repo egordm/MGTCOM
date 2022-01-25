@@ -24,13 +24,13 @@ if is_angel:
     tmp_dir = output_dir.joinpath('tmp')
     tmp_dir.mkdir(exist_ok=True)
     an = a.Angel(
-        network_filename=str(input_dir.joinpath('default.edgelist')),
+        network_filename=str(input_dir.joinpath('static.edgelist')),
         threshold=args.threshold,
         min_comsize=args.min_comsize,
-        outfile_name=tmp_dir.joinpath('default.out'),
+        outfile_name=tmp_dir.joinpath('static.out'),
     )
     an.execute()
-    outputs = [tmp_dir.joinpath('default.out')]
+    outputs = [tmp_dir.joinpath('static.out')]
 else:
     parser = argparse.ArgumentParser(description='ARCHANGEL')
     parser.add_argument('--angel', action='store_true')
@@ -58,7 +58,7 @@ else:
             for u, v, i in edges:
                 wf.write('{}\t{}\t{}\n'.format(u, v, i))
 
-    print('Running ANGEL...')
+    print('Running ARCHANGEL...')
     aa = a.ArchAngel(
         network_filename=str(output_file),
         threshold=args.threshold,
@@ -81,14 +81,19 @@ else:
 print('Converting communities to list format...')
 for i, output in enumerate(outputs):
     output = pathlib.Path(output)
-    communities = list()
-    with output.open('r') as f:
-        for line in f.readlines():
-            if line.strip() == '':
-                continue
-            ci, nodes = line.strip().split('\t')
-            communities.append(eval(nodes))
+    if is_angel:
+        output_file = output_dir.joinpath(output.with_suffix('.comlist').name)
+    else:
+        output_file = output_dir.joinpath(f'{str(i).zfill(2)}_snapshot.comlist')
 
-    with output_dir.joinpath(str(i).zfill(2) + '.coms').open('w') as f:
-        for ci, nodes in enumerate(communities):
-            f.write(' '.join(nodes) + '\n')
+    communities = list()
+    with output_file.open('w') as wf:
+        if output.exists():
+            with output.open('r') as f:
+                for line in f.readlines():
+                    if line.strip() == '':
+                        continue
+                    ci, nodes = line.strip().split('\t')
+                    nodes = eval(nodes)
+                    for nid in nodes:
+                        wf.write('{}\t{}\n'.format(nid, ci))

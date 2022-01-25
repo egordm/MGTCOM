@@ -1,6 +1,6 @@
 import unittest
 
-from benchmarks.benchmarks.metrics import nmi, nf1, modularity, conductance
+from benchmarks.metrics import nmi, nf1, modularity, conductance
 from datasets.formats import read_comlist, comlist_to_coms, read_edgelist_graph
 from shared.constants import BENCHMARKS_PATH
 

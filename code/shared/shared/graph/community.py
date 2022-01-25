@@ -2,8 +2,8 @@ import os
 from dataclasses import dataclass
 from typing import List
 
+import numpy as np
 import pandas as pd
-from cachetools import cached
 from cdlib import NodeClustering
 
 from shared.graph import ComList, read_comlist, write_comlist, read_coms, coms_to_comlist, comlist_to_coms, write_coms, \
@@ -80,5 +80,18 @@ class CommunityAssignment:
             None
         )
 
+    def add_missing_nodes(self, node_count: int):
+        max_community = int(self.data['cid'].max() + 1) if np.isfinite(self.data['cid'].max()) else 0
+        missing_nodes = set(range(node_count)).difference(set(self.data.index))
+        corresponding_cids = range(max_community, max_community + len(missing_nodes))
 
+        df_missing = pd.DataFrame({
+            'nid': list(missing_nodes),
+            'cid': list(corresponding_cids)
+        }).set_index('nid')
 
+        self.data = self.data.append(df_missing)
+        self.data.sort_index(inplace=True)
+
+    def community_count(self) -> int:
+        return len(self.data['cid'].unique())

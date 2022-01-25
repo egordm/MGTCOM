@@ -1,17 +1,18 @@
 import datetime as dt
 import os
 from dataclasses import dataclass
-
-from simple_parsing import field
+from typing import Optional
 
 import wandb
-from benchmarks.benchmarks.config import BenchmarkConfig
-from benchmarks.benchmarks.scripts import execute, evaluate, execute_evaluate
+from simple_parsing import field
+
+from benchmarks.config import BenchmarkConfig
+from benchmarks.scripts import execute, execute_evaluate
 from shared.cli import parse_args
-from shared.config import ConnectionConfig
-from shared.constants import BENCHMARKS_LOGS, WANDB_PROJECT, BENCHMARKS_RESULTS
+from shared.constants import BENCHMARKS_LOGS, WANDB_PROJECT
 from shared.logger import get_logger
 from shared.schema import DatasetSchema
+from shared.threading import AsyncModelTimeout
 
 LOG = get_logger(os.path.basename(__file__))
 
@@ -20,8 +21,7 @@ LOG = get_logger(os.path.basename(__file__))
 class Args:
     baseline: str = field(positional=True, help="baseline config name")
     dataset: str = field(positional=True, help="dataset name")
-    version: str = field(positional=True, help="dataset version name")
-    run_count: int = field(default=1, help="number of runs")
+    version: Optional[str] = field(default=None, help="dataset version name")
 
 
 def run(args: Args):
@@ -55,6 +55,9 @@ def run(args: Args):
                 'value': args.version
             },
         },
+        **({
+            'metric': baseline.get_metric(dataset.name),
+        } if baseline.get_metric(dataset.name) else {})
     }, project=WANDB_PROJECT)
 
     def runner():
@@ -70,7 +73,7 @@ def run(args: Args):
                 for param in baseline.get_params(dataset.name).to_dict().keys()
                 if param in config
             }
-            result = execute_evaluate.run(
+            run_model_with_parameters = lambda: execute_evaluate.run(
                 execute.Args(
                     baseline=args.baseline,
                     dataset=args.dataset,
@@ -79,12 +82,32 @@ def run(args: Args):
                 ),
                 params=params,
             )
-            LOG.info(f"Evaluation of {run_name} finished with result {result}")
-            wandb.log(result)
+            async_model = AsyncModelTimeout(run_model_with_parameters, baseline.get_timeout(dataset.name))
+            success, result = async_model.run()
+            if success:
+                LOG.info(f"Evaluation of {run_name} finished with result {result}")
+                wandb.log(result)
+            else:
+                LOG.error(f"Evaluation of {run_name} timed out")
+                wandb.log({
+                    'error': 'timeout',
+                    'timeout': baseline.get_timeout(dataset.name),
+                })
 
-    wandb.agent(sweep_id, function=runner, count=args.run_count)
+    wandb.agent(sweep_id, function=runner, count=baseline.get_run_count(dataset.name))
 
 
 if __name__ == "__main__":
     args: Args = parse_args(Args)[0]
-    run(args)
+    if args.version:
+        LOG.info(f"Running {args.baseline} on {args.dataset}:{args.version}")
+        run(args)
+    else:
+        baseline = BenchmarkConfig.load_config(args.baseline)
+        if not baseline.datasets.get(args.dataset, None):
+            raise ValueError(f"Dataset {args.dataset} not found in baseline {args.baseline}")
+
+        for version in baseline.datasets[args.dataset].versions:
+            LOG.info(f"Running {args.baseline} on {args.dataset}:{args.version}")
+            args.version = version
+            run(args)

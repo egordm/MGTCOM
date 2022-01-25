@@ -1,15 +1,16 @@
 import logging
 import pathlib
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Type
+from typing import List, Type, Optional
 
 import cdlib.evaluation as cdlib_eval
 import igraph as ig
 import numpy as np
+import yaml
 
-from benchmarks.benchmarks.config import BenchmarkConfig
+from benchmarks.config import BenchmarkConfig
 from shared.graph import CommunityAssignment, read_edgelist_graph
 from shared.logger import get_logger
 from shared.schema import DatasetSchema, DatasetVersion
@@ -23,6 +24,7 @@ class EvaluationContext:
     version: DatasetVersion
     benchmark: BenchmarkConfig
     output_dir: Path
+    cache: dict = field(default_factory=dict)
 
 
 class EvaluationMetric:
@@ -45,6 +47,56 @@ class EvaluationMetric:
     @abstractmethod
     def metric_name(self) -> str:
         raise NotImplementedError()
+
+    def load_ground_truth(self, file: Path) -> CommunityAssignment:
+        if str(file) in self.context.cache:
+            LOG.debug('Loading ground truth from cache')
+            ground_truth = self.context.cache[str(file)]
+        else:
+            ground_truth = CommunityAssignment.load_comlist(str(file))
+            self.context.cache[str(file)] = ground_truth
+
+        return ground_truth
+
+    def load_prediction(self, file: Path, info_file: Path) -> Optional[CommunityAssignment]:
+        if str(file) in self.context.cache:
+            LOG.debug('Loading prediction from cache')
+            prediction = self.context.cache[str(file)]
+            if prediction.is_empty() and not self.allow_empty_prediction():
+                LOG.warning('No communities are found in the prediction')
+                return None
+
+            prediction = self.context.cache[str(file) + "_proc"]
+        else:
+            prediction = CommunityAssignment.load_comlist(str(file))
+            self.context.cache[str(file)] = prediction.clone()
+
+            if prediction.is_empty() and not self.allow_empty_prediction():
+                LOG.warning('No communities are found in the prediction')
+                return np.NAN
+
+            # Add missing nodes to community list
+            if info_file.exists():
+                LOG.debug('Loading missing nodes if applicable')
+                graph_info = yaml.safe_load(info_file.read_text())
+                prediction.add_missing_nodes(graph_info['nodes'])
+
+            self.context.cache[str(file) + "_proc"] = prediction
+
+        return prediction
+
+    def load_graph(self, file: Path) -> ig.Graph:
+        if str(file) in self.context.cache:
+            LOG.debug('Loading graph from cache')
+            graph = self.context.cache[str(file)]
+        else:
+            graph = read_edgelist_graph(
+                str(file),
+                directed=self.context.version.get_param('directed', False),
+            )
+
+            self.context.cache[str(file)] = graph
+        return graph
 
 
 class AnnotatedEvaluationMetric(EvaluationMetric):
@@ -81,15 +133,14 @@ class AnnotatedEvaluationMetric(EvaluationMetric):
     def _evaluate_by_params(
             self, prediction_file: pathlib.Path, ground_truth_file: pathlib.Path
     ):
-        ground_truth = CommunityAssignment.load_comlist(str(ground_truth_file))
-        prediction = CommunityAssignment.load_comlist(str(prediction_file))
-        if prediction.is_empty():
-            LOG.warning('No communities are found in the prediction')
-            score = np.NAN
-        else:
-            score = self.evaluate_single(prediction, ground_truth)
+        prediction = self.load_prediction(prediction_file, ground_truth_file.with_suffix('.info.yaml'))
+        if prediction is None:
+            return np.NAN
 
-        return score
+        ground_truth = self.load_ground_truth(ground_truth_file)
+
+        LOG.debug(f'Evaluating the metric')
+        return self.evaluate_single(prediction, ground_truth)
 
     @abstractmethod
     def evaluate_single(
@@ -98,6 +149,9 @@ class AnnotatedEvaluationMetric(EvaluationMetric):
             ground_truth: CommunityAssignment,
     ) -> float:
         raise NotImplementedError()
+
+    def allow_empty_prediction(self):
+        return False
 
 
 class QualityMetric(EvaluationMetric):
@@ -131,17 +185,14 @@ class QualityMetric(EvaluationMetric):
     def _evaluate_by_params(
             self, prediction_file: pathlib.Path, graph_file: pathlib.Path
     ):
-        prediction = CommunityAssignment.load_comlist(str(prediction_file))
-        graph = read_edgelist_graph(
-            str(graph_file),
-            directed=self.context.version.get_param('directed', False),
-        )
-        if prediction.is_empty():
-            LOG.warning('No communities are found in the prediction')
-            score = np.NAN
-        else:
-            score = self.evaluate_single(graph, prediction)
-        return score
+        prediction = self.load_prediction(prediction_file, graph_file.with_suffix('.info.yaml'))
+        if prediction is None:
+            return np.NAN
+
+        graph = self.load_graph(graph_file)
+
+        LOG.debug(f'Evaluating the metric')
+        return self.evaluate_single(graph, prediction)
 
     @abstractmethod
     def evaluate_single(
@@ -150,6 +201,9 @@ class QualityMetric(EvaluationMetric):
             prediction: CommunityAssignment,
     ) -> float:
         raise NotImplementedError()
+
+    def allow_empty_prediction(self):
+        return False
 
 
 class MetricNMI(AnnotatedEvaluationMetric):
@@ -306,7 +360,7 @@ class MetricNormalizedCut(QualityMetric):
         return 'normalized_cut'
 
 
-class MetriAverageODF(QualityMetric):
+class MetricAverageODF(QualityMetric):
     def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
         return cdlib_eval.avg_odf(
             graph,
@@ -317,19 +371,32 @@ class MetriAverageODF(QualityMetric):
         return 'avg_odf'
 
 
+class MetricCommunityCount(QualityMetric):
+    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+        return prediction.community_count()
+
+    def metric_name(self) -> str:
+        return 'community_count'
+
+    def allow_empty_prediction(self):
+        return True
+
+
 def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[EvaluationMetric]]:
     metrics = []
+
+    metrics.append(MetricCommunityCount)
 
     if ground_truth:
         metrics.append(MetricNF1)
         metrics.append(OverlappingNMI)
         metrics.append(MetricOmega)
         metrics.append(MetricF1)
-        metrics.append(MetricAdjustedRandIndex)
 
         if overlapping:
             pass
         else:
+            metrics.append(MetricAdjustedRandIndex)
             metrics.append(MetricNMI)
 
     # Quality metrics
@@ -337,13 +404,13 @@ def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[Evaluati
     metrics.append(MetricExpansion)
     metrics.append(MetricInternalDensity)
     metrics.append(MetricNormalizedCut)
-    metrics.append(MetriAverageODF)
+    metrics.append(MetricAverageODF)
     metrics.append(MetricModularityOverlap)
     metrics.append(MetricLinkModularity)
     metrics.append(MetricZModularity)
     if overlapping:
         pass
     else:
-        metrics.append(MetricLinkModularity)
+        metrics.append(MetricModularity)
 
     return metrics
