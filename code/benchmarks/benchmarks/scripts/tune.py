@@ -1,3 +1,4 @@
+import copy
 import datetime as dt
 import os
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ from shared.constants import BENCHMARKS_LOGS, WANDB_PROJECT
 from shared.exceptions import NoCommunitiesFoundError
 from shared.logger import get_logger
 from shared.schema import DatasetSchema
+from shared.structs import filter_list_none_values
 
 LOG = get_logger(os.path.basename(__file__))
 
@@ -126,16 +128,17 @@ if __name__ == "__main__":
         datasets = baseline.datasets.keys()
 
     for dataset in datasets:
-        args.dataset = dataset
-
         if args.version:
             versions = [args.version]
         else:
-            if not baseline.datasets.get(args.dataset, None):
-                raise ValueError(f"Dataset {args.dataset} not found in baseline {args.baseline}")
-            versions = baseline.datasets[args.dataset].versions
+            if not baseline.datasets.get(dataset, None):
+                raise ValueError(f"Dataset {dataset} not found in baseline {args.baseline}")
+            versions = baseline.datasets[dataset].versions
 
         for version in versions:
-            args.version = version
-            LOG.info(f"Running {args.baseline} on {args.dataset}:{args.version}")
-            run(args)
+            new_args = copy.deepcopy(args)
+            new_args.dataset = dataset
+            new_args.version = version
+
+            LOG.info(f"Running {new_args.baseline} on {new_args.dataset}:{new_args.version}")
+            run(new_args)

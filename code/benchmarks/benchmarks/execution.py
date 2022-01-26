@@ -62,6 +62,7 @@ def execute_benchmark(
                     }
                 )
 
+                use_timeout = timeout and timeout > 0
                 timed_out = False
 
                 def timeout_fn():
@@ -69,15 +70,15 @@ def execute_benchmark(
                     p.kill()
                     timed_out = True
 
-                if timeout:
+                if use_timeout:
                     timer = Timer(timeout, timeout_fn)
 
                 try:
-                    if timeout:
+                    if use_timeout:
                         timer.start()
                     p.wait()
                 finally:
-                    if timeout:
+                    if use_timeout:
                         timer.cancel()
 
                 if timed_out:
