@@ -1,4 +1,29 @@
 # Datasets
+## Usage
+#### Download all the datasets in one go:
+```bash
+make download
+```
+
+#### Preprocess the datasets by running notebooks in: 
+`notebooks/preprocessing`.
+
+#### Export all the datasets to neo4j
+```bash
+make export_neo4j
+```
+
+#### Export all the datasets to graphml
+```bash
+make export_graphml
+```
+
+#### Create versions for all the datasets
+```bash
+make version
+```
+
+
 ## Used Datasets
 
 | Dataset                                                                                                | Reference                                                                 | Nodes   | Edges   | Node/Edge Types | Properties |

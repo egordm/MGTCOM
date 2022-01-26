@@ -1,5 +1,11 @@
 # Baselines
 
+## Usage
+#### Build all the bechmarks
+```bash
+make rebuild
+```
+
 ## Static Community Detection
 ### Link-based
 
