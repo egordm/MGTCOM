@@ -8,8 +8,8 @@ execution:
   containerized: true
 
 parameters:
-  run_count: 15
-  timeout: 600
+  run_count: 10
+  timeout: -1
   n_communities: -1
   min_communities: 5
   max_communities: 500
@@ -34,13 +34,13 @@ parameters:
   batch_size_dis: 64
   n_sample_gen: 5
   n_sample_dis: 5
-  lr_gen: 1e-3
+  lr_gen:
     min: 1e-3
     max: 1e-2
   lr_dis:
     min: 1e-3
     max: 1e-2
-  n_epochs: 10
+  n_epochs:
     values: [10]
   n_epochs_gen: 3
   n_epochs_dis: 3
@@ -68,8 +68,8 @@ datasets:
       - static
     parameters: {}
   DBLP-V1:
-    versions:
-      - static
+    versions: []
+#      - static # Havent tried but should work?
     parameters: { }
   DBLP-V3:
     versions: []

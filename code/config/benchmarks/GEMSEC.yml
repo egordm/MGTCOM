@@ -8,16 +8,24 @@ execution:
   containerized: true
 
 parameters:
-  run_count: 15
+  run_count: 10
   timeout: -1
-  walk_number: 5
-  walk_length: 80
+  walk_number:
+    values: [5, 10]
+  walk_length:
+    values: [40, 80]
   dimensions: 32
   negative_samples: 5
-  window_size: 5
-  learning_rate: 0.1
-  clusters: 10
-  gamma: 0.1
+  window_size:
+    values: [5, 10]
+  learning_rate:
+    min: 0.05
+    max: 0.2
+  clusters:
+    values: [3, 4, 8, 16, 32]
+  gamma:
+    min: 0.05
+    max: 0.2
   seed: 42
 
 datasets:

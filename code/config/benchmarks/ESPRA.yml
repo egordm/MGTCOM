@@ -8,8 +8,8 @@ execution:
   containerized: false
 
 parameters:
-  run_count: 15
-  timeout: 1200
+  run_count: 8
+  timeout: 1800
   alpha:
     min: 0.5
     max: 0.9
@@ -47,7 +47,7 @@ datasets:
 #      - split_20
     parameters: { }
   house-of-representatives-congress-116:
-    versions:
+    versions: # []
       - split_10_small
       - split_5
       - split_10

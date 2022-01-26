@@ -28,19 +28,19 @@ datasets:
     versions: []
     parameters: {}
   DBLP-HCN:
-    versions:
-      - split_5
+    versions: []
+#      - split_5
     parameters: {}
   DBLP-V1:
-    versions:
-      - split_5_small
-      - split_5
-      - split_10
+    versions: []
+#      - split_5_small
+#      - split_5
+#      - split_10
     parameters: { }
   DBLP-V3:
-    versions:
-      - split_5
-      - split_10
+    versions: []
+#      - split_5
+#      - split_10
     parameters: { }
   email-Eu-core:
     versions: []

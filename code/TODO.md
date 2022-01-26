@@ -34,7 +34,8 @@
   - [x] Triangle Participation Ratio (probably wont - high computation complexity)
 - [x] Add evaluation metrics to the baselines
 - [x] Add a way to visualize CD results
-- [ ] Add a way to generate synthetic benchmarks
+- [x] Add a way to generate synthetic benchmarks
+- [ ] Add https://github.com/isaranto/community-tracking synthetic benchmark
 - [ ] Add task specific evalution
 - [ ] Add cluster based evaluation metrics
 - [ ] Run Static Community Detection on benchmark datasets

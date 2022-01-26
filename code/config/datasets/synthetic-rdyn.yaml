@@ -8,5 +8,22 @@ versions:
       method: 'rdyn'
       seed: 1337
       size: 400
-      snapshots: 6
+      snapshots: 5
+      alpha: 2.5
+      new_node: 0.2
+      del_node: 0.1
+      avg_deg: 15
+      sigma: 0.6
+    type: edgelist_snapshots
+  small_10:
+    parameters:
+      method: 'rdyn'
+      seed: 1337
+      size: 400
+      snapshots: 10
+      alpha: 2.5
+      new_node: 0.2
+      del_node: 0.1
+      avg_deg: 9
+      sigma: 0.5
     type: edgelist_snapshots

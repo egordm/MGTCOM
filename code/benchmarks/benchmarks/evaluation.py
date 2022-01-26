@@ -389,7 +389,7 @@ def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[Evaluati
     metrics.append(MetricConductance)
     metrics.append(MetricExpansion)
     metrics.append(MetricInternalDensity)
-    metrics.append(MetricNormalizedCut)
+    # metrics.append(MetricNormalizedCut)
     metrics.append(MetricAverageODF)
     metrics.append(MetricModularityOverlap)
     metrics.append(MetricLinkModularity)

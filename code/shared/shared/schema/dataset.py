@@ -157,3 +157,6 @@ class DatasetSchema(DatasetPath, Serializable):
 
     def is_synthetic(self) -> bool:
         return TAG_SYNTHETIC in self.tags
+
+    def has_groundtruth(self) -> bool:
+        return TAG_GROUND_TRUTH in self.tags

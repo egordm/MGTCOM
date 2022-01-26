@@ -8,7 +8,7 @@ execution:
   containerized: true
 
 parameters:
-  run_count: 15
+  run_count: 5
   timeout: 600
   threshold:
     distribution: uniform
@@ -21,8 +21,8 @@ datasets:
     versions: []
     parameters: {}
   DBLP-HCN:
-    versions: []
-#      - split_5 # Seems to return empty communities
+    versions:
+      - split_5 # Seems to return empty communities
     parameters: {}
   DBLP-V1:
     versions: []
@@ -39,7 +39,7 @@ datasets:
     versions: []
     parameters: { }
   enron-mail-20150507:
-    versions:
+    versions: #[] #
       - split_10_small
 #      - split_5
 #      - split_10
@@ -47,10 +47,12 @@ datasets:
     parameters: { }
   house-of-representatives-congress-116:
     versions:
-      - split_10_small
+#      - split_10_small
+      - split_10
+      - split_5
     parameters: { }
   imdb-5000-movie-dataset:
-    versions:
+    versions: []
       - split_5
     parameters: { }
   misc-football:
@@ -73,7 +75,7 @@ datasets:
     parameters: { }
   sx-superuser:
     versions: []
-#      - split_6
+      - split_6
 #      - split_10
     parameters: { }
   ucidata-zachary:

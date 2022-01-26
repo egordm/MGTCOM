@@ -137,5 +137,22 @@ def graph_filter_connected_components(graph: ig.Graph, min_size: int):
         if len(c) < min_size
         for nid in c
     ]
-    LOG.debug(f'(graph_filter_connected_components) Removing {len(to_delete_ids)} nodes and {n_components_to_remove} components')
+    LOG.debug(
+        f'(graph_filter_connected_components) Removing {len(to_delete_ids)} nodes and {n_components_to_remove} components')
     graph.delete_vertices(to_delete_ids)
+
+
+def graph_join_attribute(
+        graph: ig.Graph,
+        df: pd.Series,
+        attribute_name: str,
+        left_attribute: str = 'gid',
+        group: bool = False,
+):
+    indexes = graph.vs[left_attribute]
+    if not group:
+        df = df[~df.index.duplicated(keep='first')]
+        values = df.loc[indexes]
+    else:
+        raise NotImplementedError()
+    graph.vs[attribute_name] = values
