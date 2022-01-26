@@ -9,7 +9,7 @@ execution:
 
 parameters:
   run_count: 15
-  timeout: -1
+  timeout: 3600
   number_walks:
     values: [5, 15, 30]
   walk_length:

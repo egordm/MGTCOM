@@ -9,7 +9,7 @@ execution:
 
 parameters:
   run_count: 5
-  timeout: 600
+  timeout: 1200
   weighted: false
   epsilon: 0.001
   reuse_partition: false

@@ -57,9 +57,9 @@ datasets:
     versions: []
     parameters: { }
   social-distancing-student:
-    versions:
-      - split_5
-      - split_10
+    versions: []
+#      - split_5  # Timeouts
+#      - split_10
     parameters: { }
   star-wars:
     versions:

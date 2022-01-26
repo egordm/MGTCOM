@@ -9,7 +9,7 @@ execution:
 
 parameters:
   run_count: 5
-  timeout: 600
+  timeout: 1200
   matching_threshold:
     min: 0.05
     max: 0.3
