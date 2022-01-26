@@ -1,5 +1,7 @@
 from cdlib.benchmark import RDyn
 
-G, coms = RDyn(size=300)
+from datasets.synthetic import generate_rdyn
+
+test = generate_rdyn()
 
 u = 9

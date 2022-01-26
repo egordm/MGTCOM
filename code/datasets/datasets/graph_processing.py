@@ -21,8 +21,8 @@ def graph_split_into_snapshots(
 ) -> Iterator[Tuple[int, ig.Graph]]:
     for i, (snapshot_start, snapshot_end) in enumerate(snapshot_ranges):
         LOG.debug(f'Creating snapshot {i} - range {snapshot_start} - {snapshot_end}')
-        nodes = G.vs.select(tstart_le=snapshot_end, tend_ge=snapshot_start) if schema.is_node_temporal() else G.vs
-        edges = G.es.select(tstart_le=snapshot_end, tend_ge=snapshot_start) if schema.is_edge_temporal() else G.es
+        nodes = G.vs.select(tstart_lt=snapshot_end, tend_ge=snapshot_start) if schema.is_node_temporal() else G.vs
+        edges = G.es.select(tstart_lt=snapshot_end, tend_ge=snapshot_start) if schema.is_edge_temporal() else G.es
         G_snapshot = G.induced_subgraph(nodes).subgraph_edges(edges)
 
         yield i, G_snapshot

@@ -5,6 +5,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from cdlib import NodeClustering
+from cdlib.classes.clustering import Clustering
 
 from shared.graph import ComList, read_comlist, write_comlist, read_coms, coms_to_comlist, comlist_to_coms, write_coms, \
     Coms
@@ -30,6 +31,13 @@ class CommunityAssignment:
         return CommunityAssignment(
             coms_to_comlist(read_coms(filepath))
         )
+
+    @classmethod
+    def from_clustering(cls, clustering: Clustering) -> 'CommunityAssignment':
+        return CommunityAssignment(
+            coms_to_comlist(dict(enumerate(clustering.communities)))
+        )
+
 
     def clone(self) -> 'CommunityAssignment':
         return CommunityAssignment(self.data.copy())

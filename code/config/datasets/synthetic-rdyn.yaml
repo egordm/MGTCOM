@@ -3,6 +3,10 @@ description: ''
 name: synthetic-rdyn
 tags: [dynamic, ground-truth, synthetic]
 versions:
-  static:
-    parameters: { }
-    type: edgelist_static
+  small_5:
+    parameters:
+      method: 'rdyn'
+      seed: 1337
+      size: 400
+      snapshots: 6
+    type: edgelist_snapshots

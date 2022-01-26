@@ -46,6 +46,9 @@ class DTypeAtomic(Enum):
         else:
             raise NotImplementedError(f'{stype}')
 
+    def to_dtype(self) -> 'DType':
+        return DType(self, False)
+
 
 @dataclass
 class DType(Serializable):
@@ -78,6 +81,7 @@ class GraphProperty(Serializable):
     @property
     def name(self):
         return self._name
+
 
 
 @dataclass
