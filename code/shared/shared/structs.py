@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -34,3 +35,14 @@ def dict_deep_merge(a: dict, b: dict) -> dict:
         else:
             result[k] = v
     return result
+
+
+@dataclass
+class CacheDict:
+    data: dict = field(default_factory=dict)
+
+    def get(self, key, value_fn):
+        if key not in self.data:
+            self.data[key] = value_fn()
+
+        return self.data[key]

@@ -18,9 +18,9 @@ LOG = get_logger(os.path.basename(__file__))
 @dataclass
 class Args:
     dataset: str = field(positional=True, help="Dataset name")
-    version: Optional[str] = field(default=None, help="Dataset version")
-    force: Optional[bool] = field(default=False, help="Force overwrite")
-    save_graphml: Optional[bool] = field(default=True, help="Save graphml")
+    version: Optional[str] = field(alias='v', default=None, help="Dataset version")
+    force: bool = field(help="Force overwrite", action='store_true')
+    save_graphml: bool = field(default=True, help="Save graphml")
 
 
 DEFAULT_CC_FILTER = 4
@@ -35,7 +35,7 @@ def run(args: Args):
         LOG.warning(f'Dataset {DATASET.name} is synthetic, skipping')
         return
 
-    if VERSION.get_path().exists() and not os.getenv('FORCE'):
+    if VERSION.get_path().exists() and not args.force:
         LOG.info(f"Dataset version {args.dataset}:{args.version} already exists. Use --force to overwrite.")
         return
 
@@ -79,7 +79,7 @@ def run(args: Args):
     if TAG_GROUND_TRUTH in DATASET.tags:
         LOG.info(f'Loading ground-truth')
         comms = CommunityAssignment.load_comlist(str(DATASET.processed('ground_truth.ncomlist')))
-        comms = comms.remap_nodes(nodemapping).renumber_communities()
+        comms = comms.remap_nodes(nodemapping).remap_communities()
         comms.named = False
 
     if VERSION.type == DatasetVersionType.EDGELIST_SNAPSHOTS:
@@ -103,7 +103,8 @@ def run(args: Args):
 
             if TAG_GROUND_TRUTH in DATASET.tags:
                 LOG.info(f'Saving ground-truth to {output_file.with_suffix(".comlist")}')
-                comms_snapshot = comms.filter_nodes(G_snapshot.vs['gid'])
+                comms_snapshot = comms.clone().with_nodes(G_snapshot.vs['gid'])
+                # comms_snapshot = comms_snapshot.remap_nodes(snapshot_nodemapping)
                 comms_snapshot.save_comlist(str(TRAIN_PART.snapshot_ground_truth(i)))
 
             if args.save_graphml:
@@ -116,7 +117,7 @@ def run(args: Args):
 
         if TAG_GROUND_TRUTH in DATASET.tags:
             LOG.info(f'Saving ground-truth to {TRAIN_PART.static_ground_truth}')
-            comms.save_comlist(str(TRAIN_PART.static_ground_truth))
+            comms.with_nodes(G.vs['gid']).save_comlist(str(TRAIN_PART.static_ground_truth))
 
         if args.save_graphml:
             LOG.info(f'Saving graphml to {TRAIN_PART.static_edgelist.with_suffix(".graphml")}')

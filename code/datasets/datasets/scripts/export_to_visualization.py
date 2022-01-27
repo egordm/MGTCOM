@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional, List
 
 import igraph as ig
+import numpy as np
 from simple_parsing import field
 
 from datasets.graph_processing import graph_join_attribute
@@ -36,10 +37,30 @@ def run(args: Args):
         LOG.info(f"Processing {graph_file}")
         graph = ig.Graph.Read_GraphML(str(graph_file.with_suffix(".graphml")))
 
+        if 'tstart' in graph.vs.attributes():
+            graph.vs['tstart'] = [
+                t if isinstance(t, (int, float)) and np.isfinite(t) else 0
+                for t in graph.vs['tstart']
+            ]
+            graph.vs['tend'] = [
+                t if isinstance(t, (int, float)) and np.isfinite(t) else 2147483646
+                for t in graph.vs['tend']
+            ]
+
+        if 'tstart' in graph.es.attributes():
+            graph.es['tstart'] = [
+                t if isinstance(t, (int, float)) and np.isfinite(t) else 0
+                for t in graph.es['tstart']
+            ]
+            graph.es['tend'] = [
+                t if isinstance(t, (int, float)) and np.isfinite(t) else 2147483646
+                for t in graph.es['tend']
+            ]
+
         if DATASET.has_groundtruth():
             LOG.info("Adding ground truth")
             ground_truth = CommunityAssignment.load_comlist(str(graph_file.with_suffix(".comlist")))
-            ground_truth.add_missing_nodes(int(max(graph.vs['gid'])))
+            ground_truth.with_nodes(graph.vs['gid'])
             graph_join_attribute(graph, ground_truth.data['cid'], 'ground_truth', left_attribute='gid', group=False)
 
         for i, path in enumerate(map(Path, args.run_paths)):
@@ -51,7 +72,7 @@ def run(args: Args):
 
             LOG.info(f"Adding prediction {prediction_file} as prediction_{i}")
             prediction = CommunityAssignment.load_comlist(str(prediction_file))
-            prediction.add_missing_nodes(int(max(graph.vs['gid'])))
+            prediction.with_nodes(graph.vs['gid'])
             graph_join_attribute(graph, prediction.data['cid'], f'prediction_{i}', left_attribute='gid', group=False)
 
         output_file = export_dir.joinpath(graph_file.with_suffix(".graphml").name)

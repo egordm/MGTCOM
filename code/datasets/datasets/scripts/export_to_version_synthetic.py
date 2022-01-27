@@ -55,7 +55,7 @@ def run(args: Args):
             G_snapshot.save_edgelist(str(output_file))
 
             LOG.info(f'Saving ground-truth to {output_file.with_suffix(".comlist")}')
-            comms_snapshot = comms.filter_nodes(G_snapshot.vs['gid'])
+            comms_snapshot = comms.clone().filter_nodes(G_snapshot.vs['gid'])
             comms_snapshot.save_comlist(str(TRAIN_PART.snapshot_ground_truth(i)))
 
             if args.save_graphml:

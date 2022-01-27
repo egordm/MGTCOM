@@ -155,4 +155,4 @@ def graph_join_attribute(
         values = df.loc[indexes]
     else:
         raise NotImplementedError()
-    graph.vs[attribute_name] = values
+    graph.vs[attribute_name] = values.values

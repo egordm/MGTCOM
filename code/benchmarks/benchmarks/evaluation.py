@@ -1,20 +1,20 @@
 import logging
-import pathlib
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Type, Optional
+from typing import List, Type
 
 import cdlib.evaluation as cdlib_eval
 import igraph as ig
 import numpy as np
-import yaml
+import wandb
 
 from benchmarks.config import BenchmarkConfig
 from shared.exceptions import NoCommunitiesFoundError
 from shared.graph import CommunityAssignment, read_edgelist_graph
 from shared.logger import get_logger
 from shared.schema import DatasetSchema, DatasetVersion
+from shared.structs import CacheDict
 
 LOG = get_logger('Evaluation')
 
@@ -25,7 +25,7 @@ class EvaluationContext:
     version: DatasetVersion
     benchmark: BenchmarkConfig
     output_dir: Path
-    cache: dict = field(default_factory=dict)
+    cache: CacheDict = field(default_factory=CacheDict)
 
 
 class EvaluationMetric:
@@ -36,9 +36,8 @@ class EvaluationMetric:
         super().__init__()
         self.context = context
         self.LOG = get_logger(self.metric_name())
-        self.prepare()
 
-    def prepare(self):
+    def prepare(self, **kwargs):
         pass
 
     @abstractmethod
@@ -49,157 +48,79 @@ class EvaluationMetric:
     def metric_name(self) -> str:
         raise NotImplementedError()
 
-    def load_ground_truth(self, file: Path) -> CommunityAssignment:
-        if str(file) in self.context.cache:
-            self.LOG.debug('Loading ground truth from cache')
-            ground_truth = self.context.cache[str(file)]
-        else:
-            ground_truth = CommunityAssignment.load_comlist(str(file))
-            self.context.cache[str(file)] = ground_truth
-
-        return ground_truth
-
-    def load_prediction(self, file: Path, info_file: Path) -> Optional[CommunityAssignment]:
-        if str(file) in self.context.cache:
-            self.LOG.debug('Loading prediction from cache')
-            prediction = self.context.cache[str(file) + "_proc"]
-        else:
-            prediction = CommunityAssignment.load_comlist(str(file))
-            self.context.cache[str(file)] = prediction.clone()
-
-            if prediction.is_empty():
-                raise NoCommunitiesFoundError()
-
-            # Add missing nodes to community list
-            if info_file.exists():
-                self.LOG.debug('Loading missing nodes if applicable')
-                graph_info = yaml.safe_load(info_file.read_text())
-                prediction.add_missing_nodes(graph_info['nodes'])
-
-            self.context.cache[str(file) + "_proc"] = prediction
-
-        return prediction
-
-    def load_graph(self, file: Path) -> ig.Graph:
-        if str(file) in self.context.cache:
-            self.LOG.debug('Loading graph from cache')
-            graph = self.context.cache[str(file)]
-        else:
-            graph = read_edgelist_graph(
-                str(file),
-                directed=self.context.version.get_param('directed', False),
-            )
-
-            self.context.cache[str(file)] = graph
-        return graph
-
-
-class AnnotatedEvaluationMetric(EvaluationMetric):
-    def evaluate(self) -> dict:
-        PART = self.context.version.train
-
-        if 'dynamic' in self.context.benchmark.tags:
-            self.LOG.debug('Evaluating dynamic benchmark')
-            scores = []
-            for i, ground_truth_file in enumerate(PART.get_snapshot_ground_truths()):
-                self.LOG.debug(f'Evaluating snapshot {i}')
-                prediction_file = self.context.output_dir.joinpath(ground_truth_file.name)
-                score = self._evaluate_by_params(prediction_file, ground_truth_file)
-                scores.append(score)
-            return {
-                f'avg_{self.metric_name()}': np.mean(scores),
-                'snapshots': {
-                    i: {
-                        self.metric_name(): score
-                    }
-                    for i, score in enumerate(scores)
-                }
-            }
-        elif 'static' in self.context.benchmark.tags:
-            self.LOG.debug('Evaluating static benchmark')
-            ground_truth_file = PART.static_ground_truth
-            prediction_file = self.context.output_dir.joinpath(ground_truth_file.name)
-            score = self._evaluate_by_params(prediction_file, ground_truth_file)
-
-            return {
-                f'avg_{self.metric_name()}': score
-            }
-
-    def _evaluate_by_params(
-            self, prediction_file: pathlib.Path, ground_truth_file: pathlib.Path
-    ):
-        prediction = self.load_prediction(prediction_file, ground_truth_file.with_suffix('.info.yaml'))
-        if prediction is None:
-            return np.NAN
-
-        ground_truth = self.load_ground_truth(ground_truth_file)
-
-        self.LOG.debug(f'Evaluating the metric')
-        return self.evaluate_single(prediction, ground_truth)
-
-    @abstractmethod
-    def evaluate_single(
-            self,
-            prediction: CommunityAssignment,
-            ground_truth: CommunityAssignment,
-    ) -> float:
-        raise NotImplementedError()
-
 
 class QualityMetric(EvaluationMetric):
+    graph: ig.Graph = None
+    prediction: CommunityAssignment = None
+
+    def load_graph(self, path: Path) -> ig.Graph:
+        graph = read_edgelist_graph(
+            str(path),
+            directed=self.context.version.get_param('directed', False),
+        )
+        graph.vs['gid'] = graph.vs['name']
+        return graph
+
+    def load_comlist(self, path: Path):
+        comms = CommunityAssignment.load_comlist(str(path))
+        if comms.is_empty():
+            raise NoCommunitiesFoundError('No communities found in file {}'.format(path))
+
+        if not self.graph:
+            raise ValueError('Graph has not been loaded yet')
+
+        comms = comms.with_nodes(self.graph.vs['gid'])
+        return comms
+
+    def prepare(self, graph_path: Path, prediction_path: Path, **kwargs):
+        self.graph = self.context.cache.get(str(graph_path), lambda: self.load_graph(graph_path))
+        self.prediction = self.context.cache.get(str(prediction_path), lambda: self.load_comlist(prediction_path))
+
     def evaluate(self) -> dict:
         PART = self.context.version.train
 
+        scores = []
         if 'dynamic' in self.context.benchmark.tags:
             self.LOG.debug('Evaluating dynamic benchmark')
-            scores = []
             for i, graph_file in enumerate(PART.get_snapshot_edgelists()):
                 self.LOG.debug(f'Evaluating snapshot {i}')
-                prediction_file = self.context.output_dir.joinpath(graph_file.name).with_suffix('.comlist')
-                score = self._evaluate_by_params(prediction_file, graph_file)
-                scores.append(score)
-            return {
-                f'{self.metric_name()}_avg': np.mean(scores),
-                **{
-                    f'{self.metric_name()}_snapshots/snapshot_{i}': score
-                    for i, score in enumerate(scores)
-                },
-            }
+                self.prepare(
+                    graph_path=graph_file,
+                    prediction_path=self.context.output_dir.joinpath(graph_file.name).with_suffix('.comlist'),
+                )
+                scores.append(self.evaluate_step())
         elif 'static' in self.context.benchmark.tags:
             self.LOG.debug('Evaluating static benchmark')
-            prediction_file = self.context.output_dir.joinpath(PART.static_ground_truth.name)
-            graph_file = PART.static_edgelist
-            score = self._evaluate_by_params(prediction_file, graph_file)
-            return {
-                f'{self.metric_name()}_avg': score
-            }
+            self.prepare(
+                graph_path=PART.static_edgelist,
+                prediction_path=self.context.output_dir.joinpath(PART.static_ground_truth.name),
+            )
+            scores.append(self.evaluate_step())
 
-    def _evaluate_by_params(
-            self, prediction_file: pathlib.Path, graph_file: pathlib.Path
-    ):
-        prediction = self.load_prediction(prediction_file, graph_file.with_suffix('.info.yaml'))
-        if prediction is None:
-            return np.NAN
-
-        graph = self.load_graph(graph_file)
-
-        LOG.debug(f'Evaluating the metric')
-        return self.evaluate_single(graph, prediction)
+        return {
+            self.metric_name(): np.mean(scores),
+            f'snapshots/{self.metric_name()}': scores,
+        }
 
     @abstractmethod
-    def evaluate_single(
-            self,
-            graph: ig.Graph,
-            prediction: CommunityAssignment,
-    ) -> float:
+    def evaluate_step(self) -> float:
         raise NotImplementedError()
+
+
+class AnnotatedEvaluationMetric(QualityMetric, ABC):
+    ground_truth: CommunityAssignment = None
+
+    def prepare(self, graph_path: Path, **kwargs):
+        super().prepare(graph_path, **kwargs)
+        ground_truth_path = graph_path.with_suffix('.comlist')
+        self.ground_truth = self.context.cache.get(str(ground_truth_path), lambda: self.load_comlist(ground_truth_path))
 
 
 class MetricNMI(AnnotatedEvaluationMetric):
-    def evaluate_single(self, prediction: CommunityAssignment, ground_truth: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.normalized_mutual_information(
-            prediction.to_nodeclustering(),
-            ground_truth.to_nodeclustering(),
+            self.prediction.to_clustering(),
+            self.ground_truth.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -207,10 +128,10 @@ class MetricNMI(AnnotatedEvaluationMetric):
 
 
 class OverlappingNMI(AnnotatedEvaluationMetric):
-    def evaluate_single(self, prediction: CommunityAssignment, ground_truth: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.overlapping_normalized_mutual_information_MGH(
-            prediction.to_nodeclustering(),
-            ground_truth.to_nodeclustering(),
+            self.prediction.to_clustering(),
+            self.ground_truth.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -218,10 +139,10 @@ class OverlappingNMI(AnnotatedEvaluationMetric):
 
 
 class MetricNF1(AnnotatedEvaluationMetric):
-    def evaluate_single(self, prediction: CommunityAssignment, ground_truth: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.nf1(
-            prediction.to_nodeclustering(),
-            ground_truth.to_nodeclustering(),
+            self.prediction.to_clustering(),
+            self.ground_truth.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -229,10 +150,10 @@ class MetricNF1(AnnotatedEvaluationMetric):
 
 
 class MetricOmega(AnnotatedEvaluationMetric):
-    def evaluate_single(self, prediction: CommunityAssignment, ground_truth: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.omega(
-            prediction.to_nodeclustering(),
-            ground_truth.to_nodeclustering(),
+            self.prediction.to_clustering(),
+            self.ground_truth.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -240,10 +161,10 @@ class MetricOmega(AnnotatedEvaluationMetric):
 
 
 class MetricF1(AnnotatedEvaluationMetric):
-    def evaluate_single(self, prediction: CommunityAssignment, ground_truth: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.f1(
-            prediction.to_nodeclustering(),
-            ground_truth.to_nodeclustering(),
+            self.prediction.to_clustering(),
+            self.ground_truth.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -251,10 +172,10 @@ class MetricF1(AnnotatedEvaluationMetric):
 
 
 class MetricAdjustedRandIndex(AnnotatedEvaluationMetric):
-    def evaluate_single(self, prediction: CommunityAssignment, ground_truth: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.adjusted_rand_index(
-            prediction.to_nodeclustering(),
-            ground_truth.to_nodeclustering(),
+            self.prediction.to_clustering(),
+            self.ground_truth.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -262,10 +183,10 @@ class MetricAdjustedRandIndex(AnnotatedEvaluationMetric):
 
 
 class MetricModularity(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.newman_girvan_modularity(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -273,10 +194,10 @@ class MetricModularity(QualityMetric):
 
 
 class MetricLinkModularity(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.link_modularity(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -284,10 +205,10 @@ class MetricLinkModularity(QualityMetric):
 
 
 class MetricModularityOverlap(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.modularity_overlap(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -295,10 +216,10 @@ class MetricModularityOverlap(QualityMetric):
 
 
 class MetricZModularity(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.z_modularity(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -306,10 +227,10 @@ class MetricZModularity(QualityMetric):
 
 
 class MetricConductance(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.conductance(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -317,10 +238,10 @@ class MetricConductance(QualityMetric):
 
 
 class MetricExpansion(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.expansion(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -328,10 +249,10 @@ class MetricExpansion(QualityMetric):
 
 
 class MetricInternalDensity(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.internal_edge_density(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -339,10 +260,10 @@ class MetricInternalDensity(QualityMetric):
 
 
 class MetricNormalizedCut(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.normalized_cut(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -350,10 +271,10 @@ class MetricNormalizedCut(QualityMetric):
 
 
 class MetricAverageODF(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
+    def evaluate_step(self) -> float:
         return cdlib_eval.avg_odf(
-            graph,
-            prediction.to_nodeclustering(),
+            self.graph,
+            self.prediction.to_clustering(),
         ).score
 
     def metric_name(self) -> str:
@@ -361,8 +282,8 @@ class MetricAverageODF(QualityMetric):
 
 
 class MetricCommunityCount(QualityMetric):
-    def evaluate_single(self, graph: ig.Graph, prediction: CommunityAssignment) -> float:
-        return prediction.community_count()
+    def evaluate_step(self) -> float:
+        return self.prediction.community_count()
 
     def metric_name(self) -> str:
         return 'community_count'
@@ -371,6 +292,7 @@ class MetricCommunityCount(QualityMetric):
 def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[EvaluationMetric]]:
     metrics = []
 
+    metrics.append(MetricConductance)
     metrics.append(MetricCommunityCount)
 
     if ground_truth:

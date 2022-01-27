@@ -1,15 +1,19 @@
+import os
 import pathlib
 from typing import List, Union, Tuple, Iterator
-import yaml
 
 import igraph as ig
 import pandas as pd
+import yaml
 
 from datasets.graph_processing import graph_add_timeranges, graph_split_into_snapshots, graph_subsample, \
     graph_filter_connected_components
 from shared.graph import igraph_to_edgelist, write_edgelist, EdgeList
 from shared.graph.loading import pd_from_graph_schema
+from shared.logger import get_logger
 from shared.schema import GraphSchema
+
+LOG = get_logger(os.path.basename(__file__))
 
 BaseGraph = ig.Graph
 
@@ -57,6 +61,7 @@ class DataGraph(BaseGraph):
         return DataGraph(schema, graph)
 
     def add_gids(self):
+        LOG.debug('Renumbering nodes gid')
         self.graph.vs['gid'] = range(self.graph.vcount())
         self.graph.es['gid'] = range(self.graph.ecount())
 
@@ -68,19 +73,26 @@ class DataGraph(BaseGraph):
                and max(self.graph.vs['gid']) == self.graph.vcount() - 1 \
                and max(self.graph.es['gid']) == self.graph.ecount() - 1
 
+    def has_gids(self):
+        if 'gid' in self.graph.vs.attributes() and 'gid' in self.graph.es.attributes():
+            return True
+        return False
+
     def save_edgelist(self, path: str):
         edges = self.to_edgelist()
         write_edgelist(edges, str(path))
         self.write_graph_info(str(pathlib.Path(str(path)).with_suffix('.info.yaml')))
 
     def to_edgelist(self) -> EdgeList:
-        if not self.valid_gids():
-            self.add_gids()
+        if not self.has_gids():
+            raise ValueError('Graph has no gids')
+
         return igraph_to_edgelist(self.graph)
 
     def to_nodemapping(self) -> pd.Series:
-        if not self.valid_gids():
-            self.add_gids()
+        if not self.has_gids():
+            raise ValueError('Graph has no gids')
+
         result = pd.Series(self.graph.vs['gid'], index=self.graph.vs['name'], name='gid')
         result.index.name = 'id'
         return result
@@ -112,8 +124,3 @@ class DataGraph(BaseGraph):
 
     def filter_connected_components(self, min_size: int = 1):
         graph_filter_connected_components(self.graph, min_size)
-
-
-
-
-
