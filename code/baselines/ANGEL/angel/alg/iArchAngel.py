@@ -37,7 +37,7 @@ def timeit(method):
 class ArchAngel(object):
 
     def __init__(self, network_filename, threshold=0.25, match_threshold=0.25,
-                 min_comsize=3, save=True, outfile_path=""):
+                 min_comsize=3, save=True, outfile_path="", neighborhood_size=1):
         """
         Constructor
 
@@ -52,6 +52,7 @@ class ArchAngel(object):
         self.threshold = threshold
         self.match_threshold = match_threshold
 
+        self.neighborhood_size = neighborhood_size
         if self.threshold < 1:
             self.min_community_size = max([3, min_comsize, int(1. / (1 - self.threshold))])
         else:
@@ -120,7 +121,7 @@ class ArchAngel(object):
             ag = an.Angel(None, threshold=self.threshold,
                           min_comsize=self.min_community_size,
                           save=self.save, outfile_name="%s_%s.txt" % (self.outfile_name, snapshot),
-                          dyn=graph, verbose=False)
+                          dyn=graph, verbose=True, network_filename=self.neighborhood_size)
 
             self.snapshot_to_coms[snapshot] = ag.execute()
 

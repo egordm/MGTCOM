@@ -22,8 +22,9 @@ datasets:
     parameters: {}
   DBLP-HCN:
     versions:
-      - split_5 # Seems to return empty communities
-    parameters: {}
+      - split_5
+    parameters:
+      neighborhood_size: 2
   DBLP-V1:
     versions: []
 #      - split_5_small
@@ -44,17 +45,19 @@ datasets:
 #      - split_5
 #      - split_10
 #      - split_20
-    parameters: { }
+    parameters:
+      neighborhood_size: 2
   house-of-representatives-congress-116:
     versions:
-#      - split_10_small
+      - split_10_small
       - split_10
       - split_5
     parameters: { }
   imdb-5000-movie-dataset:
-    versions: []
+    versions:
       - split_5
-    parameters: { }
+    parameters:
+      neighborhood_size: 2
   misc-football:
     versions: []
     parameters: { }
@@ -74,7 +77,7 @@ datasets:
       - split_10
     parameters: { }
   sx-superuser:
-    versions: []
+    versions:
       - split_6
 #      - split_10
     parameters: { }

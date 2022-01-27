@@ -12,12 +12,16 @@ import angel as a
 
 is_angel = '--angel' in sys.argv
 
+parser = argparse.ArgumentParser(description='ANGEL' if is_angel else 'ARCHANGEL')
+parser.add_argument('--angel', action='store_true')
+parser.add_argument('--input', type=str, default='/input', help='directory containing input edgelist file')
+parser.add_argument('--output', type=str, default='/output/', help='output files dir')
+parser.add_argument('--threshold', type=float, default=0.4, help='threshold')
+parser.add_argument('--min_comsize', type=int, default=3, help='minimum community size')
+parser.add_argument('--neighborhood_size', type=int, default=1, help='Neigborhood size for ego network')
+
 if is_angel:
-    parser = argparse.ArgumentParser(description='ANGEL')
-    parser.add_argument('--angel', action='store_true')
-    parser.add_argument('--input', type=str, default='/input', help='directory containing input edgelist file')
-    parser.add_argument('--threshold', type=float, default=0.4, help='threshold')
-    parser.add_argument('--min_comsize', type=int, default=3, help='minimum community size')
+
     parser.add_argument('--output', type=str, default='/output', help='output file path')
     args = parser.parse_args()
 
@@ -29,18 +33,13 @@ if is_angel:
         network_filename=str(input_dir.joinpath('static.edgelist')),
         threshold=args.threshold,
         min_comsize=args.min_comsize,
+        neighborhood_size=args.neighborhood_size,
         outfile_name=tmp_dir.joinpath('static.out'),
     )
     an.execute()
     outputs = [tmp_dir.joinpath('static.out')]
 else:
-    parser = argparse.ArgumentParser(description='ARCHANGEL')
-    parser.add_argument('--angel', action='store_true')
-    parser.add_argument('--input', type=str, default='/input', help='Directory of input edgelist files')
-    parser.add_argument('--threshold', type=float, default=0.4, help='threshold')
     parser.add_argument('--match_threshold', type=float, default=0.4, help='match threshold')
-    parser.add_argument('--min_comsize', type=int, default=3, help='minimum community size')
-    parser.add_argument('--output', type=str, default='/output/', help='output files dir')
     args = parser.parse_args()
 
     print('Converting snapshot networks to temporal network...')
@@ -66,6 +65,7 @@ else:
         threshold=args.threshold,
         match_threshold=args.match_threshold,
         min_comsize=args.min_comsize,
+        neighborhood_size=args.neighborhood_size,
         outfile_path=str(tmp_dir.joinpath('output_'))
     )
     aa.execute()

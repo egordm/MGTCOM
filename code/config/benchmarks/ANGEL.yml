@@ -22,9 +22,10 @@ datasets:
     versions: []
     parameters: {}
   DBLP-HCN:
-    versions: []
-#      - static
-    parameters: {}
+    versions:
+      - static
+    parameters:
+      neighborhood_size: 2
   DBLP-V1:
     versions: []
 #      - static

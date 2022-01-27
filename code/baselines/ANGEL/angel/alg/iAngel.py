@@ -41,7 +41,7 @@ class Angel(object):
     """
 
     def __init__(self, network_filename=None, graph=None, threshold=0.25, min_comsize=3, save=True, outfile_name="angels_coms.txt",
-                 dyn=None, verbose=True):
+                 dyn=None, verbose=True, neighborhood_size=1):
         """
         Constructor
 
@@ -63,6 +63,7 @@ class Angel(object):
         else:
             self.G = dyn
 
+        self.neighborhood_size = neighborhood_size
         self.threshold = threshold
 
         if self.threshold < 1:
@@ -104,7 +105,7 @@ class Angel(object):
         for ego in tqdm.tqdm(range(0, self.total_nodes), ncols=35, bar_format='Exec: {l_bar}{bar}', disable=not self.verbose):
 
             # ego_minus_ego node set
-            ego_minus_ego_nodes = set(self.G.neighborhood(ego, 1, mode="ALL")) - {ego}
+            ego_minus_ego_nodes = set(self.G.neighborhood(ego, self.neighborhood_size, mode="ALL")) - {ego}
             if len(ego_minus_ego_nodes) >= self.min_community_size:
                 community_to_nodes = self.__overlapping_label_propagation(ego_minus_ego_nodes)
 

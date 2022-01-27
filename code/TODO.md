@@ -35,6 +35,7 @@
 - [x] Add evaluation metrics to the baselines
 - [x] Add a way to visualize CD results
 - [x] Add a way to generate synthetic benchmarks
+- [ ] Double check alignment of comlist to snapshot files during evaluation
 - [ ] Change GENSIM baseline to the tensorflow one
 - [ ] Add https://github.com/isaranto/community-tracking synthetic benchmark
 - [ ] Add task specific evalution

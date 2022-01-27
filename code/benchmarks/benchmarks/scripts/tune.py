@@ -56,6 +56,9 @@ def run(args: Args):
             "version": {
                 'value': args.version
             },
+            "timeout": {
+                'value': baseline.get_timeout(dataset.name)
+            }
         },
         **({
                'metric': baseline.get_metric(dataset.name),
