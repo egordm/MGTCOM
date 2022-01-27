@@ -1,9 +1,9 @@
 import argparse
+import csv
 import logging
 import pathlib
 import subprocess
 import sys
-import csv
 from collections import defaultdict
 
 # Determine the mode to use
@@ -21,6 +21,7 @@ if mode is None:
     print("Please specify a mode: {}".format(MODES))
     sys.exit(1)
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -30,6 +31,7 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
 
 parser = argparse.ArgumentParser(description='GreeneDCD')
 parser.add_argument('--verbose', action='store_true', default=False, help='verbose output')
@@ -49,7 +51,8 @@ elif mode == 'moses':
 
 # GreeneDCD Arguments
 parser.add_argument('--matching_threshold', type=float, default=0.1, help='(tracker) Matching threshold')
-parser.add_argument('--death', type=int, default=3, help='(tracker) number of steps after which a dynamic community is declared dead')
+parser.add_argument('--death', type=int, default=3,
+                    help='(tracker) number of steps after which a dynamic community is declared dead')
 parser.add_argument('--persist_threshold', type=int, default=1, help='(aggregator) Persist threshold')
 parser.add_argument('--min_length', type=int, default=2, help='(aggregator) Minimum length of a track')
 parser.add_argument('--max_step', type=int, default=-1, help='(aggregator) Maximum number of steps')
@@ -85,13 +88,16 @@ if mode == 'louvain':
     for f in input_files:
         LOG.info(f'Converting input file {f} to binary format')
         output_file = tmp_dir.joinpath(f.with_suffix('.bin').name)
+        cmd = [
+            './louvain-generic/convert',
+            '-i', str(f),
+            '-o', str(output_file),
+            '-r', str(output_file.with_suffix('.mapping')),
+            *(['-w', str(output_file.with_suffix('weights'))] if args.weighted else []),
+        ]
+        LOG.info(' '.join(cmd))
         p = subprocess.Popen(
-            [
-                './louvain-generic/convert',
-                '-i', str(f),
-                '-o', str(output_file),
-                *(['-w', str(output_file.with_suffix('weights'))] if args.weighted else []),
-            ],
+            cmd,
             shell=False,
             stdout=sys.stdout, stderr=sys.stderr,
         )
@@ -103,16 +109,18 @@ if mode == 'louvain':
         LOG.info(f'Running Louvain on {f}')
         output_file = f.with_suffix('.tree')
         with open(str(output_file), 'w') as fout:
+            cmd = [
+                './louvain-generic/louvain',
+                str(f),
+                *(['-w', str(f.with_suffix('weights'))] if args.weighted else []),
+                '-q', '0',
+                '-e', str(args.epsilon),
+                *(['-v'] if args.verbose else []),
+                '-l', str(args.level if args.level >= 0 else '-1'),
+            ]
+            LOG.info(' '.join(cmd))
             p = subprocess.Popen(
-                [
-                    './louvain-generic/louvain',
-                    str(f),
-                    *(['-w', str(f.with_suffix('weights'))] if args.weighted else []),
-                    '-q', '1',
-                    '-e', str(args.epsilon),
-                    *(['-v'] if args.verbose else []),
-                    '-l', str(args.level if args.level >= 0 else '-1'),
-                ],
+                cmd,
                 shell=False,
                 stdout=fout, stderr=sys.stdout,
             )
@@ -158,14 +166,22 @@ if mode == 'louvain':
         LOG.info(f'Converting communities file {f} to row format')
         communities = defaultdict(list)
         comlist_file = output_dir.joinpath(f.with_suffix('.comlist').name)
+
+        node_mapping = {}
+        with f.with_suffix('.mapping').open() as fin:
+            for line in fin:
+                old_id, new_id = line.strip().split()
+                node_mapping[int(new_id)] = int(old_id)
+
         with comlist_file.open('w') as fout:
             with f.open('r') as fin:
                 for line in fin:
                     line = line.strip()
                     if line:
-                        node, community = line.split()
-                        communities[int(community)].append(int(node))
-                        fout.write(f'{int(node)}\t{int(community)}\n')
+                        node, community = map(int, line.split())
+                        node = node_mapping[node]
+                        communities[community].append(node)
+                        fout.write(f'{node}\t{community}\n')
 
         with f.open('w') as fout:
             for community, nodes in sorted(communities.items()):
@@ -205,7 +221,6 @@ elif mode == 'moses':
                 for nid in nodes:
                     fout.write(f'{nid}\t{cid}\n')
 
-
 if args.dynamic:
     N_TIMESTEPS = len(list(tmp_dir.glob('*.coms')))
 
@@ -236,14 +251,14 @@ if args.dynamic:
         tsv_writer = csv.writer(f, delimiter='\t')
         tsv_writer.writerow(['dcid', *(f'cid_t{i}' for i in range(N_TIMESTEPS))])
         for dcid, timeline in community_timeline:
-            tsv_writer.writerow([dcid] + [timeline.get(i+1, '-') for i in range(N_TIMESTEPS)])
+            tsv_writer.writerow([dcid] + [timeline.get(i + 1, '-') for i in range(N_TIMESTEPS)])
 
     print('Converting dynamic community timeline to pairwise matching format')
     match_list = set()
     for dcid, timeline in community_timeline:
         for i in range(N_TIMESTEPS - 1):
-            if timeline.get(i+1, None) and timeline.get(i+2, None):
-                match_list.add((i, i+1, timeline[i+1], timeline[i+2]))
+            if timeline.get(i + 1, None) and timeline.get(i + 2, None):
+                match_list.add((i, i + 1, timeline[i + 1], timeline[i + 2]))
 
     with output_dir.joinpath('tracking.tsv').open('w') as f:
         tsv_writer = csv.writer(f, delimiter='\t')
