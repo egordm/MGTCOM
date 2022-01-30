@@ -68,6 +68,10 @@ def run(args: Args):
     # TODO: Add a way to filter away small components
     # component_size = pd.Series(map(len, G.components('weak')))
 
+    if VERSION.type == DatasetVersionType.EDGELIST_SNAPSHOTS:
+        LOG.info(f'Setting time ranges for snapshots')
+        graph_add_timeranges(schema, G)
+
     # Lock down node mapping. After this, we can't change the node graph anymore
     LOG.info('Adding GIDs')
     G.add_gids()
@@ -83,9 +87,6 @@ def run(args: Args):
         comms.named = False
 
     if VERSION.type == DatasetVersionType.EDGELIST_SNAPSHOTS:
-        LOG.info(f'Setting time ranges for snapshots')
-        graph_add_timeranges(schema, G)
-
         LOG.info(f'Generating snapshot ranges')
         snapshot_ranges = graph_split_snapshot_ranges(
             schema, G,

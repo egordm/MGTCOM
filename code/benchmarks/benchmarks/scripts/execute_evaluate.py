@@ -3,6 +3,7 @@ import os
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
+import wandb
 from simple_parsing import field
 
 from benchmarks.config import BenchmarkConfig
@@ -54,6 +55,15 @@ def run(args: Args, params: Optional[Dict[str, Any]] = None):
             run_name=args.run_name,
         )
     )
+
+    # Convert value lists to wandb line plot
+    for k, v in result.items():
+        if isinstance(v, list) and k.startswith("snapshots/"):
+            result[k] = wandb.plot.line(
+                wandb.Table(data=list(enumerate(v)), columns=['snapshot', k]),
+                'snapshot', k
+            )
+
     LOG.info(f"Evaluation of {args.run_name} finished with result {result}")
     return result
 

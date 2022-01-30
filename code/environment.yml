@@ -7,17 +7,12 @@ channels:
 dependencies:
   - python=3.9
   - pip
-  - pytorch=1.10.1
-  - torchvision=0.11.2
-  - torchaudio=0.10.1
-  - cudatoolkit=11.3
-  - pyspark=3.2.0
-  - tensorflow
   - numpy
   - scipy
   - pandas
   - jupyter
   - python-igraph
+  - pyspark=3.2.0
   - networkx
   - tqdm
   - future
@@ -26,5 +21,6 @@ dependencies:
   - pip:
       - neo4j
       - cdlib
+      - -r shared/requirements.txt
       - -r datasets/requirements.txt
       - -r benchmarks/requirements.txt

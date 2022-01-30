@@ -1,0 +1,78 @@
+name: Dynamo
+description: "Dynamo"
+tags: [dynamic, link-based]
+
+execution:
+  cwd: baselines/Dynamo
+  entrypoint: [docker-compose, run, dynamo]
+  containerized: true
+
+parameters:
+  run_count: 3
+  timeout: 1800
+
+datasets:
+  com-youtube:
+    versions: []
+    parameters: {}
+  DBLP-HCN:
+    versions:
+      - split_5
+    parameters: {}
+  DBLP-V1:
+    versions:
+      - split_5_small
+      - split_5
+      - split_10
+    parameters: { }
+  DBLP-V3:
+    versions: []
+#      - split_5
+#      - split_10
+    parameters: { }
+  email-Eu-core:
+    versions: []
+    parameters: { }
+  enron-mail-20150507:
+    versions:
+      - split_10_small
+      - split_5
+      - split_10
+      - split_20
+    parameters: { }
+  house-of-representatives-congress-116:
+    versions: # []
+      - split_10_small
+      - split_5
+      - split_10
+    parameters: { }
+  imdb-5000-movie-dataset:
+    versions:
+      - split_5
+    parameters: { }
+  misc-football:
+    versions: []
+    parameters: { }
+  social-distancing-student:
+    versions:
+      - split_5
+      - split_10
+    parameters: { }
+  star-wars:
+    versions:
+      - split_5
+      - split_7
+    parameters: { }
+  sx-mathoverflow:
+    versions:
+      - split_6
+      - split_10
+    parameters: { }
+  sx-superuser:
+    versions:
+      - split_6
+      - split_10
+    parameters: { }
+  ucidata-zachary:
+    versions: []
+    parameters: { }

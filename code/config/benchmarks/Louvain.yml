@@ -1,0 +1,60 @@
+name: Louvain
+description: "Louvain benchmark"
+tags: [static, link-based]
+
+execution:
+  cwd: baselines/GreeneDCD
+  entrypoint: [docker-compose, run, greenedcd, louvain]
+  containerized: true
+
+parameters:
+  run_count: 3
+  timeout: 1200
+  weighted: false
+  epsilon: 0.001
+  reuse_partition: false
+  level: -1
+
+datasets:
+  com-youtube:
+    versions: []
+    parameters: {}
+  DBLP-HCN:
+    versions:
+      - static
+    parameters: {}
+  DBLP-V1:
+    versions: []
+#      - static # Havent tried but should work?
+    parameters: { }
+  DBLP-V3:
+    versions: []
+    parameters: { }
+  email-Eu-core:
+    versions:
+      - static
+    parameters: { }
+  house-of-representatives-congress-116:
+    versions:
+      - static_small
+    parameters: { }
+  imdb-5000-movie-dataset:
+    versions:
+      - static
+    parameters: { }
+  misc-football:
+    versions:
+      - static
+    parameters: { }
+  social-distancing-student:
+    versions:
+      - static
+    parameters: { }
+  star-wars:
+    versions:
+      - static
+    parameters: { }
+  ucidata-zachary:
+    versions:
+      - static
+    parameters: { }

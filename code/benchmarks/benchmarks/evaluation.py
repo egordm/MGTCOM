@@ -292,7 +292,6 @@ class MetricCommunityCount(QualityMetric):
 def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[EvaluationMetric]]:
     metrics = []
 
-    metrics.append(MetricConductance)
     metrics.append(MetricCommunityCount)
 
     if ground_truth:

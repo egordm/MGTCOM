@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Iterator
 
-from astropy.io.misc import yaml
+import yaml
 from simple_parsing import Serializable, field
 
 from shared.constants import CONFIG_DATASETS, DATASETS_DATA_RAW, DATASETS_DATA_PROCESSED, \
@@ -67,7 +67,7 @@ class DatasetVersionPart:
 class DatasetVersion(Serializable):
     _path: Path = field(init=False, default=None, to_dict=False)
     type: DatasetVersionType = field(decoding_fn=lambda x: DatasetVersionType(x), encoding_fn=lambda x: x.value)
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: Dict[str, Any] = field(default_factory=dict, help='Parameters for the dataset version')
 
     def get_path(self) -> Path:
         return self._path
@@ -138,7 +138,7 @@ class DatasetSchema(DatasetPath, Serializable):
     def load_schema(cls, name, **kwargs) -> 'DatasetSchema':
         path = CONFIG_DATASETS.joinpath(f'{name}.yaml')
         if path.exists():
-            data = yaml.load(path.read_text(), **kwargs)
+            data = yaml.safe_load(path.read_text())
             result = cls.from_dict(data)
         else:
             result = cls(name=name, database=to_identifier(name).replace('_', '-'))

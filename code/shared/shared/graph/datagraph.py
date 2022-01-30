@@ -3,6 +3,7 @@ import pathlib
 from typing import List, Union, Tuple, Iterator
 
 import igraph as ig
+import numpy as np
 import pandas as pd
 import yaml
 
@@ -62,7 +63,15 @@ class DataGraph(BaseGraph):
 
     def add_gids(self):
         LOG.debug('Renumbering nodes gid')
-        self.graph.vs['gid'] = range(self.graph.vcount())
+        if 'tstart' in self.graph.vs.attributes():
+            v_order = np.argsort(self.graph.vs['tstart'])
+        else:
+            v_order = np.arange(self.graph.vcount())
+
+        v_indexed = np.dstack((v_order, np.arange(self.graph.vcount())))[0]
+        v_indexed = v_indexed[np.argsort(v_indexed[:, 0])]
+
+        self.graph.vs['gid'] = v_indexed[:, 1]
         self.graph.es['gid'] = range(self.graph.ecount())
 
     def has_gids(self):

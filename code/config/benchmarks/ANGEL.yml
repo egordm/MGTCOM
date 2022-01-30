@@ -1,10 +1,10 @@
 name: ANGEL
 description: "Angel benchmark"
-tags: [static, link-based, overlapping]
+tags: [ static, link-based, overlapping ]
 
 execution:
   cwd: baselines/ANGEL
-  entrypoint: [docker-compose, run, angel, --angel]
+  entrypoint: [ docker-compose, run, angel, --angel ]
   containerized: true
 
 parameters:
@@ -19,19 +19,18 @@ parameters:
 
 datasets:
   com-youtube:
-    versions: []
-    parameters: {}
+    versions: [ ]
+    parameters: { }
   DBLP-HCN:
-    versions:
-      - static
-    parameters:
-      neighborhood_size: 2
+    versions: [ ]
+    #      - static
+    parameters: { }
   DBLP-V1:
-    versions: []
-#      - static
+    versions: [ ]
+    #      - static
     parameters: { }
   DBLP-V3:
-    versions: []
+    versions: [ ]
     parameters: { }
   email-Eu-core:
     versions:
@@ -50,8 +49,8 @@ datasets:
       - static
     parameters: { }
   social-distancing-student:
-    versions: []
-#      - static
+    versions: [ ]
+    #      - static
     parameters: { }
   star-wars:
     versions:

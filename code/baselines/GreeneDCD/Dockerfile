@@ -14,7 +14,7 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY --from=build \
+COPY --from=build --chown=root \
     /build/louvain-generic/convert \
     /build/louvain-generic/hierarchy \
     /build/louvain-generic/louvain \
