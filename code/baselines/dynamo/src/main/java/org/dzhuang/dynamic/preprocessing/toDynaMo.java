@@ -14,12 +14,13 @@ import org.dzhuang.dynamic.util.FileUtil;
 
 public class toDynaMo {
 	public static void main(String[] args) throws IOException, ClassNotFoundException {	
-		run("Cit-HepPh", 31);
-		run("Cit-HepTh", 25);
-		run("dblp_coauthorship", 31);
-		run("facebook", 28);
-		run("flickr", 24);
-		run("youtube", 33);	
+		run(args[0], Integer.parseInt(args[1]));
+//		run("Cit-HepPh", 31);
+//		run("Cit-HepTh", 25);
+//		run("dblp_coauthorship", 31);
+//		run("facebook", 28);
+//		run("flickr", 24);
+//		run("youtube", 33);
 	}
 	
 	public static void run(String dataSet, int size) throws IOException{

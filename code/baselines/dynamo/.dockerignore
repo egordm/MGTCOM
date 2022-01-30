@@ -25,3 +25,12 @@ hs_err_pid*
 data
 data2
 *_Modularity_time
+target
+
+.idea
+Dockerfile
+.dockerignore
+.gitignore
+docker-compose.yml
+data
+data2

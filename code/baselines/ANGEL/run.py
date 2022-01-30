@@ -21,8 +21,6 @@ parser.add_argument('--min_comsize', type=int, default=3, help='minimum communit
 parser.add_argument('--neighborhood_size', type=int, default=1, help='Neigborhood size for ego network')
 
 if is_angel:
-
-    parser.add_argument('--output', type=str, default='/output', help='output file path')
     args = parser.parse_args()
 
     input_dir = pathlib.Path(args.input)

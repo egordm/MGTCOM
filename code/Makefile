@@ -4,6 +4,6 @@ update:
 
 lock:
 	@echo 'Locking dependencies'
-	conda env export --prefix=./env -f environment.yml.lock
+	conda env export --prefix=./env -f environment.lock.yml
 
 install: update lock

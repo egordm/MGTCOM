@@ -27,12 +27,13 @@ public class toComparison {
 	public static double ratio=0.8;
 	
 	public static void main(String[] args) throws Exception{		
-		trans2Comparisons("Cit-HepPh", 31);
-		trans2Comparisons("Cit-HepTh", 25);
-		trans2Comparisons("dblp_coauthorship", 31);
-		trans2Comparisons("facebook", 28);
-		trans2Comparisons("flickr", 24);
-		trans2Comparisons("youtube", 33);
+		trans2Comparisons(args[0], Integer.parseInt(args[1]));
+//		trans2Comparisons("Cit-HepPh", 31);
+//		trans2Comparisons("Cit-HepTh", 25);
+//		trans2Comparisons("dblp_coauthorship", 31);
+//		trans2Comparisons("facebook", 28);
+//		trans2Comparisons("flickr", 24);
+//		trans2Comparisons("youtube", 33);
 	}
 	
 	public static void trans2Comparisons(String data, int timeLength) throws Exception {

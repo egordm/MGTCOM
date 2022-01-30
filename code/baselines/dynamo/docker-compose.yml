@@ -1,0 +1,7 @@
+version: '3'
+services:
+  dynamo:
+    build: .
+    volumes:
+      - ../../storage/datasets/versions/:/input
+      - ../../storage/results/:/output

@@ -1,4 +1,5 @@
-name: null
+name: thesis
+prefix: ./env
 channels:
   - pytorch
   - conda-forge
@@ -282,4 +283,3 @@ dependencies:
     - simple-parsing==0.0.17
     - stringcase==1.2.0
     - typing-inspect==0.7.1
-prefix: /dd_volume/Development/Python/Thesis/code/env

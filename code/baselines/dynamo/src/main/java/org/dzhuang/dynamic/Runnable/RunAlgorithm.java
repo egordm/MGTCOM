@@ -25,33 +25,40 @@ import toolbox.svm.SVM;
 public class RunAlgorithm {
 	
 	public static void main(String args[]) throws Exception{
-		ModularityOptimizer_Louvain.runLouvain("Cit-HepPh", 31);
-		ModularityOptimizer_Louvain.runLouvain("Cit-HepTh", 25);
-		ModularityOptimizer_Louvain.runLouvain("dblp_coauthorship", 31);
-		ModularityOptimizer_Louvain.runLouvain("facebook", 28);
-		ModularityOptimizer_Louvain.runLouvain("flickr", 24);
-		ModularityOptimizer_Louvain.runLouvain("youtube", 33);
+		String dataset = args[0];
+		int size = Integer.parseInt(args[1]);
+
+		ModularityOptimizer_Louvain.runLouvain(dataset, size);
+//		ModularityOptimizer_Louvain.runLouvain("Cit-HepPh", 31);
+//		ModularityOptimizer_Louvain.runLouvain("Cit-HepTh", 25);
+//		ModularityOptimizer_Louvain.runLouvain("dblp_coauthorship", 31);
+//		ModularityOptimizer_Louvain.runLouvain("facebook", 28);
+//		ModularityOptimizer_Louvain.runLouvain("flickr", 24);
+//		ModularityOptimizer_Louvain.runLouvain("youtube", 33);
 		
-		ModularityOptimizer_DynaMo.runDynamicModularity("Cit-HepPh", 31);
-		ModularityOptimizer_DynaMo.runDynamicModularity("Cit-HepTh", 25);
-		ModularityOptimizer_DynaMo.runDynamicModularity("dblp_coauthorship", 31);
-		ModularityOptimizer_DynaMo.runDynamicModularity("facebook", 28);
-		ModularityOptimizer_DynaMo.runDynamicModularity("flickr", 24);
-		ModularityOptimizer_DynaMo.runDynamicModularity("youtube", 33);
+		ModularityOptimizer_DynaMo.runDynamicModularity(dataset, size);
+//		ModularityOptimizer_DynaMo.runDynamicModularity("Cit-HepPh", 31);
+//		ModularityOptimizer_DynaMo.runDynamicModularity("Cit-HepTh", 25);
+//		ModularityOptimizer_DynaMo.runDynamicModularity("dblp_coauthorship", 31);
+//		ModularityOptimizer_DynaMo.runDynamicModularity("facebook", 28);
+//		ModularityOptimizer_DynaMo.runDynamicModularity("flickr", 24);
+//		ModularityOptimizer_DynaMo.runDynamicModularity("youtube", 33);
 		
-		runIncremental("Cit-HepPh");
-		runIncremental("Cit-HepTh");
-		runIncremental("dblp_coauthorship");
-		runIncremental("facebook");
-		runIncremental("flickr");
-		runIncremental("youtube");
+// 		runIncremental(dataset);
+//		runIncremental("Cit-HepPh");
+//		runIncremental("Cit-HepTh");
+//		runIncremental("dblp_coauthorship");
+//		runIncremental("facebook");
+//		runIncremental("flickr");
+//		runIncremental("youtube");
 		
-		runLBTR("Cit-HepPh", 31);
-		runLBTR("Cit-HepTh", 25);
-		runLBTR("dblp_coauthorship", 31);
-		runLBTR("facebook", 28);
-		runLBTR("flickr", 24);
-		runLBTR("youtube", 33);
+// 		runLBTR(dataset, size);
+//		runLBTR("Cit-HepPh", 31);
+//		runLBTR("Cit-HepTh", 25);
+//		runLBTR("dblp_coauthorship", 31);
+//		runLBTR("facebook", 28);
+//		runLBTR("flickr", 24);
+//		runLBTR("youtube", 33);
 	}
 	
 	public static void runIncremental(String dataSet) throws Exception {
