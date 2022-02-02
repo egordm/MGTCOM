@@ -9,7 +9,7 @@ execution:
 
 parameters:
   run_count: 5
-  timeout: 1200
+  timeout: 6600
   matching_threshold:
     min: 0.05
     max: 0.3
@@ -30,13 +30,13 @@ datasets:
   DBLP-V1:
     versions:
       - split_5_small
-      - split_5
-      - split_10
+#      - split_5
+#      - split_10
     parameters: { }
   DBLP-V3:
-    versions:
-      - split_5
-      - split_10
+    versions: []
+#      - split_5
+#      - split_10
     parameters: { }
   email-Eu-core:
     versions: []

@@ -8,8 +8,8 @@ execution:
   containerized: false
 
 parameters:
-  run_count: 8
-  timeout: 1800
+  run_count: 5
+  timeout: 3600
   alpha:
     min: 0.5
     max: 0.9

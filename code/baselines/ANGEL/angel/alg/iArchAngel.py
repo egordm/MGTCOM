@@ -121,7 +121,7 @@ class ArchAngel(object):
             ag = an.Angel(None, threshold=self.threshold,
                           min_comsize=self.min_community_size,
                           save=self.save, outfile_name="%s_%s.txt" % (self.outfile_name, snapshot),
-                          dyn=graph, verbose=True, network_filename=self.neighborhood_size)
+                          dyn=graph, verbose=True)
 
             self.snapshot_to_coms[snapshot] = ag.execute()
 

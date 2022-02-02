@@ -9,7 +9,7 @@ import argparse as argparse
 parser = argparse.ArgumentParser(description='DYNAMO')
 parser.add_argument('--input', type=str, default='/input', help='directory containing input edgelist file')
 parser.add_argument('--output', type=str, default='/output/', help='output files dir')
-parser.add_argument('--louvain', type=bool, default=False, action='store_true', help='run louvain')
+parser.add_argument('--louvain', action='store_true', help='run louvain')
 args = parser.parse_args()
 
 pwd_dir = Path(__file__).parent.absolute()
@@ -41,7 +41,7 @@ p.wait()
 
 print('Converting results to comlist format')
 glob_str = 'runLouvain_*' if args.louvain else 'runDynamicModularity_*'
-for i, file in enumerate(natsorted(data_dir.parent.glob('runDynamicModularity_*'), key=lambda x: str(x))):
+for i, file in enumerate(natsorted(data_dir.parent.glob(glob_str), key=lambda x: str(x))):
     print('Processing file {}'.format(file))
     output_file = output_dir.joinpath(f'{str(i).zfill(2)}_snapshot.comlist')
     with output_file.open('w') as fout:

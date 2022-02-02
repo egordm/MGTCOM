@@ -8,8 +8,8 @@ execution:
   containerized: true
 
 parameters:
-  run_count: 15
-  timeout: 3600
+  run_count: 5
+  timeout: -1
   number_walks:
     values: [5, 15, 30]
   walk_length:

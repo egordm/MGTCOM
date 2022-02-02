@@ -8,7 +8,7 @@ execution:
   containerized: true
 
 parameters:
-  run_count: 10
+  run_count: 5
   timeout: -1
   n_communities: -1
   min_communities: 5
