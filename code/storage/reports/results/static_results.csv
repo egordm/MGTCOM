@@ -1,0 +1,5 @@
+baseline,DBLP-HCN:static,email-Eu-core:static,house-of-representatives-congress-116:static_small,imdb-5000-movie-dataset:static,misc-football:static,social-distancing-student:static,star-wars:static,ucidata-zachary:static,total
+ComE,1.0,4.0,2.0,2.0,,,,,1
+Louvain,2.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,7
+GEMSEC,,3.0,4.0,,3.0,,3.0,2.5,0
+ANGEL,,2.0,3.0,,2.0,,2.0,2.5,0

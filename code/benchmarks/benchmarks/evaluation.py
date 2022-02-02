@@ -44,8 +44,14 @@ class EvaluationMetric:
     def evaluate(self) -> dict:
         raise NotImplementedError()
 
+    @classmethod
     @abstractmethod
-    def metric_name(self) -> str:
+    def metric_name(cls) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def metric_order(cls) -> str:
         raise NotImplementedError()
 
 
@@ -123,8 +129,13 @@ class MetricNMI(AnnotatedEvaluationMetric):
             self.ground_truth.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'nmi'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class OverlappingNMI(AnnotatedEvaluationMetric):
@@ -134,8 +145,13 @@ class OverlappingNMI(AnnotatedEvaluationMetric):
             self.ground_truth.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'overlapping_nmi'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricNF1(AnnotatedEvaluationMetric):
@@ -145,8 +161,13 @@ class MetricNF1(AnnotatedEvaluationMetric):
             self.ground_truth.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'nf1'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricOmega(AnnotatedEvaluationMetric):
@@ -156,8 +177,13 @@ class MetricOmega(AnnotatedEvaluationMetric):
             self.ground_truth.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'omega'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricF1(AnnotatedEvaluationMetric):
@@ -167,8 +193,13 @@ class MetricF1(AnnotatedEvaluationMetric):
             self.ground_truth.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'f1'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricAdjustedRandIndex(AnnotatedEvaluationMetric):
@@ -178,8 +209,13 @@ class MetricAdjustedRandIndex(AnnotatedEvaluationMetric):
             self.ground_truth.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'adjusted_rand_inde'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricModularity(QualityMetric):
@@ -189,8 +225,13 @@ class MetricModularity(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'modularity'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricLinkModularity(QualityMetric):
@@ -200,8 +241,13 @@ class MetricLinkModularity(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'link_modularity'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricModularityOverlap(QualityMetric):
@@ -211,8 +257,13 @@ class MetricModularityOverlap(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'modularity_overlap'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricZModularity(QualityMetric):
@@ -222,8 +273,13 @@ class MetricZModularity(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'z_modularity'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricConductance(QualityMetric):
@@ -233,8 +289,13 @@ class MetricConductance(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'conductance'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricExpansion(QualityMetric):
@@ -244,8 +305,13 @@ class MetricExpansion(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'expansion'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'minimize'
 
 
 class MetricInternalDensity(QualityMetric):
@@ -255,8 +321,13 @@ class MetricInternalDensity(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'internal_edge_density'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricNormalizedCut(QualityMetric):
@@ -266,8 +337,13 @@ class MetricNormalizedCut(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'normalized_cut'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'maximize'
 
 
 class MetricAverageODF(QualityMetric):
@@ -277,16 +353,26 @@ class MetricAverageODF(QualityMetric):
             self.prediction.to_clustering(),
         ).score
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'avg_odf'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'minimize'
 
 
 class MetricCommunityCount(QualityMetric):
     def evaluate_step(self) -> float:
         return self.prediction.community_count()
 
-    def metric_name(self) -> str:
+    @classmethod
+    def metric_name(cls) -> str:
         return 'community_count'
+
+    @classmethod
+    def metric_order(cls) -> str:
+        return 'minimize'
 
 
 def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[EvaluationMetric]]:
@@ -321,3 +407,23 @@ def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[Evaluati
         metrics.append(MetricModularity)
 
     return metrics
+
+
+ALL_METRICS: List[Type[EvaluationMetric]] = [
+    MetricNMI,
+    MetricNF1,
+    OverlappingNMI,
+    MetricOmega,
+    MetricF1,
+    MetricAdjustedRandIndex,
+    MetricModularity,
+    MetricModularityOverlap,
+    MetricConductance,
+    MetricExpansion,
+    MetricInternalDensity,
+    MetricNormalizedCut,
+    MetricAverageODF,
+    MetricLinkModularity,
+    MetricZModularity,
+]
+

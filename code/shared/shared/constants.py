@@ -24,3 +24,4 @@ BENCHMARKS_LOGS = STORAGE_PATH.joinpath('logs')
 BENCHMARKS_RESULTS = STORAGE_PATH.joinpath('results')
 
 WANDB_PROJECT = 'Thesis'
+WANDB_ENTITY = 'egordm'

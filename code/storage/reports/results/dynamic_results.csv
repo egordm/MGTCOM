@@ -1,0 +1,7 @@
+baseline,DBLP-HCN:split_5,enron-mail-20150507:split_10,enron-mail-20150507:split_10_small,enron-mail-20150507:split_20,enron-mail-20150507:split_5,house-of-representatives-congress-116:split_10,house-of-representatives-congress-116:split_10_small,house-of-representatives-congress-116:split_5,imdb-5000-movie-dataset:split_5,social-distancing-student:split_5,star-wars:split_5,star-wars:split_7,sx-mathoverflow:split_10,sx-mathoverflow:split_6,sx-superuser:split_10,sx-superuser:split_6,DBLP-V1:split_5_small,total
+GreeneDCD-louvain,1.0,2.0,3.0,2.5,1.0,3.5,2.0,5.0,1.0,1.0,3.5,5.5,1.0,1.5,1.0,1.0,,7
+Louvain-Dynamic,2.5,1.0,2.0,1.0,2.0,1.0,1.0,1.0,3.0,3.0,3.5,2.0,2.5,1.5,3.0,4.5,1.0,6
+Dynamo,2.5,3.0,1.0,2.5,3.0,3.5,5.0,,2.0,2.0,6.0,5.5,,,,2.5,2.0,1
+GreeneDCD-MOSES,,,,,,,5.0,2.0,,,3.5,3.5,4.0,4.0,2.0,4.5,3.0,0
+ESPRA,,,,,,3.5,5.0,3.5,,,3.5,3.5,,,,,,0
+ARCHANGEL,,,,,,3.5,3.0,3.5,,,1.0,1.0,2.5,3.0,,2.5,,2
