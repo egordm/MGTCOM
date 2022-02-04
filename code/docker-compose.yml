@@ -1,5 +1,15 @@
 version: '3'
 services:
+  mongo:
+    image: mongo
+    userns_mode: "host"
+    ports:
+      - 27017:27017
+    volumes:
+      - data-mongo:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: helloworld
   neo4j:
     image: neo4j:4.4-community
     ports:
@@ -7,7 +17,7 @@ services:
       - 7687:7687
     volumes:
       - neo4j-data:/data
-#      - ./data:/var/lib/neo4j/import
+    #      - ./data:/var/lib/neo4j/import
     #      - ./conf:/conf
     #      - ./logs:/logs
     #      - ./plugins:/plugins
@@ -19,4 +29,5 @@ services:
       - NEO4JLABS_PLUGINS=["apoc","bloom","graph-data-science"]
 
 volumes:
+  data-mongo:
   neo4j-data:
