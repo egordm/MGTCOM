@@ -2,3 +2,4 @@ simple-parsing
 stringcase
 igraph
 seaborn
+feature-engine
