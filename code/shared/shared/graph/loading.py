@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union, Optional, Callable
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,7 @@ def pd_from_entity_schema(
         schema: EntitySchema,
         explicit_label: bool = True,
         explicit_timestamp: bool = True,
-        include_properties: List[str] = None,
+        include_properties: Optional[Union[List[str], Callable[[List[str]], List[str]]]] = None,
         unix_timestamp: bool = False,
         prefix_id: bool = False,
 ) -> pd.DataFrame:
@@ -38,6 +38,8 @@ def pd_from_entity_schema(
             df['id'] = schema.get_type() + ':' + df['id']
 
     # Select only necessary columns
+    if callable(include_properties):
+        include_properties = include_properties(df.columns)
     props = {*id_props, 'type', 'label', 'timestamp', *(include_properties or [])} & set(df.columns)
     df.drop(columns=set(df.columns).difference(props), inplace=True)
 

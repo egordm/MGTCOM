@@ -5,22 +5,25 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.9.7
   - pip
+  - cudatoolkit=11.3
+  - tensorflow-gpu
   - numpy
   - scipy
   - pandas
   - jupyter
   - python-igraph
   - pyspark=3.2.0
-  - networkx
-  - tqdm
   - future
-  - pyyaml
   - fsspec
   - pip:
       - neo4j
       - cdlib
+      - tqdm
+      - networkx
+      - pyyaml
+      - ./tmp/stellargraph
       - -r shared/requirements.txt
       - -r datasets/requirements.txt
       - -r benchmarks/requirements.txt
