@@ -108,9 +108,12 @@ class QualityMetric(EvaluationMetric):
             f'snapshots/{self.metric_name()}': scores,
         }
 
-    @abstractmethod
     def evaluate_step(self) -> float:
-        raise NotImplementedError()
+        self.calculate(self.graph, self.prediction)
+
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        pass
 
 
 class AnnotatedEvaluationMetric(QualityMetric, ABC):
@@ -219,12 +222,6 @@ class MetricAdjustedRandIndex(AnnotatedEvaluationMetric):
 
 
 class MetricModularity(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.newman_girvan_modularity(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
-
     @classmethod
     def metric_name(cls) -> str:
         return 'modularity'
@@ -233,14 +230,12 @@ class MetricModularity(QualityMetric):
     def metric_order(cls) -> str:
         return 'maximize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.newman_girvan_modularity(graph, clustering.to_clustering()).score
+
 
 class MetricLinkModularity(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.link_modularity(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
-
     @classmethod
     def metric_name(cls) -> str:
         return 'link_modularity'
@@ -249,14 +244,12 @@ class MetricLinkModularity(QualityMetric):
     def metric_order(cls) -> str:
         return 'maximize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.link_modularity(graph, clustering.to_clustering()).score
+
 
 class MetricModularityOverlap(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.modularity_overlap(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
-
     @classmethod
     def metric_name(cls) -> str:
         return 'modularity_overlap'
@@ -265,14 +258,12 @@ class MetricModularityOverlap(QualityMetric):
     def metric_order(cls) -> str:
         return 'maximize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.modularity_overlap(graph, clustering.to_clustering()).score
+
 
 class MetricZModularity(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.z_modularity(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
-
     @classmethod
     def metric_name(cls) -> str:
         return 'z_modularity'
@@ -281,14 +272,12 @@ class MetricZModularity(QualityMetric):
     def metric_order(cls) -> str:
         return 'maximize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.z_modularity(graph, clustering.to_clustering()).score
+
 
 class MetricConductance(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.conductance(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
-
     @classmethod
     def metric_name(cls) -> str:
         return 'conductance'
@@ -297,13 +286,12 @@ class MetricConductance(QualityMetric):
     def metric_order(cls) -> str:
         return 'maximize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.conductance(graph, clustering.to_clustering()).score
+
 
 class MetricExpansion(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.expansion(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
 
     @classmethod
     def metric_name(cls) -> str:
@@ -313,14 +301,12 @@ class MetricExpansion(QualityMetric):
     def metric_order(cls) -> str:
         return 'minimize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.expansion(graph, clustering.to_clustering()).score
+
 
 class MetricInternalDensity(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.internal_edge_density(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
-
     @classmethod
     def metric_name(cls) -> str:
         return 'internal_edge_density'
@@ -329,14 +315,12 @@ class MetricInternalDensity(QualityMetric):
     def metric_order(cls) -> str:
         return 'maximize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.internal_edge_density(graph, clustering.to_clustering()).score
+
 
 class MetricNormalizedCut(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.normalized_cut(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
-
     @classmethod
     def metric_name(cls) -> str:
         return 'normalized_cut'
@@ -345,13 +329,12 @@ class MetricNormalizedCut(QualityMetric):
     def metric_order(cls) -> str:
         return 'maximize'
 
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.normalized_cut(graph, clustering.to_clustering()).score
+
 
 class MetricAverageODF(QualityMetric):
-    def evaluate_step(self) -> float:
-        return cdlib_eval.avg_odf(
-            self.graph,
-            self.prediction.to_clustering(),
-        ).score
 
     @classmethod
     def metric_name(cls) -> str:
@@ -360,6 +343,10 @@ class MetricAverageODF(QualityMetric):
     @classmethod
     def metric_order(cls) -> str:
         return 'minimize'
+
+    @classmethod
+    def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
+        return cdlib_eval.avg_odf(graph, clustering.to_clustering()).score
 
 
 class MetricCommunityCount(QualityMetric):
