@@ -43,6 +43,10 @@ def pd_from_entity_schema(
     props = {*id_props, 'type', 'label', 'timestamp', *(include_properties or [])} & set(df.columns)
     df.drop(columns=set(df.columns).difference(props), inplace=True)
 
+    if 'name' in df.columns:
+        df['name_'] = df['name']
+        df.drop(columns=['name'], inplace=True)
+
     # Move id to the first column
     for key in reversed(id_props):
         ids = df.pop(key)
@@ -60,7 +64,7 @@ def pd_from_graph_schema(
         schema: GraphSchema,
         explicit_label: bool = True,
         explicit_timestamp: bool = True,
-        include_properties: List[str] = None,
+        include_properties: Optional[Union[List[str], Callable[[List[str]], List[str]]]] = None,
         unix_timestamp: bool = False,
         prefix_id: bool = False,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:

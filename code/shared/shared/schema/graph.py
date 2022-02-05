@@ -253,6 +253,9 @@ class GraphSchema(Serializable):
     @classmethod
     def load_schema(cls: Type['GraphSchema'], path: Union[str, Path], **kwargs) -> 'GraphSchema':
         path = Path(path) if isinstance(path, str) else path
+        if path.is_file():
+            path = path.parent
+
         data = yaml.safe_load(path.joinpath('schema.yaml').read_text(), **kwargs)
         result = cls.from_dict(data)
         result._path = path

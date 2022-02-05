@@ -20,12 +20,15 @@ TAG_SYNTHETIC = 'synthetic'
 class DatasetVersionType(Enum):
     EDGELIST_SNAPSHOTS = 'edgelist_snapshots'
     EDGELIST_STATIC = 'edgelist_static'
+    GRAPHSCHEMA = 'graphschema'
 
     def pretty(self) -> str:
         if self == DatasetVersionType.EDGELIST_SNAPSHOTS:
             return 'snapshots'
         elif self == DatasetVersionType.EDGELIST_STATIC:
             return 'static'
+        elif self == DatasetVersionType.GRAPHSCHEMA:
+            return 'graphschema'
 
 
 @dataclass
@@ -59,6 +62,10 @@ class DatasetVersionPart:
         return self.static_edgelist.with_suffix('.comlist')
 
     @property
+    def graphschema(self) -> Path:
+        return self.path.joinpath('schema.yaml')
+
+    @property
     def nodemapping(self) -> Path:
         return self.path.joinpath('nodemapping.tsv')
 
@@ -68,23 +75,30 @@ class DatasetVersion(Serializable):
     _path: Path = field(init=False, default=None, to_dict=False)
     type: DatasetVersionType = field(decoding_fn=lambda x: DatasetVersionType(x), encoding_fn=lambda x: x.value)
     parameters: Dict[str, Any] = field(default_factory=dict, help='Parameters for the dataset version')
+    partless: bool = field(default=False, help='Whether this dataset version has no parts')
 
     def get_path(self) -> Path:
         return self._path
+
+    def _get_part(self, name: str) -> DatasetVersionPart:
+        if self.partless:
+            return DatasetVersionPart(self.get_path())
+        else:
+            return DatasetVersionPart(self.get_path().joinpath(name))
 
     def train_part(self) -> DatasetVersionPart:
         return self.train
 
     @property
     def train(self):
-        return DatasetVersionPart(self.get_path().joinpath('train'))
+        return self._get_part('train')
 
     def test_part(self) -> DatasetVersionPart:
         return self.test
 
     @property
     def test(self):
-        return DatasetVersionPart(self.get_path().joinpath('test'))
+        return self._get_part('test')
 
     def get_param(self, name: str, default=None) -> Optional[Any]:
         return self.parameters.get(name, default)
@@ -150,6 +164,14 @@ class DatasetSchema(DatasetPath, Serializable):
         yaml.dump(self.to_dict(), path.open('w'), **kwargs)
 
     def get_version(self, version: str) -> DatasetVersion:
+        if version == 'base':
+            result = DatasetVersion(
+                type=DatasetVersionType.GRAPHSCHEMA,
+                partless=True,
+            )
+            result._path = self.processed()
+            return result
+
         if version not in self.versions:
             raise ValueError(f'Version {version} not found in dataset {self.name}')
 

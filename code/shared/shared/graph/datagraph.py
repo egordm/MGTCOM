@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import List, Union, Tuple, Iterator
+from typing import List, Union, Tuple, Iterator, Optional, Callable
 
 import igraph as ig
 import numpy as np
@@ -42,14 +42,16 @@ class DataGraph(BaseGraph):
     def from_schema(
             cls,
             schema: GraphSchema,
-            include_properties: List[str] = None,
+            include_properties: Optional[Union[List[str], Callable[[List[str]], List[str]]]] = None,
             prefix_id: bool = False,
+            explicit_timestamp: bool = True,
             unix_timestamp: bool = False,
     ) -> Union[ig.Graph, 'DataGraph']:
         nodes_df, edges_df = pd_from_graph_schema(
             schema,
             include_properties=include_properties,
             prefix_id=prefix_id,
+            explicit_timestamp=explicit_timestamp,
             unix_timestamp=unix_timestamp,
         )
 

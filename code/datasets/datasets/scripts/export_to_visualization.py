@@ -9,9 +9,9 @@ from simple_parsing import field
 
 from datasets.graph_processing import graph_join_attribute
 from shared.cli import parse_args
-from shared.graph import CommunityAssignment
+from shared.graph import CommunityAssignment, DataGraph
 from shared.logger import get_logger
-from shared.schema import DatasetSchema, DatasetVersionType
+from shared.schema import DatasetSchema, DatasetVersionType, GraphSchema
 
 LOG = get_logger(os.path.basename(__file__))
 
@@ -35,7 +35,21 @@ def run(args: Args):
 
     def process_graph(graph_file: Path):
         LOG.info(f"Processing {graph_file}")
-        graph = ig.Graph.Read_GraphML(str(graph_file.with_suffix(".graphml")))
+        if graph_file.suffix == '.graphml':
+            graph = ig.Graph.Read_GraphML(str(graph_file.with_suffix(".graphml")))
+        elif graph_file.name == 'schema.yaml':
+            schema = GraphSchema.load_schema(graph_file)
+            graph = DataGraph.from_schema(
+                schema,
+                explicit_timestamp=True,
+                unix_timestamp=True,
+                include_properties=lambda xs: [x for x in xs if not x.startswith('feat_')]
+            )
+            graph.vs['gid'] = graph.vs['name']
+            # if schema.is_node_temporal() or schema.is_edge_temporal():
+            #     graph.add_timeranges()
+        else:
+            raise ValueError(f"Unknown file type: {graph_file}")
 
         if 'tstart' in graph.vs.attributes():
             graph.vs['tstart'] = [
@@ -85,6 +99,10 @@ def run(args: Args):
 
     elif VERSION.type == DatasetVersionType.EDGELIST_STATIC:
         process_graph(VERSION.train.static_edgelist)
+
+    elif VERSION.type == DatasetVersionType.GRAPHSCHEMA:
+        process_graph(VERSION.train.graphschema)
+
 
 
 if __name__ == '__main__':

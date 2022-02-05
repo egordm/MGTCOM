@@ -35,20 +35,16 @@
 - [x] Add evaluation metrics to the baselines
 - [x] Add a way to visualize CD results
 - [x] Add a way to generate synthetic benchmarks
-- [ ] Double check alignment of comlist to snapshot files during evaluation
-- [ ] Change GENSIM baseline to the tensorflow one
+- [x] Double check alignment of comlist to snapshot files during evaluation
+- [x] Change GENSIM baseline to the tensorflow one // gensim performs poorly
 - [ ] Add https://github.com/isaranto/community-tracking synthetic benchmark
 - [ ] Add task specific evalution
 - [ ] Add cluster based evaluation metrics
-- [ ] Run Static Community Detection on benchmark datasets
-- [ ] Run Dynamic Community Detection on benchmark datasets
+- [x] Run Static Community Detection on benchmark datasets
+- [x] Run Dynamic Community Detection on benchmark datasets
 - [ ] Run Representation Learning on benchmark datasets
 - [ ] Implement remaining DCD methods
-- [ ] Document used data formats: (and their standards / invariants)
-  - [ ] Edgelist (0 indexed)
-  - [ ] Comlist (0 indexed)
-  - [ ] tracking.tsv
-- [ ] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD
+- [x] Check [Dynamo](https://github.com/nogrady/dynamo) is seems like a recent DCD
 - [x] Run thesis through GeCTOR 
 - [x] Collect dataset statistics
   - [x] Node/Edge counts (global and per type)
