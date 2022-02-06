@@ -13,3 +13,5 @@
   * Has `TemporalRandomWalk` implementation 
 * [DynComm-R](https://github.com/softskillsgroup/DynComm-R-package)
   * R package for dynamic community detection
+* [Pytorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/)
+  * Library for graph representation learning

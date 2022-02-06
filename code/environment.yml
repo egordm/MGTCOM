@@ -1,14 +1,16 @@
 name: thesis
 prefix: ./env
 channels:
+  - pyg
   - pytorch
   - conda-forge
   - defaults
 dependencies:
-  - python=3.9.7
+  - python=3.9
   - pip
   - cudatoolkit=11.3
-  - tensorflow-gpu
+  - pytorch
+  - pyg
   - numpy
   - scipy
   - pandas
@@ -18,12 +20,6 @@ dependencies:
   - future
   - fsspec
   - pip:
-      - neo4j
-      - cdlib
-      - tqdm
-      - networkx
-      - pyyaml
-      - ./tmp/stellargraph
       - -r shared/requirements.txt
       - -r datasets/requirements.txt
       - -r benchmarks/requirements.txt

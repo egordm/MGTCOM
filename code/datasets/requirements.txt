@@ -3,3 +3,4 @@ stringcase
 igraph
 seaborn
 feature-engine
+neo4j

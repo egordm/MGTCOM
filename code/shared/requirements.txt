@@ -1,2 +1,4 @@
 PyYAML
 inflection
+networkx
+tqdm
