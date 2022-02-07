@@ -67,6 +67,14 @@ class LinkSplitter(BaseTransform):
             self._split(store, val_idx, val_store)
             self._split(store, test_idx, test_store)
 
+            edge_partitions = torch.zeros(edge_index.size(1), dtype=torch.uint8, device=edge_index.device)
+            edge_partitions[train_idx] = 0
+            edge_partitions[perm[num_train:num_train + num_val]] = 1
+            edge_partitions[perm[num_train + num_val:]] = 2
+            train_store.edge_partitions = edge_partitions[train_idx]
+            val_store.edge_partitions = edge_partitions[val_idx]
+            test_store.edge_partitions = edge_partitions[test_idx]
+
         return result_train, result_val, result_test
 
     def _split(
