@@ -10,6 +10,7 @@ dependencies:
   - pip
   - cudatoolkit=11.3
   - pytorch
+  - pytorch-lightning
   - pyg
   - numpy
   - scipy
