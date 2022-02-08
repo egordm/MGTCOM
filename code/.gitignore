@@ -8,3 +8,4 @@ storage/results/*
 !storage/results/.gitkeep
 storage/tmp
 tmp
+wandb

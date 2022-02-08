@@ -56,3 +56,13 @@
   - [x] Per cluster statistics (Node/Edge counts, Temporal Distribution, Degree Distribution, Modularity)
   - [x] Centrality etc per node type
   - [x] Clustering statistics per edge type
+- [ ] Experiment and define good candidate objective measures for:
+  - [ ] Homophily (unsupervised node similarity <-> connectedness)
+  - [ ] Community quality (node - community relation)
+  - [ ] Community cohesion (community - community [- to node] relation)
+  - [ ] Later on (apply this to temporal communities)
+- [ ] Figure a way out to efficiently calculate/approximate these measures
+  - [ ] Through sampling (if possible)
+  - [ ] Through incremental calculation
+- [ ] If applicable, figure a training regimen to optimize them
+  - [ ] Do we need to do two step (node - communty) optimization? If yes can we balance the two? (meta learning?)
