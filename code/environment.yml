@@ -24,3 +24,4 @@ dependencies:
       - -r shared/requirements.txt
       - -r datasets/requirements.txt
       - -r benchmarks/requirements.txt
+      - faiss-cpu

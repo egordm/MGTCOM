@@ -124,6 +124,10 @@ def run(args: Args):
             LOG.info(f'Saving graphml to {TRAIN_PART.static_edgelist.with_suffix(".graphml")}')
             G.write_graphml(str(TRAIN_PART.static_edgelist.with_suffix(".graphml")))
 
+    elif VERSION.type == DatasetVersionType.PYG:
+        LOG.info(f'Saving pyg to {TRAIN_PART.pyg}')
+        raise NotImplementedError()
+
 
 if __name__ == '__main__':
     args: Args = parse_args(Args)[0]

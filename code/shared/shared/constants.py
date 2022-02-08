@@ -9,6 +9,7 @@ CONFIG_BENCHMARKS = GLOBAL_CONFIG_PATH.joinpath('benchmarks')
 
 STORAGE_PATH = BASE_PATH.joinpath('storage')
 TMP_PATH = STORAGE_PATH.joinpath('tmp')
+CACHE_PATH = STORAGE_PATH.joinpath('cache')
 REPORTS_PATH = STORAGE_PATH.joinpath('reports')
 
 DATASETS_PATH = BASE_PATH.joinpath('datasets')

@@ -21,6 +21,7 @@ class DatasetVersionType(Enum):
     EDGELIST_SNAPSHOTS = 'edgelist_snapshots'
     EDGELIST_STATIC = 'edgelist_static'
     GRAPHSCHEMA = 'graphschema'
+    PYG = 'pyg'
 
     def pretty(self) -> str:
         if self == DatasetVersionType.EDGELIST_SNAPSHOTS:
@@ -29,6 +30,8 @@ class DatasetVersionType(Enum):
             return 'static'
         elif self == DatasetVersionType.GRAPHSCHEMA:
             return 'graphschema'
+        elif self == DatasetVersionType.PYG:
+            return 'pyg'
 
 
 @dataclass
@@ -68,6 +71,10 @@ class DatasetVersionPart:
     @property
     def nodemapping(self) -> Path:
         return self.path.joinpath('nodemapping.tsv')
+
+    @property
+    def pyg(self) -> Path:
+        return self.path.joinpath('graph.pt')
 
 
 @dataclass
