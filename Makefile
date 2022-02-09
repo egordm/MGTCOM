@@ -49,5 +49,8 @@ activate:
 update:
 	git submodule foreach git pull origin master
 
+changelog:
+	git cliff > CHANGELOG.md
+
 %:
     @:
