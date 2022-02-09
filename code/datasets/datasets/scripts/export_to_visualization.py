@@ -95,10 +95,10 @@ def run(args: Args):
 
     if VERSION.type == DatasetVersionType.EDGELIST_SNAPSHOTS:
         for snapshot_file in VERSION.train.get_snapshot_edgelists():
-            process_graph(snapshot_file)
+            process_graph(snapshot_file.with_suffix(".graphml"))
 
     elif VERSION.type == DatasetVersionType.EDGELIST_STATIC:
-        process_graph(VERSION.train.static_edgelist)
+        process_graph(VERSION.train.static_edgelist.with_suffix(".graphml"))
 
     elif VERSION.type == DatasetVersionType.GRAPHSCHEMA:
         process_graph(VERSION.train.graphschema)
