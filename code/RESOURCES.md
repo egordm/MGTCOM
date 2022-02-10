@@ -15,3 +15,5 @@
   * R package for dynamic community detection
 * [Pytorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/)
   * Library for graph representation learning
+* [Pytorch Geometric Temporal](https://github.com/benedekrozemberczki/pytorch_geometric_temporal)
+  * Extensions for Pytorch Geometric to handle temporal graphs (convolutions specifically)

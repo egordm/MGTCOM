@@ -20,6 +20,9 @@ class BaseModule(pl.LightningModule):
     def configure_metrics(self) -> Dict[str, Tuple[torchmetrics.Metric, bool]]:
         return {}
 
+    def get_metric(self, key: str, prefix: str = 'train') -> Any:
+        return getattr(self, f'{prefix}_{key}')
+
     def _on_epoch_end(self, prefix: str) -> None:
         for key, (metric, prog_bar) in self._metrics.items():
             if key.startswith(prefix):

@@ -6,7 +6,7 @@ from torchmetrics import Metric
 from torchmetrics.utilities.data import dim_zero_cat
 
 
-class LabelEntropy(Metric):
+class LabelEntropyMetric(Metric):
     def __init__(
             self,
             num_classes: int,
