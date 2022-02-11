@@ -17,3 +17,16 @@
     * analysis/ - Dataset analysis notebooks
 * shared/ - Shared code for all projects (e.g. graph schemas, config schema)
 * storage/ - Storage folder for datasets and results
+
+
+## Environment Setup
+* Make sure you have `conda` installed
+  * If not, follow the [offical guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it
+* To speedup installation process you can also install `mamba`
+  * Follow these steps to install it: [mamba](https://github.com/mamba-org/mamba)
+    * tldr: `conda install mamba -n base -c conda-forge`
+  * This is not necessary as mamba and conda commands are interchangeable
+* Create your conda environment:
+  * From the dev config: `mamba env create -f environment.yml`
+  * From the lock file: `mamba env create -f environment.lock.yml`
+

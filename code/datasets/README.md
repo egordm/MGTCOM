@@ -5,6 +5,8 @@
 make download
 ```
 
+> Note: Some datasets download from kaggle. To download these datasets you first need to [set up kaggle cli](https://github.com/Kaggle/kaggle-api#api-credentials).
+
 #### Preprocess the datasets by running notebooks in: 
 `notebooks/preprocessing`.
 
