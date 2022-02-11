@@ -34,7 +34,10 @@ class BaseModule(pl.LightningModule):
             if key.startswith(prefix):
                 lkey = key.replace(prefix, '')
                 if lkey in outputs:
-                    metric.update(outputs[lkey])
+                    if isinstance(outputs[lkey], tuple):
+                        metric.update(*outputs[lkey])
+                    else:
+                        metric.update(outputs[lkey])
 
     def on_train_batch_end(self, outputs, *args, **kwargs) -> None:
         super().on_train_batch_end(outputs, *args, **kwargs)
