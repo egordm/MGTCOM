@@ -51,6 +51,10 @@ def run(args: Args):
         else:
             raise ValueError(f"Unknown file type: {graph_file}")
 
+        # TODO: make this configurable
+        if 'weight' in graph.es.attributes():
+            graph.es['weight'] = 1
+
         if 'tstart' in graph.vs.attributes():
             graph.vs['tstart'] = [
                 t if isinstance(t, (int, float)) and np.isfinite(t) else 0

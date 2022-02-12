@@ -17,3 +17,4 @@
   * Library for graph representation learning
 * [Pytorch Geometric Temporal](https://github.com/benedekrozemberczki/pytorch_geometric_temporal)
   * Extensions for Pytorch Geometric to handle temporal graphs (convolutions specifically)
+* [Deep Clustering Paper Collection](https://github.com/zhoushengisnoob/DeepClustering)
