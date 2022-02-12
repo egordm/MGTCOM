@@ -43,6 +43,10 @@ def pd_from_entity_schema(
     props = {*id_props, 'type', 'label', 'timestamp', *(include_properties or [])} & set(df.columns)
     df.drop(columns=set(df.columns).difference(props), inplace=True)
 
+    for prop_name, prop in schema.properties.items():
+        if prop_name in df.columns and prop.dtype.array:
+            df[prop_name] = df[prop_name].apply(lambda x: x.tolist())
+
     if 'name' in df.columns:
         df['name_'] = df['name']
         df.drop(columns=['name'], inplace=True)
