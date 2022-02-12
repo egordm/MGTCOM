@@ -45,7 +45,6 @@ def run(args: Args):
                 unix_timestamp=True,
                 include_properties=lambda xs: [x for x in xs if not x.startswith('feat_')]
             )
-            graph.write_graphml(str('aa'))
             graph.vs['gid'] = graph.vs['name']
             # if schema.is_node_temporal() or schema.is_edge_temporal():
             #     graph.add_timeranges()
