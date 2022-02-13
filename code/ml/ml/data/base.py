@@ -1,4 +1,6 @@
 from typing import Dict, Tuple, Any
+
+import torch
 import torchmetrics
 
 import pytorch_lightning as pl
@@ -17,8 +19,11 @@ class BaseModule(pl.LightningModule):
                 self._metrics[f'{prefix}/{key}'] = current_metric
                 setattr(self, f'{prefix}_{key}', current_metric[0])
 
-    def configure_metrics(self) -> Dict[str, Tuple[torchmetrics.Metric, bool]]:
-        return {}
+    def training_step(self, batch):
+        return self._step(batch)
+
+    def validation_step(self, batch, batch_idx):
+        return self._step(batch)
 
     def get_metric(self, key: str, prefix: str = 'train') -> Any:
         return getattr(self, f'{prefix}_{key}')
@@ -62,5 +67,17 @@ class BaseModule(pl.LightningModule):
     def on_test_epoch_end(self) -> None:
         super().on_test_epoch_end()
         self._on_epoch_end('test/')
+
+    def configure_metrics(self) -> Dict[str, Tuple[torchmetrics.Metric, bool]]:
+        return {}
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.params.get('lr', 0.001))
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, verbose=True)
+        return {
+            'optimizer': optimizer,
+            'lr_scheduler': scheduler,
+            'monitor': 'val/loss'
+        }
 
 

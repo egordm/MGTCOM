@@ -6,6 +6,7 @@ import torch
 from torch_geometric.data import HeteroData, InMemoryDataset
 
 from shared.constants import CACHE_PATH
+from shared.graph import DataGraph
 from shared.graph.loading import pd_from_entity_schema
 from shared.schema import GraphSchema, DatasetSchema
 
@@ -88,6 +89,7 @@ class StarWars(InMemoryDataset):
                 data[edge_type].timestamp = torch.tensor(edf['timestamp'].values.astype(np.int32))
 
         self.data, self.slices = self.collate([data])
+        self.G = DataGraph.from_schema(schema) # TODO: assumes ids are unchanged
 
     def node_mapping(self):
         return list(range(self.data.num_nodes))
