@@ -1,4 +1,3 @@
-from ml.data.datasets import StarWars
 from typing import Optional, Dict, Tuple, Any
 
 import torch
@@ -18,13 +17,15 @@ import pandas as pd
 from datasets.scripts import export_to_visualization
 
 import ml
+from ml.data.datasets import StarWars
 
 dataset = StarWars()
 data = dataset[0]
 data
 
-data_module = ml.EdgeLoaderDataModule(data, batch_size=16, num_samples=[4] * 2, num_workers=0, node_type='Character',
-                                      neg_sample_ratio=1)
+data_module = ml.EdgeLoaderDataModule(
+    data, batch_size=16, num_samples=[4] * 2, num_workers=8, node_type='Character', neg_sample_ratio=1
+)
 
 
 class HGTModule(torch.nn.Module):
@@ -58,13 +59,28 @@ class HGTModule(torch.nn.Module):
 
 
 class ClusteringModule(torch.nn.Module):
-    def __init__(self, rep_dim, n_clusters):
+    def __init__(
+            self, rep_dim: int, n_clusters: int,
+            cluster_centers: Optional[torch.Tensor] = None
+    ):
         super().__init__()
-        self.lin = torch.nn.Linear(rep_dim, n_clusters)
+        self.n_clusters = n_clusters
+        self.rep_dim = rep_dim
+
+        if cluster_centers is None:
+            initial_cluster_centers = torch.zeros(
+                self.n_clusters, self.rep_dim, dtype=torch.float
+            )
+            torch.nn.init.xavier_uniform_(initial_cluster_centers)
+        else:
+            assert cluster_centers.shape == (self.n_clusters, self.rep_dim)
+            initial_cluster_centers = cluster_centers
+        self.cluster_centers = torch.nn.Parameter(initial_cluster_centers)
         self.activation = torch.nn.Softmax(dim=1)
 
     def forward(self, batch: torch.Tensor):
-        return self.activation(self.lin(batch))
+        sim = torch.cdist(batch, self.cluster_centers, p=2)
+        return self.activation(sim)
 
     def forward_assign(self, batch: torch.Tensor):
         q = self(batch)
@@ -107,11 +123,13 @@ class Net(ml.BaseModule):
         super().__init__()
         self.embedding_module = embedding_module
         self.clustering_module = clustering_module
-        self.cos_sim = torch.nn.CosineSimilarity(dim=1)
+        self.dist = torch.nn.PairwiseDistance(p=2)
         self.lin = torch.nn.Linear(1, 2)
 
         self.link_prediction_loss = LinkPredictionLoss()
         self.clustering_loss = ClusteringLoss()
+
+        self.is_pretraining = True
 
     def configure_metrics(self) -> Dict[str, Tuple[torchmetrics.Metric, bool]]:
         return {
@@ -128,23 +146,27 @@ class Net(ml.BaseModule):
 
         emb_l = self.embedding_module(batch_l.x_dict, batch_l.edge_index_dict)[:batch_size]
         emb_r = self.embedding_module(batch_r.x_dict, batch_r.edge_index_dict)[:batch_size]
-        sim = self.cos_sim(emb_l, emb_r)
-        out = self.lin(torch.unsqueeze(sim, 1))
+        dist = self.dist(emb_l, emb_r)
+        out = self.lin(torch.unsqueeze(dist, 1))
         hp_loss = self.link_prediction_loss(out, label)
 
-        q_l = self.clustering_module(emb_l)
-        q_r = self.clustering_module(emb_r)
-        cc_loss, ne = self.clustering_loss(q_l, q_r, label)
+        out_dict = {}
+        if self.is_pretraining:
+            loss = hp_loss
+        else:
+            q_l = self.clustering_module(emb_l)
+            q_r = self.clustering_module(emb_r)
+            cc_loss, ne = self.clustering_loss(q_l, q_r, label)
+            loss = hp_loss + 2 * cc_loss + ne * 0.01
+            out_dict['ne'] = ne.detach()
+            out_dict['cc_loss'] = cc_loss.detach()
 
-        loss = hp_loss + 2 * cc_loss + ne
-
-        pred = out.argmax(dim=-1)
+        pred = out.argmax(dim=-1).detach()
         return {
             'loss': loss,
-            'hp_loss': hp_loss,
-            'cc_loss': cc_loss,
+            'hp_loss': hp_loss.detach(),
             'accuracy': (pred, label),
-            'ne': ne,
+            **out_dict
         }
 
     def forward(self, batch):
@@ -168,12 +190,26 @@ embedding_module = HGTModule(node_type='Character', metadata=data.metadata(), hi
                              num_layers=2)
 clustering_module = ClusteringModule(rep_dim=32, n_clusters=5)
 model = Net(embedding_module, clustering_module)
+
+model.is_pretraining = True
 trainer = pl.Trainer(
-    # gpus=1,
+    gpus=1,
     callbacks=[
         pl.callbacks.EarlyStopping(monitor="val/loss", min_delta=0.00, patience=5, verbose=True, mode="min")
     ],
-    max_epochs=50,
+    max_epochs=20,
+    enable_model_summary=True,
+    # logger=wandb_logger
+)
+trainer.fit(model, data_module)
+
+model.is_pretraining = False
+trainer = pl.Trainer(
+    gpus=1,
+    callbacks=[
+        pl.callbacks.EarlyStopping(monitor="val/loss", min_delta=0.00, patience=5, verbose=True, mode="min")
+    ],
+    max_epochs=20,
     enable_model_summary=True,
     # logger=wandb_logger
 )
@@ -186,11 +222,18 @@ predictions = trainer.predict(model, data_module)
 embeddings, assignments = map(lambda x: torch.cat(x, dim=0).detach().cpu(), zip(*predictions))
 assignments = torch.argmax(assignments, dim=1)
 
-
 labeling = pd.Series(assignments.squeeze(), index=dataset.node_mapping(), name="cid")
 labeling.index.name = "nid"
 comlist = CommunityAssignment(labeling)
 comlist.save_comlist(save_path.joinpath('schema.comlist'))
+
+export_to_visualization.run(
+    export_to_visualization.Args(
+        dataset='star-wars',
+        version='base',
+        run_paths=[str(save_path)]
+    )
+)
 
 # Calculate Evaluation Metrics
 DATASET = DatasetSchema.load_schema('star-wars')
@@ -206,4 +249,4 @@ results = pd.DataFrame([
     }
     for metric_cls in metrics]
 )
-print(results)
+results

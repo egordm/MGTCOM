@@ -1,91 +1,98 @@
-from ml.data import LinkSplitter
-from shared.schema import DatasetSchema, GraphSchema
-from shared.graph.loading import pd_from_entity_schema
-import pandas as pd
+import argparse
+from typing import Any
+
 import torch
-import numpy as np
-from torch_geometric.data import HeteroData, Data
+import torchmetrics
+from torch.nn import ReLU
 
-from shared.schema import DatasetSchema, GraphSchema
-from shared.graph.loading import pd_from_entity_schema
+from torch_geometric.nn import SAGEConv, Sequential, to_hetero
 
-DATASET = DatasetSchema.load_schema('star-wars')
-schema = GraphSchema.from_dataset(DATASET)
+import pytorch_lightning as pl
 
-explicit_label = False
-explicit_timestamp = True
-unix_timestamp = True
-prefix_id = None
-include_properties = lambda cs: [c for c in cs if c.startswith('feat_') or c == 'name']
+import ml
+from ml import StarWars, BaseModule
 
-nodes_dfs = {
-    label: pd_from_entity_schema(
-        entity_schema,
-        explicit_label=explicit_label,
-        explicit_timestamp=explicit_timestamp,
-        include_properties=include_properties,
-        unix_timestamp=unix_timestamp,
-        prefix_id=prefix_id,
-    ).set_index('id').drop(columns=['type']).sort_index()
-    for label, entity_schema in schema.nodes.items()
-}
-node_mappings_dfs = {
-    label: pd.Series(range(len(df)), index=df.index, name='nid')
-    for label, df in nodes_dfs.items()
-}
+parser = argparse.ArgumentParser()
+parser.add_argument('--use_hgt_loader', action='store_true')
+args = parser.parse_args()
 
-edges_dfs = {
-    label: pd_from_entity_schema(
-        entity_schema,
-        explicit_label=explicit_label,
-        explicit_timestamp=explicit_timestamp,
-        include_properties=include_properties,
-        unix_timestamp=unix_timestamp,
-        prefix_id=prefix_id,
-    )
-        .reset_index()
-        .drop(columns=['type'])
-        .drop_duplicates(subset=['src', 'dst', 'timestamp'])
-        .join(node_mappings_dfs[entity_schema.source_type], on='src')
-        .drop(columns=['src'])
-        .rename(columns={'nid': 'src'})
-        .join(node_mappings_dfs[entity_schema.target_type], on='dst')
-        .drop(columns=['dst'])
-        .rename(columns={'nid': 'dst'})
-    for label, entity_schema in schema.edges.items()
-}
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-cursor = 0
-for df in edges_dfs.values():
-    df.index += cursor
-    cursor += len(df)
+dataset = StarWars()
+data = dataset[0].to(device, 'x', 'y')
 
-data = HeteroData()
-for ntype, ndf in nodes_dfs.items():
-    columns = [c for c in ndf.columns if c.startswith('feat_')]
-    data[ntype].x = torch.tensor(ndf[columns].values.astype(np.float32))
-    if 'timestamp' in ndf.columns:
-        data[ntype].timestamp = torch.tensor(ndf['timestamp'].values.astype(np.int32))
-
-for etype, edf in edges_dfs.items():
-    columns = [c for c in edf.columns if c.startswith('feat_')]
-    edge_schema = schema.edges[etype]
-    edge_type = (edge_schema.source_type, edge_schema.get_type(), edge_schema.target_type)
-    data[edge_type].edge_attr = torch.tensor(edf[columns].values.astype(np.float32))
-    data[edge_type].edge_index = torch.tensor(edf[['src', 'dst']].T.values.astype(np.int64))
-    if 'timestamp' in edf.columns:
-        data[edge_type].timestamp = torch.tensor(edf['timestamp'].values.astype(np.int32))
-
-
-metapath = [
-    ('Character', 'INTERACTIONS', 'Character'),
-    ('Character', 'MENTIONS', 'Character')
-]
-
-transform = LinkSplitter(
-    edge_types=metapath,
+embedding_dim = 32
+node_type = 'Character'
+data_module = ml.EdgeLoaderDataModule(
+    data,
+    batch_size=16, num_neighbors=[4] * 2, num_workers=8, node_type=node_type, neg_sample_ratio=1
 )
+train_loader = data_module.train_dataloader()
+val_loader = data_module.val_dataloader()
 
-train_data, val_data, test_data = transform(data)
+embedding_model = Sequential('x, edge_index', [
+    (SAGEConv((-1, -1), embedding_dim), 'x, edge_index -> x'),
+    ReLU(inplace=True),
+    (SAGEConv((-1, -1), embedding_dim), 'x, edge_index -> x'),
+])
+embedding_model = to_hetero(embedding_model, data.metadata(), aggr='mean')
 
+
+class Net(BaseModule):
+    def __init__(
+            self,
+            embedding_model, node_type,
+            *args: Any, **kwargs: Any
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self.embedding_model = embedding_model
+        self.node_type = node_type
+
+        self.sim = torch.nn.CosineSimilarity(dim=1)
+        self.lin = torch.nn.Linear(1, 2)
+        self.ce_loss = torch.nn.CrossEntropyLoss()
+
+    def _step(self, batch: Any) -> dict:
+        batch_l, batch_r, label = batch
+        batch_size = batch_l[self.node_type].batch_size
+
+        emb_l = self.embedding_model(batch_l.x_dict, batch_l.edge_index_dict)[node_type][:batch_size]
+        emb_r = self.embedding_model(batch_r.x_dict, batch_r.edge_index_dict)[node_type][:batch_size]
+
+        sim = self.sim(emb_l, emb_r)
+        out = self.lin(torch.unsqueeze(sim, 1))
+        loss = self.ce_loss(out, label)
+
+        pred = out.argmax(dim=-1).detach()
+        return {
+            'loss': loss,
+            'accuracy': (pred, label),
+        }
+
+    def training_step(self, batch):
+        return self._step(batch)
+
+    def validation_step(self, batch, batch_idx):
+        return self._step(batch)
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=1e-3)
+
+    def configure_metrics(self):
+        return {
+            'loss': (torchmetrics.MeanMetric(), True),
+            'accuracy': (torchmetrics.Accuracy(), True),
+        }
+
+
+model = Net(embedding_model, node_type)
+trainer = pl.Trainer(
+    gpus=1,
+    callbacks=[
+        pl.callbacks.EarlyStopping(monitor="val/loss", min_delta=0.00, patience=5, verbose=True, mode="min")
+    ],
+    max_epochs=20,
+    enable_model_summary=True,
+)
+trainer.fit(model, data_module)
 u = 0

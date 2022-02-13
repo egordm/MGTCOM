@@ -9,6 +9,8 @@ import torchmetrics
 import pytorch_lightning as pl
 import math
 
+import torch_geometric.nn as tg_nn
+
 from shared.constants import BENCHMARKS_RESULTS
 from shared.graph import DataGraph
 from benchmarks.evaluation import get_metric_list
@@ -16,8 +18,6 @@ from shared.schema import GraphSchema, DatasetSchema
 from shared.graph import CommunityAssignment
 import pandas as pd
 from datasets.scripts import export_to_visualization
-
-import torch_geometric.nn as tg_nn
 
 import ml
 
