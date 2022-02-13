@@ -68,3 +68,7 @@
 - [ ] If applicable, figure a training regimen to optimize them
   - [ ] Do we need to do two step (node - communty) optimization? If yes can we balance the two? (meta learning?)
 - [ ] Fix Dynamo (I think loading goes wrong somewhere)
+- [ ] Test initialization using Louvain
+- [ ] Test bouldin index like objective function (aggregating one in general)
+- [ ] Test two step optimization
+- [ ] Add the facy cyclic loss scheduler

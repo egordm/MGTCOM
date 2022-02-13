@@ -7,6 +7,7 @@ from copy import copy
 from torch_geometric.typing import EdgeType
 from torch_geometric.data import Data, HeteroData
 from torch_geometric.data.storage import EdgeStorage
+from torch_geometric.utils import negative_sampling
 
 from torch_geometric.transforms import BaseTransform
 
@@ -91,3 +92,32 @@ class LinkSplitter(BaseTransform):
                 out_store[key] = value[index]
 
         out_store.edge_index = in_store.edge_index[:, index]
+
+
+def get_edges_partition(data: HeteroData, partition: int, neg_sample_ratio: float = 1.0) -> torch.Tensor:
+    pos_edge_index = {
+        edge_type: data[edge_type].edge_index[:, data[edge_type].edge_partitions == partition]
+        for edge_type in data.edge_types
+    }
+
+    neg_edge_index = {
+        edge_type: negative_sampling(
+            data[edge_type].edge_index,
+            num_neg_samples=int(pos_edge_index[edge_type].shape[1] * neg_sample_ratio)
+        )
+        for edge_type in data.edge_types
+    }
+
+    edge_index = {
+        edge_type: torch.cat([
+            torch.cat(
+                [pos_edge_index[edge_type], torch.ones(1, pos_edge_index[edge_type].shape[1], dtype=torch.long)],
+                dim=0),
+            torch.cat(
+                [neg_edge_index[edge_type], torch.zeros(1, neg_edge_index[edge_type].shape[1], dtype=torch.long)],
+                dim=0),
+        ], dim=1)
+        for edge_type in data.edge_types
+    }
+
+    return edge_index

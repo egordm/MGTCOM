@@ -17,44 +17,28 @@ from shared.graph import CommunityAssignment
 import pandas as pd
 from datasets.scripts import export_to_visualization
 
+import torch_geometric.nn as tg_nn
+
 import ml
 
 dataset = StarWars()
 data = dataset[0]
 data
 
-data_module = ml.EdgeLoaderDataModule(data, batch_size=16, num_samples=[4] * 2, num_workers=0, node_type='Character',
-                                      neg_sample_ratio=1)
+node_type = 'Character'
+embedding_dim = 32
+data_module = ml.EdgeLoaderDataModule(
+    data,
+    batch_size=16, num_samples=[4] * 2,
+    num_workers=0, node_type=node_type, neg_sample_ratio=1
+)
 
-
-class HGTModule(torch.nn.Module):
-    def __init__(
-            self,
-            node_type,
-            metadata: Metadata,
-            hidden_channels=64,
-            num_heads=2,
-            num_layers=1
-    ):
-        super().__init__()
-        self.node_type = node_type
-        self.lin_dict = torch.nn.ModuleDict()
-        for node_type in metadata[0]:
-            self.lin_dict[node_type] = Linear(-1, hidden_channels)
-
-        self.convs = torch.nn.ModuleList()
-        for _ in range(num_layers):
-            conv = HGTConv(hidden_channels, hidden_channels, metadata, num_heads, group='sum')
-            self.convs.append(conv)
-
-    def forward(self, x_dict, edge_index_dict):
-        for node_type, x in x_dict.items():
-            x_dict[node_type] = self.lin_dict[node_type](x).relu_()
-
-        for conv in self.convs:
-            x_dict = conv(x_dict, edge_index_dict)
-
-        return x_dict[self.node_type]
+embedding_module = tg_nn.Sequential('x, edge_index', [
+    (tg_nn.SAGEConv((-1, -1), embedding_dim), 'x, edge_index -> x'),
+    torch.nn.ReLU(inplace=True),
+    (tg_nn.SAGEConv((-1, -1), embedding_dim), 'x, edge_index -> x'),
+])
+embedding_module = tg_nn.to_hetero(embedding_module, data.metadata(), aggr='mean')
 
 
 class ClusteringModule(torch.nn.Module):
@@ -117,10 +101,12 @@ class ClusteringLoss(torch.nn.Module):
 class Net(ml.BaseModule):
     def __init__(
             self,
-            embedding_module: HGTModule,
+            node_type: str,
+            embedding_module: torch.nn.Module,
             clustering_module: ClusteringModule,
     ):
         super().__init__()
+        self.node_type = node_type
         self.embedding_module = embedding_module
         self.clustering_module = clustering_module
         self.cos_sim = torch.nn.CosineSimilarity(dim=1)
@@ -142,10 +128,10 @@ class Net(ml.BaseModule):
 
     def _step(self, batch: torch.Tensor):
         batch_l, batch_r, label = batch
-        batch_size = batch_l[self.embedding_module.node_type].batch_size
+        batch_size = batch_l[self.node_type].batch_size
 
-        emb_l = self.embedding_module(batch_l.x_dict, batch_l.edge_index_dict)[:batch_size]
-        emb_r = self.embedding_module(batch_r.x_dict, batch_r.edge_index_dict)[:batch_size]
+        emb_l = self.embedding_module(batch_l.x_dict, batch_l.edge_index_dict)[self.node_type][:batch_size]
+        emb_r = self.embedding_module(batch_r.x_dict, batch_r.edge_index_dict)[self.node_type][:batch_size]
         sim = self.cos_sim(emb_l, emb_r)
         out = self.lin(torch.unsqueeze(sim, 1))
         hp_loss = self.link_prediction_loss(out, label)
@@ -157,7 +143,7 @@ class Net(ml.BaseModule):
             q_l = self.clustering_module(emb_l)
             q_r = self.clustering_module(emb_r)
             cc_loss, ne = self.clustering_loss(q_l, q_r, label)
-            loss = hp_loss + 2 * cc_loss + ne
+            loss = hp_loss + 2 * cc_loss + ne * 0.01
             out_dict['ne'] = ne
             out_dict['cc_loss'] = cc_loss
 
@@ -170,8 +156,8 @@ class Net(ml.BaseModule):
         }
 
     def forward(self, batch):
-        batch_size = batch[self.embedding_module.node_type].batch_size
-        emb = self.embedding_module(batch.x_dict, batch.edge_index_dict)[:batch_size]
+        batch_size = batch[self.node_type].batch_size
+        emb = self.embedding_module(batch.x_dict, batch.edge_index_dict)[self.node_type][:batch_size]
         q = self.clustering_module(emb)
         return emb, q
 
@@ -186,10 +172,8 @@ class Net(ml.BaseModule):
         return optimizer
 
 
-embedding_module = HGTModule(node_type='Character', metadata=data.metadata(), hidden_channels=32, num_heads=2,
-                             num_layers=2)
 clustering_module = ClusteringModule(rep_dim=32, n_clusters=5)
-model = Net(embedding_module, clustering_module)
+model = Net(node_type, embedding_module, clustering_module)
 
 model.is_pretraining = True
 trainer = pl.Trainer(
@@ -215,7 +199,7 @@ trainer = pl.Trainer(
 )
 trainer.fit(model, data_module)
 
-save_path = BENCHMARKS_RESULTS.joinpath('analysis', 'pyg-hgt-comopt-contrastive')
+save_path = BENCHMARKS_RESULTS.joinpath('analysis', 'pyg-sage-comopt-contrastive')
 save_path.mkdir(parents=True, exist_ok=True)
 
 predictions = trainer.predict(model, data_module)
