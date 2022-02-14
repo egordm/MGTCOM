@@ -27,6 +27,10 @@ data = dataset[0]
 G = dataset.G
 G.to_undirected()
 
+edges = data.edge_stores[0].edge_index
+edge_nodes = torch.cat([edges[0, :], edges[1, :]], dim=0)
+degrees = torch.zeros(data.num_nodes, dtype=torch.long).scatter_add(0, edge_nodes, torch.ones_like(edge_nodes, dtype=torch.long))
+degrees.requires_grad = False
 
 
 def initial_clustering(embeddings: torch.Tensor):
@@ -49,6 +53,8 @@ class Model(Node2Vec):
         self.centroids = torch.nn.Embedding(n_clusters, embedding_dim)
         self.cos_sim = torch.nn.CosineSimilarity(dim=2)
         self.euc_dist = torch.nn.PairwiseDistance(p=2)
+        # self.ce_loss = torch.nn.CrossEntropyLoss(reduction='none')
+        self.ce_loss = torch.nn.CrossEntropyLoss()
         self.is_pretraining = True
 
     def loss(self, pos_rw, neg_rw):
@@ -56,7 +62,7 @@ class Model(Node2Vec):
         if not self.is_pretraining:
             cc_loss = self.clustering_loss(pos_rw, neg_rw)
             return {
-                'loss': hp_loss + cc_loss,
+                'loss': hp_loss + cc_loss * 1000,
                 'hp_loss': hp_loss.detach(),
                 'cc_loss': cc_loss.detach()
             }
@@ -75,8 +81,8 @@ class Model(Node2Vec):
         h_start = self.embedding(start).view(pos_rw.size(0), 1, self.embedding_dim)
         h_rest = self.embedding(rest.view(-1)).view(pos_rw.size(0), -1, self.embedding_dim)
 
-        # out = self.cos_sim(h_start, h_rest).view(-1)
-        out = -self.euc_dist(h_start, h_rest).view(-1)
+        out = self.cos_sim(h_start, h_rest).view(-1)
+        # out = -self.euc_dist(h_start, h_rest).view(-1)
         pos_loss = -torch.log(torch.sigmoid(out) + EPS).mean()
 
         # Negative loss.
@@ -85,8 +91,8 @@ class Model(Node2Vec):
         h_start = self.embedding(start).view(neg_rw.size(0), 1, self.embedding_dim)
         h_rest = self.embedding(rest.view(-1)).view(neg_rw.size(0), -1, self.embedding_dim)
 
-        # out = self.cos_sim(h_start, h_rest).view(-1)
-        out = -self.euc_dist(h_start, h_rest).view(-1)
+        out = self.cos_sim(h_start, h_rest).view(-1)
+        # out = -self.euc_dist(h_start, h_rest).view(-1)
         neg_loss = -torch.log(1 - torch.sigmoid(out) + EPS).mean()
 
         return pos_loss + neg_loss
@@ -96,35 +102,47 @@ class Model(Node2Vec):
         start, rest = pos_rw[:, 0], pos_rw[:, 1:].contiguous()
 
         h_start = self.embedding(start).view(pos_rw.size(0), 1, self.embedding_dim)
+        k_start = degrees[start].view(pos_rw.size(0), 1).float()
         q_start = cosine_cdist(h_start, self.centroids.weight.clone().unsqueeze(0), dim=2)
         # q_start = -euclidean_cdist(h_start, self.centroids.weight.clone().unsqueeze(0))
         q_start = torch.softmax(q_start, dim=2)
 
         h_rest = self.embedding(rest.view(-1)).view(pos_rw.size(0), -1, self.embedding_dim)
+        k_rest = degrees[rest.view(-1)].view(pos_rw.size(0), -1).float()
+        k_rest = torch.mean(k_rest, dim=1)
         q_rest = cosine_cdist(h_rest, self.centroids.weight.clone().unsqueeze(0), dim=2)
         # q_rest = -euclidean_cdist(h_rest, self.centroids.weight.clone().unsqueeze(0))
         q_rest = torch.mean(q_rest, dim=1, keepdim=True)
         q_rest = torch.softmax(q_rest, dim=2)
+        weights = (1 / k_rest) / torch.sum((1 / k_rest), dim=0)
 
-        out = (q_start * q_rest).sum(dim=-1).view(-1)
-        pos_loss = -torch.log(torch.sigmoid(out) + EPS).mean()
+        # pos_loss = torch.sum(self.ce_loss(q_rest.squeeze(), q_start.squeeze()) * weights)
+        pos_loss = self.ce_loss(q_rest.squeeze(), q_start.squeeze())
+        # out = (q_start * q_rest).sum(dim=-1).view(-1)
+        # pos_loss = -torch.log(torch.sigmoid(out) + EPS).mean()
 
         # Negative loss.
         start, rest = neg_rw[:, 0], neg_rw[:, 1:].contiguous()
 
         h_start = self.embedding(start).view(neg_rw.size(0), 1, self.embedding_dim)
+        k_start = degrees[start].view(neg_rw.size(0), 1).float()
         q_start = cosine_cdist(h_start, self.centroids.weight.clone().unsqueeze(0), dim=2)
         # q_start = -euclidean_cdist(h_start, self.centroids.weight.clone().unsqueeze(0))
         q_start = torch.softmax(q_start, dim=2)
 
         h_rest = self.embedding(rest.view(-1)).view(neg_rw.size(0), -1, self.embedding_dim)
+        k_rest = degrees[rest.view(-1)].view(neg_rw.size(0), -1).float()
+        k_rest = torch.mean(k_rest, dim=1)
         q_rest = cosine_cdist(h_rest, self.centroids.weight.clone().unsqueeze(0), dim=2)
         # q_rest = -euclidean_cdist(h_rest, self.centroids.weight.clone().unsqueeze(0))
         q_rest = torch.mean(q_rest, dim=1, keepdim=True)
         q_rest = torch.softmax(q_rest, dim=2)
+        weights = (1 / k_rest) / torch.sum((1 / k_rest), dim=0)
 
-        out = (q_start * q_rest).sum(dim=-1).view(-1)
-        neg_loss = -torch.log(1 - torch.sigmoid(out) + EPS).mean()
+        neg_loss = -self.ce_loss(q_rest.squeeze(), q_start.squeeze())
+        # neg_loss = -torch.sum(self.ce_loss(q_rest.squeeze(), q_start.squeeze()) * weights)
+        # out = (q_start * q_rest).sum(dim=-1).view(-1)
+        # neg_loss = -torch.log(1 - torch.sigmoid(out) + EPS).mean()
 
         return pos_loss + neg_loss
 
@@ -169,7 +187,9 @@ def test():
 for epoch in range(1, 500):
     if epoch >= 200:
         model.is_pretraining = False
+        # model.embedding.requires_grad_(False)
     if epoch == 200:
+        # model.embedding.requires_grad_(False)
         embeddings = model.embedding.weight.detach().cpu()
         centroids = initial_clustering(embeddings)
         model.centroids = torch.nn.Embedding.from_pretrained(centroids, freeze=False)
@@ -196,6 +216,7 @@ if recluster:
     D, I = kmeans.index.search(embeddings.numpy(), 1)
 else:
     sim = cosine_cdist(embeddings, centroids)
+    # sim = euclidean_cdist(embeddings, centroids)
     I = torch.argmax(sim, dim=1).numpy()
 
 from shared.graph import CommunityAssignment
