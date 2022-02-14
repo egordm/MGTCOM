@@ -8,8 +8,8 @@ def euclidean_cdist(x, y):
     return torch.cdist(x, y, p=2)
 
 
-def cosine_cdist(x, y):
-    return torch.cosine_similarity(x.unsqueeze(1), y.unsqueeze(0), dim=2)
+def cosine_cdist(x, y, dim=1):
+    return torch.cosine_similarity(x.unsqueeze(dim), y.unsqueeze(dim-1), dim=dim+1)
 
 
 class ClusteringModule(torch.nn.Module):
