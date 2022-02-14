@@ -34,6 +34,7 @@ class ExplicitClusteringModule(ClusteringModule):
             dist='cosine',
     ):
         super().__init__(repr_dim, n_clusters)
+        self.dist = dist
 
         if centroids is None:
             initial_centroids = torch.zeros(self.n_clusters, self.repr_dim, dtype=torch.float)
@@ -53,6 +54,9 @@ class ExplicitClusteringModule(ClusteringModule):
 
     def forward(self, batch: torch.Tensor):
         sim = self.cdist_fn(batch, self.centroids)
+        if self.dist == 'euclidean':
+            sim = -sim
+
         return self.softmax(sim)
 
 

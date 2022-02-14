@@ -12,9 +12,7 @@ class ClusterCohesionLoss(torch.nn.Module):
 
     def forward(self, q_l: torch.Tensor, q_r: torch.Tensor, label: torch.Tensor):
         sim = (self.cos_sim(q_l, q_r) + 1) / 2
-        pred = torch.stack([1 - sim, sim], dim=1)
-        loss = self.ce_loss(pred, label)
-        return loss
+        return torch.mean(torch.square(label - sim))
 
 
 class NegativeEntropyRegularizer(torch.nn.Module):

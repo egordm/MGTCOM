@@ -2,13 +2,18 @@ from abc import abstractmethod
 from typing import Tuple
 
 import torch
+import torchmetrics
 
 from torch_geometric.typing import Metadata
 import torch_geometric.nn as tg_nn
 from torch_geometric.data import HeteroData
+import pytorch_lightning as pl
 
 
-class EmbeddingModule(torch.nn.Module):
+import ml
+
+
+class EmbeddingModule(pl.LightningModule):
     def __init__(self, metadata: Metadata, repr_dim: int = 32, n_layers: int = 2) -> None:
         super().__init__()
         self.repr_dim = repr_dim
@@ -42,7 +47,7 @@ class GraphSAGEModule(EmbeddingModule):
         return self.module(batch.x_dict, batch.edge_index_dict)[self.node_type][:batch_size]
 
 
-class LinkPredictionModule(torch.nn.Module):
+class LinkPredictionModule(ml.BaseModule):
     def __init__(self, embedding_module: EmbeddingModule, dist='cosine'):
         super().__init__()
         self.embedding_module = embedding_module
@@ -55,6 +60,7 @@ class LinkPredictionModule(torch.nn.Module):
             raise ValueError(f'Unknown distance {dist}')
 
         self.lin = torch.nn.Linear(1, 2)
+        self.ce_loss = torch.nn.CrossEntropyLoss()
 
     def forward(self, batch: Tuple[HeteroData, HeteroData, torch.Tensor]):
         batch_l, batch_r, label = batch
@@ -65,3 +71,20 @@ class LinkPredictionModule(torch.nn.Module):
         logits = self.lin(torch.unsqueeze(dist, 1))
 
         return logits, dist, emb_l, emb_r
+
+    def _step(self, batch: Tuple[HeteroData, HeteroData, torch.Tensor]):
+        _, _, label = batch
+        logits, dist, emb_l, emb_r = self.forward(batch)
+        loss = self.ce_loss(logits, label)
+
+        pred = logits.argmax(dim=-1)
+        return {
+            'loss': loss,
+            'accuracy': (pred.detach(), label),
+        }
+
+    def configure_metrics(self):
+        return {
+            'loss': (torchmetrics.MeanMetric(), True),
+            'accuracy': (torchmetrics.Accuracy(), True),
+        }

@@ -109,3 +109,17 @@ class EdgeLoaderDataModule(pl.LightningDataModule):
             input_nodes=nodes,
             shuffle=False,
         )
+
+    def nodes_dataloader(self):
+        data = self.data
+        nodes = (self.node_type, torch.tensor(range(data[self.node_type].num_nodes)))
+        args = {**self.args}
+        del args['batch_size']
+
+        return NeighborLoader(
+            data,
+            **args,
+            batch_size=nodes[1].size(0),
+            input_nodes=nodes,
+            shuffle=False,
+        )

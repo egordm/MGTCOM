@@ -9,9 +9,10 @@ import pytorch_lightning as pl
 class BaseModule(pl.LightningModule):
     _metrics: Dict[str, Tuple[torchmetrics.Metric, bool]]
 
-    def __init__(self) -> None:
+    def __init__(self, params=None) -> None:
         super().__init__()
         metrics = self.configure_metrics()
+        self.params = params or {}
         self._metrics = {}
         for key, (metric, prog_bar) in metrics.items():
             for prefix in ['train', 'val', 'test']:
