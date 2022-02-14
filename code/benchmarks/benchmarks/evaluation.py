@@ -284,7 +284,7 @@ class MetricConductance(QualityMetric):
 
     @classmethod
     def metric_order(cls) -> str:
-        return 'maximize'
+        return 'minimize'
 
     @classmethod
     def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:

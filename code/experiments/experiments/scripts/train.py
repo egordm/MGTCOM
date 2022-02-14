@@ -28,7 +28,7 @@ data = dataset[0]
 data_module = ml.EdgeLoaderDataModule(
     data,
     batch_size=16, num_samples=[4] * 2,
-    num_workers=0, node_type=node_type, neg_sample_ratio=4,
+    num_workers=0, node_type=node_type, neg_sample_ratio=1,
     transform=transform
 )
 
