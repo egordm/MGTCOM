@@ -6,11 +6,12 @@ import torchmetrics
 from torch.nn import ReLU
 
 from torch_geometric.nn import SAGEConv, Sequential, to_hetero
+from torch_geometric.transforms import ToUndirected
 
 import pytorch_lightning as pl
 
 import ml
-from ml import StarWars, BaseModule
+from ml import StarWars, BaseModule, StarWarsHomogenous
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--use_hgt_loader', action='store_true')
@@ -18,14 +19,17 @@ args = parser.parse_args()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-dataset = StarWars()
-data = dataset[0].to(device, 'x', 'y')
+# dataset = StarWars()
+dataset = StarWarsHomogenous()
+data = dataset[0]
 
 embedding_dim = 32
 node_type = 'Character'
+transform = ToUndirected()
 data_module = ml.EdgeLoaderDataModule(
     data,
-    batch_size=16, num_neighbors=[4] * 2, num_workers=8, node_type=node_type, neg_sample_ratio=1
+    batch_size=16, num_neighbors=[4] * 2, num_workers=8, node_type=node_type, neg_sample_ratio=1,
+    transform=transform
 )
 train_loader = data_module.train_dataloader()
 val_loader = data_module.val_dataloader()

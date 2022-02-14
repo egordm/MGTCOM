@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 import torch
 import torchmetrics
 import pandas as pd
-from torch_geometric.data import HeteroData
+from torch_geometric.transforms import ToUndirected
 
 from experiments import ClusteringModule, ClusterCohesionLoss, NegativeEntropyRegularizer, cosine_cdist
 from shared.constants import TMP_PATH, BENCHMARKS_RESULTS
@@ -21,12 +21,15 @@ callbacks = [
     pl.callbacks.EarlyStopping(monitor="val/loss", min_delta=0.00, patience=5, verbose=True, mode="min")
 ]
 
-dataset = ml.StarWars()
+# dataset = ml.StarWars()
+dataset = ml.StarWarsHomogenous()
+transform = ToUndirected()
 data = dataset[0]
 data_module = ml.EdgeLoaderDataModule(
     data,
     batch_size=16, num_samples=[4] * 2,
-    num_workers=0, node_type=node_type, neg_sample_ratio=1
+    num_workers=0, node_type=node_type, neg_sample_ratio=4,
+    transform=transform
 )
 
 G = dataset.G

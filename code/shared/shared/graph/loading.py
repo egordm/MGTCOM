@@ -13,6 +13,7 @@ def pd_from_entity_schema(
         include_properties: Optional[Union[List[str], Callable[[List[str]], List[str]]]] = None,
         unix_timestamp: bool = False,
         prefix_id: bool = False,
+        directed: bool = None,
 ) -> pd.DataFrame:
     df = pd.read_parquet(schema.get_path(), engine='pyarrow', use_nullable_dtypes=True)
 
@@ -58,7 +59,7 @@ def pd_from_entity_schema(
 
     # Add duplicated edges in case of undirected graph
     if isinstance(schema, EdgeSchema):
-        if not schema.directed:
+        if directed is False or (not schema.directed and directed is None):
             df = pd.concat([df, df.rename(columns={'src': 'dst', 'dst': 'src'})])
 
     return df

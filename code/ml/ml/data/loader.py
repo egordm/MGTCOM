@@ -50,6 +50,7 @@ class EdgeLoaderDataModule(pl.LightningDataModule):
             num_neighbors=None,
             batch_size=8,
             num_workers=0,
+            transform=None,
             **kwargs,
     ):
         super().__init__()
@@ -60,7 +61,7 @@ class EdgeLoaderDataModule(pl.LightningDataModule):
         self.num_workers = num_workers
         self.node_type = node_type
 
-        transform = LinkSplitter(
+        split_transform = LinkSplitter(
             num_val=num_val,
             num_test=num_test,
             edge_types=data.edge_types,
@@ -72,7 +73,11 @@ class EdgeLoaderDataModule(pl.LightningDataModule):
             'num_neighbors': self.num_neighbors,
         }
 
-        self.train_data, self.val_data, self.test_data = transform(data)
+        self.train_data, self.val_data, self.test_data = split_transform(data)
+        if transform:
+            self.train_data, self.val_data, self.test_data = (
+                transform(self.train_data), transform(self.val_data), transform(self.test_data)
+            )
 
     def train_dataloader(self):
         data = self.train_data
@@ -89,7 +94,7 @@ class EdgeLoaderDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         data = self.val_data
-        edge_index = get_edges_partition(data, partition=0, neg_sample_ratio=self.neg_sample_ratio)
+        edge_index = get_edges_partition(data, partition=1, neg_sample_ratio=self.neg_sample_ratio)
         nodes = (self.node_type, torch.tensor(range(data[self.node_type].num_nodes)))
 
         return EdgeLoader(
