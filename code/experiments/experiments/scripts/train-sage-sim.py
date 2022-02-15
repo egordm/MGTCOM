@@ -95,7 +95,8 @@ class SamplesLoader(BaseDataLoader):
         return self.node_loader.transform_fn(out)
 
 
-data_loader = SamplesLoader(data_idx, batch_size=8, shuffle=True)
+batch_size = 8
+data_loader = SamplesLoader(data_idx, batch_size=batch_size, shuffle=True)
 batch = next(iter(data_loader))
 
 embedding_module = experiments.GraphSAGEModule(node_type, data.metadata(), repr_dim, n_layers=2)
@@ -104,10 +105,18 @@ optimizer = torch.optim.Adam(list(model.parameters()), lr=0.01)
 
 cos_sim = torch.nn.CosineSimilarity(dim=2)
 
+use_cosine = False
+use_centers = True
+n_clusters = 5
+centroids = torch.nn.Embedding(n_clusters, repr_dim)
 
-def train():
+n_epochs = 30 # 5 # 30
+comm_epoch = 10 # 2 #10
+
+def train(epoch):
     model.train()
     total_loss = 0
+    optimize_comms = epoch > comm_epoch
     for batch in data_loader:
         optimizer.zero_grad()
 
@@ -117,13 +126,36 @@ def train():
         pos_emb = neg_pos_emb[:, 1, :].unsqueeze(1)
         neg_emb = neg_pos_emb[:, 2:, :]
 
-        out = cos_sim(ctr_emb, pos_emb).view(-1)
-        pos_loss = -torch.log(torch.sigmoid(out) + EPS).mean()
+        # Constrastive loss
+        # out = cos_sim(ctr_emb, pos_emb).view(-1)
+        # pos_loss = -torch.log(torch.sigmoid(out) + EPS).mean()
+        #
+        # out = cos_sim(ctr_emb, neg_emb).view(-1)
+        # neg_loss = -torch.log(1 - torch.sigmoid(out) + EPS).mean()
+        #
+        # loss = pos_loss + neg_loss
 
-        out = cos_sim(ctr_emb, neg_emb).view(-1)
-        neg_loss = -torch.log(1 - torch.sigmoid(out) + EPS).mean()
+        # Max Margin loss
+        pos_d = torch.bmm(ctr_emb, pos_emb.transpose(1, 2)).view(-1)
+        neg_d = torch.bmm(ctr_emb, neg_emb.transpose(1, 2)).max(dim=2).values.view(-1)
+        mm_loss = torch.clip(neg_d - pos_d + 1, min=0).mean()
+        loss = mm_loss
 
-        loss = pos_loss + neg_loss
+        if optimize_comms:
+            # Clustering Max Margin loss
+            current_batch_size = neg_pos_emb.shape[0]
+            c_emb = centroids.weight.clone().unsqueeze(0).transpose(1, 2).repeat(current_batch_size, 1, 1)
+            c_ctr_q = torch.softmax(torch.bmm(ctr_emb, c_emb), dim=-1)
+            c_pos_q = torch.softmax(torch.bmm(pos_emb, c_emb), dim=-1)
+            c_neg_q = torch.softmax(torch.bmm(neg_emb, c_emb), dim=-1)
+
+            c_pos_d = torch.bmm(c_ctr_q, c_pos_q.transpose(1, 2)).view(-1)
+            c_neg_d = torch.bmm(c_ctr_q, c_neg_q.transpose(1, 2)).max(dim=2).values.view(-1)
+            c_mm_loss = torch.clip(c_neg_d - c_pos_d + 1, min=0).mean()
+            loss = c_mm_loss + mm_loss
+
+        # c_emb.unsqueeze(0).transpose(1, 2)
+
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
@@ -140,8 +172,8 @@ def get_embeddings():
     return torch.cat(embs, dim=0)
 
 
-for epoch in range(1, 20):
-    loss = train()
+for epoch in range(1, n_epochs):
+    loss = train(epoch)
     # acc = test()
     acc = np.nan
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')  #
@@ -158,13 +190,21 @@ save_path.mkdir(parents=True, exist_ok=True)
 
 embeddings = get_embeddings().detach()
 
-# Normalize for cosine similarity
-embeddings = embeddings / torch.norm(embeddings, dim=1, keepdim=True)
+if use_centers:
+    print('Reusing trained centers')
+    centers = centroids.weight.detach()
+    q = torch.softmax(torch.mm(embeddings, centers.transpose(1, 0)), dim=-1)
+    I = q.argmax(dim=-1)
+    I = I.numpy()
+else:
+    if use_cosine:
+        print('Normalize for cosine similarity')
+        embeddings = embeddings / torch.norm(embeddings, dim=1, keepdim=True)
 
-k = 5
-kmeans = faiss.Kmeans(embeddings.shape[1], k, niter=20, verbose=True, nredo=10)
-kmeans.train(embeddings.numpy())
-D, I = kmeans.index.search(embeddings.numpy(), 1)
+    print('Searching for cluster centers using K-means')
+    kmeans = faiss.Kmeans(embeddings.shape[1], k=n_clusters, niter=20, verbose=True, nredo=10)
+    kmeans.train(embeddings.numpy())
+    D, I = kmeans.index.search(embeddings.numpy(), 1)
 
 from shared.graph import CommunityAssignment
 
