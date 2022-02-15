@@ -11,11 +11,11 @@ from scipy.sparse import csr_matrix
 
 import experiments
 import ml
-from experiments import cosine_cdist, euclidean_cdist
+from experiments import cosine_cdist, euclidean_cdist, NegativeEntropyRegularizer
 from shared.constants import TMP_PATH
 
 device = 'cpu'
-experiment_name = 'pyg-n2v-experiment'
+experiment_name = 'pyg-sage-sim'
 node_type = 'Character'
 initialization = 'louvain'  # 'k-means' or 'none
 repr_dim = 32
@@ -104,19 +104,38 @@ model = embedding_module
 optimizer = torch.optim.Adam(list(model.parameters()), lr=0.01)
 
 cos_sim = torch.nn.CosineSimilarity(dim=2)
+kl_loss = torch.nn.KLDivLoss(size_average=False)
+ne_fn = NegativeEntropyRegularizer()
 
 use_cosine = False
 use_centers = True
+initialize = 'louvain'
 n_clusters = 5
 centroids = torch.nn.Embedding(n_clusters, repr_dim)
 
-n_epochs = 30 # 5 # 30
-comm_epoch = 10 # 2 #10
+n_epochs = 30  # 5 # 30
+comm_epoch = 10  # 2 #10
+# n_epochs = 40  # 5 # 30
+# comm_epoch = 20  # 2 #10
+# n_epochs = 5 # 30
+# comm_epoch = 2 #10
+
+
+def initial_clustering(embeddings: torch.Tensor):
+    clustering = G.community_multilevel(return_levels=True)[0]
+    assignment = torch.tensor(clustering.membership)
+    cluster_count = len(clustering)
+    assigned_count = torch.zeros(cluster_count, dtype=torch.long)\
+        .scatter_add(0, assignment, torch.ones_like(assignment, dtype=torch.long))
+    c = torch.zeros(cluster_count, repr_dim, dtype=torch.float).index_add_(0, assignment, embeddings)
+    c = c / assigned_count.unsqueeze(1)
+    return c
+
 
 def train(epoch):
     model.train()
     total_loss = 0
-    optimize_comms = epoch > comm_epoch
+    optimize_comms = epoch >= comm_epoch
     for batch in data_loader:
         optimizer.zero_grad()
 
@@ -152,7 +171,15 @@ def train(epoch):
             c_pos_d = torch.bmm(c_ctr_q, c_pos_q.transpose(1, 2)).view(-1)
             c_neg_d = torch.bmm(c_ctr_q, c_neg_q.transpose(1, 2)).max(dim=2).values.view(-1)
             c_mm_loss = torch.clip(c_neg_d - c_pos_d + 1, min=0).mean()
-            loss = c_mm_loss + mm_loss
+            loss = mm_loss + c_mm_loss
+
+            # KL Divergence loss (Confidence improvement)
+            # q = torch.cat([c_ctr_q, c_pos_q, c_neg_q], dim=1).view(-1, n_clusters)
+            # p = q.detach().square()
+            # ca_loss = kl_loss(torch.log(q), p)
+            # ne = ne_fn(q)
+            # loss = c_mm_loss + mm_loss + ca_loss * 0.01 + ne * 0.01
+            u = 0
 
         # c_emb.unsqueeze(0).transpose(1, 2)
 
@@ -161,6 +188,7 @@ def train(epoch):
         total_loss += loss.item()
 
     return total_loss / len(data_loader)
+
 
 def get_embeddings():
     model.eval()
@@ -173,6 +201,11 @@ def get_embeddings():
 
 
 for epoch in range(1, n_epochs):
+    if epoch == comm_epoch and initialize is not None:
+        embeddings = get_embeddings()
+        c = initial_clustering(embeddings)
+        centroids = torch.nn.Embedding.from_pretrained(c, freeze=False)
+
     loss = train(epoch)
     # acc = test()
     acc = np.nan
