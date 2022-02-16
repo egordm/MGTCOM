@@ -1,6 +1,42 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### Bug Fixes
+
+- Updated report graphs to show metric name as title
+- Fixed visualization export to swap out edgelist extension for graphml (new standard format)
+- Fixed modularity calculation. Igraph was converted incorrectly (previously)
+- Minor improvements in module / predictor structure
+
+### Documentation
+
+- Updated readme and requirements regarding usage of kaggle and mamba
+
+### Features
+
+- Added changelog generation
+- Added label/cluster entropy metric to detect early on the quality of cluster assignments
+- Updated comopt and homophily notebooks to include new metrics and a few small fixes
+- Added pretraining + join cluster + embedding optimization using kl div and target distribution reinforcement (adds more confident assignments, empathises more confident points), (still tends to sometimes go to entropy 0)
+- Added nn clustering module and contrastive loss
+- Added contrastive opt with cluster centers
+- Added euclidean variant of centroid based contrastive loss optimization
+- Added GraphSAGE based repr learning
+- Added GraphSAGE link prediction models
+- Split simple clustering flow into modules
+- Added homogenous variant of SW dataset with better split into validation and train dataset
+- Added node2vec based clustering
+- Added node2vec script and community optimization with a better modularity approximation
+- Added CE loss to n2v
+- Added pos+neg neighbourhood sampling based learning to GraphSAGE based model
+- Added notebook for pos+neg neighbourhood sampling (GraphSAGE)
+- Added max margin loss and community optimization using mm loss
+- Added cluster initializations to graphsage max margin
+- Added star wars dataset into snapshot splitting
+- Added graphsage based second pass for temporal homophiliy optimization
+
 ## [2022.06] - 2022-02-08
 
 ### Bug Fixes
