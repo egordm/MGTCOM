@@ -99,10 +99,6 @@ batch_size = 8
 data_loader = SamplesLoader(data_idx, batch_size=batch_size, shuffle=True)
 batch = next(iter(data_loader))
 
-embedding_module = experiments.GraphSAGEModule(node_type, data.metadata(), repr_dim, n_layers=2)
-model = embedding_module
-optimizer = torch.optim.Adam(list(model.parameters()), lr=0.01)
-
 cos_sim = torch.nn.CosineSimilarity(dim=2)
 kl_loss = torch.nn.KLDivLoss(size_average=False)
 ne_fn = NegativeEntropyRegularizer()
@@ -111,10 +107,11 @@ use_cosine = False
 use_centers = True
 initialize = 'louvain'
 n_clusters = 5
-centroids = torch.nn.Embedding(n_clusters, repr_dim)
 
 n_epochs = 30  # 5 # 30
 comm_epoch = 10  # 2 #10
+
+
 # n_epochs = 40  # 5 # 30
 # comm_epoch = 20  # 2 #10
 # n_epochs = 5 # 30
@@ -125,20 +122,23 @@ def initial_clustering(embeddings: torch.Tensor):
     clustering = G.community_multilevel(return_levels=True)[0]
     assignment = torch.tensor(clustering.membership)
     cluster_count = len(clustering)
-    assigned_count = torch.zeros(cluster_count, dtype=torch.long)\
+    assigned_count = torch.zeros(cluster_count, dtype=torch.long) \
         .scatter_add(0, assignment, torch.ones_like(assignment, dtype=torch.long))
     c = torch.zeros(cluster_count, repr_dim, dtype=torch.float).index_add_(0, assignment, embeddings)
     c = c / assigned_count.unsqueeze(1)
     return c
 
 
-def train(epoch):
-    model.train()
-    total_loss = 0
-    optimize_comms = epoch >= comm_epoch
-    for batch in data_loader:
-        optimizer.zero_grad()
+embedding_module = experiments.GraphSAGEModule(node_type, data.metadata(), repr_dim, n_layers=2)
 
+
+class MainModel(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.embedding_module = embedding_module
+        self.centroids = torch.nn.Embedding(n_clusters, repr_dim)
+
+    def forward(self, batch, optimize_comms=False):
         emb = embedding_module(batch)
         neg_pos_emb = emb.view(-1, num_neg_samples + 2, repr_dim)
         ctr_emb = neg_pos_emb[:, 0, :].unsqueeze(1)
@@ -163,7 +163,7 @@ def train(epoch):
         if optimize_comms:
             # Clustering Max Margin loss
             current_batch_size = neg_pos_emb.shape[0]
-            c_emb = centroids.weight.clone().unsqueeze(0).transpose(1, 2).repeat(current_batch_size, 1, 1)
+            c_emb = self.centroids.weight.clone().unsqueeze(0).transpose(1, 2).repeat(current_batch_size, 1, 1)
             c_ctr_q = torch.softmax(torch.bmm(ctr_emb, c_emb), dim=-1)
             c_pos_q = torch.softmax(torch.bmm(pos_emb, c_emb), dim=-1)
             c_neg_q = torch.softmax(torch.bmm(neg_emb, c_emb), dim=-1)
@@ -182,6 +182,21 @@ def train(epoch):
             u = 0
 
         # c_emb.unsqueeze(0).transpose(1, 2)
+        return loss
+
+
+model = MainModel()
+optimizer = torch.optim.Adam(list(model.parameters()), lr=0.01)
+
+
+def train(epoch):
+    model.train()
+    total_loss = 0
+    optimize_comms = epoch >= comm_epoch
+    for batch in data_loader:
+        optimizer.zero_grad()
+
+        loss = model(batch, optimize_comms)
 
         loss.backward()
         optimizer.step()
@@ -204,7 +219,7 @@ for epoch in range(1, n_epochs):
     if epoch == comm_epoch and initialize is not None:
         embeddings = get_embeddings()
         c = initial_clustering(embeddings)
-        centroids = torch.nn.Embedding.from_pretrained(c, freeze=False)
+        model.centroids = torch.nn.Embedding.from_pretrained(c, freeze=False)
 
     loss = train(epoch)
     # acc = test()
@@ -212,7 +227,8 @@ for epoch in range(1, n_epochs):
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')  #
 
 save_path.mkdir(exist_ok=True, parents=True)
-torch.save(model.state_dict(), save_path.joinpath('model.pt'))
+torch.save(embedding_module.state_dict(), save_path.joinpath('embeddings.pt'))
+torch.save(model.centroids.state_dict(), save_path.joinpath('centroids.pt'))
 print(f'Saved model to {save_path}')
 u = 0
 # aaaa
@@ -228,7 +244,7 @@ embeddings = get_embeddings().detach()
 
 if use_centers:
     print('Reusing trained centers')
-    centers = centroids.weight.detach()
+    centers = model.centroids.weight.detach()
     q = torch.softmax(torch.mm(embeddings, centers.transpose(1, 0)), dim=-1)
     I = q.argmax(dim=-1)
     I = I.numpy()

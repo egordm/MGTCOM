@@ -96,7 +96,7 @@ def neg_sample(nodes: torch.Tensor, snaps: torch.Tensor, num_neg_samples: int = 
     return neg_idx, neg_snaps
 
 
-repeat_count = 2
+repeat_count = 20
 num_neg_samples = 3
 # pos_idx = edge_index.t().repeat(repeat_count, 1)
 # pos_snaps = torch.stack([
@@ -104,7 +104,7 @@ num_neg_samples = 3
 #     edge_snaps.repeat(repeat_count)
 # ], dim=1)
 
-pos_idx, pos_snaps = pos_sample(torch.arange(data.num_nodes), num_samples=20)
+pos_idx, pos_snaps = pos_sample(torch.arange(data.num_nodes), num_samples=repeat_count)
 neg_idx, neg_snaps = neg_sample(pos_idx[:, 0], pos_snaps[:, 0], num_neg_samples=num_neg_samples)
 data_node_idx = torch.cat([pos_idx, neg_idx], dim=1)
 data_snaps = torch.cat([pos_snaps, neg_snaps], dim=1)
@@ -172,10 +172,11 @@ node_loader = NeighborLoader(
 embedding_module = experiments.GraphSAGEModule(node_type, data.metadata(), repr_dim, n_layers=2)
 temporal_module = experiments.GraphSAGEModule(node_type, data.metadata(), tempo_dim, n_layers=2)
 
-save_path = TMP_PATH.joinpath('pyg-sage-sim/model.pt')
-embedding_module.load_state_dict(torch.load(str(save_path)))
-embedding_module.freeze()
-embedding_module.requires_grad_(False)
+
+use_cosine = False
+temporal_only_cluster = True
+initialize = 'louvain'
+n_clusters = 8
 
 
 class MainModel(torch.nn.Module):
@@ -183,8 +184,10 @@ class MainModel(torch.nn.Module):
         super().__init__()
         self.embedding_module = embedding_module
         self.temporal_module = temporal_module
+        self.centroids = torch.nn.Embedding(n_clusters, repr_dim)
+        self.centroids_temp = torch.nn.Embedding(n_clusters, tempo_dim)
 
-    def forward(self, batch):
+    def forward(self, batch, optimize_comms=False):
         emb_posi = torch.zeros(sum(len(v['batch_idx']) for v in batch.values()), repr_dim)
         emb_temp = torch.zeros(sum(len(v['batch_idx']) for v in batch.values()), tempo_dim)
         for k, v in batch.items():
@@ -207,27 +210,50 @@ class MainModel(torch.nn.Module):
         mm_loss = torch.clip(neg_d - pos_d + 1, min=0).mean()
         loss = mm_loss
 
+        if optimize_comms:
+            # Clustering Max Margin loss
+            current_batch_size = neg_pos_emb.shape[0]
+            centroids = torch.cat([self.centroids.weight.clone(), self.centroids_temp.weight.clone()], dim=1)
+            c_emb = centroids.unsqueeze(0).transpose(1, 2).repeat(current_batch_size, 1, 1)
+            c_ctr_q = torch.softmax(torch.bmm(ctr_emb, c_emb), dim=-1)
+            c_pos_q = torch.softmax(torch.bmm(pos_emb, c_emb), dim=-1)
+            c_neg_q = torch.softmax(torch.bmm(neg_emb, c_emb), dim=-1)
+
+            c_pos_d = torch.bmm(c_ctr_q, c_pos_q.transpose(1, 2)).view(-1)
+            c_neg_d = torch.bmm(c_ctr_q, c_neg_q.transpose(1, 2)).max(dim=2).values.view(-1)
+            c_mm_loss = torch.clip(c_neg_d - c_pos_d + 1, min=0).mean()
+            loss = mm_loss + c_mm_loss
+
+            # KL Divergence loss (Confidence improvement)
+            # q = torch.cat([c_ctr_q, c_pos_q, c_neg_q], dim=1).view(-1, n_clusters)
+            # p = q.detach().square()
+            # ca_loss = kl_loss(torch.log(q), p)
+            # ne = ne_fn(q)
+            # loss = c_mm_loss + mm_loss + ca_loss * 0.01 + ne * 0.01
+            u = 0
+
         return loss
 
 
 model = MainModel()
 optimizer = torch.optim.Adam(list(model.parameters()), lr=0.01)
 
-use_cosine = False
-recluster = False
-temporal_only_cluster = True
-initialize = 'louvain'
-n_clusters = 7
-centroids = torch.nn.Embedding(n_clusters, repr_dim)
+embedding_module.load_state_dict(torch.load(str(TMP_PATH.joinpath('pyg-sage-sim/embeddings.pt'))))
+embedding_module.freeze()
+embedding_module.requires_grad_(False)
+
+model.centroids.load_state_dict(torch.load(str(TMP_PATH.joinpath('pyg-sage-sim/centroids.pt'))))
+model.centroids.requires_grad_(False)
 
 # n_epochs = 30  # 5 # 30
 # comm_epoch = 10  # 2 #10
-n_epochs = 20  # 5 # 30
-comm_epoch = 10  # 2 #10
+# n_epochs = 20  # 5 # 30
+# comm_epoch = 10  # 2 #10
 # n_epochs = 40  # 5 # 30
 # comm_epoch = 20  # 2 #10
-# n_epochs = 5 # 30
-# comm_epoch = 2 #10
+n_epochs = 5 # 30
+comm_epoch = 2 #10
+
 
 def train(epoch):
     model.train()
@@ -235,7 +261,7 @@ def train(epoch):
     for batch in data_loader:
         optimizer.zero_grad()
 
-        loss = model(batch)
+        loss = model(batch, optimize_comms=(epoch >= comm_epoch))
 
         loss.backward()
         optimizer.step()
@@ -270,16 +296,19 @@ save_path = BENCHMARKS_RESULTS.joinpath('analysis', experiment_name)
 save_path.mkdir(parents=True, exist_ok=True)
 
 embeddings = get_embeddings().detach()
-if temporal_only_cluster:
-    embeddings = embeddings[:, repr_dim:]
 
-if recluster:
+if not recluster:
     print('Reusing trained centers')
-    centers = centroids.weight.detach()
+    centers = torch.cat([
+        model.centroids.weight.clone(), model.centroids_temp.weight.clone()
+    ], dim=1).detach()
     q = torch.softmax(torch.mm(embeddings, centers.transpose(1, 0)), dim=-1)
     I = q.argmax(dim=-1)
     I = I.numpy()
 else:
+    if temporal_only_cluster:
+        embeddings = embeddings[:, repr_dim:]
+
     if use_cosine:
         print('Normalize for cosine similarity')
         embeddings = embeddings / torch.norm(embeddings, dim=1, keepdim=True)
