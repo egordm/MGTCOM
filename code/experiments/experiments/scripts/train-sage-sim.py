@@ -211,6 +211,9 @@ for epoch in range(1, n_epochs):
     acc = np.nan
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')  #
 
+save_path.mkdir(exist_ok=True, parents=True)
+torch.save(model.state_dict(), save_path.joinpath('model.pt'))
+print(f'Saved model to {save_path}')
 u = 0
 # aaaa
 

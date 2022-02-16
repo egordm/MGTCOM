@@ -57,18 +57,18 @@
   - [x] Centrality etc per node type
   - [x] Clustering statistics per edge type
 - [ ] Implement a cluster entropy metric
-- [ ] Experiment and define good candidate objective measures for:
-  - [ ] Homophily (unsupervised node similarity <-> connectedness)
-  - [ ] Community cohesion (node - community relation)
-  - [ ] Community quality (community - community [- to node] relation)
+- [x] Experiment and define good candidate objective measures for:
+  - [x] Homophily (unsupervised node similarity <-> connectedness)
+  - [x] Community cohesion (node - community relation)
+  - [x] Community quality (community - community [- to node] relation)
   - [ ] Later on (apply this to temporal communities)
-- [ ] Figure a way out to efficiently calculate/approximate these measures
-  - [ ] Through sampling (if possible)
-  - [ ] Through incremental calculation
+- [x] Figure a way out to efficiently calculate/approximate these measures
+  - [x] Through sampling (if possible)
+  - [x] Through incremental calculation
 - [ ] If applicable, figure a training regimen to optimize them
   - [ ] Do we need to do two step (node - communty) optimization? If yes can we balance the two? (meta learning?)
 - [ ] Fix Dynamo (I think loading goes wrong somewhere)
-- [ ] Test initialization using Louvain
-- [ ] Test bouldin index like objective function (aggregating one in general)
+- [x] Test initialization using Louvain
+- [x] Test bouldin index like objective function (aggregating one in general)
 - [ ] Test two step optimization
 - [ ] Add the facy cyclic loss scheduler
