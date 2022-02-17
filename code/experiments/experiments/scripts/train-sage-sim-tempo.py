@@ -11,10 +11,11 @@ from torch_geometric.loader import NeighborLoader
 from torch_geometric.loader.base import BaseDataLoader
 from scipy.sparse import csr_matrix
 import itertools as it
+from torch.utils.tensorboard import SummaryWriter
 
 import experiments
 import ml
-from experiments import cosine_cdist, euclidean_cdist, NegativeEntropyRegularizer
+from experiments import cosine_cdist, euclidean_cdist, NegativeEntropyRegularizer, save_projector
 from shared.constants import TMP_PATH
 
 device = 'cpu'
@@ -60,13 +61,14 @@ node_to_snapshot_idx = [
     for i in range(data.num_nodes)
 ]
 
+
 def pos_sample(nodes: torch.Tensor, num_samples: int = 5) -> torch.Tensor:
     pos_nodes = torch.tensor([
         [
             [nid, random.choice(list(node_to_snapshot_idx[i].intersection(node_to_snapshot_idx[nid])))]
             for nid in random.choices(list(set(it.chain(*[
-                candidates for ct, candidates in enumerate(snapshot_nodes) if ct in node_to_snapshot_idx[i]
-            ]))), k=num_samples)
+            candidates for ct, candidates in enumerate(snapshot_nodes) if ct in node_to_snapshot_idx[i]
+        ]))), k=num_samples)
         ]
         for i in nodes.tolist()
     ], dtype=torch.long)
@@ -84,8 +86,8 @@ def neg_sample(nodes: torch.Tensor, snaps: torch.Tensor, num_neg_samples: int = 
         [
             [nid, random.choice(list(node_to_snapshot_idx[nid].difference([t])))]
             for nid in random.choices(list(set(it.chain(*[
-                candidates for ct, candidates in enumerate(snapshot_nodes) if t != ct
-            ]))), k=num_neg_samples)
+            candidates for ct, candidates in enumerate(snapshot_nodes) if t != ct
+        ]))), k=num_neg_samples)
         ]
         for i, t in zip(nodes.tolist(), snaps.tolist())
     ], dtype=torch.long)
@@ -172,7 +174,6 @@ node_loader = NeighborLoader(
 embedding_module = experiments.GraphSAGEModule(node_type, data.metadata(), repr_dim, n_layers=2)
 temporal_module = experiments.GraphSAGEModule(node_type, data.metadata(), tempo_dim, n_layers=2)
 
-
 use_cosine = False
 temporal_only_cluster = True
 initialize = 'louvain'
@@ -245,14 +246,14 @@ embedding_module.requires_grad_(False)
 model.centroids.load_state_dict(torch.load(str(TMP_PATH.joinpath('pyg-sage-sim/centroids.pt'))))
 model.centroids.requires_grad_(False)
 
-# n_epochs = 30  # 5 # 30
-# comm_epoch = 10  # 2 #10
+n_epochs = 30  # 5 # 30
+comm_epoch = 10  # 2 #10
 # n_epochs = 20  # 5 # 30
 # comm_epoch = 10  # 2 #10
 # n_epochs = 40  # 5 # 30
 # comm_epoch = 20  # 2 #10
-n_epochs = 5 # 30
-comm_epoch = 2 #10
+# n_epochs = 5  # 30
+# comm_epoch = 2  # 10
 
 
 def train(epoch):
@@ -287,7 +288,6 @@ for epoch in range(1, n_epochs):
     acc = np.nan
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')  #
 
-
 from shared.constants import BENCHMARKS_RESULTS
 import faiss
 import pandas as pd
@@ -318,6 +318,11 @@ else:
     em = np.ascontiguousarray(embeddings.numpy())
     kmeans.train(em)
     D, I = kmeans.index.search(em, 1)
+
+save_projector("Star Wars Temporal", embeddings, pd.DataFrame({
+    'label': G.vs['label'],
+    'cluster': I
+}))
 
 from shared.graph import CommunityAssignment
 
