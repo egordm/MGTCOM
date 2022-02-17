@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Fixed visualization export to swap out edgelist extension for graphml (new standard format)
 - Fixed modularity calculation. Igraph was converted incorrectly (previously)
 - Minor improvements in module / predictor structure
+- Changed evaluation code to distinct between overlapping gt and input. Calculate modularity if input it not overlapping
 
 ### Documentation
 
@@ -36,6 +37,12 @@ All notable changes to this project will be documented in this file.
 - Added cluster initializations to graphsage max margin
 - Added star wars dataset into snapshot splitting
 - Added graphsage based second pass for temporal homophiliy optimization
+- Added community optimization using temporal features
+- Added standalone tensorflow projector to preview trained embeddings
+
+### Miscellaneous Tasks
+
+- Updated changelog
 
 ## [2022.06] - 2022-02-08
 
