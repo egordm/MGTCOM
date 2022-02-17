@@ -109,7 +109,7 @@ class QualityMetric(EvaluationMetric):
         }
 
     def evaluate_step(self) -> float:
-        self.calculate(self.graph, self.prediction)
+        return self.calculate(self.graph, self.prediction)
 
     @classmethod
     def calculate(cls, graph: ig.Graph, clustering: CommunityAssignment) -> float:
@@ -362,7 +362,7 @@ class MetricCommunityCount(QualityMetric):
         return 'minimize'
 
 
-def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[EvaluationMetric]]:
+def get_metric_list(ground_truth: bool, overlapping: bool, overlapping_input: bool) -> List[Type[EvaluationMetric]]:
     metrics = []
 
     metrics.append(MetricCommunityCount)
@@ -388,7 +388,7 @@ def get_metric_list(ground_truth: bool, overlapping: bool) -> List[Type[Evaluati
     metrics.append(MetricModularityOverlap)
     metrics.append(MetricLinkModularity)
     metrics.append(MetricZModularity)
-    if overlapping:
+    if overlapping_input:
         pass
     else:
         metrics.append(MetricModularity)

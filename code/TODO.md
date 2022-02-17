@@ -67,7 +67,8 @@
   - [x] Through incremental calculation
 - [ ] If applicable, figure a training regimen to optimize them
   - [ ] Do we need to do two step (node - communty) optimization? If yes can we balance the two? (meta learning?)
-- [ ] Fix Dynamo (I think loading goes wrong somewhere)
+- [x] Fix Dynamo (I think loading goes wrong somewhere)
+  - [ ] Rerun benchmarking
 - [x] Test initialization using Louvain
 - [x] Test bouldin index like objective function (aggregating one in general)
 - [ ] Test two step optimization

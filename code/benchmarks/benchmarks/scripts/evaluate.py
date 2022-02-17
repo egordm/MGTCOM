@@ -38,6 +38,7 @@ def run(args: Args):
     metrics = get_metric_list(
         TAG_GROUND_TRUTH in dataset.tags,
         TAG_OVERLAPPING in baseline.tags or TAG_OVERLAPPING in dataset.tags,
+        TAG_OVERLAPPING in baseline.tags
     )
 
     result = {}
