@@ -177,7 +177,7 @@ temporal_module = experiments.GraphSAGEModule(node_type, data.metadata(), tempo_
 use_cosine = False
 temporal_only_cluster = True
 initialize = 'louvain'
-n_clusters = 8
+n_clusters = 9
 
 
 class MainModel(torch.nn.Module):
@@ -318,6 +318,11 @@ else:
     em = np.ascontiguousarray(embeddings.numpy())
     kmeans.train(em)
     D, I = kmeans.index.search(em, 1)
+
+save_projector("Star Wars Combined", embeddings[:, repr_dim:], pd.DataFrame({
+    'label': G.vs['label'],
+    'cluster': I
+}))
 
 save_projector("Star Wars Temporal", embeddings, pd.DataFrame({
     'label': G.vs['label'],

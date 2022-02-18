@@ -11,7 +11,7 @@ from scipy.sparse import csr_matrix
 
 import experiments
 import ml
-from experiments import cosine_cdist, euclidean_cdist, NegativeEntropyRegularizer
+from experiments import cosine_cdist, euclidean_cdist, NegativeEntropyRegularizer, save_projector
 from shared.constants import TMP_PATH
 
 device = 'cpu'
@@ -257,6 +257,12 @@ else:
     kmeans = faiss.Kmeans(embeddings.shape[1], k=n_clusters, niter=20, verbose=True, nredo=10)
     kmeans.train(embeddings.numpy())
     D, I = kmeans.index.search(embeddings.numpy(), 1)
+
+
+save_projector("Star Wars Positional", embeddings, pd.DataFrame({
+    'label': G.vs['label'],
+    'cluster': I
+}))
 
 from shared.graph import CommunityAssignment
 
