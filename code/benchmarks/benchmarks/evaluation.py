@@ -362,15 +362,15 @@ class MetricCommunityCount(QualityMetric):
         return 'minimize'
 
 
-def get_metric_list(ground_truth: bool, overlapping: bool, overlapping_input: bool) -> List[Type[EvaluationMetric]]:
+def get_metric_list(ground_truth: bool, overlapping: bool, overlapping_input: bool=False) -> List[Type[EvaluationMetric]]:
     metrics = []
 
     metrics.append(MetricCommunityCount)
 
     if ground_truth:
         metrics.append(MetricNF1)
-        metrics.append(OverlappingNMI)
-        metrics.append(MetricOmega)
+        # metrics.append(OverlappingNMI)
+        # metrics.append(MetricOmega)
         metrics.append(MetricF1)
 
         if overlapping:
