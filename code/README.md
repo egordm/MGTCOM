@@ -29,4 +29,15 @@
 * Create your conda environment:
   * From the dev config: `mamba env create -f environment.yml`
   * From the lock file: `mamba env create -f environment.lock.yml`
+* Some parts of the project use `pyspark`
+  * Ensure you have the right java version installed using `java -version`
+  * Project is known to work with: openjdk11
 
+
+## Working with the code
+#### Activating the environment
+Make sure you have conda installed beforehand.
+
+```bash
+source ./activate.sh
+```

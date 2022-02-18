@@ -8,7 +8,17 @@ make download
 > Note: Some datasets download from kaggle. To download these datasets you first need to [set up kaggle cli](https://github.com/Kaggle/kaggle-api#api-credentials).
 
 #### Preprocess the datasets by running notebooks in: 
-`notebooks/preprocessing`.
+`notebooks/preprocessing`
+
+You can do this by starting jupyter notebook in the root directory using: `jupyter notebook`
+
+> Note: Check root readme on how to activate the virtual environment.
+
+> Note: Some parts of the project use `pyspark`
+> 
+> Ensure you have the right java version installed using `java -version`
+> 
+> Project is known to work with: openjdk11
 
 #### Export all the datasets to neo4j
 ```bash
