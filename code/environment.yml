@@ -8,7 +8,7 @@ channels:
 dependencies:
   - python=3.9
   - pip
-  - cudatoolkit=11.3 # Only if you use NVIDIA GPU
+  - cudatoolkit-dev=11.3 # Only if you use NVIDIA GPU
   - pytorch
   - pytorch-lightning
   - pyg
