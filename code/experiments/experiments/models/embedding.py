@@ -25,20 +25,20 @@ class EmbeddingModule(pl.LightningModule):
 
 
 class GraphSAGEModule(EmbeddingModule):
-    def __init__(self, node_type: str, metadata: Metadata, repr_dim: int = 32, n_layers: int = 2) -> None:
+    def __init__(self, node_type: str, metadata: Metadata, repr_dim: int = 32, n_layers: int = 2, normalize=False) -> None:
         super().__init__(metadata, repr_dim, n_layers)
         self.node_type = node_type
 
         components = []
         for i in range(n_layers - 1):
             components.extend([
-                (tg_nn.SAGEConv((-1, -1), repr_dim), 'x, edge_index -> x'),
+                (tg_nn.SAGEConv((-1, -1), repr_dim, normalize=normalize), 'x, edge_index -> x'),
                 torch.nn.ReLU(inplace=True)
             ])
 
         embedding_module = tg_nn.Sequential('x, edge_index', [
             *components,
-            (tg_nn.SAGEConv((-1, -1), repr_dim), 'x, edge_index -> x'),
+            (tg_nn.SAGEConv((-1, -1), repr_dim, normalize=normalize), 'x, edge_index -> x'),
         ])
         self.module = tg_nn.to_hetero(embedding_module, metadata, aggr='mean')
 

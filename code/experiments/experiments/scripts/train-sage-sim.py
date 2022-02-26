@@ -107,13 +107,12 @@ use_cosine = False
 use_centers = True
 initialize = 'louvain'
 n_clusters = 5
+save = False
 
-n_epochs = 30  # 5 # 30
-comm_epoch = 10  # 2 #10
-
-
-# n_epochs = 40  # 5 # 30
-# comm_epoch = 20  # 2 #10
+# n_epochs = 30  # 5 # 30
+# comm_epoch = 10  # 2 #10
+n_epochs = 40  # 5 # 30
+comm_epoch = 20  # 2 #10
 # n_epochs = 5 # 30
 # comm_epoch = 2 #10
 
@@ -129,9 +128,12 @@ def initial_clustering(embeddings: torch.Tensor):
     return c
 
 
-embedding_module = experiments.GraphSAGEModule(node_type, data.metadata(), repr_dim, n_layers=2)
+embedding_module = experiments.GraphSAGEModule(
+    node_type, data.metadata(), repr_dim, n_layers=2, normalize=False
+)
 
-
+# export CMAKE_PREFIX_PATH=/data/pella/projects/University/Thesis/Thesis/code/env/lib/python3.9/site-packages/torch/share/cmake/Torch:$CMAKE_PREFIX_PATH
+# CUDA_TOOLKIT_ROOT_DIR
 class MainModel(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
@@ -226,10 +228,11 @@ for epoch in range(1, n_epochs):
     acc = np.nan
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')  #
 
-save_path.mkdir(exist_ok=True, parents=True)
-torch.save(embedding_module.state_dict(), save_path.joinpath('embeddings.pt'))
-torch.save(model.centroids.state_dict(), save_path.joinpath('centroids.pt'))
-print(f'Saved model to {save_path}')
+if save:
+    save_path.mkdir(exist_ok=True, parents=True)
+    torch.save(embedding_module.state_dict(), save_path.joinpath('embeddings.pt'))
+    torch.save(model.centroids.state_dict(), save_path.joinpath('centroids.pt'))
+    print(f'Saved model to {save_path}')
 u = 0
 # aaaa
 
@@ -259,10 +262,11 @@ else:
     D, I = kmeans.index.search(embeddings.numpy(), 1)
 
 
-save_projector("Star Wars Positional", embeddings, pd.DataFrame({
-    'label': G.vs['label'],
-    'cluster': I
-}))
+if save:
+    save_projector("Star Wars Positional", embeddings, pd.DataFrame({
+        'label': G.vs['label'],
+        'cluster': I
+    }))
 
 from shared.graph import CommunityAssignment
 
