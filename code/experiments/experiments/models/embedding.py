@@ -9,7 +9,6 @@ import torch_geometric.nn as tg_nn
 from torch_geometric.data import HeteroData
 import pytorch_lightning as pl
 
-
 import ml
 
 
@@ -24,8 +23,32 @@ class EmbeddingModule(pl.LightningModule):
         pass
 
 
+class GraphSAGEHeteroModule(EmbeddingModule):
+    def __init__(self, repr_dim: int = 32, n_layers: int = 2,
+                 normalize=False) -> None:
+        super().__init__(None, repr_dim, n_layers)
+
+        components = []
+        for i in range(n_layers - 1):
+            components.extend([
+                (tg_nn.SAGEConv((-1, -1), repr_dim, normalize=normalize), 'x, edge_index -> x'),
+                torch.nn.ReLU(inplace=True)
+            ])
+
+        embedding_module = tg_nn.Sequential('x, edge_index', [
+            *components,
+            (tg_nn.SAGEConv((-1, -1), repr_dim, normalize=normalize), 'x, edge_index -> x'),
+        ])
+        self.module = embedding_module
+
+    def forward(self, batch: HeteroData, *args) -> torch.Tensor:
+        batch_size = batch.batch_size
+        return self.module(batch.x, batch.edge_index)[:batch_size]
+
+
 class GraphSAGEModule(EmbeddingModule):
-    def __init__(self, node_type: str, metadata: Metadata, repr_dim: int = 32, n_layers: int = 2, normalize=False) -> None:
+    def __init__(self, node_type: str, metadata: Metadata, repr_dim: int = 32, n_layers: int = 2,
+                 normalize=False) -> None:
         super().__init__(metadata, repr_dim, n_layers)
         self.node_type = node_type
 

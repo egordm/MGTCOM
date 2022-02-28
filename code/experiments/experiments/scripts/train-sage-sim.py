@@ -111,8 +111,10 @@ save = False
 
 # n_epochs = 30  # 5 # 30
 # comm_epoch = 10  # 2 #10
-n_epochs = 40  # 5 # 30
-comm_epoch = 20  # 2 #10
+# n_epochs = 40  # 5 # 30
+# comm_epoch = 20  # 2 #10
+n_epochs = 50  # 5 # 30
+comm_epoch = 30  # 2 #10
 # n_epochs = 5 # 30
 # comm_epoch = 2 #10
 
@@ -132,8 +134,7 @@ embedding_module = experiments.GraphSAGEModule(
     node_type, data.metadata(), repr_dim, n_layers=2, normalize=False
 )
 
-# export CMAKE_PREFIX_PATH=/data/pella/projects/University/Thesis/Thesis/code/env/lib/python3.9/site-packages/torch/share/cmake/Torch:$CMAKE_PREFIX_PATH
-# CUDA_TOOLKIT_ROOT_DIR
+
 class MainModel(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
