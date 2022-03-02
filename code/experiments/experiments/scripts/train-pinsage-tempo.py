@@ -12,10 +12,12 @@ import tch_geometric as thg
 from torch_geometric.loader.utils import filter_data
 from torch_geometric.data import Data
 from torch_geometric.loader.base import BaseDataLoader
+from torch_geometric.loader import NeighborLoader
 from torch_scatter.utils import broadcast
 from torch_scatter import scatter_sum, scatter_mean
 from scipy.sparse import csr_matrix
 import torch.nn.functional as F
+import itertools as it
 
 from experiments import ClusteringModule, ClusterCohesionLoss, NegativeEntropyRegularizer, cosine_cdist, save_projector, \
     EmbeddingModule
@@ -25,21 +27,24 @@ from shared.graph import CommunityAssignment
 import ml
 import experiments
 
-experiment_name = 'pyg-pinsage'
+experiment_name = 'pyg-pinsage-tempo'
 node_type = 'Character'
 repr_dim = 32
+tempo_dim = 8
+temporal_only_cluster = True
 EPS = 1e-15
 recluster = False
-save_path = TMP_PATH.joinpath('pyg-pinsage')
+save_path = TMP_PATH.joinpath('pyg-pinsage-tempo')
 
 dataset = ml.StarWarsHomogenous()
 data = dataset[0]
 data = Data(data.node_stores[0].x, data.edge_stores[0].edge_index)
+data.edge_stores[0].timestamp = dataset[0].edge_stores[0].timestamp
 data = ToUndirected()(data)
 data = SortEdges()(data)
+snapshots = dataset.snapshots
 G = dataset.G
 G.to_undirected()
-
 
 # Node Importance Definition
 degree_avg = np.mean(dataset.G.degree())
@@ -66,45 +71,93 @@ match = match[match != 0] - 1
 neighbor_weight[match] += walk_edge_counts
 data.edge_stores[0].weight = neighbor_weight
 
-# Build pos and neg samples
-rows, cols = data.edge_index
-csr = csr_matrix(
-    (torch.ones(data.edge_index.shape[1], dtype=torch.int32).numpy(), (rows.numpy(), cols.numpy())),
-    shape=(data.num_nodes, data.num_nodes),
-)
-neg_neighbors = [
-    list(set(range(data.num_nodes)).difference(set(csr[i, :].indices)))
+# neighbor_weight = torch.ones(len(data.edge_index[0, :]))
+# data.edge_stores[0].weight = neighbor_weight
+
+# Edges are always within snapshots (so take them all)
+edge_index = data.edge_index
+edge_snaps = data.timestamp
+
+snapshot_nodes = []
+for i, snapshot in enumerate(snapshots):
+    snapshot_nodes.append(list(set(snapshot.node_stores[0].node_mask.nonzero().squeeze().tolist())))
+
+snapshot_idx = set(range(len(snapshots)))
+node_to_snapshot_idx = [
+    {j for j, snap in enumerate(snapshots) if snap.node_stores[0].node_mask[i].item()}
     for i in range(data.num_nodes)
 ]
 
 
-def neg_sample(batch: torch.Tensor, num_neg_samples: int = 1) -> torch.Tensor:
-    result = torch.tensor([
-        random.choices(neg_neighbors[i], k=num_neg_samples)
-        for i in batch[:, 0]
+def pos_sample(nodes: torch.Tensor, num_samples: int = 5) -> torch.Tensor:
+    pos_nodes = torch.tensor([
+        [
+            [nid, random.choice(list(node_to_snapshot_idx[i].intersection(node_to_snapshot_idx[nid])))]
+            for nid in random.choices(list(set(it.chain(*[
+            candidates for ct, candidates in enumerate(snapshot_nodes) if ct in node_to_snapshot_idx[i]
+        ]))), k=num_samples)
+        ]
+        for i in nodes.tolist()
     ], dtype=torch.long)
-    return result
+
+    ctr_nodes = nodes.unsqueeze(1).repeat(1, num_samples).view(-1)
+    pos_nodes = pos_nodes.view(-1, 2)
+    pos_idx = torch.stack([ctr_nodes, pos_nodes[:, 0]], dim=1)
+    pos_snaps = torch.stack([pos_nodes[:, 1], pos_nodes[:, 1]], dim=1)
+
+    return pos_idx, pos_snaps
 
 
-repeat_count = 2
+def neg_sample(nodes: torch.Tensor, snaps: torch.Tensor, num_neg_samples: int = 1) -> torch.Tensor:
+    neg_nodes = torch.tensor([
+        [
+            [nid, random.choice(list(node_to_snapshot_idx[nid].difference([t])))]
+            for nid in random.choices(list(set(it.chain(*[
+            candidates for ct, candidates in enumerate(snapshot_nodes) if t != ct
+        ]))), k=num_neg_samples)
+        ]
+        for i, t in zip(nodes.tolist(), snaps.tolist())
+    ], dtype=torch.long)
+
+    neg_idx = neg_nodes[:, :, 0]
+    neg_snaps = neg_nodes[:, :, 1]
+
+    return neg_idx, neg_snaps
+
+
+repeat_count = 20
 num_neg_samples = 3
-pos_idx = data.edge_index.t().repeat(repeat_count, 1)
-neg_idx = neg_sample(pos_idx, num_neg_samples=num_neg_samples)
-data_idx = torch.cat([pos_idx, neg_idx], dim=1)
+# pos_idx = edge_index.t().repeat(repeat_count, 1)
+# pos_snaps = torch.stack([
+#     edge_snaps.repeat(repeat_count),
+#     edge_snaps.repeat(repeat_count)
+# ], dim=1)
+
+pos_idx, pos_snaps = pos_sample(torch.arange(data.num_nodes), num_samples=repeat_count)
+neg_idx, neg_snaps = neg_sample(pos_idx[:, 0], pos_snaps[:, 0], num_neg_samples=num_neg_samples)
+data_node_idx = torch.cat([pos_idx, neg_idx], dim=1)
+data_snaps = torch.cat([pos_snaps, neg_snaps], dim=1)
+data_all = torch.stack([data_node_idx, data_snaps], dim=2)
+
+window = (0, 0)
 
 
 # Build dataloader
-class WeightedNeighborLoader:
+class TemporalWeightedNeighborLoader:
     def __init__(self, data: Data, num_neighbors: List[int]):
         self.num_neighbors = num_neighbors
         self.col_ptrs, self.row_indices, self.perm = thg.data.to_csc(data.edge_index, data.num_nodes)
         self.weights = data.edge_stores[0].weight[self.perm].double()
+        self.timestamps = data.timestamp[self.perm].long()
         # super(NeighborLoader, self).__init__(data, batch_size, shuffle)
 
-    def __call__(self, indices: List[int]):
+    def __call__(self, indices: List[int], snaps: List[int]):
         index = torch.tensor(indices)
+        snaps = torch.tensor(snaps)
         nodes, rows, cols, edge_index, layer_offsets = thg.algo.neighbor_sampling_homogenous(
-            self.col_ptrs, self.row_indices, index, self.num_neighbors, sampler=thg.WeightedSampler(self.weights)
+            self.col_ptrs, self.row_indices, index, self.num_neighbors,
+            sampler=thg.WeightedSampler(self.weights),
+            filter=thg.TemporalFilter(window, self.timestamps, snaps, forward=False, mode=thg.TEMPORAL_SAMPLE_RELATIVE)
         )
         return nodes, rows, cols, edge_index, len(indices), layer_offsets
 
@@ -112,7 +165,7 @@ class WeightedNeighborLoader:
 class NodesLoader(BaseDataLoader):
     def __init__(self, data: Data, inputs: torch.Tensor, num_neighbors: List[int], **kwargs):
         self.data = data
-        self.neighbor_sampler = WeightedNeighborLoader(data, num_neighbors)
+        self.neighbor_sampler = TemporalWeightedNeighborLoader(data, num_neighbors)
 
         super().__init__(
             inputs.tolist(),
@@ -121,8 +174,10 @@ class NodesLoader(BaseDataLoader):
         )
 
     def sample(self, indices):
-        indices = torch.tensor(indices, dtype=torch.long).tolist()
-        return self.neighbor_sampler(indices)
+        indices = torch.tensor(indices, dtype=torch.long)
+        node_idx = indices[:, :, 0].view(-1)
+        node_snaps = indices[:, :, 1].view(-1)
+        return self.neighbor_sampler(node_idx.tolist(), node_snaps.tolist())
 
     def transform_fn(self, out):
         nodes, rows, cols, edge_index, batch_size, layer_offsets = out
@@ -133,8 +188,10 @@ class NodesLoader(BaseDataLoader):
 
 class SamplesLoader(NodesLoader):
     def sample(self, indices):
-        indices = torch.tensor(indices, dtype=torch.long).view(-1).tolist()
-        return self.neighbor_sampler(indices)
+        indices = torch.tensor(indices, dtype=torch.long)
+        node_idx = indices[:, :, 0].view(-1)
+        node_snaps = indices[:, :, 1].view(-1)
+        return self.neighbor_sampler(node_idx.tolist(), node_snaps.tolist())
 
 
 num_neighbors = [4, 4]
@@ -144,10 +201,14 @@ nodes_loader = NodesLoader(
     batch_size=batch_size, num_workers=0
 )
 data_loader = SamplesLoader(
-    data, data_idx, num_neighbors,
+    data, data_all, num_neighbors,
     batch_size=batch_size, num_workers=0, shuffle=True
 )
 batch, batch_layer_offsets = next(iter(data_loader))
+
+node_loader = NeighborLoader(
+    data=data, num_neighbors=[4, 4], directed=False, replace=False
+)
 
 # Build model
 use_cosine = False
@@ -224,11 +285,11 @@ class GraphSAGEHeteroModuleNew(torch.nn.Module):
         self.repr_dim = repr_dim
         self.n_layers = n_layers
 
-        self.conv1 = PinSAGELayer((32, repr_dim), repr_dim, normalize)
-        self.conv2 = PinSAGELayer((32, repr_dim), repr_dim, normalize)
+        self.conv1 = PinSAGELayer((32, 32), repr_dim, normalize)
+        self.conv2 = PinSAGELayer((repr_dim, repr_dim), repr_dim, normalize)
         self.activation = torch.nn.ReLU()
 
-    def forward(self, batch: Data, layer_offsets: List[Tuple[int, int]]) -> torch.Tensor:
+    def forward(self, batch: Data, layer_offsets: List[Tuple[int, int]] = None) -> torch.Tensor:
         x = batch.x
         x = self.conv1(x, batch.edge_index, batch.weight)
         x = self.activation(x)
@@ -236,72 +297,32 @@ class GraphSAGEHeteroModuleNew(torch.nn.Module):
         return x[:batch.batch_size]
 
 
-class GraphSAGEHeteroModuleReplica(torch.nn.Module):
-    def __init__(
-            self, repr_dim: int = 32, n_layers: int = 2, normalize=False
-    ) -> None:
-        super().__init__()
-        self.repr_dim = repr_dim
-        self.n_layers = n_layers
-        self.normalize = normalize
-
-        self.lin_l1 = torch.nn.Linear(32, repr_dim, bias=True)
-        self.lin_l2 = torch.nn.Linear(32, repr_dim, bias=True)
-        self.lin_r1 = torch.nn.Linear(32, repr_dim, bias=False)
-        self.lin_r2 = torch.nn.Linear(32, repr_dim, bias=False)
-
-        self.lin_l = [self.lin_l1, self.lin_l2]
-        self.lin_r = [self.lin_r1, self.lin_r2]
-        self.activation = torch.nn.ReLU(inplace=True)
-
-    def propagate(self, edge_index, x):
-        gather = x.index_select(0, edge_index[0, :])
-        agg = scatter_mean(gather, edge_index[1, :], dim=0, dim_size=x.shape[0])
-        return agg
-
-    def conv(self, i, x, edge_index):
-        agg = self.propagate(edge_index, x=x)
-        h_n = self.lin_l[i](agg)
-        h_v = self.lin_r[i](x)
-
-        h = h_n + h_v
-        return h
-
-    def forward(self, batch: Data, *args) -> torch.Tensor:
-        x = batch.x
-        x = self.conv(0, x, batch.edge_index)
-        x = self.activation(x)
-        x = self.conv(1, x, batch.edge_index)
-        return x[:batch.batch_size]
-
-
 embedding_module = GraphSAGEHeteroModuleNew(
     repr_dim, n_layers=2, normalize=False
 )
+temporal_module = GraphSAGEHeteroModuleNew(
+    tempo_dim, n_layers=2, normalize=False
+)
 
-# embedding_module = GraphSAGEHeteroModuleReplica(
-#     repr_dim, n_layers=2, normalize=False
-# )
-
-# embedding_module = GraphSAGEHeteroConvModule2(
-#     repr_dim, n_layers=2, normalize=False
-# )
-
-# embedding_module = experiments.GraphSAGEHeteroModule(
-#     repr_dim, n_layers=2, normalize=False
-# )
-
+ne_fn = NegativeEntropyRegularizer()
 
 class MainModel(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.embedding_module = embedding_module
+        self.temporal_module = temporal_module
         self.centroids = torch.nn.Embedding(n_clusters, repr_dim)
+        self.centroids_temp = torch.nn.Embedding(n_clusters, tempo_dim)
 
     def forward(self, batch, optimize_comms=False):
         batch, layer_offsets = batch
-        emb = embedding_module(batch, layer_offsets)
-        neg_pos_emb = emb.view(-1, num_neg_samples + 2, repr_dim)
+        emb_posi = self.embedding_module(batch, layer_offsets)
+        emb_temp = self.temporal_module(batch, layer_offsets)
+
+        emb_posi = emb_posi.view(-1, num_neg_samples + 2, repr_dim)
+        emb_temp = emb_temp.view(-1, num_neg_samples + 2, tempo_dim)
+        neg_pos_emb = torch.cat([emb_posi, emb_temp], dim=2)
+
         ctr_emb = neg_pos_emb[:, 0, :].unsqueeze(1)
         pos_emb = neg_pos_emb[:, 1, :].unsqueeze(1)
         neg_emb = neg_pos_emb[:, 2:, :]
@@ -315,7 +336,8 @@ class MainModel(torch.nn.Module):
         if optimize_comms:
             # Clustering Max Margin loss
             current_batch_size = neg_pos_emb.shape[0]
-            c_emb = self.centroids.weight.clone().unsqueeze(0).transpose(1, 2).repeat(current_batch_size, 1, 1)
+            centroids = torch.cat([self.centroids.weight.clone(), self.centroids_temp.weight.clone()], dim=1)
+            c_emb = centroids.unsqueeze(0).transpose(1, 2).repeat(current_batch_size, 1, 1)
             c_ctr_q = torch.softmax(torch.bmm(ctr_emb, c_emb), dim=-1)
             c_pos_q = torch.softmax(torch.bmm(pos_emb, c_emb), dim=-1)
             c_neg_q = torch.softmax(torch.bmm(neg_emb, c_emb), dim=-1)
@@ -325,12 +347,31 @@ class MainModel(torch.nn.Module):
             c_mm_loss = torch.clip(c_neg_d - c_pos_d + 1, min=0).mean()
             loss = mm_loss + c_mm_loss
 
-        # c_emb.unsqueeze(0).transpose(1, 2)
+            q = torch.cat([c_ctr_q, c_pos_q, c_neg_q], dim=1).view(-1, n_clusters)
+            ne = ne_fn(q)
+            loss = mm_loss + c_mm_loss + ne * 0.01
+
+
+            # KL Divergence loss (Confidence improvement)
+            # q = torch.cat([c_ctr_q, c_pos_q, c_neg_q], dim=1).view(-1, n_clusters)
+            # p = q.detach().square()
+            # ca_loss = kl_loss(torch.log(q), p)
+            # ne = ne_fn(q)
+            # loss = c_mm_loss + mm_loss + ca_loss * 0.01 + ne * 0.01
+            u = 0
+
         return loss
+
 
 
 model = MainModel()
 optimizer = torch.optim.Adam(list(model.parameters()), lr=0.01)
+
+embedding_module.load_state_dict(torch.load(str(TMP_PATH.joinpath('pyg-pinsage/embeddings.pt'))))
+embedding_module.requires_grad_(False)
+
+model.centroids.load_state_dict(torch.load(str(TMP_PATH.joinpath('pyg-pinsage/centroids.pt'))))
+model.centroids.requires_grad_(False)
 
 
 def train(epoch):
@@ -352,9 +393,10 @@ def train(epoch):
 def get_embeddings():
     model.eval()
     embs = []
-    for batch, layer_offsets in nodes_loader:
-        emb = embedding_module(batch, layer_offsets)
-        embs.append(emb)
+    for batch in node_loader:
+        emb_posi = embedding_module(batch)
+        emb_temp = temporal_module(batch)
+        embs.append(torch.cat([emb_posi, emb_temp], dim=1))
 
     return torch.cat(embs, dim=0)
 
@@ -387,24 +429,31 @@ save_path.mkdir(parents=True, exist_ok=True)
 
 embeddings = get_embeddings().detach()
 
-if use_centers:
+if not recluster:
     print('Reusing trained centers')
-    centers = model.centroids.weight.detach()
+    centers = torch.cat([
+        model.centroids.weight.clone(), model.centroids_temp.weight.clone()
+    ], dim=1).detach()
     q = torch.softmax(torch.mm(embeddings, centers.transpose(1, 0)), dim=-1)
     I = q.argmax(dim=-1)
     I = I.numpy()
 else:
+    if temporal_only_cluster:
+        embeddings = embeddings[:, repr_dim:]
+
     if use_cosine:
         print('Normalize for cosine similarity')
         embeddings = embeddings / torch.norm(embeddings, dim=1, keepdim=True)
 
     print('Searching for cluster centers using K-means')
     kmeans = faiss.Kmeans(embeddings.shape[1], k=n_clusters, niter=20, verbose=True, nredo=10)
-    kmeans.train(embeddings.numpy())
-    D, I = kmeans.index.search(embeddings.numpy(), 1)
+    em = np.ascontiguousarray(embeddings.numpy())
+    kmeans.train(em)
+    D, I = kmeans.index.search(em, 1)
+
 
 if save:
-    save_projector("Star Wars Positional", embeddings, pd.DataFrame({
+    save_projector("Star Wars Temporal", embeddings, pd.DataFrame({
         'label': G.vs['label'],
         'cluster': I
     }))
