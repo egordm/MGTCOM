@@ -44,6 +44,8 @@ data = SortEdges()(data)
 G = dataset.G
 G.to_undirected()
 
+
+
 # Node Importance Definition
 degree_avg = np.mean(dataset.G.degree())
 row_ptrs, col_indices, perm, size = to_csr(data)
@@ -71,21 +73,41 @@ neighbor_weight[match] += walk_edge_counts
 data.edge_stores[0].weight = neighbor_weight
 
 # Build pos and neg samples
-col_ptrs, row_indices, csc_perm, size = to_csc(data)
+rows, cols = data.edge_index
+csr = csr_matrix(
+    (torch.ones(data.edge_index.shape[1], dtype=torch.int32).numpy(), (rows.numpy(), cols.numpy())),
+    shape=(data.num_nodes, data.num_nodes),
+)
+neg_neighbors = [
+    list(set(range(data.num_nodes)).difference(set(csr[i, :].indices)))
+    for i in range(data.num_nodes)
+]
 
 
 def neg_sample(batch: torch.Tensor, num_neg_samples: int = 1) -> torch.Tensor:
+    result = torch.tensor([
+        random.choices(neg_neighbors[i], k=num_neg_samples)
+        for i in batch[:, 0]
+    ], dtype=torch.long)
+    return result
+
+
+col_ptrs, row_indices, csc_perm, size = to_csc(data)
+
+def cooler_neg_sample(batch: torch.Tensor, num_neg_samples: int = 1) -> torch.Tensor:
     inputs = batch[:, 0]
-    neg_idx, errors, uu, zz = thg.native.negative_sample_neighbors_homogenous(col_ptrs, row_indices, data.size(), inputs, num_neg_samples,
-                                                           10)
+    neg_idx, errors = thg.native.negative_sample_neighbors(col_ptrs, row_indices, data.size(), inputs, num_neg_samples, 10)
 
     return neg_idx[1, :].reshape([len(inputs), num_neg_samples])
+
 
 
 repeat_count = 2
 num_neg_samples = 3
 pos_idx = data.edge_index.t().repeat(repeat_count, 1)
+# neg_idx = negative_sampling(data.edge_index).t()
 neg_idx = neg_sample(pos_idx, num_neg_samples=num_neg_samples)
+# neg_idx = cooler_neg_sample(pos_idx, num_neg_samples=num_neg_samples)
 
 data_idx = torch.cat([pos_idx, neg_idx], dim=1)
 
@@ -94,7 +116,7 @@ data_idx = torch.cat([pos_idx, neg_idx], dim=1)
 class WeightedNeighborLoader:
     def __init__(self, data: Data, num_neighbors: List[int]):
         self.num_neighbors = num_neighbors
-        self.col_ptrs, self.row_indices, self.perm = to_csc(data)
+        self.col_ptrs, self.row_indices, self.perm, self.size = to_csc(data)
         self.weights = data.edge_stores[0].weight[self.perm].double()
         # super(NeighborLoader, self).__init__(data, batch_size, shuffle)
 
@@ -430,8 +452,8 @@ export_to_visualization.run(
 
 DATASET = DatasetSchema.load_schema('star-wars')
 schema = GraphSchema.from_dataset(DATASET)
-G = DataGraph.from_schema(schema)
-G.to_undirected()
+# G = DataGraph.from_schema(schema)
+# G.to_undirected()
 
 metrics = get_metric_list(ground_truth=False, overlapping=False)
 results = pd.DataFrame([
