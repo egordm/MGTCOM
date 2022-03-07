@@ -7,6 +7,8 @@ import torchmetrics
 import pandas as pd
 import numpy as np
 import torch_geometric.nn as tg_nn
+from tch_geometric.data import to_csr, to_csc
+from tch_geometric.transforms import WeightedEdgeSampler
 from torch_geometric.transforms import ToUndirected
 import tch_geometric as thg
 from torch_geometric.loader.utils import filter_data
@@ -16,6 +18,7 @@ from torch_scatter.utils import broadcast
 from torch_scatter import scatter_sum, scatter_mean
 from scipy.sparse import csr_matrix
 import torch.nn.functional as F
+from torch_geometric.utils import negative_sampling
 
 from experiments import ClusteringModule, ClusterCohesionLoss, NegativeEntropyRegularizer, cosine_cdist, save_projector, \
     EmbeddingModule
@@ -31,6 +34,7 @@ repr_dim = 32
 EPS = 1e-15
 recluster = False
 save_path = TMP_PATH.joinpath('pyg-pinsage')
+save = False
 
 dataset = ml.StarWarsHomogenous()
 data = dataset[0]
@@ -40,16 +44,16 @@ data = SortEdges()(data)
 G = dataset.G
 G.to_undirected()
 
-
 # Node Importance Definition
 degree_avg = np.mean(dataset.G.degree())
-row_ptrs, col_indices, perm = thg.data.to_csr(data.edge_index, data.num_nodes)
+row_ptrs, col_indices, perm, size = to_csr(data)
+# row_ptrs, col_indices, perm = thg.data.to_csr(data.edge_index, data.num_nodes)
 neighbor_weight = torch.ones(len(data.edge_index[0, :]))
 
 walks_per_node = int(np.ceil(degree_avg))
 walk_length = 5
 start = torch.arange(data.num_nodes, dtype=torch.long)
-walks = thg.algo.random_walk(row_ptrs, col_indices, start.repeat(walks_per_node), walk_length, p=1.0, q=1.0)
+walks = thg.native.random_walk(row_ptrs, col_indices, start.repeat(walks_per_node), walk_length, p=1.0, q=1.0)
 
 walk_edges = []
 for i in range(walk_length - 1):
@@ -67,29 +71,22 @@ neighbor_weight[match] += walk_edge_counts
 data.edge_stores[0].weight = neighbor_weight
 
 # Build pos and neg samples
-rows, cols = data.edge_index
-csr = csr_matrix(
-    (torch.ones(data.edge_index.shape[1], dtype=torch.int32).numpy(), (rows.numpy(), cols.numpy())),
-    shape=(data.num_nodes, data.num_nodes),
-)
-neg_neighbors = [
-    list(set(range(data.num_nodes)).difference(set(csr[i, :].indices)))
-    for i in range(data.num_nodes)
-]
+col_ptrs, row_indices, csc_perm, size = to_csc(data)
 
 
 def neg_sample(batch: torch.Tensor, num_neg_samples: int = 1) -> torch.Tensor:
-    result = torch.tensor([
-        random.choices(neg_neighbors[i], k=num_neg_samples)
-        for i in batch[:, 0]
-    ], dtype=torch.long)
-    return result
+    inputs = batch[:, 0]
+    neg_idx, errors, uu, zz = thg.native.negative_sample_neighbors_homogenous(col_ptrs, row_indices, data.size(), inputs, num_neg_samples,
+                                                           10)
+
+    return neg_idx[1, :].reshape([len(inputs), num_neg_samples])
 
 
 repeat_count = 2
 num_neg_samples = 3
 pos_idx = data.edge_index.t().repeat(repeat_count, 1)
 neg_idx = neg_sample(pos_idx, num_neg_samples=num_neg_samples)
+
 data_idx = torch.cat([pos_idx, neg_idx], dim=1)
 
 
@@ -97,14 +94,14 @@ data_idx = torch.cat([pos_idx, neg_idx], dim=1)
 class WeightedNeighborLoader:
     def __init__(self, data: Data, num_neighbors: List[int]):
         self.num_neighbors = num_neighbors
-        self.col_ptrs, self.row_indices, self.perm = thg.data.to_csc(data.edge_index, data.num_nodes)
+        self.col_ptrs, self.row_indices, self.perm = to_csc(data)
         self.weights = data.edge_stores[0].weight[self.perm].double()
         # super(NeighborLoader, self).__init__(data, batch_size, shuffle)
 
     def __call__(self, indices: List[int]):
         index = torch.tensor(indices)
-        nodes, rows, cols, edge_index, layer_offsets = thg.algo.neighbor_sampling_homogenous(
-            self.col_ptrs, self.row_indices, index, self.num_neighbors, sampler=thg.WeightedSampler(self.weights)
+        nodes, rows, cols, edge_index, layer_offsets = thg.native.neighbor_sampling_homogenous(
+            self.col_ptrs, self.row_indices, index, self.num_neighbors, sampler=WeightedEdgeSampler(self.weights)
         )
         return nodes, rows, cols, edge_index, len(indices), layer_offsets
 
@@ -155,12 +152,13 @@ use_centers = True
 initialize = None  # 'louvain'
 # initialize = 'louvain'
 n_clusters = 5
-save = True
 
-# n_epochs = 30  # 5 # 30
-# comm_epoch = 10  # 2 #10
-n_epochs = 50  # 5 # 30
-comm_epoch = 30  # 2 #10
+n_epochs = 30  # 5 # 30
+comm_epoch = 10  # 2 #10
+
+
+# n_epochs = 50  # 5 # 30
+# comm_epoch = 30  # 2 #10
 
 
 # n_epochs = 5 # 30
@@ -278,6 +276,7 @@ class GraphSAGEHeteroModuleReplica(torch.nn.Module):
 embedding_module = GraphSAGEHeteroModuleNew(
     repr_dim, n_layers=2, normalize=False
 )
+
 
 # embedding_module = GraphSAGEHeteroModuleReplica(
 #     repr_dim, n_layers=2, normalize=False
