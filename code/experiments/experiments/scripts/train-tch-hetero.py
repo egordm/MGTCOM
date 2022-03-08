@@ -5,8 +5,11 @@ import numpy as np
 import pandas as pd
 import torch
 from tch_geometric.data import edge_type_to_str
+from tch_geometric.data.subgraph import build_subgraph
 from tch_geometric.loader import CustomLoader
 from tch_geometric.transforms import NegativeSamplerTransform, NeighborSamplerTransform
+from tch_geometric.transforms.constrastive_merge import ContrastiveMergeTransform, EdgeTypeAggregateTransform
+from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform
 from torch import Tensor
 from torch.utils.data import Dataset
 from torch_geometric.data import Data, HeteroData
@@ -18,7 +21,7 @@ import ml
 from benchmarks.evaluation import get_metric_list
 from experiments import HingeLoss, NegativeEntropyRegularizer
 from ml import SortEdges
-from ml.models.embeddings import PinSAGEModule
+from ml.models.embeddings import PinSAGEModule, HGTModule
 from shared.graph import CommunityAssignment
 
 dataset = ml.StarWars()
@@ -32,7 +35,7 @@ repr_dim = 32
 n_epochs = 20  # 10
 n_comm_epochs = 10
 n_clusters = 5
-batch_size = 24
+batch_size = 16
 
 
 class CustomDataset(Dataset):
@@ -70,7 +73,9 @@ dataset = CustomDataset(data)
 
 neg_sampler = NegativeSamplerTransform(data, 3, 5)
 # neighbor_sampler = NeighborSamplerTransform(data, [4, 3])
-neighbor_sampler = NeighborSamplerTransform(data, [3, 2])
+# neighbor_sampler = NeighborSamplerTransform(data, [3, 2])
+# neighbor_sampler = HGTSamplerTransformz(data, [3, 2])
+neighbor_sampler = HGTSamplerTransform(data, [3, 2])
 
 
 def edgelist_to_subgraph(edge_indexes: Dict[EdgeType, Tensor]):
@@ -95,7 +100,10 @@ def edgelist_to_subgraph(edge_indexes: Dict[EdgeType, Tensor]):
         nodes[dst] = torch.cat([nodes[dst], edge_index[1, :]])
         cols[edge_type] = torch.arange(start, start + edge_count, dtype=torch.long)
 
-    return nodes, (rows, cols), node_counts
+    subgraph = build_subgraph(nodes, rows, cols, node_attrs=dict(sample_count=node_counts))
+
+    return subgraph
+    # return nodes, (rows, cols), node_counts
 
 
 class DataLoader(CustomLoader):
@@ -107,67 +115,50 @@ class DataLoader(CustomLoader):
         super().__init__(dataset, **kwargs)
         self.neg_sampler = neg_sampler
         self.neighbor_sampler = neighbor_sampler
+        self.pos_neg_merge = ContrastiveMergeTransform()
+        self.edge_aggr = EdgeTypeAggregateTransform()
 
     def sample(self, inputs):
-        # Edge rel to type mapping
-        edge_rel_to_type = {
-            edge_type_to_str(edge_type): edge_type
-            for edge_type in self.dataset.data.edge_types
-        }
+        # Transform edges to pos subgraph
+        pos_data = edgelist_to_subgraph(inputs)
 
-        # Positive samples
-        # TODO: use positive sampler instead
-        pos_nodes, pos_edges, node_counts = edgelist_to_subgraph(inputs)
-        pos_edges = {
-            rel: (pos_edges[0][rel], pos_edges[1][rel])
-            for rel in pos_edges[0].keys()
-        }
-
-        # Extract center nodes
+        # Extract central `query` nodes
         ctr_nodes = {
-            node_type: pos_nodes[node_type][:count]
-            for node_type, count in node_counts.items()
+            store._key: store.x[:store.sample_count]
+            for store in pos_data.node_stores
         }
 
-        # Negative samples
-        neg_nodes, neg_edges, _ = self.neg_sampler(ctr_nodes)
-        neg_edges = {
-            edge_rel_to_type[rel]: (neg_edges[0][rel], neg_edges[1][rel])
-            for rel in neg_edges[0].keys()
-        }
+        # Sample negative nodes
+        neg_data = self.neg_sampler(ctr_nodes)
 
-        # Merge nodes and correct edge indices
-        for rel, edges in neg_edges.items():
-            (src, _, dst) = rel
-            neg_edges[rel] = (edges[0], edges[1] + len(pos_nodes[dst]))
+        # Merge pos and neg graphs
+        data = self.pos_neg_merge(pos_data, neg_data)
 
-        nodes = defaultdict(lambda: torch.tensor([], dtype=torch.long))
-        for node_type, nodes_list in pos_nodes.items():
-            nodes[node_type] = nodes_list
-        for node_type, nodes_list in neg_nodes.items():
-            nodes[node_type] = torch.cat([nodes[node_type], nodes_list])
-
-        # Prune nodes
-        nodes_inv = {}
-        for node_type, node_list in nodes.items():
-            node_list, inverse_indices = torch.unique(
-                node_list, return_inverse=True,
-            )
-            nodes[node_type] = node_list
-            nodes_inv[node_type] = inverse_indices
+        # Combine unique nodes
+        offset = 0
+        nodes_dict = {}
+        for store in data.node_stores:
+            nodes, emb_mapping = torch.unique(store.x, return_inverse=True)
+            nodes_dict[store._key] = nodes
+            store.emb_mapping = emb_mapping + offset
+            offset += len(nodes)
 
         # Neighbor samples
-        samples = self.neighbor_sampler(nodes)
-        for store in samples.edge_stores:
-            store.edge_weight = torch.ones(store.num_edges, dtype=torch.float)
+        samples = self.neighbor_sampler(nodes_dict)
 
-        return samples, nodes_inv, pos_edges, neg_edges
+        # Aggregate pos and neg edges
+        for store in data.node_stores:
+            store.x = store.emb_mapping
+        data_agg = self.edge_aggr(data)
+
+        return samples, data_agg, data.node_types
 
 
 data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 u = 0
 
-embedding_module = PinSAGEModule(data.metadata(), repr_dim, normalize=False)
+# embedding_module = PinSAGEModule(data.metadata(), repr_dim, normalize=False)
+embedding_module = HGTModule(data.metadata(), repr_dim, repr_dim, 2, 2)
 
 
 class HingeLoss(torch.nn.Module):
@@ -190,6 +181,33 @@ class HingeLoss(torch.nn.Module):
         pp_emb = emb_dst[inv_idx[pos_edges[1]], :]
         nc_emb = emb_src[inv_idx[neg_edges[0]], :]
         nn_emb = emb_dst[inv_idx[neg_edges[1]], :]
+
+        # Compute positive and negative distances
+        p_d_full = torch.bmm(pc_emb.unsqueeze(1), pp_emb.unsqueeze(2)).view(-1)
+        p_d = scatter(p_d_full, pos_edges[0], dim=0, reduce=self.agg_pos)
+
+        n_d_full = torch.bmm(nc_emb.unsqueeze(1), nn_emb.unsqueeze(2)).view(-1)
+        n_d = scatter(n_d_full, neg_edges[0], dim=0, reduce=self.agg_neg)
+
+        # Compute loss
+        loss = torch.clip(n_d - p_d + self.delta, min=0).mean()
+
+        return loss
+
+    def forward_hetero2(
+            self,
+            emb: Tensor,
+            data: HeteroData,
+    ):
+        nodes = data['n'].x
+        pos_edges = data[('n', 'pos', 'n')].edge_index
+        neg_edges = data[('n', 'neg', 'n')].edge_index
+
+        # Gather embeddings for edge nodes
+        pc_emb = emb[nodes[pos_edges[0]], :]
+        pp_emb = emb[nodes[pos_edges[1]], :]
+        nc_emb = emb[nodes[neg_edges[0]], :]
+        nn_emb = emb[nodes[neg_edges[1]], :]
 
         # Compute positive and negative distances
         p_d_full = torch.bmm(pc_emb.unsqueeze(1), pp_emb.unsqueeze(2)).view(-1)
@@ -270,23 +288,21 @@ class MainModel(torch.nn.Module):
         self.neg_entropy = NegativeEntropyRegularizer()
 
     def forward(self, batch, optimize_comms=False):
-        samples, inv_idx, pos_edges, neg_edges = batch
-        emb = embedding_module(samples)
+        samples, pos_neg_data, node_types = batch
+        emb_dict = embedding_module(samples)
+        emb = torch.cat([emb_dict[node_type] for node_type in node_types], dim=0)
 
-        posi_loss = self.posi_loss.forward_hetero(emb, inv_idx, pos_edges, neg_edges)
+        posi_loss = self.posi_loss.forward_hetero2(emb, pos_neg_data)
         loss = posi_loss
 
         if optimize_comms:
             # Clustering Max Margin loss
             c_emb = self.centroids.weight.clone().unsqueeze(0)
-            emb_q = {
-                node_type: torch.softmax(torch.sum(emb_l.unsqueeze(1) * c_emb, dim=2), dim=1)
-                for node_type, emb_l in emb.items()
-            }
+            emb_q = torch.softmax(torch.sum(emb.unsqueeze(1) * c_emb, dim=2), dim=1)
 
-            clus_loss = self.clus_loss.forward_hetero(emb_q, inv_idx, pos_edges, neg_edges)
-            # ne = self.neg_entropy(emb_q)
-            loss = posi_loss + clus_loss  # + ne * 0.01
+            clus_loss = self.clus_loss.forward_hetero2(emb_q, pos_neg_data)
+            ne = self.neg_entropy(emb_q)
+            loss = posi_loss + clus_loss + ne * 0.01
 
         return loss
 
