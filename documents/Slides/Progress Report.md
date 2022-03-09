@@ -11,22 +11,20 @@
 * Proof of concept implementation
   * node2vec
   * graphSAGE
-
-
+    
+    
 
 ## Overview Architecture
 
 ### Stage 1: Positional Clustering
 
 * $Z_n \in \mathbb{R}^{n \times d}$  (Positional Embeddings)
-* $C_k \in \mathbb{R}^{k \times q}$ (Cluster Center Embeddings)
+* $C_k \in \mathbb{R}^{k \times d}$ (Cluster Center Embeddings)
 * $Q_n \in \mathbb{R}^{n \times k} = Z_n \cdot C_k^T$ (Cluster Assignment Representation)
+  
+  
 
-
-
-<img src="file:///home/egordm/.config/marktext/images/2022-03-09-12-03-15-image.png" title="" alt="" width="792">
-
-
+<img title="" src="file:///home/egordm/.config/marktext/images/2022-03-09-12-03-15-image.png" alt="" width="1122">
 
 ### Stage 2: Temporal Correction
 
@@ -38,12 +36,10 @@
 * Calculate loss over:
   * $Z_n = Z_n^{posi} || Z_n^{temp}$
   * $C_k = C_k^{posi} || C_k^{temp}$
-
-
+    
+    
 
 <img src="file:///home/egordm/.config/marktext/images/2022-03-09-12-23-11-image.png" title="" alt="" width="580">
-
-
 
 ### What do we have?
 
@@ -59,8 +55,8 @@
 * Comparative static clustering performance to Louvain
   * Better performance than louvain for more fine grained clusters
     * Lower levels in hierarchy
-
-
+      
+      
 
 ## Progress Sprint 4
 
@@ -68,11 +64,11 @@
 
 * Implement temporal neighborhood sampling (instead of using multiple snapshots)
 * Update proof of concept to support heterogeneous graphs
-*  Experiment with various network architectures
+* Experiment with various network architectures
   * To improve stability
   * Speedup training process
-
-
+    
+    
 
 ### Neighborhood Sampling
 
@@ -92,15 +88,11 @@ R. Ying, R. He, K. Chen, P. Eksombatchai, W. L. Hamilton, and J. Leskovec, “Gr
 
 <img src="file:///home/egordm/.config/marktext/images/2022-03-09-10-40-43-image.png" title="" alt="" width="509">
 
-
-
 #### Heterogenous Graph Transformers (HGT)
 
 Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *Proceedings of The Web Conference 2020*, Taipei Taiwan, Apr. 2020, pp. 2704–2710. doi: [10.1145/3366423.3380027](https://doi.org/10.1145/3366423.3380027).
 
 <img src="file:///home/egordm/.config/marktext/images/2022-03-09-10-49-05-image.png" title="" alt="" width="953">
-
-
 
 * Slightly modifies GraphSAGE sampling
   * Imposes a per node type budget per layer
@@ -110,16 +102,17 @@ Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *
   * Nodes cannot be sampled twice
     * Problematic when you want stateful temporal sampling
     * Only supports windowed temporal sampling
-
-
+      
+      
 
 ### tch_geometric
 
 * **Rust** library with python bindings, containing implementation for neighborhood sampling
   
   
-  
-  #### Why?
+
+#### Why?
+
 * Neighborhood sampling can not be done batchwise (must be done per node individually)
   * Python is too slow for this
 * Python is bad at multithreading - Global Interpreter Locking (GIL) :(
@@ -129,8 +122,6 @@ Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *
   * COO (standard format) does but cant be used for sampling
 * Standard implementations in **torch_geometric** do not implement **temporal sampling** or **weighted sampling**
 * 
-
-
 
 #### Graph Modelling
 
@@ -143,13 +134,9 @@ Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *
 
 <img title="" src="https://imgs.developpaper.com/imgs/105020H29-3.gif" alt="Instructions for using Python SciPy sparse matrix" width="594">
 
-
-
 #### Modelling Parallel edges
 
 <img src="file:///home/egordm/.config/marktext/images/2022-03-09-11-14-07-image.png" title="" alt="" width="598">
-
-
 
 #### Sampling Implementations
 
@@ -167,8 +154,8 @@ Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *
     * Windowed (described in original paper)
     * Relative (my addition) 
       * Implemented by recording edge states instead of node state
-
-
+        
+        
 
 #### Other contributions
 
@@ -177,10 +164,6 @@ Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *
   * Had no interop support for python
 
 <img src="file:///home/egordm/.config/marktext/images/2022-03-09-11-36-41-image.png" title="" alt="" width="1018">
-
-
-
-
 
 ### Network Architecture and Importance Sampling
 
@@ -195,7 +178,6 @@ R. Ying, R. He, K. Chen, P. Eksombatchai, W. L. Hamilton, and J. Leskovec, “Gr
 * Results:
   * Improves stability of the algorithm
   * Doesn't improve upper bound of the resulting clustering score
-  
   * Need to do k random walks per node and assign weight to each edge
   * Heterogenous graphs are troublesome (lot of weights)
 
@@ -217,37 +199,29 @@ Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *
   * Is stable
   * No random walks required
   * Much slower on cpu, comparative on gpu
-
-
+    
+    
 
 ### Relative temporal encoding through Positional Embeddings
 
 * HGT non conference paper explores temporal encoding through Positional Embeddings
   * By abusing transformers their ability to do positional embedding for sentences (language)
-
-
+    
+    
 
 <img src="file:///home/egordm/.config/marktext/images/2022-03-09-12-43-27-image.png" title="" alt="" width="665">
-
-
 
 * Cons:
   * Difficult to employ for for clustering (cluster centers) 
   * May get a strong positional embedding bias
-  * Relative embedding but with a fixed resolution
-    * Resolution needs to be tuned 
-    * Can not encode all temporal distances
+  * Can not encode all temporal distances
 * Pros:
   * Interpretable
   * Querying possibilities
+  * Unlimited resolution within a range
+  * Cheap to compute
 
 <img title="" src="file:///home/egordm/.config/marktext/images/2022-03-09-12-46-49-image.png" alt="" width="679">
-
-
-
-
-
-
 
 ## What next?
 
@@ -259,5 +233,5 @@ Z. Hu, Y. Dong, K. Wang, and Y. Sun, “Heterogeneous Graph Transformer,” in *
   * This is third step for the algorithm
     * To explain cluster centers
     * Splitting into arbitrary amount of subclusters
-
-
+      
+      

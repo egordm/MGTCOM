@@ -56,12 +56,12 @@
   - [x] Per cluster statistics (Node/Edge counts, Temporal Distribution, Degree Distribution, Modularity)
   - [x] Centrality etc per node type
   - [x] Clustering statistics per edge type
-- [ ] Implement a cluster entropy metric
+- [x] Implement a cluster entropy metric
 - [x] Experiment and define good candidate objective measures for:
   - [x] Homophily (unsupervised node similarity <-> connectedness)
   - [x] Community cohesion (node - community relation)
   - [x] Community quality (community - community [- to node] relation)
-  - [ ] Later on (apply this to temporal communities)
+  - [x] Later on (apply this to temporal communities)
 - [x] Figure a way out to efficiently calculate/approximate these measures
   - [x] Through sampling (if possible)
   - [x] Through incremental calculation
@@ -71,5 +71,13 @@
   - [ ] Rerun benchmarking
 - [x] Test initialization using Louvain
 - [x] Test bouldin index like objective function (aggregating one in general)
-- [ ] Test two step optimization
+- [x] Test two step optimization
 - [ ] Add the facy cyclic loss scheduler
+- [ ] * Finish up temporal learning for heterogenous graphs
+- [ ] * Run the training on all the datasets
+- [ ] * Parameter and network fine tuning
+- [ ] * Experiment with possible integration of temporal encoding through positional embeddings
+  - [ ] * Experiment with possibly identifying influential nodes and building clusters around them
+  - [ ] * This is third step for the algorithm
+    - [ ] * To explain cluster centers
+    - [ ] * Splitting into arbitrary amount of subclusters
