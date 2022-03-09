@@ -9,12 +9,15 @@ versions:
     parameters:
       snapshot_count: 5
       snapshot_coverage: 0.95
+    partless: false
     type: edgelist_snapshots
   split_7:
     parameters:
       snapshot_count: 7
       snapshot_coverage: 0.95
+    partless: false
     type: edgelist_snapshots
   static:
     parameters: {}
+    partless: false
     type: edgelist_static

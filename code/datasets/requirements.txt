@@ -5,3 +5,6 @@ seaborn
 feature-engine
 neo4j
 kaggle
+pymongo
+wikitextparser
+lxml

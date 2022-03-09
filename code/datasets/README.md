@@ -55,6 +55,18 @@ make version
 | [116th House of Representatives](https://www.kaggle.com/aavigan/house-of-representatives-congress-116) | [@116thHouseRepresentatives]                                              | 1134891 | 298762  | 1/1             | S/Y        |
 | [social-distancing-student]()                                                                          | [@wangPublicSentimentGovernmental2020]                                    | 93433   | 3710183 | 3/7             | T/N        |
 
+## Data Engineering
+Currently, some datasets are augmented with additional features. 
+This is not compulsory for now. If it will be used in final paper the prebuilt dataset will be compiled.
+
+If you want to have augmented datasets, follow the following steps:
+* Make sure you have [docker](https://docs.docker.com/engine/install/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/) installed.
+* Start mongodb by running `docker-compose up` in the root code directory.
+* Install spark mongo connector:
+  * First try skipping this step. If you have trouble [install the connector manually](https://docs.mongodb.com/spark-connector/current/)
+* You are done. Data engineering notebooks are in `datasets/notebooks/development` directory.
+
+
 ## Wishlist
 - [ ] https://www.kaggle.com/phamvudung/imdb-dataset
 - [ ] https://www.kaggle.com/wolfram77/graphs-communities (doenst contain timestamps)
