@@ -36,8 +36,8 @@ commit:
 	$(MAKE) push
 
 push:
-	git push origin master
-	git push mirror master
+	git push origin master --tags
+	git push mirror master --tags
 
 present:
 	pympress "$(filter-out $@,$(MAKECMDGOALS))"

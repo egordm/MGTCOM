@@ -1,7 +1,21 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [2022.10] - 2022-03-09
+
+### Features
+
+- Added normalization parameter for node embedding learning
+- Updated activate script to work in non-root folders
+- Temporarily changed cudatoolkit to dev version. Should change back once tch-geometric is built by ci
+- Added pinsage example aka graphsage with neighbor importance weighing
+- Added pinsage and tch geometric based temporal community detection
+- Added train-tch utilizing negative sampling and neighbor sampling from tch_geometric
+- Added proof of concept heterogenous graph learning / clustering
+- Updated tch hetero to use aggregation functions. Cleaned up loss function
+- Added progress report
+
+## [2022.08] - 2022-02-18
 
 ### Bug Fixes
 
@@ -10,6 +24,7 @@ All notable changes to this project will be documented in this file.
 - Fixed modularity calculation. Igraph was converted incorrectly (previously)
 - Minor improvements in module / predictor structure
 - Changed evaluation code to distinct between overlapping gt and input. Calculate modularity if input it not overlapping
+- Fixed evaluation by adding fallback value for community overlap (to avoid modifying existing code)
 
 ### Documentation
 
@@ -39,10 +54,13 @@ All notable changes to this project will be documented in this file.
 - Added graphsage based second pass for temporal homophiliy optimization
 - Added community optimization using temporal features
 - Added standalone tensorflow projector to preview trained embeddings
+- Added saving for positional and temporal embeddings separately
 
 ### Miscellaneous Tasks
 
 - Updated changelog
+- Updated changelog
+- Updated readme with info about environment activation and java version
 
 ## [2022.06] - 2022-02-08
 
