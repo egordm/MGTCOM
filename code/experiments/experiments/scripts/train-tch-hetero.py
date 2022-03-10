@@ -9,7 +9,7 @@ from tch_geometric.data.subgraph import build_subgraph
 from tch_geometric.loader import CustomLoader
 from tch_geometric.transforms import NegativeSamplerTransform, NeighborSamplerTransform
 from tch_geometric.transforms.constrastive_merge import ContrastiveMergeTransform, EdgeTypeAggregateTransform
-from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform
+from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform, NAN_TIMESTAMP
 from torch import Tensor
 from torch.utils.data import Dataset
 from torch_geometric.data import Data, HeteroData
@@ -26,7 +26,7 @@ from shared.graph import CommunityAssignment
 
 dataset = ml.StarWars()
 data = dataset[0]
-data = ToUndirected()(data)
+data = ToUndirected(reduce='max')(data)
 data = SortEdges()(data)
 G = dataset.G
 G.to_undirected()
@@ -36,6 +36,7 @@ n_epochs = 20  # 10
 n_comm_epochs = 10
 n_clusters = 5
 batch_size = 16
+temporal = False
 
 
 class CustomDataset(Dataset):
@@ -61,12 +62,19 @@ class CustomDataset(Dataset):
         idx_split = [idx - start for (idx, (start, _)) in zip(idx_split, self.edge_ranges)]
 
         # Extract edges for each type
-        result = {
+        edge_index_dict = {
             edge_type: self.data[edge_type].edge_index[:, idx]
             for (edge_type, idx) in zip(self.data.edge_types, idx_split)
         }
 
-        return result
+        edge_timestamp_dict = None
+        if temporal:
+            edge_timestamp_dict = {
+                edge_type: self.data[edge_type].timestamp[idx]
+                for (edge_type, idx) in zip(self.data.edge_types, idx_split)
+            }
+
+        return edge_index_dict, edge_timestamp_dict
 
 
 dataset = CustomDataset(data)
@@ -75,16 +83,20 @@ neg_sampler = NegativeSamplerTransform(data, 3, 5)
 # neighbor_sampler = NeighborSamplerTransform(data, [4, 3])
 # neighbor_sampler = NeighborSamplerTransform(data, [3, 2])
 # neighbor_sampler = HGTSamplerTransformz(data, [3, 2])
-neighbor_sampler = HGTSamplerTransform(data, [3, 2])
+# neighbor_sampler = HGTSamplerTransform(data, [3, 2])
+neighbor_sampler = HGTSamplerTransform(data, [3, 2], temporal=temporal)
 
 
-def edgelist_to_subgraph(edge_indexes: Dict[EdgeType, Tensor]):
+def edgelist_to_subgraph(
+        edge_index_dict: Dict[EdgeType, Tensor],
+        edge_timestamp_dict: Dict[EdgeType, Tensor],
+):
     nodes = defaultdict(lambda: torch.tensor([], dtype=torch.long))
     rows = defaultdict(lambda: torch.tensor([], dtype=torch.long))
     cols = defaultdict(lambda: torch.tensor([], dtype=torch.long))
     node_counts = defaultdict(lambda: 0)
 
-    for edge_type, edge_index in edge_indexes.items():
+    for edge_type, edge_index in edge_index_dict.items():
         (src, _, _) = edge_type
         start = len(nodes[src])
         edge_count = edge_index.shape[1]
@@ -93,14 +105,18 @@ def edgelist_to_subgraph(edge_indexes: Dict[EdgeType, Tensor]):
 
         node_counts[src] += edge_count
 
-    for edge_type, edge_index in edge_indexes.items():
+    for edge_type, edge_index in edge_index_dict.items():
         (_, _, dst) = edge_type
         start = len(nodes[dst])
         edge_count = edge_index.shape[1]
         nodes[dst] = torch.cat([nodes[dst], edge_index[1, :]])
         cols[edge_type] = torch.arange(start, start + edge_count, dtype=torch.long)
 
-    subgraph = build_subgraph(nodes, rows, cols, node_attrs=dict(sample_count=node_counts))
+    subgraph = build_subgraph(
+        nodes, rows, cols,
+        node_attrs=dict(sample_count=node_counts),
+        edge_attrs=dict(timestamp=edge_timestamp_dict) if temporal else None
+    )
 
     return subgraph
     # return nodes, (rows, cols), node_counts
@@ -119,8 +135,13 @@ class DataLoader(CustomLoader):
         self.edge_aggr = EdgeTypeAggregateTransform()
 
     def sample(self, inputs):
+        edge_index_dict, edge_timestamp_dict = inputs
+
         # Transform edges to pos subgraph
-        pos_data = edgelist_to_subgraph(inputs)
+        pos_data = edgelist_to_subgraph(
+            edge_index_dict,
+            edge_timestamp_dict,
+        )
 
         # Extract central `query` nodes
         ctr_nodes = {
@@ -144,7 +165,12 @@ class DataLoader(CustomLoader):
             offset += len(nodes)
 
         # Neighbor samples
-        samples = self.neighbor_sampler(nodes_dict)
+        nodes_timestamps_dict = {
+            node_type: torch.full((len(idx),), NAN_TIMESTAMP, dtype=torch.int64)
+            for node_type, idx in nodes_dict.items()
+        }
+
+        samples = self.neighbor_sampler(nodes_dict, nodes_timestamps_dict)
 
         # Aggregate pos and neg edges
         for store in data.node_stores:
@@ -158,7 +184,7 @@ data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 u = 0
 
 # embedding_module = PinSAGEModule(data.metadata(), repr_dim, normalize=False)
-embedding_module = HGTModule(data.metadata(), repr_dim, repr_dim, 2, 2)
+embedding_module = HGTModule(data.metadata(), repr_dim, repr_dim, 2, 2, use_RTE=temporal)
 
 
 class HingeLoss(torch.nn.Module):

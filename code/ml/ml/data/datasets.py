@@ -78,7 +78,7 @@ class StarWars(InMemoryDataset):
             columns = [c for c in ndf.columns if c.startswith('feat_')]
             data[ntype].x = torch.tensor(ndf[columns].values.astype(np.float32))
             if 'timestamp' in ndf.columns:
-                data[ntype].timestamp = torch.tensor(ndf['timestamp'].values.astype(np.int32))
+                data[ntype].timestamp = torch.tensor(ndf['timestamp'].values.astype(np.int64))
 
         for etype, edf in edges_dfs.items():
             columns = [c for c in edf.columns if c.startswith('feat_')]
@@ -87,7 +87,7 @@ class StarWars(InMemoryDataset):
             data[edge_type].edge_attr = torch.tensor(edf[columns].values.astype(np.float32))
             data[edge_type].edge_index = torch.tensor(edf[['src', 'dst']].T.values.astype(np.int64))
             if 'timestamp' in edf.columns:
-                data[edge_type].timestamp = torch.tensor(edf['timestamp'].values.astype(np.int32))
+                data[edge_type].timestamp = torch.tensor(edf['timestamp'].values.astype(np.int64))
 
         self.data, self.slices = self.collate([data])
         self.G = DataGraph.from_schema(schema) # TODO: assumes ids are unchanged

@@ -1,9 +1,10 @@
 import torch.nn
 from torch.nn import ReLU
 from torch_geometric.data import HeteroData
-from torch_geometric.nn import Sequential, to_hetero, HGTConv, Linear
+from torch_geometric.nn import Sequential, to_hetero, Linear
 from torch_geometric.typing import Metadata
 
+from ml.layers.hgt_conv import HGTConv
 from ml.layers.pinsage import PinSAGEConv
 
 
@@ -29,8 +30,12 @@ class PinSAGEModule(torch.nn.Module):
 
 
 class HGTModule(torch.nn.Module):
-    def __init__(self, metadata: Metadata, hidden_channels, out_channels, num_heads, num_layers):
+    def __init__(
+            self, metadata: Metadata, hidden_channels, out_channels, num_heads, num_layers,
+            use_RTE=False
+    ):
         super().__init__()
+        self.use_RTE = use_RTE
 
         self.lin_dict = torch.nn.ModuleDict()
         for node_type in metadata[0]:
@@ -38,7 +43,7 @@ class HGTModule(torch.nn.Module):
 
         self.convs = torch.nn.ModuleList()
         for _ in range(num_layers):
-            conv = HGTConv(hidden_channels, hidden_channels, metadata, num_heads, group='mean')
+            conv = HGTConv(hidden_channels, hidden_channels, metadata, num_heads, group='mean', use_RTE=use_RTE)
             self.convs.append(conv)
 
         self.lin = Linear(hidden_channels, out_channels)
@@ -46,6 +51,11 @@ class HGTModule(torch.nn.Module):
     def forward(self, data: HeteroData):
         x_dict = data.x_dict
         edge_index_dict = data.edge_index_dict
+        if self.use_RTE:
+            timedelta_dict = data.timedelta_dict
+        else:
+            timedelta_dict = None
+
 
         x_dict = {
             node_type: self.lin_dict[node_type](x).relu_()
@@ -53,7 +63,7 @@ class HGTModule(torch.nn.Module):
         }
 
         for conv in self.convs:
-            x_dict = conv(x_dict, edge_index_dict)
+            x_dict = conv(x_dict, edge_index_dict, timedelta_dict)
 
         for node_type in data.node_types:
             batch_size = data[node_type].batch_size
