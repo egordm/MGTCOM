@@ -1,14 +1,18 @@
 database: DBLP-HCN
 description: ''
 name: DBLP-HCN
-tags: [dynamic, ground-truth, overlapping]
+tags:
+- dynamic
+- ground-truth
+- overlapping
 versions:
-  static:
-    parameters: { }
-    type: edgelist_static
   split_5:
-    type: edgelist_snapshots
     parameters:
       snapshot_count: 5
       snapshot_coverage: 0.95
-
+    partless: false
+    type: edgelist_snapshots
+  static:
+    parameters: {}
+    partless: false
+    type: edgelist_static
