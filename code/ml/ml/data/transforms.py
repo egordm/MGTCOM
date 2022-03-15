@@ -1,10 +1,12 @@
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Tuple, Dict
 
 import torch
 from torch import Tensor
 
 from torch_geometric.data import Data, HeteroData
 from torch_geometric.transforms import BaseTransform
+from torch_geometric.typing import NodeType
+
 
 
 def sort_edges(
@@ -60,3 +62,15 @@ class SortEdges(BaseTransform):
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}()'
+
+
+def extract_unique_nodes(data: HeteroData) -> Tuple[Dict[NodeType, Tensor], HeteroData]:
+    offset = 0
+    nodes_dict = {}
+    for store in data.node_stores:
+        nodes, perm = torch.unique(store.x, return_inverse=True)
+        nodes_dict[store._key] = nodes
+        store.perm = perm + offset
+        offset += len(nodes)
+
+    return nodes_dict, data
