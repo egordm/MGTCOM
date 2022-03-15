@@ -64,7 +64,7 @@ class HGTConv(MessagePassing):
 
     def __init__(
             self,
-            in_channels: Union[int, Dict[str, int]],
+            in_channels: Union[int, Dict[NodeType, int]],
             out_channels: int,
             metadata: Metadata,
             heads: int = 1,

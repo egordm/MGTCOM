@@ -49,7 +49,7 @@ def pd_from_entity_schema(
             df[prop_name] = df[prop_name].apply(lambda x: x.tolist())
 
     if 'name' in df.columns:
-        df['name_'] = df['name']
+        df['_name'] = df['name']
         df.drop(columns=['name'], inplace=True)
 
     # Move id to the first column
