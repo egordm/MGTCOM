@@ -1,7 +1,6 @@
-from typing import Optional, Dict, Tuple, Any
+from typing import Optional, Dict, Tuple
 
 import torch
-import torch.nn.functional as F
 from torch_geometric.typing import Metadata
 from torch_geometric.nn import HGTConv, Linear
 import torchmetrics
@@ -17,7 +16,7 @@ import pandas as pd
 from datasets.scripts import export_to_visualization
 
 import ml
-from ml.data.datasets import StarWars
+from experiments.datasets import StarWars
 
 dataset = StarWars()
 data = dataset[0]

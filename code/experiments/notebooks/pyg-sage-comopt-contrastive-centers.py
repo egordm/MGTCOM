@@ -1,10 +1,7 @@
-from ml.data.datasets import StarWars
-from typing import Optional, Dict, Tuple, Any
+from experiments.datasets import StarWars
+from typing import Optional, Dict, Tuple
 
 import torch
-import torch.nn.functional as F
-from torch_geometric.typing import Metadata
-from torch_geometric.nn import HGTConv, Linear
 import torchmetrics
 import pytorch_lightning as pl
 import math

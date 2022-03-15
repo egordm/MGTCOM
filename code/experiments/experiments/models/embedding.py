@@ -9,7 +9,7 @@ import torch_geometric.nn as tg_nn
 from torch_geometric.data import HeteroData
 import pytorch_lightning as pl
 
-import ml
+from experiments.models.base import BaseModule
 
 
 class EmbeddingModule(pl.LightningModule):
@@ -70,7 +70,7 @@ class GraphSAGEModule(EmbeddingModule):
         return self.module(batch.x_dict, batch.edge_index_dict)[self.node_type][:batch_size]
 
 
-class LinkPredictionModule(ml.BaseModule):
+class LinkPredictionModule(BaseModule):
     def __init__(self, embedding_module: EmbeddingModule, dist='cosine'):
         super().__init__()
         self.embedding_module = embedding_module

@@ -1,30 +1,36 @@
 from collections import defaultdict
-from typing import Callable, Tuple, List, Dict
+from typing import Callable, Tuple, List, Dict, Union
 
 import numpy as np
 import pandas as pd
 import torch
 from tch_geometric.data import edge_type_to_str
-from tch_geometric.data.subgraph import build_subgraph
+from tch_geometric.data.subgraph import subgraph_from_edgelist, create_subgraph
 from tch_geometric.loader import CustomLoader
 from tch_geometric.transforms import NegativeSamplerTransform, NeighborSamplerTransform
 from tch_geometric.transforms.constrastive_merge import ContrastiveMergeTransform, EdgeTypeAggregateTransform
 from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform, NAN_TIMESTAMP
 from torch import Tensor
+import torch.nn
 from torch.utils.data import Dataset
 from torch_geometric.data import Data, HeteroData
 from torch_geometric.transforms import ToUndirected
-from torch_geometric.typing import NodeType, EdgeType
+from torch_geometric.typing import NodeType, EdgeType, Metadata
 from torch_scatter import scatter
+from torch_geometric.nn import Sequential, to_hetero, Linear
 
 import ml
 from benchmarks.evaluation import get_metric_list
-from experiments import HingeLoss, NegativeEntropyRegularizer
-from ml import SortEdges
-from ml.models.embeddings import PinSAGEModule, HGTModule
+from experiments.datasets import StarWars
+from ml import SortEdges, extract_unique_nodes
+from ml.layers import NegativeEntropyRegularizer
+from ml.layers.hgt_conv import HGTConv
 from shared.graph import CommunityAssignment
 
-dataset = ml.StarWars()
+
+
+
+dataset = StarWars()
 data = dataset[0]
 data = ToUndirected(reduce='max')(data)
 data = SortEdges()(data)
@@ -112,7 +118,7 @@ def edgelist_to_subgraph(
         nodes[dst] = torch.cat([nodes[dst], edge_index[1, :]])
         cols[edge_type] = torch.arange(start, start + edge_count, dtype=torch.long)
 
-    subgraph = build_subgraph(
+    subgraph = create_subgraph(
         nodes, rows, cols,
         node_attrs=dict(sample_count=node_counts),
         edge_attrs=dict(timestamp=edge_timestamp_dict) if temporal else None
@@ -178,6 +184,48 @@ class DataLoader(CustomLoader):
         data_agg = self.edge_aggr(data)
 
         return samples, data_agg, data.node_types
+
+class HGTModule(torch.nn.Module):
+    def __init__(
+            self, metadata: Metadata, hidden_channels, out_channels, num_heads, num_layers,
+            use_RTE=False
+    ):
+        super().__init__()
+        self.use_RTE = use_RTE
+
+        self.lin_dict = torch.nn.ModuleDict()
+        for node_type in metadata[0]:
+            self.lin_dict[node_type] = Linear(-1, hidden_channels)
+
+        self.convs = torch.nn.ModuleList()
+        for _ in range(num_layers):
+            conv = HGTConv(hidden_channels, hidden_channels, metadata, num_heads, group='mean', use_RTE=use_RTE)
+            self.convs.append(conv)
+
+        self.lin = Linear(hidden_channels, out_channels)
+
+    def forward(self, data: HeteroData):
+        x_dict = data.x_dict
+        edge_index_dict = data.edge_index_dict
+        if self.use_RTE:
+            timedelta_dict = data.timedelta_dict
+        else:
+            timedelta_dict = None
+
+
+        x_dict = {
+            node_type: self.lin_dict[node_type](x).relu_()
+            for node_type, x in x_dict.items()
+        }
+
+        for conv in self.convs:
+            x_dict = conv(x_dict, edge_index_dict, timedelta_dict)
+
+        for node_type in data.node_types:
+            batch_size = data[node_type].batch_size
+            x_dict[node_type] = x_dict[node_type][:batch_size, :]
+
+        return x_dict
 
 
 data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
