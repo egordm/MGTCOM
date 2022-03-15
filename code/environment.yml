@@ -10,6 +10,7 @@ dependencies:
   - pip
   - cudatoolkit-dev=11.3 # Only if you use NVIDIA GPU
   - pytorch
+  - torchvision
   - pytorch-lightning
   - pyg
   - numpy
