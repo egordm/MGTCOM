@@ -33,3 +33,15 @@ class ExplicitClusteringModule(torch.nn.Module):
     def forward(self, batch: torch.Tensor):
         sim = self.sim_fn(batch.unsqueeze(1), self.centroids.weight.unsqueeze(0))
         return self.softmax(sim)
+
+    def assign(self, batch: torch.Tensor):
+        q = self.forward(batch)
+        return q.argmax(dim=-1)
+
+    def reinit(self, centers: torch.Tensor):
+        device = self.centroids.weight.data.device
+        self.centroids = torch.nn.Embedding.from_pretrained(centers, freeze=False).to(device)
+
+    @property
+    def n_clusters(self):
+        return self.centroids.weight.shape[0]

@@ -51,6 +51,13 @@ class HingeLoss(torch.nn.Module):
 
 class NegativeEntropyRegularizer(torch.nn.Module):
     def forward(self, *args: List[torch.Tensor]):
+        """
+        Averages all predictions into class based probability distribution and calculates negative entropy.
+        See: https://en.wikipedia.org/wiki/Entropy#Information_theory
+        The higher the `ne` value is the more unbalanced the class distribution is.
+        :param args:
+        :return:
+        """
         p = sum(map(lambda q: torch.sum(q, dim=0), args))
         p /= p.sum()
         ne = math.log(p.size(0)) + (p * torch.log(p)).sum()
