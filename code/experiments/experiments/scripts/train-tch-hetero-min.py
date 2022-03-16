@@ -1,69 +1,70 @@
 import pytorch_lightning as pl
 import torch
-from tch_geometric.loader import CustomLoader
-from tch_geometric.loader.hgt_loader import HGTLoader
-from tch_geometric.transforms import NegativeSamplerTransform
-from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform
 from torch_geometric.transforms import ToUndirected
 
-from experiments.datasets import StarWars
 from ml import SortEdges, newman_girvan_modularity
+from ml.datasets import IMDB5000, StarWars, DBLPHCN
 from ml.layers import ExplicitClusteringModule
 from ml.layers.embedding import HGTModule
-from ml.loaders.contrastive_dataloader import ContrastiveDataLoader
-from ml.loaders.dataset import HeteroEdgesDataset, HeteroNodesDataset
-from ml.models.positional import PositionalModel
+from ml.models.positional import PositionalModel, PositionalDataModule
 from ml.utils.collections import merge_dicts
 
-dataset = StarWars()
-data = dataset[0]
+# dataset = StarWars()
+# batch_size = 16
+# n_clusters = 5
+dataset = IMDB5000()
+batch_size = 512
+n_clusters = 50
+# dataset = DBLPHCN()
+# batch_size = 512
+# n_clusters = 55
+
+data = dataset.data
 data = ToUndirected(reduce='max')(data)
 data = SortEdges()(data)
-G = dataset.G
-G.to_undirected()
 
-repr_dim = 32
-n_epochs = 20  # 10
-n_comm_epochs = 10
-# n_epochs = 1  # 10
+lr = 0.01
+# repr_dim = 32
+repr_dim = 64
+# n_epochs = 20
+# n_comm_epochs = 10
+n_epochs = 8
+n_comm_epochs = 6
+# n_epochs = 1
 # n_comm_epochs = 1
-n_clusters = 5
-batch_size = 16
+num_samples = [4, 3]
+num_neg_samples = 4
+use_Lin = True
+ne_weight = 0.0001
+
 temporal = False
+gpus = 1
+workers = 8
 
-
-neg_sampler = NegativeSamplerTransform(data, 3, 5)
-# neighbor_sampler = NeighborSamplerTransform(data, [4, 3])
-# neighbor_sampler = NeighborSamplerTransform(data, [3, 2])
-# neighbor_sampler = HGTSamplerTransformz(data, [3, 2])
-# neighbor_sampler = HGTSamplerTransform(data, [3, 2])
-neighbor_sampler = HGTSamplerTransform(data, [3, 2], temporal=temporal)
-
-data_loader = ContrastiveDataLoader(
-    HeteroEdgesDataset(data, temporal=temporal),
-    neg_sampler, neighbor_sampler, batch_size=batch_size, shuffle=True
-)
-nodes_loader = HGTLoader(
-    HeteroNodesDataset(data, temporal=temporal),
-    neighbor_sampler=neighbor_sampler,
-    batch_size=batch_size, shuffle=False
+data_module = PositionalDataModule(
+    data, num_samples=num_samples, num_neg_samples=num_neg_samples, batch_size=batch_size, temporal=temporal,
+    num_workers=workers, prefetch_factor=4, persistent_workers=True
 )
 
 # embedding_module = PinSAGEModule(data.metadata(), repr_dim, normalize=False)
-embedding_module = HGTModule(data.metadata(), repr_dim, repr_dim, num_heads=2, num_layers=2, use_RTE=temporal)
+in_channels = {
+    node_type: data[node_type].num_features
+    for node_type in data.node_types
+}
+embedding_module = HGTModule(data.metadata(), in_channels, repr_dim, num_heads=2, num_layers=2, use_RTE=temporal, use_Lin=use_Lin)
 clustering_module = ExplicitClusteringModule(repr_dim, n_clusters)
-model = PositionalModel(embedding_module, clustering_module)
+model = PositionalModel(embedding_module, clustering_module, lr=lr, ne_weight=ne_weight)
 
 # Pretraining
-trainer = pl.Trainer(gpus=0, min_epochs=n_epochs, max_epochs=n_epochs)
-trainer.fit(model, data_loader)
+trainer = pl.Trainer(gpus=gpus, min_epochs=n_epochs, max_epochs=n_epochs)
+trainer.fit(model, data_module)
 # Cluster-aware training
 model.use_clustering = True
-trainer = pl.Trainer(gpus=0, min_epochs=n_comm_epochs, max_epochs=n_comm_epochs, enable_model_summary=False)
-trainer.fit(model, data_loader)
+trainer = pl.Trainer(gpus=gpus, min_epochs=n_comm_epochs, max_epochs=n_comm_epochs, enable_model_summary=False)
+trainer.fit(model, data_module)
 
 # Get Embeddings
-pred = trainer.predict(model, nodes_loader)
+pred = trainer.predict(model, data_module)
 embeddings = merge_dicts(pred, lambda xs: torch.cat(xs, dim=0))
 
 print('Reusing trained centers')

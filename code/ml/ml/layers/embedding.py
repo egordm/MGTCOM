@@ -49,13 +49,13 @@ class HGTModule(torch.nn.Module):
         if use_Lin:
             self.lin_dict = torch.nn.ModuleDict()
             for node_type in metadata[0]:
-                self.lin_dict[node_type] = Linear(-1, hidden_channels)
+                self.lin_dict[node_type] = Linear(-1, self.hidden_channels)
 
         self.convs = torch.nn.ModuleList()
         for i in range(num_layers):
-            in_channels = self.in_channels if i == 0 and not use_Lin else self.hidden_channels
-            out_channels = self.out_channels if i == num_layers - 1 else self.hidden_channels
-            conv = HGTConv(in_channels, out_channels, metadata, num_heads, group=group, use_RTE=use_RTE)
+            l_in_channels = self.in_channels if i == 0 and not use_Lin else self.hidden_channels
+            l_out_channels = self.out_channels if i == num_layers - 1 else self.hidden_channels
+            conv = HGTConv(l_in_channels, l_out_channels, metadata, num_heads, group=group, use_RTE=use_RTE)
             self.convs.append(conv)
 
     def forward(self, data: HeteroData):
