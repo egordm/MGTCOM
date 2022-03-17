@@ -1,6 +1,5 @@
 import pytorch_lightning as pl
 import torch
-from torch_geometric.transforms import ToUndirected
 
 from ml import SortEdges, newman_girvan_modularity
 from ml.datasets import IMDB5000, StarWars, DBLPHCN
@@ -8,21 +7,22 @@ from ml.layers import ExplicitClusteringModule
 from ml.layers.embedding import HGTModule
 from ml.layers.initialization import LouvainInitialization
 from ml.models.positional import PositionalModel, PositionalDataModule
+from ml.transforms.undirected import ToUndirected
 from ml.utils.collections import merge_dicts
 
-# dataset = StarWars()
-# batch_size = 16
-# n_clusters = 5
-dataset = IMDB5000()
-batch_size = 512
-n_clusters = 50
+dataset = StarWars()
+batch_size = 16
+n_clusters = 5
+# dataset = IMDB5000()
+# batch_size = 512
+# n_clusters = 50
 # dataset = DBLPHCN()
 # batch_size = 512
 # n_clusters = 55
 # n_clusters = 70
 
 data = dataset.data
-data = ToUndirected(reduce='max')(data)
+data = ToUndirected(reduce=None)(data)
 data = SortEdges()(data)
 
 lr = 0.01
