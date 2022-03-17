@@ -36,7 +36,7 @@ class ContrastiveDataLoader(CustomLoader):
         # Merge pos and neg graphs
         data = self.contrastive_merge(pos_data, neg_data)
 
-        # Combine unique nodes
+        # Combine unique nodes and save perm attribute
         nodes_dict, data = extract_unique_nodes(data)
 
         # Neighbor samples
@@ -47,9 +47,11 @@ class ContrastiveDataLoader(CustomLoader):
 
         samples = self.neighbor_sampler(nodes_dict, nodes_timestamps_dict)
 
-        # Aggregate pos and neg edges
+        # Change node indices to unique indices (perm)
         for store in data.node_stores:
             store.x = store.perm
+
+        # Aggregate pos and neg edges disregarding hetero types
         data_agg = self.edge_type_aggr(data)
 
         return samples, data_agg, data.node_types
