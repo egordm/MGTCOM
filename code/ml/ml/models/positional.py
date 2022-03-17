@@ -2,15 +2,16 @@ from typing import Any, List, Union, Dict
 
 import pytorch_lightning as pl
 import torch.nn
+import torchmetrics
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EVAL_DATALOADERS, TRAIN_DATALOADERS
 from tch_geometric.loader.hgt_loader import HGTLoader
 from tch_geometric.transforms import NegativeSamplerTransform
 from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform
-from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import NodeType
 
 from ml.layers import HingeLoss, NegativeEntropyRegularizer
+from ml.layers.metrics import MetricBag
 from ml.loaders import ContrastiveDataLoader, HeteroEdgesDataset, HeteroNodesDataset
 
 
@@ -21,6 +22,7 @@ class PositionalModel(pl.LightningModule):
             clustering_module: torch.nn.Module,
             ne_weight: float = 0.001,
             lr: float = 0.01,
+            lr_cosine: bool = False,
             use_clustering: bool = False,
             *args: Any, **kwargs: Any
     ) -> None:
@@ -30,11 +32,18 @@ class PositionalModel(pl.LightningModule):
 
         self.ne_weight = ne_weight
         self.lr = lr
+        self.lr_cosine = lr_cosine
         self.use_clustering = use_clustering
 
         self.positional_loss = HingeLoss()
         self.clustering_loss = HingeLoss()
         self.ne_loss = NegativeEntropyRegularizer()
+
+        self.metrics = MetricBag({
+            'loss': torchmetrics.MeanMetric(),
+            'p_loss': torchmetrics.MeanMetric(),
+            'c_loss': torchmetrics.MeanMetric(),
+        })
 
     def forward(self, batch: HeteroData, *args, **kwargs) -> Any:
         return self.embedding_module(batch, *args, **kwargs)
@@ -69,25 +78,32 @@ class PositionalModel(pl.LightningModule):
         return self.step(*args, **kwargs)
 
     def on_train_batch_end(self, outputs, *args, **kwargs) -> None:
-        log_data = {
-            k: v.detach() if isinstance(v, Tensor) else v
-            for k, v in outputs.items()
-        }
-        self.log_dict(log_data, prog_bar=True)
-        self.log('pre', 1.0 if self.use_clustering else 0.0, prog_bar=True)
+        self.metrics.update(outputs)
+        self.log_dict(outputs, prog_bar=True)
+        lr = self.trainer.optimizers[0].param_groups[0]['lr']
+        self.log('lr', lr, prog_bar=True)
         super().on_train_batch_end(outputs, *args, **kwargs)
 
     def on_train_epoch_end(self) -> None:
         super().on_train_epoch_end()
-
-    def on_predict_epoch_end(self, results: List[Any]) -> None:
-        super().on_predict_epoch_end(results)
+        outputs = self.metrics.compute(epoch=True, prefix='epoch_')
+        self.log_dict(outputs, prog_bar=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        return {
-            'optimizer': optimizer,
-        }
+        if self.lr_cosine:
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                optimizer, eta_min=0.0001, T_0=200, T_mult=2
+            )
+            return {
+                'optimizer': optimizer,
+                'lr_scheduler': {
+                    "scheduler": scheduler,
+                    "interval": "step",
+                },
+            }
+        else:
+            return optimizer
 
 
 class PositionalDataModule(pl.LightningDataModule):

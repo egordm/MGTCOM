@@ -26,6 +26,7 @@ data = ToUndirected(reduce='max')(data)
 data = SortEdges()(data)
 
 lr = 0.01
+lr_cosine=False
 # repr_dim = 32
 repr_dim = 64
 # n_epochs = 20
@@ -45,6 +46,10 @@ workers = 8
 # gpus = 0
 # workers = 0
 
+callbacks = [
+    pl.callbacks.LearningRateMonitor(logging_interval='step'),
+]
+
 data_module = PositionalDataModule(
     data, num_samples=num_samples, num_neg_samples=num_neg_samples, batch_size=batch_size, temporal=temporal,
     num_workers=workers, prefetch_factor=4 if workers else 2, persistent_workers=True if workers else False,
@@ -57,10 +62,10 @@ in_channels = {
 }
 embedding_module = HGTModule(data.metadata(), in_channels, repr_dim, num_heads=2, num_layers=2, use_RTE=temporal, use_Lin=use_Lin)
 clustering_module = ExplicitClusteringModule(repr_dim, n_clusters)
-model = PositionalModel(embedding_module, clustering_module, lr=lr, ne_weight=ne_weight)
+model = PositionalModel(embedding_module, clustering_module, lr=lr, lr_cosine=lr_cosine, ne_weight=ne_weight)
 
 # Pretraining
-trainer = pl.Trainer(gpus=gpus, min_epochs=n_epochs, max_epochs=n_epochs)
+trainer = pl.Trainer(gpus=gpus, min_epochs=n_epochs, max_epochs=n_epochs, callbacks=callbacks)
 trainer.fit(model, data_module)
 
 # Get Embeddings
@@ -74,7 +79,7 @@ clustering_module.reinit(centers)
 
 # Cluster-aware training
 model.use_clustering = True
-trainer = pl.Trainer(gpus=gpus, min_epochs=n_comm_epochs, max_epochs=n_comm_epochs, enable_model_summary=False)
+trainer = pl.Trainer(gpus=gpus, min_epochs=n_comm_epochs, max_epochs=n_comm_epochs, callbacks=callbacks, enable_model_summary=False)
 trainer.fit(model, data_module)
 
 # Get Embeddings
