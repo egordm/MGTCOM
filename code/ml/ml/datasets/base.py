@@ -4,12 +4,15 @@ from typing import Optional, Callable, Dict
 import pandas as pd
 import torch
 from torch_geometric.data import InMemoryDataset as THGInMemoryDataset, HeteroData
-from torch_geometric.typing import NodeType, EdgeType
+from torch_geometric.typing import NodeType, EdgeType, Metadata
+from pytorch_lightning.utilities.cli import _Registry
 
 from shared.constants import DATASETS_DATA_TORCH
 
+DATASET_REGISTRY = _Registry()
 
-class InMemoryDataset(THGInMemoryDataset):
+
+class GraphDataset(THGInMemoryDataset):
     def __init__(self, root: Optional[str] = None, transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None, pre_filter: Optional[Callable] = None):
         if not root:
@@ -24,6 +27,10 @@ class InMemoryDataset(THGInMemoryDataset):
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}()'
+
+    @property
+    def metadata(self) -> Metadata:
+        return self.data.metadata()
 
 
 def hetero_from_pandas(

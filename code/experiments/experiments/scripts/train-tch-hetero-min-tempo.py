@@ -6,7 +6,7 @@ from ml import SortEdges, newman_girvan_modularity
 from ml.datasets import IMDB5000, StarWars, DBLPHCN
 from ml.layers import ExplicitClusteringModule
 from ml.layers.embedding import HGTModule
-from ml.layers.initialization import LouvainInitialization
+from ml.layers.initialization import LouvainInitializer
 from ml.loaders.temporal_sampling import TemporalSamplerLoader
 from ml.models.positional import PositionalModel, PositionalDataModule
 from ml.models.temporal import TemporalDataModule
@@ -78,7 +78,7 @@ pred = trainer.predict(model, data_module)
 embeddings = merge_dicts(pred, lambda xs: torch.cat(xs, dim=0))
 
 # Reinitialize
-initializer = LouvainInitialization(data)
+initializer = LouvainInitializer(data)
 centers = initializer.initialize(embeddings)
 clustering_module.reinit(centers)
 

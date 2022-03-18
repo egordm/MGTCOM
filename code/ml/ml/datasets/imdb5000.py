@@ -3,12 +3,15 @@ import shutil
 
 import torch
 
-from ml.datasets.base import InMemoryDataset, hetero_from_pandas
+from ml import SortEdges
+from ml.datasets.base import GraphDataset, hetero_from_pandas, DATASET_REGISTRY
+from ml.transforms.undirected import ToUndirected
 from shared.graph.loading import pd_from_entity_schema
 from shared.schema import DatasetSchema, GraphSchema
 
 
-class IMDB5000(InMemoryDataset):
+@DATASET_REGISTRY
+class IMDB5000(GraphDataset):
     def __init__(self, root: Optional[str] = None, transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None, pre_filter: Optional[Callable] = None):
         super().__init__(root, transform, pre_transform, pre_filter)
@@ -109,6 +112,8 @@ class IMDB5000(InMemoryDataset):
             ts[ts != -1] -= min_timestamp
             data[entity_type].timestamp = ts.long()
 
+        data = ToUndirected(reduce=None)(data)
+        data = SortEdges()(data)
         if self.pre_transform is not None:
             data = self.pre_transform(data)
 

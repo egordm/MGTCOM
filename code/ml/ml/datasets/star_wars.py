@@ -3,12 +3,15 @@ import shutil
 
 import torch
 
-from ml.datasets.base import InMemoryDataset, hetero_from_pandas
+from ml import SortEdges
+from ml.datasets.base import GraphDataset, hetero_from_pandas, DATASET_REGISTRY
+from ml.transforms.undirected import ToUndirected
 from shared.graph.loading import pd_from_entity_schema
 from shared.schema import DatasetSchema, GraphSchema
 
 
-class StarWars(InMemoryDataset):
+@DATASET_REGISTRY
+class StarWars(GraphDataset):
     def __init__(self, root: Optional[str] = None, transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None, pre_filter: Optional[Callable] = None):
         super().__init__(root, transform, pre_transform, pre_filter)
@@ -90,6 +93,8 @@ class StarWars(InMemoryDataset):
 
         data = hetero_from_pandas(node_dfs, edge_dfs)
 
+        data = ToUndirected(reduce=None)(data)
+        data = SortEdges()(data)
         if self.pre_transform is not None:
             data = self.pre_transform(data)
 

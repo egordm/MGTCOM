@@ -10,9 +10,16 @@ from ml.layers.hgt_conv import HGTConv
 from ml.layers.pinsage_conv import PinSAGEConv
 
 
-class PinSAGEModule(torch.nn.Module):
-    def __init__(self, metadata: Metadata, repr_dim: int = 32, normalize=True) -> None:
+class HeteroEmbeddingModule(torch.nn.Module):
+    def __init__(self, metadata: Metadata, repr_dim: int) -> None:
         super().__init__()
+        self.metadata = metadata
+        self.repr_dim = repr_dim
+
+
+class PinSAGEModule(HeteroEmbeddingModule):
+    def __init__(self, metadata: Metadata, repr_dim: int = 32, normalize=True) -> None:
+        super().__init__(metadata, repr_dim)
         self.repr_dim = repr_dim
 
         module = Sequential('x, edge_index', [
@@ -31,15 +38,16 @@ class PinSAGEModule(torch.nn.Module):
         return emb
 
 
-class HGTModule(torch.nn.Module):
+class HGTModule(HeteroEmbeddingModule):
     def __init__(
             self,
             metadata: Metadata,
-            in_channels: Union[int, Dict[NodeType, int]], out_channels: int, hidden_channels: int = None,
+            out_channels: int = 32, hidden_channels: int = None,
+            in_channels: Union[int, Dict[NodeType, int]] = None,
             num_heads=2, num_layers=2, group='mean',
-            use_RTE=False, use_Lin=False
+            use_RTE=False, use_Lin=True
     ):
-        super().__init__()
+        super().__init__(metadata, out_channels)
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.hidden_channels = hidden_channels or out_channels
@@ -50,6 +58,8 @@ class HGTModule(torch.nn.Module):
             self.lin_dict = torch.nn.ModuleDict()
             for node_type in metadata[0]:
                 self.lin_dict[node_type] = Linear(-1, self.hidden_channels)
+        else:
+            assert in_channels is not None
 
         self.convs = torch.nn.ModuleList()
         for i in range(num_layers):

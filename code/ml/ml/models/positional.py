@@ -11,15 +11,18 @@ from torch_geometric.data import HeteroData
 from torch_geometric.typing import NodeType
 
 from ml.layers import HingeLoss, NegativeEntropyRegularizer
+from ml.layers.embedding import HeteroEmbeddingModule
 from ml.layers.metrics import MetricBag
 from ml.loaders import ContrastiveDataLoader, HeteroEdgesDataset, HeteroNodesDataset
+from ml.utils import merge_dicts
 
 
 class PositionalModel(pl.LightningModule):
     def __init__(
             self,
-            embedding_module: torch.nn.Module,
+            embedding_module: HeteroEmbeddingModule,
             clustering_module: torch.nn.Module,
+            c_weight: float = 1.0,
             ne_weight: float = 0.001,
             lr: float = 0.01,
             lr_cosine: bool = False,
@@ -32,6 +35,7 @@ class PositionalModel(pl.LightningModule):
         self.clustering_module = clustering_module
 
         self.ne_weight = ne_weight
+        self.c_weight = c_weight
         self.lr = lr
         self.lr_cosine = lr_cosine
         self.use_clustering = use_clustering
@@ -64,7 +68,7 @@ class PositionalModel(pl.LightningModule):
             ne = self.ne_loss(c_emb)
 
             return {
-                'loss': p_loss + c_loss + (ne * self.ne_weight),
+                'loss': p_loss + (c_loss * self.c_weight) + (ne * self.ne_weight),
                 'p_loss': p_loss.detach(),
                 'c_loss': c_loss.detach(),
                 'ne_loss': ne.detach(),
@@ -105,6 +109,10 @@ class PositionalModel(pl.LightningModule):
             }
         else:
             return optimizer
+
+    def compute_embeddings(self, trainer: pl.Trainer, loader: pl.LightningDataModule):
+        pred = trainer.predict(self, loader)
+        return merge_dicts(pred, lambda xs: torch.cat(xs, dim=0))
 
 
 class PositionalDataModule(pl.LightningDataModule):

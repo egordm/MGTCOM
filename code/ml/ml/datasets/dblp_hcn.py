@@ -3,12 +3,15 @@ import shutil
 
 import torch
 
-from ml.datasets.base import InMemoryDataset, hetero_from_pandas
+from ml import SortEdges
+from ml.datasets.base import GraphDataset, hetero_from_pandas, DATASET_REGISTRY
+from ml.transforms.undirected import ToUndirected
 from shared.graph.loading import pd_from_entity_schema
 from shared.schema import DatasetSchema, GraphSchema
 
 
-class DBLPHCN(InMemoryDataset):
+@DATASET_REGISTRY
+class DBLPHCN(GraphDataset):
     def __init__(self, root: Optional[str] = None, transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None, pre_filter: Optional[Callable] = None,
                  model_name: Optional[str] = "all-MiniLM-L6-v2"):
@@ -121,6 +124,9 @@ class DBLPHCN(InMemoryDataset):
             ts[torch.logical_and(ts != -1, ts < min_timestamp)] = min_timestamp
             ts[ts != -1] -= min_timestamp
             data[entity_type].timestamp = ts.long()
+
+        data = ToUndirected(reduce=None)(data)
+        data = SortEdges()(data)
 
         if self.pre_transform is not None:
             data = self.pre_transform(data)
