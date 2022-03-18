@@ -1,30 +1,33 @@
 import pytorch_lightning as pl
 import torch
 
-from ml import SortEdges, newman_girvan_modularity
+from ml import SortEdges, newman_girvan_modularity, igraph_from_hetero
 from ml.datasets import IMDB5000, StarWars, DBLPHCN
 from ml.layers import ExplicitClusteringModule
 from ml.layers.embedding import HGTModule
-from ml.layers.initialization import LouvainInitialization
+from ml.layers.initialization import LouvainInitialization, KMeansInitialization
 from ml.models.positional import PositionalModel, PositionalDataModule
 from ml.transforms.undirected import ToUndirected
 from ml.utils.collections import merge_dicts
+from shared.constants import BENCHMARKS_RESULTS
 
-dataset = StarWars()
-batch_size = 16
-n_clusters = 5
+# dataset = StarWars()
+# batch_size = 16
+# n_clusters = 5
 # dataset = IMDB5000()
 # batch_size = 512
 # n_clusters = 50
-# dataset = DBLPHCN()
-# batch_size = 512
-# n_clusters = 55
+dataset = DBLPHCN()
+batch_size = 512
+n_clusters = 55
 # n_clusters = 70
+# n_clusters = 5
 
 data = dataset.data
 data = ToUndirected(reduce=None)(data)
 data = SortEdges()(data)
 
+name = f'tch-hetero-min-{dataset.name}'
 lr = 0.01
 lr_cosine=False
 # repr_dim = 32
@@ -39,6 +42,8 @@ num_samples = [4, 3]
 num_neg_samples = 3
 use_Lin = True
 ne_weight = 0.001
+sim = 'dotp'
+# sim = 'cosine'
 
 temporal = False
 gpus = 1
@@ -61,8 +66,8 @@ in_channels = {
     for node_type in data.node_types
 }
 embedding_module = HGTModule(data.metadata(), in_channels, repr_dim, num_heads=2, num_layers=2, use_RTE=temporal, use_Lin=use_Lin)
-clustering_module = ExplicitClusteringModule(repr_dim, n_clusters)
-model = PositionalModel(embedding_module, clustering_module, lr=lr, lr_cosine=lr_cosine, ne_weight=ne_weight)
+clustering_module = ExplicitClusteringModule(repr_dim, n_clusters, sim=sim)
+model = PositionalModel(embedding_module, clustering_module, lr=lr, lr_cosine=lr_cosine, ne_weight=ne_weight, sim=sim)
 
 # Pretraining
 trainer = pl.Trainer(gpus=gpus, min_epochs=n_epochs, max_epochs=n_epochs, callbacks=callbacks)
@@ -74,6 +79,7 @@ embeddings = merge_dicts(pred, lambda xs: torch.cat(xs, dim=0))
 
 # Reinitialize
 initializer = LouvainInitialization(data)
+# initializer = KMeansInitialization(data, n_clusters)
 centers = initializer.initialize(embeddings)
 clustering_module.reinit(centers)
 
@@ -91,3 +97,8 @@ I = {k: clustering_module.assign(emb).detach().cpu() for k, emb in embeddings.it
 
 m = newman_girvan_modularity(data, I, clustering_module.n_clusters)
 print(f'Modularity: {m:.4f}')
+
+save_dir = BENCHMARKS_RESULTS.joinpath('analysis', name)
+save_dir.mkdir(parents=True, exist_ok=True)
+G, _, _ = igraph_from_hetero(data, node_attrs=dict(comm=I))
+G.write_graphml(str(save_dir.joinpath('graph.graphml')))

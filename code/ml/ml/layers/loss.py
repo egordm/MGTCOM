@@ -6,15 +6,24 @@ from torch import Tensor
 from torch_geometric.data import Data, HeteroData
 from torch_scatter import scatter
 
-from ml.layers.distance import pairwise_dotp
+from ml.layers.distance import pairwise_dotp, pairwise_cosine, pairwise_euclidean_sim
 
 
 class HingeLoss(torch.nn.Module):
-    def __init__(self, delta=1.0, agg_pos='mean', agg_neg='max') -> None:
+    def __init__(self, delta=1.0, agg_pos='mean', agg_neg='max', sim='dotp') -> None:
         super().__init__()
         self.delta = delta
         self.agg_pos = agg_pos
         self.agg_neg = agg_neg
+
+        if sim == 'dotp':
+            self.sim_fn = pairwise_dotp
+        elif sim == 'cosine':
+            self.sim_fn = pairwise_cosine
+        elif sim == 'euclidean':
+            self.sim_fn = pairwise_euclidean_sim
+        else:
+            raise ValueError(f'Unknown similarity function {sim}')
 
     def forward(
             self,
@@ -37,10 +46,10 @@ class HingeLoss(torch.nn.Module):
         nn_emb = emb[nodes[neg_edges[1]], :]
 
         # Compute positive and negative similarity
-        p_d_full = pairwise_dotp(pc_emb, pp_emb)
+        p_d_full = self.sim_fn(pc_emb, pp_emb)
         p_d = scatter(p_d_full, pos_edges[0], dim=0, reduce=self.agg_pos)
 
-        n_d_full = pairwise_dotp(nc_emb, nn_emb)
+        n_d_full = self.sim_fn(nc_emb, nn_emb)
         n_d = scatter(n_d_full, neg_edges[0], dim=0, reduce=self.agg_neg)
 
         # Compute loss

@@ -24,6 +24,7 @@ class PositionalModel(pl.LightningModule):
             lr: float = 0.01,
             lr_cosine: bool = False,
             use_clustering: bool = False,
+            sim='dotp',
             *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
@@ -35,8 +36,8 @@ class PositionalModel(pl.LightningModule):
         self.lr_cosine = lr_cosine
         self.use_clustering = use_clustering
 
-        self.positional_loss = HingeLoss()
-        self.clustering_loss = HingeLoss()
+        self.positional_loss = HingeLoss(sim=sim)
+        self.clustering_loss = HingeLoss(sim=sim)
         self.ne_loss = NegativeEntropyRegularizer()
 
         self.metrics = MetricBag({

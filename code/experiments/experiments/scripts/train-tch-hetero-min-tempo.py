@@ -9,6 +9,7 @@ from ml.layers.embedding import HGTModule
 from ml.layers.initialization import LouvainInitialization
 from ml.loaders.temporal_sampling import TemporalSamplerLoader
 from ml.models.positional import PositionalModel, PositionalDataModule
+from ml.models.temporal import TemporalDataModule
 from ml.transforms.undirected import ToUndirected
 from ml.utils.collections import merge_dicts
 
@@ -42,23 +43,20 @@ num_neg_samples = 3
 use_Lin = True
 ne_weight = 0.001
 
+repeat_count = 8
+window = (0, 1)
 temporal = False
-gpus = 1
-workers = 8
-# gpus = 0
-# workers = 0
-
-
-neighbor_sampler = HGTSamplerTransform(data, num_samples, temporal=temporal)
-test = TemporalSamplerLoader(data, neighbor_sampler=neighbor_sampler, window=(0, 1), batch_size=16, num_workers=0, shuffle=True)
-a = next(iter(test))
+# gpus = 1
+# workers = 8
+gpus = 0
+workers = 0
 
 callbacks = [
     pl.callbacks.LearningRateMonitor(logging_interval='step'),
 ]
 
-data_module = PositionalDataModule(
-    data, num_samples=num_samples, num_neg_samples=num_neg_samples, batch_size=batch_size, temporal=temporal,
+data_module = TemporalDataModule(
+    data, num_samples=num_samples, window=window, repeat_count=repeat_count, batch_size=batch_size,
     num_workers=workers, prefetch_factor=4 if workers else 2, persistent_workers=True if workers else False,
 )
 

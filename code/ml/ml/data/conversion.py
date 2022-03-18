@@ -1,13 +1,20 @@
+from collections import defaultdict
 from typing import Dict, Tuple
 
 import igraph
 import numpy as np
+import torch
+from torch import Tensor
 
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import NodeType, EdgeType
 
 
-def igraph_from_hetero(data: HeteroData) -> Tuple[igraph.Graph, Dict[NodeType, int], Dict[EdgeType, int]]:
+def igraph_from_hetero(
+        data: HeteroData,
+        node_attrs: Dict[str, Dict[NodeType, Tensor]] = None,
+        edge_attrs: Dict[str, Dict[EdgeType, Tensor]] = None,
+) -> Tuple[igraph.Graph, Dict[NodeType, int], Dict[EdgeType, int]]:
     """Convert a heterograph to an igraph graph."""
     node_type_to_idx = {
         node_type: idx
@@ -23,6 +30,7 @@ def igraph_from_hetero(data: HeteroData) -> Tuple[igraph.Graph, Dict[NodeType, i
 
     attr_node_perm = np.zeros(data.num_nodes, dtype=np.int64)
     attr_node_type = np.zeros(data.num_nodes, dtype=np.int64)
+    node_perms: Dict[NodeType, Tensor] = {}
     offsets: Dict[NodeType, int] = {}
     offset = 0
     for store in data.node_stores:
@@ -34,6 +42,14 @@ def igraph_from_hetero(data: HeteroData) -> Tuple[igraph.Graph, Dict[NodeType, i
 
     g.vs["id"] = attr_node_perm
     g.vs["type"] = attr_node_type
+
+    for attr_name, attr_data in (node_attrs or {}).items():
+        attr_items = []
+        for store in data.node_stores:
+            node_type = store._key
+            attr_items.append(attr_data[node_type])
+
+        g.vs[attr_name] = torch.cat(attr_items, dim=0).numpy()
 
     edges = np.zeros((data.num_edges, 2), dtype=np.int64)
     attr_edge_perm = np.zeros(data.num_edges, dtype=np.int64)
@@ -52,5 +68,13 @@ def igraph_from_hetero(data: HeteroData) -> Tuple[igraph.Graph, Dict[NodeType, i
     g.add_edges(edges)
     g.es["id"] = attr_edge_perm
     g.es["type"] = attr_edge_type
+
+    for attr_name, attr_data in (edge_attrs or {}).items():
+        attr_items = []
+        for store in data.edge_stores:
+            edge_type = store._key
+            attr_items.extend(attr_data[edge_type])
+
+        g.vs[attr_name] = torch.cat(attr_items, dim=0).numpy()
 
     return g, node_type_to_idx, edge_type_to_idx

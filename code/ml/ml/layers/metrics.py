@@ -7,14 +7,12 @@ import torchmetrics
 class MetricBag(torch.nn.Module):
     def __init__(self, metrics: Dict[str, torchmetrics.Metric]):
         super().__init__()
-        self.metrics_ = torch.nn.ModuleList(metrics.values())
-        self.metrics = metrics
+        self.metrics = torch.nn.ModuleDict(metrics)
 
     def update(self, inputs: Dict[str, Any]):
         for k, v in inputs.items():
-            metric = self.metrics.get(k)
-            if metric is not None:
-                metric.update(v)
+            if k in self.metrics:
+                self.metrics[k].update(v)
 
     def reset(self):
         for metric in self.metrics.values():
