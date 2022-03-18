@@ -43,7 +43,7 @@ class KMeansInitialization:
         self.verbose = verbose
 
     def initialize(self, emb_dict: Dict[NodeType, Tensor]):
-        rep_dim = next(emb_dict.values()).shape[1]
+        rep_dim = next(iter(emb_dict.values())).shape[1]
         kmeans = faiss.Kmeans(rep_dim, k=self.k, niter=20, verbose=self.verbose, nredo=10)
 
         emb = torch.cat(list(emb_dict.values()), dim=0)
