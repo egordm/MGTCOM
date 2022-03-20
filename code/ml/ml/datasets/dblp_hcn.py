@@ -119,7 +119,7 @@ class DBLPHCN(GraphDataset):
         # Normalize timestamps
         timestamps = torch.cat(list(data.timestamp_dict.values()))
         timestamps = timestamps[timestamps != -1]
-        min_timestamp = timestamps.double().quantile(torch.tensor(0.025).double()).int()
+        min_timestamp = timestamps.double().sort().values.quantile(torch.tensor(0.025).double()).int()
         for entity_type, ts in data.timestamp_dict.items():
             ts[torch.logical_and(ts != -1, ts < min_timestamp)] = min_timestamp
             ts[ts != -1] -= min_timestamp

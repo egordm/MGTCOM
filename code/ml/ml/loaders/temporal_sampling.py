@@ -83,6 +83,7 @@ class TemporalSamplerLoader(CustomLoader):
 
         self.time_index = torch.vstack([attr_node_timestamp, attr_node_type, attr_node_perm]) \
             .unique(dim=1, sorted=True)
+        self.node_timestamps = self.time_index[0, :].contiguous()
 
         dataset_size = self.time_index.shape[1] * repeat_count
         super().__init__(DummyDataset(dataset_size), **kwargs)
@@ -97,7 +98,7 @@ class TemporalSamplerLoader(CustomLoader):
 
         # Positive sample
         windows = (self.window.repeat((len(idx), 1)) + ctr_timestamps.unsqueeze(1)).t()
-        window_from, window_to = torch.searchsorted(self.time_index[0, :], windows.reshape(-1)).view(2, -1)
+        window_from, window_to = torch.searchsorted(self.node_timestamps, windows.reshape(-1)).view(2, -1)
         pos_ranges = window_to - window_from
         pos_idx = randint_range(pos_ranges, low=window_from)
         pos_timestamps, pos_node_types, pos_nodes = self.time_index[:, pos_idx]
@@ -124,7 +125,7 @@ class TemporalSamplerLoader(CustomLoader):
             nodes_dict[node_type], perm = nodes[type_idx].unique(return_inverse=True)
             nodes_timestamps_dict[node_type] = nodes_timestamps[type_idx]
             nodes[type_idx] = perm + offset
-            offset += len(type_idx)
+            offset += len(nodes_dict[node_type])
 
         # Sample nodes
         samples = self.neighbor_sampler(nodes_dict, nodes_timestamps_dict)
