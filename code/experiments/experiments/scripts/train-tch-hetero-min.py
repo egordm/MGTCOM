@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch
 
 from ml import newman_girvan_modularity, igraph_from_hetero
-from ml.datasets import DBLPHCN, StarWars
+from ml.datasets import DBLPHCN, StarWars, IMDB5000
 from ml.layers import ExplicitClusteringModule
 from ml.layers.embedding import HGTModule
 from ml.layers.initialization import LouvainInitializer
@@ -12,12 +12,12 @@ from shared.constants import BENCHMARKS_RESULTS
 # dataset = StarWars()
 # batch_size = 16
 # n_clusters = 5
-# dataset = IMDB5000()
-# batch_size = 512
-# n_clusters = 50
-dataset = DBLPHCN()
+dataset = IMDB5000()
 batch_size = 512
-n_clusters = 55
+n_clusters = 50
+# dataset = DBLPHCN()
+# batch_size = 512
+# n_clusters = 55
 # n_clusters = 70
 # n_clusters = 5
 

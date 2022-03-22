@@ -4,8 +4,10 @@ import pytorch_lightning as pl
 import torch.nn
 import torchmetrics
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EVAL_DATALOADERS, TRAIN_DATALOADERS
+from tch_geometric.loader.budget_loader import BudgetLoader
 from tch_geometric.loader.hgt_loader import HGTLoader
 from tch_geometric.transforms import NegativeSamplerTransform
+from tch_geometric.transforms.budget_sampling import BudgetSamplerTransform
 from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import NodeType
@@ -178,6 +180,7 @@ class TemporalDataModule(pl.LightningDataModule):
             persistent_workers=persistent_workers,
         )
         self.neighbor_sampler = HGTSamplerTransform(data, num_samples, temporal=False)
+        # self.neighbor_sampler = BudgetSamplerTransform(data, num_samples, self.window, forward=False, relative=True)
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return TemporalSamplerLoader(
@@ -191,6 +194,7 @@ class TemporalDataModule(pl.LightningDataModule):
 
     def predict_dataloader(self) -> EVAL_DATALOADERS:
         return HGTLoader(
+        # return BudgetLoader(
             HeteroNodesDataset(self.data, temporal=False),
             neighbor_sampler=self.neighbor_sampler,
             shuffle=False,
