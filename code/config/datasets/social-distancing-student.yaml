@@ -1,19 +1,22 @@
 database: social-distancing-student
 description: ''
 name: social-distancing-student
-tags: [dynamic]
+tags:
+- dynamic
 versions:
-  static:
-    parameters: { }
-    type: edgelist_static
-  split_5:
-    type: edgelist_snapshots
-    parameters:
-      snapshot_count: 5
-      snapshot_coverage: 0.95
   split_10:
-    type: edgelist_snapshots
     parameters:
       snapshot_count: 10
       snapshot_coverage: 0.95
-
+    partless: false
+    type: edgelist_snapshots
+  split_5:
+    parameters:
+      snapshot_count: 5
+      snapshot_coverage: 0.95
+    partless: false
+    type: edgelist_snapshots
+  static:
+    parameters: {}
+    partless: false
+    type: edgelist_static
