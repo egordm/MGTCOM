@@ -1,6 +1,48 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2022.12] - 2022-03-23
+
+### Bug Fixes
+
+- Fixed kmeans initialization regarding inferring the embedding size
+- Fixed louvain initialization normalization; Added support for configurable distance functions
+
+### Features
+
+- Updated changelog and updated push command to include tags
+- Updated star wars dataset preprocessing scripts
+- Updated todo list and progress report
+- Added support for temporal HGT
+- Updated DBLP and IMDB preprocessing to include binary features about the nodes
+- Added dblp, imdb and star-wars torch_geometric dataset loading scripts
+- Added HeteroEdgeDataset and HeteroNodeDataset. Also added a contrastive sampling based dataloader
+- Added helper functions to partition hetero data and to extract unique nodes from graphs
+- Added separate clustering and embedding modules
+- Minor refactors regarding logging and graph loading
+- Added separate hinge loss module. Added modularity calculation function based on heterodata graph storage
+- Added positional model for positional community aware clustering
+- Added example training script using Torch Lightning for community aware embeddings
+- Added datamodule combining the positive sampling and node batching for prediction
+- Updated training script to use IMDB and DBLPHCN dataset
+- Added cluster initialization
+- Added cleaner metric summarization in progress bar. Added cosine lr annealing
+- Added to undirected graph transformation *without edge aggregation*
+- Added temporal contrastive window based sampling dataloader
+- Added cli for positional training / encoding
+- Added temporal training script
+- Tested temporal models
+- Updated social distancing student dataset with feature engineering
+- Added social distancing student dataset
+
+### Refactor
+
+- Moved old embedding and dataset classes into experiments to maintain compatibility
+
+### Testing
+
+- Added dblp, imdb and star-wars dataset tests
+
 ## [2022.10] - 2022-03-09
 
 ### Features
