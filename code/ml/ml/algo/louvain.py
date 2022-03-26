@@ -6,6 +6,7 @@ from torch import Tensor
 
 Weight = float
 
+
 @dataclass
 class CooGraph:
     n_nodes: int
@@ -47,20 +48,23 @@ class CooGraph:
 
 @dataclass
 class MultilevelCommunity:
-    size: int
-    weight_inside: Weight
-    weight_all: Weight
+    size: int  # Size of the community
+    weight_inside: Weight  # Sum of edge weights inside community
+    weight_all: Weight  # Sum of edge weights starting/ending in the community
 
 
 @dataclass
 class MultilevelCommunityList:
-    n_comms: int
-    n_vertices: int
-    weight_sum: Weight
-    communities: List[MultilevelCommunity]
-    membership: Tensor
+    n_comms: int  # Number of communities
+    n_vertices: int  # Number of vertices
+    weight_sum: Weight  # Sum of edges weight in the whole graph
+    communities: List[MultilevelCommunity]  # List of communities
+    membership: Tensor  # Community IDs
 
     def modularity(self, resolution: float) -> float:
+        """
+        Computes the modularity of a community partitioning
+        """
         result = 0.0
         m = self.weight_sum
 
@@ -73,6 +77,9 @@ class MultilevelCommunityList:
 
 
 def multilevel_simplify_multiple(edge_index: Tensor, weights: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
+    """
+    Merges multiple edges and returns new edge id's for each edge in |E|log|E|
+    """
     edge_index, perm = torch.unique(edge_index, dim=1, return_inverse=True, sorted=True)
     # Recalculate edge weights
     weights = torch.zeros(edge_index.shape[1], dtype=torch.float).index_add(0, perm, weights)
@@ -89,6 +96,9 @@ def multilevel_community_modularity_gain(
 
 
 def multilevel_shrink(edge_index: Tensor, membership: Tensor) -> [int, Tensor]:
+    """
+    Shrinks communities into single vertices, keeping all the edges.
+    """
     n_edges = edge_index.shape[1]
     edge_index_new = membership[torch.cat([edge_index[0, :], edge_index[1, :]], dim=0)]
     nodes, perm = torch.unique(edge_index_new, return_inverse=True, sorted=True)
@@ -107,8 +117,19 @@ def multilevel_community_links(
         comms: MultilevelCommunityList,
         vertex: int
 ):
+    """
+    Given a graph, a community structure and a vertex ID, this method calculates:
+    - links: the list of edge IDs that are incident on the vertex
+    - weight_all: the total weight of these edges
+    - weight_inside: the total weight of edges that stay within the same community where the given vertex is right now,
+        excluding loop edges
+    - weight_loop: the total weight of loop edges
+    - c_ids and c_weights: together these two vectors list the communities incident on this vertex and the total
+        weight of edges pointing to these communities
+    """
     weight_all, weight_inside, weight_loop = (0.0, 0.0, 0.0)
 
+    # Get the list of incident edges
     cid = comms.membership[vertex]
     neighbors, neigh_edge_ids = graph.incident(vertex)
 
@@ -133,6 +154,7 @@ def multilevel_community_links(
     link_cid[edge_mask] = to_cid[edge_mask]
     link_weight[edge_mask] = weight[edge_mask]
 
+    # Sort links by community ID and merge the same
     c_ids, link_perm = torch.unique(link_cid, return_inverse=True, sorted=True)
     c_weights = torch.zeros(c_ids.shape[0], dtype=torch.float).index_add(0, link_perm, link_weight)
 
@@ -144,8 +166,16 @@ def multilevel_community_links(
 
 def community_multilevel_step(
         graph: CooGraph,
-        resolution: float
+        resolution: float = 1.0,
 ) -> Tuple[CooGraph, Tensor, float]:
+    """
+    Performs a single step of the multi-level modularity optimization method
+    :param graph: The input graph. It must be an undirected graph.
+    :param resolution: Resolution parameter. Must be greater than or equal to 0. Default is 1.
+    :return:
+    """
+
+    # Initialize list of communities from graph vertices
     n_nodes = graph.n_nodes
     node_order = torch.arange(0, n_nodes, dtype=torch.long)
     comms = MultilevelCommunityList(
@@ -167,7 +197,7 @@ def community_multilevel_step(
     q = comms.modularity(resolution)
     pass_g = 1
 
-    while True:
+    while True: # Pass begin
         pass_q = q
         changed = 0
 
@@ -240,8 +270,11 @@ def louvain(
         n_count: int,
         edge_index: Tensor,
         weights: Tensor,
-        resolution: float = 1,
+        resolution: float = 1.0,
 ):
+    """
+    :param resolution: Resolution parameter. Must be greater than or equal to 0. Default is 1.
+    """
     # Sort edge index
     edge_index, weights, _ = multilevel_simplify_multiple(edge_index, weights)
     graph = CooGraph.from_edgelist(n_count, edge_index, weights)
