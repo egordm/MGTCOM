@@ -77,4 +77,4 @@ def igraph_from_hetero(
 
         g.vs[attr_name] = torch.cat(attr_items, dim=0).numpy()
 
-    return g, node_type_to_idx, edge_type_to_idx
+    return g, node_type_to_idx, edge_type_to_idx, offsets

@@ -2,19 +2,22 @@ import pytorch_lightning as pl
 import torch
 
 from ml import newman_girvan_modularity, igraph_from_hetero
-from ml.datasets import DBLPHCN, StarWars, IMDB5000
+from ml.datasets import DBLPHCN, StarWars, IMDB5000, SocialDistancingStudents
 from ml.layers import ExplicitClusteringModule
 from ml.layers.embedding import HGTModule
 from ml.layers.initialization import LouvainInitializer
 from ml.models.positional import PositionalModel, PositionalDataModule
 from shared.constants import BENCHMARKS_RESULTS
 
-# dataset = StarWars()
-# batch_size = 16
-# n_clusters = 5
-dataset = IMDB5000()
-batch_size = 512
-n_clusters = 50
+dataset = StarWars()
+batch_size = 16
+n_clusters = 5
+# dataset = SocialDistancingStudents()
+# batch_size = 6144
+# n_clusters = 50
+# dataset = IMDB5000()
+# batch_size = 512
+# n_clusters = 50
 # dataset = DBLPHCN()
 # batch_size = 512
 # n_clusters = 55
@@ -35,6 +38,8 @@ repr_dim = 32
 # n_comm_epochs = 10
 n_epochs = 8
 n_comm_epochs = 6
+# n_epochs = 4
+# n_comm_epochs = 2
 # n_epochs = 1
 # n_comm_epochs = 1
 num_samples = [4, 3]
@@ -89,7 +94,7 @@ I = {k: model.clustering_module.assign(emb).detach().cpu() for k, emb in embeddi
 m = newman_girvan_modularity(data, I, clustering_module.n_clusters)
 print(f'Modularity: {m:.4f}')
 
-G, _, _ = igraph_from_hetero(data, node_attrs=dict(comm=I))
+G, _, _, _ = igraph_from_hetero(data, node_attrs=dict(comm=I))
 G.write_graphml(str(save_dir.joinpath('graph.graphml')))
 
 torch.save(model.state_dict(), str(save_dir.joinpath('model.pt')))
