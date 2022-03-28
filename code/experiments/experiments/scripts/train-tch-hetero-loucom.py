@@ -1,9 +1,8 @@
-import numpy as np
 import pytorch_lightning as pl
 import torch
 
 from ml import igraph_from_hetero
-from ml.algo import louvain
+from experiments.algo import louvain, loucom
 from ml.datasets import StarWars
 from ml.layers import ExplicitClusteringModule, pairwise_sim_fn
 from ml.layers.embedding import HGTModule
@@ -25,33 +24,28 @@ n_clusters = 5
 
 data = dataset.data
 
-
-# G = igraph.Graph.Read_GML('karate.gml')
-# comm = G.community_multilevel()
-# print(f'Found communities with modularity={comm.modularity}')
-#
-# edge_index = torch.tensor(G.get_edgelist(), dtype=torch.long).t()
-# # edge_index = torch.cat([edge_index, edge_index.flip(0)], dim=1)
-#
-# ms, qs = community_multilevel(
-#     G.vcount(), edge_index, torch.ones(edge_index.shape[1]),
-# )
-# print(f'Own modularity={qs[-1]}, Real = {G.modularity(ms[-1])}')
-#
-# exit(1)
 G, _, _, node_offsets = igraph_from_hetero(data)
 comm = G.community_multilevel()
 print(f'Found communities with modularity={comm.modularity}')
 
 uni_data = TypedHomogenousTransform()(data)
+centroids = torch.rand(uni_data.num_nodes, 2)
 ms, qs = louvain(
     uni_data.num_nodes, uni_data.edge_index, torch.ones(uni_data.num_edges),
 )
-
 print(f'Own modularity={qs[-1]}, Real = {G.modularity(ms[-1])}')
 
-u = np.array(G.get_edgelist())[G.incident(0)]
-exit(0)
+ms, qs, cc, cs = loucom(
+    uni_data.num_nodes, centroids, uni_data.edge_index, torch.ones(uni_data.num_edges),
+)
+print(f'Own modularity={qs[-1]}, Real = {G.modularity(ms[-1])}')
+# ccs = torch.zeros(cc[-1]).index_add(0, ms[-1], torch.ones(ms[-1].shape))
+# css = torch.zeros(cc[-1], 2).index_add(0, ms[-1], centroids) / ccs.unsqueeze(1)
+
+# u = np.array(G.get_edgelist())[G.incident(0)]
+# exit(0)
+
+
 name = f'tch-hetero-min-{dataset.name}'
 load_dir = BENCHMARKS_RESULTS.joinpath('analysis', name)
 if not load_dir.exists():
@@ -121,19 +115,13 @@ comm = G.community_multilevel(weights)
 G.vs['comm_id'] = comm.membership
 G.es['weight'] = weights
 
-print(f'Found communities with modularity={comm.modularity}')
+print(f'Weighted modularity={comm.modularity}')
 m = G.modularity(comm.membership)
 print(f'Unweighted modularity={m}')
 
 # G.write_graphml(str(load_dir.joinpath('graph_weighted.graphml')))
 
-import networkx as nx
-Gnx = nx.Graph(G.to_networkx())
-comn = best_partition(Gnx)
-I = torch.zeros(G.vcount(), dtype=torch.long)
-for k in sorted(comn.keys()):
-    I[k] = comn[k]
-
-m = G.modularity(I)
-print(f'UnWeighted custom modularity={m}')
-u = 0
+ms, qs, cc, cs = loucom(
+    G.vcount(), embeddings, edges.t(), torch.ones(len(edges)),
+)
+print(f'Own modularity={qs[-1]}, Real = {G.modularity(ms[-1])}')
