@@ -14,7 +14,7 @@ def igraph_from_hetero(
         data: HeteroData,
         node_attrs: Dict[str, Dict[NodeType, Tensor]] = None,
         edge_attrs: Dict[str, Dict[EdgeType, Tensor]] = None,
-) -> Tuple[igraph.Graph, Dict[NodeType, int], Dict[EdgeType, int]]:
+) -> Tuple[igraph.Graph, Dict[NodeType, int], Dict[EdgeType, int], Dict[NodeType, int]]:
     """Convert a heterograph to an igraph graph."""
     node_type_to_idx = {
         node_type: idx

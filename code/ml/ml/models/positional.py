@@ -3,6 +3,7 @@ from typing import Any, List, Union, Dict
 import pytorch_lightning as pl
 import torch.nn
 import torchmetrics
+from jsonargparse.typing import final
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EVAL_DATALOADERS, TRAIN_DATALOADERS
 from tch_geometric.loader.budget_loader import BudgetLoader
 from tch_geometric.loader.hgt_loader import HGTLoader
@@ -116,11 +117,27 @@ class PositionalModel(pl.LightningModule):
         pred = trainer.predict(self, loader)
         return merge_dicts(pred, lambda xs: torch.cat(xs, dim=0))
 
+    def centroids(self) -> torch.Tensor:
+        return self.clustering_module.centroids.weight.data
+
+    def compute_soft_assignments(self, embeddings: torch.Tensor) -> torch.Tensor:
+        return self.clustering_module\
+            .sim_fn(embeddings.unsqueeze(1), self.centroids().unsqueeze(0))\
+            .softmax(dim=-1)
+
+    def compute_assignments(self, embeddings: torch.Tensor) -> torch.Tensor:
+        return self.compute_soft_assignments(embeddings).argmax(dim=-1)
+
+
+@final
+class FinalHeteroData(HeteroData):
+    pass
+
 
 class PositionalDataModule(pl.LightningDataModule):
     def __init__(
             self,
-            data: HeteroData,
+            data: FinalHeteroData,
             num_samples: Union[List[int], Dict[NodeType, List[int]]],
             num_neg_samples: int = 3,
             num_neg_tries: int = 5,

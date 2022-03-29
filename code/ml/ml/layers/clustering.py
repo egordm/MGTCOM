@@ -39,6 +39,9 @@ class ExplicitClusteringModule(torch.nn.Module):
         return q.argmax(dim=-1)
 
     def reinit(self, centers: torch.Tensor):
+        if not centers:
+            return
+
         device = self.centroids.weight.data.device
         self.centroids = torch.nn.Embedding.from_pretrained(centers, freeze=False).to(device)
 

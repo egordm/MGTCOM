@@ -28,9 +28,12 @@ class BaseInitializer:
 @INITIALIZER_REGISTRY
 class RandomInitializer(BaseInitializer):
     def __init__(self, data: HeteroData, k: int) -> None:
-        super().__init__()
+        super().__init__(data)
         self.data = data
         self.k = k
+
+    def initialize(self, emb_dict: Dict[NodeType, Tensor]):
+        return None
 
     @property
     def n_clusters(self) -> int:

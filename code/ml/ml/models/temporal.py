@@ -3,6 +3,7 @@ from typing import Any, List, Union, Dict, Tuple
 import pytorch_lightning as pl
 import torch.nn
 import torchmetrics
+from jsonargparse.typing import final
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EVAL_DATALOADERS, TRAIN_DATALOADERS
 from tch_geometric.loader.budget_loader import BudgetLoader
 from tch_geometric.loader.hgt_loader import HGTLoader
@@ -154,10 +155,15 @@ class TemporalModel(pl.LightningModule):
         return self.compute_soft_assignments(embeddings).argmax(dim=-1)
 
 
+@final
+class FinalHeteroData(HeteroData):
+    pass
+
+
 class TemporalDataModule(pl.LightningDataModule):
     def __init__(
             self,
-            data: HeteroData,
+            data: FinalHeteroData,
             num_samples: Union[List[int], Dict[NodeType, List[int]]],
             window: Tuple[int, int],
             num_neg_samples: int = 3,

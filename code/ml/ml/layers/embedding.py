@@ -42,15 +42,16 @@ class HGTModule(HeteroEmbeddingModule):
     def __init__(
             self,
             metadata: Metadata,
-            out_channels: int = 32, hidden_channels: int = None,
+            repr_dim: int = 32,
+            out_channels: int = None, hidden_channels: int = None,
             in_channels: Union[int, Dict[NodeType, int]] = None,
             num_heads=2, num_layers=2, group='mean',
             use_RTE=False, use_Lin=True
     ):
         super().__init__(metadata, out_channels)
         self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.hidden_channels = hidden_channels or out_channels
+        self.out_channels = out_channels or repr_dim
+        self.hidden_channels = hidden_channels or self.out_channels
         self.use_RTE = use_RTE
         self.use_Lin = use_Lin
 
