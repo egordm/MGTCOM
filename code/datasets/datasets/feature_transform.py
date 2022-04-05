@@ -36,6 +36,7 @@ class MultiRareLabelEncoder(BaseCategoricalTransformer):
         self.n_categories = n_categories
         self.max_n_categories = max_n_categories
         self.replace_with = replace_with
+        self.ignore_format = True
 
     def fit(self, X: pd.DataFrame, y: Optional[pd.Series] = None):
         X = self._check_fit_input_and_variables(X)

@@ -92,6 +92,9 @@ class StarWars(GraphDataset):
         }
 
         data = hetero_from_pandas(node_dfs, edge_dfs)
+        for node_type in data.node_types:
+            data[node_type].names = node_dfs[node_type]['_name'].values
+            data[node_type].mapping = node_mapping[node_type].values
 
         data = ToUndirected(reduce=None)(data)
         data = SortEdges()(data)

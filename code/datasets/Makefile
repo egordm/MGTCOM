@@ -105,6 +105,9 @@ DATASETS_DIR := ../storage/datasets/raw
 		&& kaggle datasets download ruchi798/star-wars \
 		&& unzip -d star-wars star-wars.zip \
 		&& rm star-wars.zip
+		&& wget "https://s3.amazonaws.com/wikia_xml_dumps/s/st/starwars_pages_current.xml.7z" -O star-wars/starwars_pages_current.xml.7z \
+		&& cd star-wars \
+		&& 7z e starwars_pages_current.xml.7z
 
 ../storage/datasets/raw/house-of-representatives-congress-116:
 	cd ${DATASETS_DIR} \
