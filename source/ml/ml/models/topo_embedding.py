@@ -8,6 +8,7 @@ from tch_geometric.loader.hgt_loader import HGTLoader
 from tch_geometric.transforms import NegativeSamplerTransform
 from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform
 from torch_geometric.data import HeteroData
+from simple_parsing import choice
 
 from datasets import GraphDataset
 from ml.data import ContrastiveTopoDataLoader, HeteroNodesDataset
@@ -25,7 +26,7 @@ class TopoEmbeddingModelParams(HParams):
     num_heads: int = 2
     group: str = 'mean'
 
-    sim: str = 'dotp'
+    sim: str = choice(['cosine', 'dotp', 'l2'], default='dotp')
 
     lr: float = 0.01
 
@@ -72,14 +73,16 @@ class TopoEmbeddingModel(pl.LightningModule):
         loss = self.loss_fn(emb, pn_data)
 
         return {
-            'loss': loss
+            'loss': loss,
         }
 
     def training_step(self, batch):
         return self.step(batch)
 
-    def validation_step(self, batch):
-        return self.step(batch)
+    def validation_step(self, batch, batch_idx, dataloader_idx=0):
+        return {
+            'emb': self.forward(batch)
+        }
 
     def on_train_batch_end(self, outputs, *args, **kwargs) -> None:
         self.metrics.update(outputs)
@@ -114,5 +117,11 @@ class TopoEmbeddingModel(pl.LightningModule):
         )
 
     def val_dataloader(self):
-        # TODO: add validation data
-        pass
+        return [
+            HGTLoader(
+                HeteroNodesDataset(self.dataset.data, temporal=False),
+                neighbor_sampler=HGTSamplerTransform(self.dataset.data, self.hparams.num_neighbors, temporal=False),
+                shuffle=False,
+                **self.hparams.loader_args,
+            ),
+        ]

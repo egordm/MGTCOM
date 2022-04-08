@@ -5,11 +5,11 @@ def pairwise_dotp(x, y):
     return torch.einsum('...i,...i->...', x, y)
 
 
-def pairwise_euclidean(x, y, p=2):
+def pairwise_l2(x, y, p=2):
     return torch.cdist(x, y, p=p)
 
 
-def pairwise_euclidean_sim(x, y, p=2):
+def pairwise_l2s(x, y, p=2):
     return -torch.cdist(x, y, p=p)
 
 
@@ -22,7 +22,7 @@ def pairwise_sim_fn(sim='dotp'):
         return pairwise_dotp
     elif sim == 'cosine':
         return pairwise_cosine
-    elif sim == 'euclidean':
-        return pairwise_euclidean_sim
+    elif sim == 'l2':
+        return pairwise_l2s
     else:
         raise ValueError(f'Unknown similarity function {sim}')
