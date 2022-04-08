@@ -8,15 +8,19 @@ import torch
 from torch_geometric.data import InMemoryDataset as THGInMemoryDataset, HeteroData
 from torch_geometric.data.storage import NodeStorage, EdgeStorage, BaseStorage
 from torch_geometric.typing import NodeType, EdgeType, Metadata
+from pytorch_lightning.utilities.cli import _Registry
 
-from datasets.utils.data import DynHeteroData
 from shared.paths import CACHE_PATH
+
+DATASET_REGISTRY = _Registry()
 
 
 class GraphDataset(THGInMemoryDataset):
     name: str = ''
     description: str = ''
     tags: List[str] = []
+
+    data: HeteroData
 
     def __init__(
             self,

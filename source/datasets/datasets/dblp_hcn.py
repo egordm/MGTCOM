@@ -9,10 +9,11 @@ from datasets.transforms.define_snapshots import DefineSnapshots
 from datasets.transforms.normalize_timestamps import NormalizeTimestamps
 from datasets.transforms.sort_edges import SortEdges
 from datasets.transforms.undirected import ToUndirected
-from datasets.utils.base import GraphDataset
+from datasets.utils.base import GraphDataset, DATASET_REGISTRY
 from shared.paths import DatasetPath
 
 
+@DATASET_REGISTRY
 class DBLPHCN(GraphDataset):
     name = 'DBLP-HCN'
     tags = ['dynamic', 'ground-truth', 'overlapping']

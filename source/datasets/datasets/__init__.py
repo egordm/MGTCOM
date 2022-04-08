@@ -1,3 +1,4 @@
+from .utils import GraphDataset
 from .star_wars import StarWars
 from .dblp_hcn import DBLPHCN
 from .imdb5000 import IMDB5000
