@@ -10,6 +10,8 @@ STORAGE_PATH = BASE_PATH / 'storage'
 TMP_PATH = STORAGE_PATH / 'tmp'
 CACHE_PATH = STORAGE_PATH / 'cache'
 DATASET_PATH = STORAGE_PATH / 'datasets'
+RESULTS_PATH = STORAGE_PATH / 'results'
+
 
 
 @dataclass
