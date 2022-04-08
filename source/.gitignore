@@ -6,6 +6,8 @@ storage/logs/*
 !storage/logs/.gitkeep
 storage/results/*
 !storage/results/.gitkeep
+storage/cache/*
+!storage/cache/.gitkeep
 storage/tmp
 tmp
 wandb

@@ -110,7 +110,7 @@ class SocialDistancingStudents(GraphDataset):
         for entity_type, df in itertools.chain(edge_dfs.items(), node_dfs.items()):
             if 'timestamp' not in df.columns:
                 continue
-            df['timestamp'] = df['timestamp'].astype(int)
+            df['timestamp'] = df['timest    qamp'].astype(int)
 
         # Embed natural text features
         model = SentenceTransformer(self.model_name)
