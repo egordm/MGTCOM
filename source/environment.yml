@@ -1,0 +1,21 @@
+name: thesis
+prefix: ./env
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - conda-forge::pyspark=3.2.0
+  - pytorch::cudatoolkit=11.3
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - conda-forge::pytorch-lightning
+  - pyg::pyg
+  - conda-forge::python-igraph
+  - numpy
+  - scipy
+  - pandas
+  - jupyter
+  - pip:
+      - -r datasets/requirements.txt
+
