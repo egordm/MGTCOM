@@ -1,11 +1,22 @@
+from typing import Union
+
 import faiss
+import numpy as np
 import torch
 from torch import Tensor
+
+
+def ensure_numpy(x: Union[Tensor, np.ndarray]) -> np.ndarray:
+    if isinstance(x, Tensor):
+        return x.detach().cpu().numpy()
+    else:
+        return x
 
 
 class KMeans:
     clus: faiss.Clustering
     index: faiss.Index
+    centroids: np.ndarray
 
     def __init__(
             self,
@@ -37,11 +48,11 @@ class KMeans:
 
     def fit(self, x: Tensor, weights: Tensor = None, init_centroids: Tensor = None):
         # Convert torch tensors to numpy arrays
-        x = x.cpu().numpy()
+        x = ensure_numpy(x)
         if weights is not None:
-            weights = weights.cpu().numpy()
+            weights = ensure_numpy(weights)
         if init_centroids is not None:
-            init_centroids = init_centroids.cpu().numpy()
+            init_centroids = ensure_numpy(init_centroids)
 
         # Initialize clustering
         self.clus = faiss.Clustering(self.repr_dim, self.k, self.params)
@@ -62,7 +73,11 @@ class KMeans:
 
     def assign(self, x):
         assert self.centroids is not None, "should train before assigning"
-        x = x.cpu().numpy()
+        x = ensure_numpy(x)
         self.index.reset()
         self.index.add(self.centroids)
         return torch.tensor(self.index.assign(x, k=1).ravel(), dtype=torch.long)
+
+    def get_centroids(self):
+        return torch.tensor(self.centroids, dtype=torch.float)
+
