@@ -1,16 +1,9 @@
-from typing import Union
-
 import faiss
 import numpy as np
 import torch
 from torch import Tensor
 
-
-def ensure_numpy(x: Union[Tensor, np.ndarray]) -> np.ndarray:
-    if isinstance(x, Tensor):
-        return x.detach().cpu().numpy()
-    else:
-        return x
+from ml.utils.tensor import ensure_numpy
 
 
 class KMeans:
@@ -80,4 +73,3 @@ class KMeans:
 
     def get_centroids(self):
         return torch.tensor(self.centroids, dtype=torch.float)
-

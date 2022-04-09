@@ -58,7 +58,7 @@ class TopoEmbeddingModel(pl.LightningModule):
         self.loss_fn = HingeLoss(sim=self.hparams.sim)
 
         self.metrics = MetricCollector({
-            'loss': torchmetrics.MeanMetric(),
+            'mean_loss': torchmetrics.MeanMetric(),
         })
 
     def forward(self, batch: HeteroData, *args, **kwargs) -> Any:
@@ -74,6 +74,7 @@ class TopoEmbeddingModel(pl.LightningModule):
 
         return {
             'loss': loss,
+            'mean_loss': loss.detach(),
         }
 
     def training_step(self, batch):
@@ -86,7 +87,7 @@ class TopoEmbeddingModel(pl.LightningModule):
 
     def on_train_batch_end(self, outputs, *args, **kwargs) -> None:
         self.metrics.update(outputs)
-        self.log_dict(outputs, prog_bar=True)
+        # self.log_dict(outputs, prog_bar=True)
 
     def on_train_epoch_end(self) -> None:
         super().on_train_epoch_end()

@@ -1,5 +1,7 @@
 import sys
+from typing import Union
 
+import numpy as np
 import torch
 from torch import Tensor
 
@@ -22,3 +24,10 @@ def randint_range(range: Tensor, low=None, dtype=torch.long):
     if low is not None:
         out = out + low
     return out
+
+
+def ensure_numpy(x: Union[Tensor, np.ndarray]) -> np.ndarray:
+    if isinstance(x, Tensor):
+        return x.detach().cpu().numpy()
+    else:
+        return x
