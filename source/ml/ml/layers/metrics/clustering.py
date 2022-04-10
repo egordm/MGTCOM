@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from sklearn import metrics, utils, preprocessing
 
 from ml.utils.tensor import ensure_numpy
@@ -16,6 +17,9 @@ def sim_to_sk(sim):
 
 
 def silhouette_score(X, labels, sim='dotp', sample_size=None):
+    if len(torch.unique(labels)) <= 1:
+        return 0.0
+
     return metrics.silhouette_score(
         ensure_numpy(X), ensure_numpy(labels),
         metric=sim_to_sk(sim), sample_size=sample_size
@@ -41,6 +45,9 @@ def check_number_of_labels(n_labels, n_samples):
 
 
 def davies_bouldin_score(X, labels, sim='dotp'):
+    if len(torch.unique(labels)) <= 1:
+        return 0.0
+
     metric = sim_to_sk(sim)
     X = ensure_numpy(X)
     labels = ensure_numpy(labels)
