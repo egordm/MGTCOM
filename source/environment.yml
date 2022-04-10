@@ -18,6 +18,12 @@ dependencies:
   - scipy
   - pandas
   - jupyter
+  - matplotlib
+  - datashader
+  - bokeh
+  - holoviews
+  - colorcet
+  - scikit-image
   - pip:
       - -r datasets/requirements.txt
       - -r ml/requirements.txt
