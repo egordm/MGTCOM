@@ -51,7 +51,7 @@ class DBLPHCN(GraphDataset):
 
             model = SentenceTransformer('all-MiniLM-L6-v2')
             with torch.no_grad():
-                emb = model.encode(df['title'].values, show_progress_bar=True, convert_to_tensor=True).cpu()
+                emb = model.encode(df['name'].values, show_progress_bar=True, convert_to_tensor=True).cpu()
             store.x = emb
 
     def process(self):
