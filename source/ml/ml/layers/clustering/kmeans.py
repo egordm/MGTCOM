@@ -31,7 +31,7 @@ class KMeans:
 
         if sim == 'dotp':
             self.index_cls = faiss.IndexFlatIP
-        elif sim == 'l2':
+        elif sim == 'euclidean':
             self.index_cls = faiss.IndexFlatL2
         elif sim == 'cos':
             self.params.spherical = True
