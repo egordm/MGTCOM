@@ -5,8 +5,8 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor
 
 from datasets.utils.base import DATASET_REGISTRY, GraphDataset
-from ml.callbacks import ClusteringVisualizerCallback
 from ml.callbacks.clustering_monitor import ClusteringMonitor
+from ml.callbacks.gmm_visualizer_callback import GMMVisualizerCallback
 from ml.data import ConcatDataset, PretrainedEmbeddingsDataset
 from ml.models.dpm_clustering import DPMClusteringModelParams, DPMClusteringModel
 from ml.utils.config import TrainerParams, dataset_choices
@@ -42,7 +42,8 @@ def train(args: Args):
     callbacks = [
         LearningRateMonitor(logging_interval='step'),
         ClusteringMonitor(),
-        ClusteringVisualizerCallback(),
+        # ClusteringVisualizerCallback(),
+        GMMVisualizerCallback(),
     ]
 
     logger.info('Training model')

@@ -12,7 +12,7 @@ def eps_norm(x: Tensor, eps: float = 1e-6) -> Tensor:
 
 
 class GMMModule(torch.nn.Module):
-    mu: torch.nn.Parameter
+    mus: torch.nn.Parameter
     covs: torch.nn.Parameter
     pi: torch.nn.Parameter
 
@@ -34,7 +34,7 @@ class GMMModule(torch.nn.Module):
         if mu_init is None:
             mu_init = torch.randn(self.n_components, self.repr_dim)
         assert mu_init.shape == (self.n_components, self.repr_dim)
-        self.mu = torch.nn.Parameter(mu_init, requires_grad=False)
+        self.mus = torch.nn.Parameter(mu_init, requires_grad=False)
 
         if covs_init is None:
             covs_init = torch.eye(self.repr_dim).reshape(1, self.repr_dim, self.repr_dim).repeat(self.n_components, 1, 1)
@@ -53,12 +53,12 @@ class GMMModule(torch.nn.Module):
         else:
             raise NotImplementedError
 
-        self.mu.data, self.covs.data, self.pi.data = mus, covs, pi
+        self.mus.data, self.covs.data, self.pi.data = mus, covs, pi
 
     def estimate_log_prob(self, x: Tensor):
         weighted_r_E = []
         for k in range(self.n_components):
-            gmm_k = MultivariateNormal(self.mu[k], self.covs[k])
+            gmm_k = MultivariateNormal(self.mus[k], self.covs[k])
             prob_k = gmm_k.log_prob(x.detach())
             weighted_r_E.append(prob_k + torch.log(self.pi[k]))
 
@@ -81,4 +81,4 @@ class GMMModule(torch.nn.Module):
     def m_step(self, x: Tensor, r: Tensor, prior: Priors):
         mus, covs, pi = update_cluster_params(x, r, self.n_components, prior)
 
-        self.mu.data, self.covs.data, self.pi.data = mus, covs, pi
+        self.mus.data, self.covs.data, self.pi.data = mus, covs, pi
