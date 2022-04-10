@@ -1,9 +1,11 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, List, Optional
 
 import pytorch_lightning as pl
 import torch
 import torchmetrics
+from torch import Tensor
 from tch_geometric.loader.hgt_loader import HGTLoader
 from tch_geometric.transforms import NegativeSamplerTransform
 from tch_geometric.transforms.hgt_sampling import HGTSamplerTransform
@@ -15,7 +17,13 @@ from ml.data import ContrastiveTopoDataLoader, HeteroNodesDataset
 from ml.layers.embedding import HGTEmbeddingModule
 from ml.layers.loss.hinge_loss import HingeLoss
 from ml.layers.metrics.metric_collector import MetricCollector
+from ml.models.base.embedding import BaseEmbeddingModel
+from ml.utils import merge_dicts, dicts_extract
 from ml.utils.config import HParams, DataLoaderParams
+
+
+class ValidationDataloaderIdx(Enum):
+    SequentialNodes = 0
 
 
 @dataclass
@@ -24,9 +32,9 @@ class TopoEmbeddingModelParams(HParams):
     hidden_dim: Optional[int] = None
     num_layers: int = 2
     num_heads: int = 2
-    group: str = 'mean'
+    neigh_agg: str = 'mean'
 
-    sim: str = choice(['cosine', 'dotp', 'l2'], default='dotp')
+    sim: str = choice(['cosine', 'dotp', 'euclidean'], default='euclidean')
 
     lr: float = 0.01
 
@@ -37,13 +45,12 @@ class TopoEmbeddingModelParams(HParams):
     loader_args: DataLoaderParams = DataLoaderParams()
 
 
-class TopoEmbeddingModel(pl.LightningModule):
+class TopoEmbeddingModel(BaseEmbeddingModel):
     hparams: TopoEmbeddingModelParams
 
     def __init__(self, dataset: GraphDataset, hparams: TopoEmbeddingModelParams) -> None:
         super().__init__()
         self.save_hyperparameters(hparams.to_dict())
-
         self.dataset = dataset
 
         self.embedding_module = HGTEmbeddingModule(
@@ -52,7 +59,7 @@ class TopoEmbeddingModel(pl.LightningModule):
             hidden_dim=self.hparams.hidden_dim,
             num_layers=self.hparams.num_layers,
             num_heads=self.hparams.num_heads,
-            group=self.hparams.group
+            group=self.hparams.neigh_agg
         )
 
         self.loss_fn = HingeLoss(sim=self.hparams.sim)
@@ -79,11 +86,6 @@ class TopoEmbeddingModel(pl.LightningModule):
 
     def training_step(self, batch):
         return self.step(batch)
-
-    def validation_step(self, batch, batch_idx, dataloader_idx=0):
-        return {
-            'emb': self.forward(batch)
-        }
 
     def on_train_batch_end(self, outputs, *args, **kwargs) -> None:
         self.metrics.update(outputs)
