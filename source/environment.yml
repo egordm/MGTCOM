@@ -13,6 +13,7 @@ dependencies:
   - conda-forge::pytorch-lightning
   - pyg::pyg
   - conda-forge::python-igraph
+  - conda-forge::umap-learn
   - numpy
   - scipy
   - pandas
@@ -20,4 +21,5 @@ dependencies:
   - pip:
       - -r datasets/requirements.txt
       - -r ml/requirements.txt
+      - wandb
 
