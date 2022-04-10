@@ -12,3 +12,7 @@ def merge_dicts(ds, merge_fn=None):
             res[k] = merge_fn(v)
 
     return res
+
+
+def dicts_extract(ds, key):
+    return [d[key] for d in ds if key in d]

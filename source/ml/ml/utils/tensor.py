@@ -31,3 +31,13 @@ def ensure_numpy(x: Union[Tensor, np.ndarray]) -> np.ndarray:
         return x.detach().cpu().numpy()
     else:
         return x
+
+
+def unique_count(I: Tensor, k: int) -> Tensor:
+    """
+    Counts the number of elements in each of the k partitions.
+    """
+    labels, counts = torch.unique(I, return_counts=True)
+    result = torch.zeros(k, dtype=torch.long)
+    result[labels] = counts
+    return result
