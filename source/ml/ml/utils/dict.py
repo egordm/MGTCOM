@@ -16,3 +16,11 @@ def merge_dicts(ds, merge_fn=None):
 
 def dicts_extract(ds, key):
     return [d[key] for d in ds if key in d]
+
+
+def flat_iter(l):
+    for el in l:
+        if isinstance(el, list):
+            yield from flat_iter(el)
+        else:
+            yield el

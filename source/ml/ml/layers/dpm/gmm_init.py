@@ -46,7 +46,7 @@ def initialize_kmeans1d(X: Tensor, k: int, prior: Priors, sim='euclidean') -> GM
 
     mus = prior.compute_post_mus(counts, mus)
     covs = torch.stack([
-        prior.compute_post_cov(counts[i], X[I == i], covs[i])
+        prior.compute_post_cov(counts[i], X[I == i].mean(axis=0), covs[i])
         for i in range(k)
     ])
 

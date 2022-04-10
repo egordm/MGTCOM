@@ -47,7 +47,7 @@ class ClusteringVisualizerCallback(Callback):
         color_dict = {i: self.cmap(i / k) for i in range(k)}
 
         I = pl_module.val_r.argmax(dim=-1)
-        centers = pl_module.gmm.mu.data.detach().cpu()
+        centers = pl_module.cluster_gmm.mu.data.detach().cpu()
 
         ax = umap.plot.points(self.mapper, labels=I.numpy(), color_key=color_dict)
 

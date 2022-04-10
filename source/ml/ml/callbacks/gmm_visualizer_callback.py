@@ -56,9 +56,9 @@ class GMMVisualizerCallback(Callback):
         X_t = self.X_t
         I = self.subsampler.transform(pl_module.val_r.argmax(dim=-1).cpu())
 
-        mus = pl_module.gmm.mus.data.detach().cpu()
-        covs = pl_module.gmm.covs.data.detach().cpu()
-        k = pl_module.gmm.n_components
+        mus = pl_module.cluster_gmm.mus.data.detach().cpu()
+        covs = pl_module.cluster_gmm.covs.data.detach().cpu()
+        k = pl_module.cluster_gmm.n_components
 
         # Remap Cluster Parameters
         if self.mapper:

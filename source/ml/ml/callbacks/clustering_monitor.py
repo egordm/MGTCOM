@@ -1,15 +1,11 @@
 from pathlib import Path
 from typing import Optional
 
-import numpy as np
-import umap
-import umap.plot
 import torch
-from pytorch_lightning import Trainer, LightningModule
+import umap.plot
+from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.trainer.states import RunningStage
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 from torch import Tensor
 
 from ml.layers.metrics import silhouette_score, davies_bouldin_score
