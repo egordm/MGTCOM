@@ -32,11 +32,12 @@ class SubClusteringNet(torch.nn.Module):
         self.in_net = torch.nn.Linear(in_dim, self.out_dim * k)
         self.out_net = torch.nn.Linear(self.out_dim * k, k * 2)
 
+        # Detach different clusters by zeroing out their interactions
         out_gradient_mask = torch.zeros(self.out_dim * k, k * 2)
         for i in range(k):
             out_gradient_mask[self.out_dim * i:self.out_dim * (i + 1), i * 2:(i + 1) * 2] = 1
-        self.out_net.weight.data *= out_gradient_mask.T
 
+        self.out_net.weight.data *= out_gradient_mask.T
         self.out_net.weight.register_hook(
             lambda grad: grad.mul_(out_gradient_mask.T.to(device=grad.device))
         )
@@ -47,8 +48,8 @@ class SubClusteringNet(torch.nn.Module):
 
         # Zero our irrelevant (non z) clusters
         mask = torch.zeros_like(ri)
-        mask[:, 2 * z] = 1.
-        mask[:, 2 * z + 1] = 1.
+        mask[torch.arange(len(z)), 2 * z] = 1.
+        mask[torch.arange(len(z)), 2 * z + 1] = 1.
 
         # Masked softmax
         ri = F.softmax(ri.masked_fill((1 - mask).bool(), float('-inf')), dim=1)

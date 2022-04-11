@@ -21,14 +21,13 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class DPMClusteringModelParams(HParams):
     lat_dim: int = 32
-    # init_k: int = 2
-    init_k: int = 5
+    init_k: int = 2
     subcluster: bool = True
 
     sim: str = choice(['cosine', 'dotp', 'euclidean'], default='euclidean')
 
     epoch_start_m: int = 10
-    epoch_start_msub: int = 20
+    epoch_start_msub: int = 30
 
     prior_dir_counts: float = 0.1
     prior_kappa: float = 0.0001
@@ -54,6 +53,7 @@ class DPMClusteringModel(pl.LightningModule):
     hparams: DPMClusteringModelParams
 
     val_r: Tensor
+    val_ri: Tensor
 
     def __init__(
             self,
@@ -100,27 +100,31 @@ class DPMClusteringModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, optimizer_idx=0):
         optimizer_idx = OptimizerIdx(optimizer_idx)
+        out = {}
         x = batch
         r = self.cluster_net(x)
 
         cluster_loss = self.cluster_gmm.e_step(x, r)
+        out['cluster_loss'] = cluster_loss.detach()
 
         if optimizer_idx == OptimizerIdx.Cluster:
             loss = cluster_loss
         elif optimizer_idx == OptimizerIdx.SubCluster:
-            r = r.detach()
-            z = r.argmax(dim=-1)
-            ri = self.subcluster_net(x, z)
+            if self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub:
+                r = r.detach()
+                z = r.argmax(dim=-1)
+                ri = self.subcluster_net(x, z)
 
-            subcluster_loss = self.subcluster_gmm.e_step(x, ri)
-            loss = subcluster_loss
+                subcluster_loss = self.subcluster_gmm.e_step(x, ri)
+                out['subcluster_loss'] = cluster_loss.detach()
+
+                loss = subcluster_loss
+            else:
+                return None
         else:
             raise ValueError(f"Unknown optimizer_idx: {optimizer_idx}")
 
-        out = {
-            'loss': loss,
-            'cluster_loss': cluster_loss.detach(),
-        }
+        out['loss'] = loss
 
         if optimizer_idx == OptimizerIdx.Cluster:
             out.update({
@@ -137,7 +141,6 @@ class DPMClusteringModel(pl.LightningModule):
     def training_epoch_end(self, outputs) -> None:
         X = torch.cat(dicts_extract(flat_iter(outputs), 'x'), dim=0)
         r = torch.cat(dicts_extract(flat_iter(outputs), 'r'), dim=0)
-        ri = torch.cat(dicts_extract(flat_iter(outputs), 'ri'), dim=0) if self.hparams.subcluster else None
 
         # Clustering M step
         update_params = self.current_epoch > self.hparams.epoch_start_m
@@ -146,15 +149,16 @@ class DPMClusteringModel(pl.LightningModule):
             self.cluster_gmm.m_step(X, r, self.prior)
 
         # Initialize subcluster GMM (later in the training)
-        if self.hparams.subcluster and self.current_epoch == self.hparams.epoch_start_msub:
+        if self.hparams.subcluster and self.current_epoch + 1 == self.hparams.epoch_start_msub:
             logger.info("Initializing subcluster params")
-            self.subcluster_gmm.initialize_params(X, ri, self.prior, mode=self.hparams.mu_sub_init_fn)
+            self.subcluster_gmm.initialize_params(X, r, self.prior, mode=self.hparams.mu_sub_init_fn)
 
         # Subcluster M step
-        update_params_sub = self.hparams.subcluster and self.current_epoch > self.hparams.epoch_start_msub and update_params
+        update_params_sub = self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub and update_params
         if update_params_sub:
             logger.info("Updating subcluster params")
-            self.subcluster_gmm.m_step(X, ri, self.prior)
+            ri = torch.cat(dicts_extract(flat_iter(outputs), 'ri'), dim=0)
+            self.subcluster_gmm.m_step(X, r, ri, self.prior)
 
         self.log_dict({
             'update_params': update_params,
@@ -162,14 +166,23 @@ class DPMClusteringModel(pl.LightningModule):
         })
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
-        r = self.forward(batch)
+        out = {}
+        x = batch
 
-        return {
-            'r': r.detach(),
-        }
+        r = self.forward(x)
+        out['r'] = r.detach()
+
+        if self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub:
+            z = r.detach().argmax(dim=-1)
+            ri = self.subcluster_net(x, z)
+            out['ri'] = ri.detach()
+
+        return out
 
     def validation_epoch_end(self, outputs, dataloader_idx=0):
         self.val_r = torch.cat(dicts_extract(outputs, 'r'), dim=0)
+        self.val_ri = torch.cat(dicts_extract(outputs, 'ri'),
+                                dim=0) if self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub else None
 
     def configure_optimizers(self):
         optimizers = []

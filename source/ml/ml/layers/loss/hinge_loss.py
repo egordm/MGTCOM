@@ -7,7 +7,7 @@ from ml.utils.distance import pairwise_sim_fn
 
 
 class HingeLoss(torch.nn.Module):
-    def __init__(self, delta=1.0, agg_pos='mean', agg_neg='max', sim='dotp') -> None:
+    def __init__(self, delta=1.0, agg_pos='mean', agg_neg='max', sim='euclidean') -> None:
         super().__init__()
         self.delta = delta
         self.agg_pos = agg_pos

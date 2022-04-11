@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import torch
@@ -128,17 +129,22 @@ class StackedGaussianMixtureModel(torch.nn.Module):
             for i in range(n_components)
         ])
 
-        self.loss_fn = IsoGMMLoss()
+        self.loss_fn = IsoGMMLoss(sim=sim)
 
     def initialize_params(self, X: Tensor, r: Optional[Tensor], prior: Priors, mode='kmeans1d'):
         z = r.argmax(dim=-1)
 
+        n_empty = 0
         for i, submodel in enumerate(self.components):
             X_k = X[z == i]
-            submodel.initialize_params(X_k if len(X_k) else X, None, prior, mode=mode)
+            n_empty += (len(X_k) == 0)
+            submodel.initialize_params(X_k if len(X_k) >= self.n_subcomponents else X, None, prior, mode=mode)
 
-    def update_params(self, X: Tensor, ri: Tensor, prior: Priors):
-        z = ri.argmax(dim=-1)
+        if n_empty > 0:
+            logging.warning(f'Encountered {n_empty} empty clusters while initializing subclusters')
+
+    def update_params(self, X: Tensor, r: Tensor, ri: Tensor, prior: Priors):
+        z = r.argmax(dim=-1)
 
         pi = ri.sum(dim=0) / len(ri)
         pi = prior.compute_post_pi(pi)
@@ -146,11 +152,17 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         for i, submodel in enumerate(self.components):
             X_k = X[z == i]
             r_k = ri[z == i, self.n_subcomponents * i: self.n_subcomponents * (i + 1)]
+            z_k = r_k.argmax(dim=-1)
             denom = r_k.sum(dim=0)
 
-            if (z == i).sum() == 0 or (denom == 0).any() or len(torch.unique(r_k.argmax(dim=1))) < self.n_subcomponents:
-                # Empty cluster or subcluster encountered
-                submodel.initialize_params(X, None, prior, mode='kmeans1d')
+            if len(X_k) < self.n_subcomponents or (denom == 0).any() or len(torch.unique(z_k)) < self.n_subcomponents:
+                if len(X_k) < self.n_subcomponents:
+                    logging.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
+                else:
+                    logging.warning(f'Encountered concentrated cluster {i} while updating subclusters. Reinitializing')
+
+                submodel.initialize_params(X_k if len(X_k) >= self.n_subcomponents else X, None, prior, mode='kmeans1d')
+                u = 0
             else:
                 pi_k = pi[self.n_subcomponents * i: self.n_subcomponents * (i + 1)]
                 mus_k = compute_mus_soft_assignment(X_k, r_k, self.n_subcomponents)
@@ -169,20 +181,20 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         loss = self.loss_fn(self, X, ri)
         return loss
 
-    def m_step(self, X: Tensor, r: Tensor, prior: Priors):
-        self.update_params(X, r, prior)
+    def m_step(self, X: Tensor, r: Tensor, ri: Tensor, prior: Priors):
+        self.update_params(X, r, ri, prior)
 
     @property
     def pi(self):
-        return torch.cat([submodel.pi for submodel in self.components], dim=0)
+        return torch.cat([submodel.pi.data for submodel in self.components], dim=0)
 
     @property
     def mus(self):
-        return torch.cat([submodel.mus for submodel in self.components], dim=0)
+        return torch.cat([submodel.mus.data for submodel in self.components], dim=0)
 
     @property
     def covs(self):
-        return torch.cat([submodel.covs for submodel in self.components], dim=0)
+        return torch.cat([submodel.covs.data for submodel in self.components], dim=0)
 
     def tot_components(self):
         return self.n_components * self.n_subcomponents

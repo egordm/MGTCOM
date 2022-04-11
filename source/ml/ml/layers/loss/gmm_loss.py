@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 import torch
 from torch import Tensor
 
+from ml.utils import pairwise_sim_fn, pairwise_dist_fn
+
 if TYPE_CHECKING:
     from ml.layers.dpm import GaussianMixtureModel
 
@@ -25,13 +27,14 @@ class KLGMMLoss(torch.nn.Module):
 
 
 class IsoGMMLoss(torch.nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, sim='euclidean') -> None:
         super().__init__()
+        self.dist_fn = pairwise_dist_fn(sim)
 
     def forward(self, gmm: "GaussianMixtureModel", X: Tensor, r: Tensor):
         x_tag = X.repeat(1, gmm.tot_components()).view(-1, gmm.repr_dim)
         mus_tag = gmm.mus.repeat(X.shape[0], 1)
         r_tag = r.flatten()
-        loss = torch.mean(r_tag * (x_tag - mus_tag).norm(dim=1).pow(2))
+        loss = torch.mean(r_tag * self.dist_fn(x_tag, mus_tag).pow(2))
 
         return loss
