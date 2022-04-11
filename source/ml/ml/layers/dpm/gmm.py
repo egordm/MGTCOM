@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import Optional
 
 import torch
@@ -8,6 +9,9 @@ from torch.distributions.multivariate_normal import MultivariateNormal
 from ml.layers.dpm import initialize_kmeans, Priors, initialize_kmeans1d, initialize_soft_assignment, \
     compute_mus_soft_assignment, compute_covs_soft_assignment
 from ml.layers.loss.gmm_loss import KLGMMLoss, IsoGMMLoss
+from shared import get_logger
+
+logger = get_logger(Path(__file__).stem)
 
 
 def eps_norm(x: Tensor, eps: float = 1e-6) -> Tensor:
@@ -157,12 +161,12 @@ class StackedGaussianMixtureModel(torch.nn.Module):
 
             if len(X_k) < self.n_subcomponents or (denom == 0).any() or len(torch.unique(z_k)) < self.n_subcomponents:
                 if len(X_k) < self.n_subcomponents:
-                    logging.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
+                    logger.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
+                    submodel.initialize_params(X, None, prior, mode='kmeans1d')
+                    submodel.pi.data = torch.tensor([0, len(X_k)]) / len(X)
                 else:
-                    logging.warning(f'Encountered concentrated cluster {i} while updating subclusters. Reinitializing')
-
-                submodel.initialize_params(X_k if len(X_k) >= self.n_subcomponents else X, None, prior, mode='kmeans1d')
-                u = 0
+                    logger.warning(f'Encountered concentrated cluster {i} while updating subclusters. Reinitializing')
+                    submodel.initialize_params(X_k, None, prior, mode='kmeans1d')
             else:
                 pi_k = pi[self.n_subcomponents * i: self.n_subcomponents * (i + 1)]
                 mus_k = compute_mus_soft_assignment(X_k, r_k, self.n_subcomponents)
