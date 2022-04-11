@@ -31,6 +31,7 @@ class GMMVisualizerCallback(Callback):
         self.max_points = max_points
         self.enabled = True
         self.cmap = mpl.cm.get_cmap('tab20')
+        self.sub_cmap = mpl.cm.get_cmap('binary')
         self.marker_size = mpl.rcParams['lines.markersize'] ** 2
         self.mapper_type = mapper
 
@@ -52,13 +53,23 @@ class GMMVisualizerCallback(Callback):
         if trainer.current_epoch % self.logging_interval != 0 and trainer.current_epoch != trainer.max_epochs:
             return
 
+        visualize_subclusters = trainer.current_epoch > pl_module.hparams.epoch_start_msub and pl_module.hparams.subcluster
+
         logger.info(f'Visualizing decision boundaries at epoch {trainer.current_epoch}')
         X_t = self.X_t
         I = self.subsampler.transform(pl_module.val_r.argmax(dim=-1).cpu())
+        sub_I = self.subsampler.transform(pl_module.val_ri.argmax(dim=-1).cpu()) if visualize_subclusters else None
 
+        # Extract Cluster parameters
         mus = pl_module.cluster_gmm.mus.data.detach().cpu()
         covs = pl_module.cluster_gmm.covs.data.detach().cpu()
         k = pl_module.cluster_gmm.n_components
+
+        if visualize_subclusters:
+            sub_mus = pl_module.subcluster_gmm.mus.detach().cpu()
+            sub_covs = pl_module.subcluster_gmm.covs.detach().cpu()
+        else:
+            sub_mus, sub_covs, sub_k = None, None, None
 
         # Remap Cluster Parameters
         if self.mapper:
@@ -68,16 +79,41 @@ class GMMVisualizerCallback(Callback):
                 for cov in covs
             ])
 
+            if visualize_subclusters:
+                sub_mus = self.mapper.transform(sub_mus)
+                sub_covs = torch.stack([
+                    torch.eye(2) * self.mapper.transform(cov.diag().reshape(1, -1))
+                    for cov in sub_covs
+                ])
+
+        self.visualize(
+            X_t, I, sub_I,
+            k, mus, covs, sub_mus, sub_covs,
+            pl_module,
+            title=f'Epoch {trainer.current_epoch}'
+        )
+        plt.show()
+
+    def visualize(
+            self, X_t, I, sub_I,
+            k, mus, covs, sub_mus, sub_covs,
+            pl_module: DPMClusteringModel, title: str = ''
+    ):
+        colors_sub = torch.tensor([self.cmap(i) for i in range(2)], dtype=torch.float)
         colors = torch.tensor([self.cmap(i) for i in range(k)], dtype=torch.float)
 
         # Figure frame
         _min, _max = X_t.min(axis=0).values, X_t.max(axis=0).values
-        fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(10, 8))
+        fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(10, 6))
         fig.tight_layout(rect=[0, -0.02, 1, 0.95])
         (ax_clusters, ax_boundaries) = axes
 
         # Plot both clusters and boundaries
-        self.plot_clusters(ax_clusters, X_t, I, mus, covs, colors)
+        self.plot_clusters(
+            ax_clusters, X_t, I, sub_I,
+            mus, covs, sub_mus, sub_covs,
+            colors, colors_sub
+        )
         cont = self.plot_decision_regions(ax_boundaries, X_t, I, colors, pl_module)
 
         # Crop the axes
@@ -90,26 +126,49 @@ class GMMVisualizerCallback(Callback):
         cbar = fig.colorbar(cont, ax=axes.ravel().tolist(), shrink=0.95)
         cbar.set_label("Max network response", rotation=270, labelpad=10, y=0.45)
 
-        fig.suptitle(f'Epoch {trainer.current_epoch}')
-        plt.show()
+        fig.suptitle(title)
 
-    def plot_clusters(self, ax, X_t, I, mus, covs, colors):
+    def plot_clusters(
+            self, ax, X_t, I, sub_I,
+            mus, covs, sub_mus, sub_covs,
+            colors, colors_sub
+    ):
         for i, center in enumerate(mus):
             ell = self.draw_ellipse(ax, center, covs[i], color=colors[i])
             ax.add_artist(ell)
 
+        if sub_covs is not None:
+            for i, sub_center in enumerate(sub_mus):
+                ell = self.draw_ellipse(ax, sub_center, sub_covs[i], color=colors[i // 2])
+                ax.add_artist(ell)
+
         ax.scatter(
             X_t[:, 0], X_t[:, 1],
             c=colors[I], alpha=0.5,
+            edgecolors=colors_sub[sub_I % 2] if sub_I is not None else None,
+            linewidth=2,
             s=self.marker_size, zorder=1
         )
 
-        ax.plot(
+        ax.scatter(
             mus[:, 0], mus[:, 1],
-            "ko", label="Net Centers",
-            markersize=self.marker_size / 2,
+            marker="o", c="k", edgecolors=colors,
+            label="Net Centers",
+            s=self.marker_size * 2, linewidth=2,
             alpha=0.6, zorder=3
         )
+
+        if sub_mus is not None:
+            indices = torch.arange(len(mus)) * 2
+            for m, indices in [('<', indices), ('>', indices + 1)]:
+                ax.scatter(
+                    sub_mus[indices, 0], sub_mus[indices, 1],
+                    marker=m, c="k",
+                    edgecolors=[colors[i.floor_divide(2)].numpy() for i in indices],
+                    label="Net Centers",
+                    s=self.marker_size * 2, linewidth=2,
+                    alpha=0.6, zorder=3
+                )
 
         ax.set_title("Net Clusters and Covariances")
 
