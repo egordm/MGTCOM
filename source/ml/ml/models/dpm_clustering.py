@@ -11,7 +11,8 @@ from tch_geometric.loader import CustomLoader
 from torch import Tensor
 from torch.utils.data import Dataset
 
-from ml.layers.dpm import ClusteringNet, SubClusteringNet, Priors, GaussianMixtureModel, StackedGaussianMixtureModel
+from ml.layers.dpm import ClusteringNet, SubClusteringNet, Priors, GaussianMixtureModel, StackedGaussianMixtureModel, \
+    SplitMode, MergeMode, InitMode
 from ml.layers.dpm.mhsc_rules import MHSCRules
 from ml.utils import dicts_extract, flat_iter
 from ml.utils.config import HParams, DataLoaderParams
@@ -38,15 +39,17 @@ class DPMClusteringModelParams(HParams):
     prior_sigma_choice: str = choice(['data_std', 'isotropic'], default='data_std')
     prior_sigma_scale: float = 0.005
 
-    mu_init_fn: str = choice('kmeans', 'soft_assign', 'kmeans1d', default='kmeans')
-    mu_sub_init_fn: str = choice('kmeans', 'soft_assign', 'kmeans1d', default='kmeans1d')
-    mu_update_fn: str = choice('kmeans', 'soft_assign', default='soft_assign')
+    mu_init_fn: InitMode = InitMode.KMeans
+    mu_sub_init_fn: InitMode = InitMode.KMeans1D
+    mu_update_fn: InitMode = InitMode.SoftAssignment
 
     alpha: float = 10.0
     split_prob: Optional[float] = None
     merge_prob: Optional[float] = None
     min_split_points: int = 6
     n_merge_neighbors: int = 3
+    split_mode: SplitMode = SplitMode.Random
+    merge_mode: MergeMode = MergeMode.Same
 
     cluster_lr: float = 0.01
     subcluster_lr: float = 0.01
@@ -106,9 +109,12 @@ class DPMClusteringModel(pl.LightningModule):
             kappa=self.hparams.prior_kappa, nu=self.hparams.prior_nu,
             sigma_scale=self.hparams.prior_sigma_scale, prior_sigma_choice=self.hparams.prior_sigma_choice,
         )
-        self.cluster_gmm = GaussianMixtureModel(self.k, self.repr_dim, sim=self.hparams.sim, loss='kl')
-        self.subcluster_gmm = StackedGaussianMixtureModel(self.k, 2, self.repr_dim, sim=self.hparams.sim,
-                                                          loss='iso') if self.hparams.subcluster else None
+        self.cluster_gmm = GaussianMixtureModel(
+            self.k, self.repr_dim, sim=self.hparams.sim, loss='kl', init_mode=self.hparams.mu_init_fn
+        )
+        self.subcluster_gmm = StackedGaussianMixtureModel(
+            self.k, 2, self.repr_dim, sim=self.hparams.sim, loss='iso', init_mode=self.hparams.mu_sub_init_fn
+        ) if self.hparams.subcluster else None
 
         self.ms_rules = MHSCRules(
             self.prior, self.cluster_gmm, self.subcluster_gmm,
@@ -119,6 +125,7 @@ class DPMClusteringModel(pl.LightningModule):
 
         self.stage = Stage.BurnIn
         self.last_action = Action.NoAction
+        # self.last_action = Action.Split
         self.action = Action.NoAction
 
     def forward(self, batch: Tensor):
@@ -130,7 +137,7 @@ class DPMClusteringModel(pl.LightningModule):
         self.prior.init_priors(xs)
 
         logger.info(f"Initializing cluster params")
-        self.cluster_gmm.initialize_params(xs, None, self.prior, mode=self.hparams.mu_init_fn)
+        self.cluster_gmm.initialize_params(xs, None, self.prior)
 
     def on_train_epoch_start(self) -> None:
         if self.stage == Stage.BurnIn:
@@ -187,7 +194,7 @@ class DPMClusteringModel(pl.LightningModule):
         # Initialize subcluster GMM (later in the training)
         if self.hparams.subcluster and self.current_epoch + 1 == self.hparams.epoch_start_msub:
             logger.info("Initializing subcluster params")
-            self.subcluster_gmm.initialize_params(X, r, self.prior, mode=self.hparams.mu_sub_init_fn)
+            self.subcluster_gmm.initialize_params(X, r, self.prior)
 
         # Subcluster M step
         if self.stage >= Stage.SubClustering:
@@ -205,20 +212,98 @@ class DPMClusteringModel(pl.LightningModule):
 
         # Perform the action
         if self.action == Action.Split:
-            # self.last_action = Action.Split
-            decisions = self.ms_rules.split_decisions(X, r, ri)
-            logger.info('Split decisions: {}'.format(decisions))
-            u = 0
+            self.last_action = Action.Split
+            self.split(X, r, ri)
+
         elif self.action == self.action.Merge:
-            # self.last_action = Action.Merge
-            decisions = self.ms_rules.merge_decisions(X, r)
-            u = 1
+            self.last_action = Action.Merge
+            self.merge(X, r, ri)
 
         self.log_dict({
             'stage_burnin': self.stage == Stage.BurnIn,
             'stage_clustering': self.stage == Stage.Clustering,
             'stage_subclustering': self.stage == Stage.SubClustering,
         })
+
+    def split(self, X, r, ri):
+        decisions = self.ms_rules.split_decisions(X, r, ri)
+        logger.info('Split decisions: {}'.format(decisions))
+
+        if not decisions.any():
+            return
+
+        cluster_opt, subcluster_opt = self.optimizers()
+
+        # Split clustering network
+        for p in self.cluster_net.out_net.parameters():
+            cluster_opt.state.pop(p)
+
+        self.cluster_net.split(decisions, SplitMode.Same)
+        cluster_opt.param_groups[1]['params'] = list(self.cluster_net.out_net.parameters())
+        self.cluster_net.out_net.to(self.device)
+
+        # Split subcluster network
+        for p in self.subcluster_net.parameters():
+            subcluster_opt.state.pop(p)
+
+        self.subcluster_net.split(decisions, SplitMode.Same)
+        subcluster_opt.param_groups[0]['params'] = list(self.subcluster_net.parameters())
+
+        # Split GMM params
+        self.ms_rules.split(decisions, X, r, ri)
+
+        self.k = self.cluster_gmm.n_components
+
+        self.sanity_check()
+
+    def merge(self, X, r, ri):
+        decisions = self.ms_rules.merge_decisions(X, r)
+        logger.info('Merge decisions: {}'.format(decisions))
+
+        if len(decisions) == 0:
+            return
+
+        cluster_opt, subcluster_opt = self.optimizers()
+
+        # Merge clustering network
+        for p in self.cluster_net.out_net.parameters():
+            cluster_opt.state.pop(p)
+
+        self.cluster_net.merge(decisions, MergeMode.Same)
+        cluster_opt.param_groups[1]['params'] = list(self.cluster_net.out_net.parameters())
+        self.cluster_net.out_net.to(self.device)
+
+        # Merge subcluster network
+        for p in self.subcluster_net.parameters():
+            subcluster_opt.state.pop(p)
+
+        self.subcluster_net.merge(decisions, MergeMode.Same)
+        subcluster_opt.param_groups[0]['params'] = list(self.subcluster_net.parameters())
+
+        # Merge GMM params
+        self.ms_rules.merge(decisions, X, r, ri)
+
+        self.k = self.cluster_gmm.n_components
+
+        self.sanity_check()
+
+    def sanity_check(self):
+        # Debug: do a few asserts
+        assert self.cluster_gmm.n_components == self.k
+        assert self.cluster_gmm.pi.data.shape == (self.k,)
+        assert self.cluster_gmm.mus.data.shape == (self.k, self.repr_dim)
+        assert self.cluster_gmm.covs.data.shape == (self.k, self.repr_dim, self.repr_dim)
+        assert self.subcluster_gmm.n_components == self.k * self.subcluster_gmm.n_subcomponents
+        for component in self.subcluster_gmm.components:
+            assert component.pi.data.shape == (2,)
+            assert component.mus.data.shape == (2, self.repr_dim)
+            assert component.covs.data.shape == (2, self.repr_dim, self.repr_dim)
+
+        assert len(self.subcluster_gmm) == self.k
+        assert self.cluster_net.in_net.weight.data.shape == (self.hparams.lat_dim, self.repr_dim)
+        assert self.cluster_net.out_net.weight.data.shape == (self.k, self.hparams.lat_dim)
+        assert self.subcluster_net.in_net.weight.data.shape == (self.hparams.lat_dim * self.k, self.repr_dim)
+        assert self.subcluster_net.out_net.weight.data.shape == (self.k * 2, self.hparams.lat_dim * self.k)
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         out = {}
@@ -240,8 +325,9 @@ class DPMClusteringModel(pl.LightningModule):
     def configure_optimizers(self):
         optimizers = []
 
-        cluster_params = torch.nn.ParameterList(
-            [p for n, p in self.cluster_net.named_parameters() if "out_net" not in n])
+        cluster_params = torch.nn.ParameterList([
+            p for n, p in self.cluster_net.named_parameters() if "out_net" not in n
+        ])
         cluster_opt = torch.optim.Adam(cluster_params, lr=self.hparams.cluster_lr)
         cluster_opt.add_param_group({'params': self.cluster_net.out_net.parameters()})
         optimizers.append({"optimizer": cluster_opt})
@@ -263,6 +349,3 @@ class DPMClusteringModel(pl.LightningModule):
 
     def is_subclusters_initialized(self):
         return self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub
-
-
-

@@ -1,12 +1,14 @@
-from typing import Optional
+from typing import Optional, Tuple, List
 
 import numpy as np
 import torch
 from torch import Tensor
 from sklearn.neighbors import NearestNeighbors
 
-from ml.layers.dpm import Priors, StackedGaussianMixtureModel, GaussianMixtureModel
+from ml.layers.dpm import Priors, StackedGaussianMixtureModel, GaussianMixtureModel, compute_covs_soft_assignment
 
+SplitDecisions = Tensor
+MergeDecisions = List[Tuple[int, int]]
 
 class MHSCRules:
     """
@@ -79,6 +81,8 @@ class MHSCRules:
     def merge_rule(self, X: Tensor, ri: Tensor, mus: Tensor):
         k = len(mus)
         I = ri.argmax(dim=-1)
+        if len(X) != len(I):
+            u = 0
         X_K = [X[I == i] for i in range(k)]
         N_K = torch.tensor([len(X_k) for X_k in X_K], dtype=torch.float)
         N_c = sum(N_K)
@@ -105,7 +109,7 @@ class MHSCRules:
             X_k = X[z == i]
             ri_k = ri[z == i, self.gmm_sub.n_subcomponents * i: self.gmm_sub.n_subcomponents * (i + 1)]
 
-            decisions[i] = self.split_rule(X_k, ri_k, self.gmm.mus.data[i], self.gmm_sub.component(i).mus.data)
+            decisions[i] = self.split_rule(X_k, ri_k, self.gmm.mus.data[i], self.gmm_sub[i].mus.data)
 
         return decisions
 
@@ -129,8 +133,9 @@ class MHSCRules:
             if i in considered or j in considered:
                 continue
 
-            X_K = X[torch.logical_or(z == i, z == j)]
-            r_K = r[:, [i, j]]
+            ind = torch.logical_or(z == i, z == j)
+            X_K = X[ind]
+            r_K = r[ind][:, [i, j]]
             mus = self.gmm.mus.data[[i, j], :]
 
             decision, dominant_k = self.merge_rule(X_K, r_K, mus)
@@ -139,4 +144,97 @@ class MHSCRules:
                 considered.add(j)
                 decisions.append((i, j) if dominant_k == 0 else (j, i))
 
-        return decisions
+        return torch.tensor(decisions, dtype=torch.long)
+
+    def split(self, decisions: Tensor, X: Tensor, r: Tensor, ri: Tensor):
+        z = r.argmax(dim=-1)
+
+        # Split clusters
+        pi_new = self.gmm.pi.data[~decisions]
+        mus_new = self.gmm.mus.data[~decisions]
+        covs_new = self.gmm.covs.data[~decisions]
+
+        pis_to_add, mus_to_add, covs_to_add = [], [], []
+        for k in decisions.nonzero():
+            component = self.gmm_sub[k]
+            pis_to_add.append(component.pi.data)
+            mus_to_add.append(component.mus.data)
+            covs_to_add.append(component.covs.data)
+
+        self.gmm.pi.data = torch.cat([pi_new, torch.cat(pis_to_add, dim=0)], dim=0)
+        self.gmm.mus.data = torch.cat([mus_new, torch.cat(mus_to_add, dim=0)], dim=0)
+        self.gmm.covs.data = torch.cat([covs_new, torch.cat(covs_to_add, dim=0)], dim=0)
+        self.gmm.n_components = len(self.gmm.mus.data)
+
+        # Create new subclusters
+        self.gmm_sub.components = torch.nn.ModuleList([
+            component for not_split, component in zip(~decisions, self.gmm_sub.components) if not_split
+        ])
+        for i in decisions.nonzero():
+            X_k = X[z == i]
+            ri_k = ri[z == i, self.gmm_sub.n_subcomponents * i: self.gmm_sub.n_subcomponents * (i + 1)]
+            z_k = ri_k.argmax(dim=-1)
+
+            for j in range(self.gmm_sub.n_subcomponents):
+                X_kj = X_k[z_k == j] if sum(z_k == j) >= self.gmm_sub.n_subcomponents else None
+                self.gmm_sub.add_component().initialize_params(X_kj, None, self.prior)
+
+    def merge(self, decisions: Tensor, X: Tensor, r: Tensor, ri: Tensor):
+        z = r.argmax(dim=-1)
+        mask = torch.zeros(len(self.gmm), dtype=torch.bool)
+        mask[decisions.flatten()] = True
+
+        # Merge subclusters
+        self.gmm_sub.components = torch.nn.ModuleList([
+            component for not_merge, component in zip(~mask, self.gmm_sub.components) if not_merge
+        ])
+        for pair in decisions:
+            (i, j) = pair
+            X_k = X[torch.logical_or(z == i, z == j)]
+            if len(X_k) <= self.n_merge_neighbors:
+                # Too few points to merge (so use the clusters as subclusters)
+                self.gmm_sub.add_component(
+                    pi_init=self.gmm.pi.data[pair],
+                    mus_init=self.gmm.mus.data[pair],
+                    covs_init=self.gmm.covs.data[pair],
+                )
+            else:
+                self.gmm_sub.add_component().initialize_params(X_k, None, self.prior)
+
+        # Merge clusters
+        pis_new = self.gmm.pi.data[~mask]
+        mus_new = self.gmm.mus.data[~mask]
+        covs_new = self.gmm.covs.data[~mask]
+
+        pi_merged, mus_merged, covs_merged = [], [], []
+        for (i, j) in decisions:
+            N_k_i, N_k_j = sum(z == i), sum(z == j)
+            N_k = N_k_i + N_k_j
+
+            r_mod = r[:, [i, j]].sum(dim=-1).reshape(-1, 1)
+            if N_k > 0:
+                mu_new = (self.gmm.mus.data[i] * N_k_i + self.gmm.mus.data[j] * N_k_j) / N_k
+                cov_new = compute_covs_soft_assignment(X, r_mod, 1, mu_new)
+            else:
+                mu_new = self.gmm.mus.data[[i, j], :].mean(dim=0)
+                cov_new = self.gmm.covs.data[i].unsqueeze(0)
+
+            pi_new = (self.gmm.pi[i] + self.gmm.pi[j]).reshape(1)
+
+            r_tot = r_mod.sum(dim=0)
+            cov_new = self.prior.compute_post_cov(r_tot, mu_new, cov_new)
+            mu_new = self.prior.compute_post_mus(pi_new * len(r), mu_new)
+
+            pi_merged.append(pi_new)
+            mus_merged.append(mu_new)
+            covs_merged.append(cov_new)
+
+        self.gmm.pi.data = torch.cat([pis_new, torch.cat(pi_merged, dim=0)], dim=0)
+        self.gmm.mus.data = torch.cat([mus_new, torch.cat(mus_merged, dim=0)], dim=0)
+        self.gmm.covs.data = torch.cat([covs_new, torch.cat(covs_merged, dim=0)], dim=0)
+        self.gmm.n_components = len(self.gmm.mus.data)
+
+
+
+
+
