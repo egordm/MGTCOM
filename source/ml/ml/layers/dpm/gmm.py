@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
 import torch
 from torch import Tensor
 from torch.distributions.multivariate_normal import MultivariateNormal
@@ -199,6 +200,9 @@ class StackedGaussianMixtureModel(torch.nn.Module):
     @property
     def covs(self):
         return torch.cat([submodel.covs.data for submodel in self.components], dim=0)
+
+    def component(self, i) -> GaussianMixtureModel:
+        return self.components[i]
 
     def tot_components(self):
         return self.n_components * self.n_subcomponents

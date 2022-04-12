@@ -1,7 +1,8 @@
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import IntEnum
 from pathlib import Path
+from typing import Optional, Dict, Union
 
 import pytorch_lightning as pl
 import torch
@@ -11,6 +12,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 
 from ml.layers.dpm import ClusteringNet, SubClusteringNet, Priors, GaussianMixtureModel, StackedGaussianMixtureModel
+from ml.layers.dpm.mhsc_rules import MHSCRules
 from ml.utils import dicts_extract, flat_iter
 from ml.utils.config import HParams, DataLoaderParams
 from shared import get_logger
@@ -21,7 +23,8 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class DPMClusteringModelParams(HParams):
     lat_dim: int = 32
-    init_k: int = 2
+    init_k: int = 1
+    # init_k: int = 2
     subcluster: bool = True
 
     sim: str = choice(['cosine', 'dotp', 'euclidean'], default='euclidean')
@@ -32,11 +35,18 @@ class DPMClusteringModelParams(HParams):
     prior_dir_counts: float = 0.1
     prior_kappa: float = 0.0001
     prior_nu: float = field(default=12.0, help="Need to be at least repr_dim + 1")
+    prior_sigma_choice: str = choice(['data_std', 'isotropic'], default='data_std')
     prior_sigma_scale: float = 0.005
 
     mu_init_fn: str = choice('kmeans', 'soft_assign', 'kmeans1d', default='kmeans')
     mu_sub_init_fn: str = choice('kmeans', 'soft_assign', 'kmeans1d', default='kmeans1d')
     mu_update_fn: str = choice('kmeans', 'soft_assign', default='soft_assign')
+
+    alpha: float = 10.0
+    split_prob: Optional[float] = None
+    merge_prob: Optional[float] = None
+    min_split_points: int = 6
+    n_merge_neighbors: int = 3
 
     cluster_lr: float = 0.01
     subcluster_lr: float = 0.01
@@ -44,13 +54,29 @@ class DPMClusteringModelParams(HParams):
     loader_args: DataLoaderParams = DataLoaderParams()
 
 
-class OptimizerIdx(Enum):
+class OptimizerIdx(IntEnum):
     Cluster = 0
     SubCluster = 1
 
 
+class Stage(IntEnum):
+    BurnIn = 0
+    Clustering = 1
+    SubClustering = 2
+
+
+class Action(IntEnum):
+    Split = 0
+    Merge = 1
+    NoAction = 2
+
+
 class DPMClusteringModel(pl.LightningModule):
     hparams: DPMClusteringModelParams
+
+    stage: Stage
+    last_action: Action
+    action: Action
 
     val_r: Tensor
     val_ri: Tensor
@@ -77,11 +103,23 @@ class DPMClusteringModel(pl.LightningModule):
 
         self.prior = Priors(
             K=self.k, pi_counts=self.hparams.prior_dir_counts,
-            kappa=self.hparams.prior_kappa, nu=self.hparams.prior_nu, sigma_scale=self.hparams.prior_sigma_scale,
+            kappa=self.hparams.prior_kappa, nu=self.hparams.prior_nu,
+            sigma_scale=self.hparams.prior_sigma_scale, prior_sigma_choice=self.hparams.prior_sigma_choice,
         )
         self.cluster_gmm = GaussianMixtureModel(self.k, self.repr_dim, sim=self.hparams.sim, loss='kl')
         self.subcluster_gmm = StackedGaussianMixtureModel(self.k, 2, self.repr_dim, sim=self.hparams.sim,
                                                           loss='iso') if self.hparams.subcluster else None
+
+        self.ms_rules = MHSCRules(
+            self.prior, self.cluster_gmm, self.subcluster_gmm,
+            self.hparams.alpha, self.hparams.split_prob, self.hparams.merge_prob,
+            self.hparams.min_split_points, self.hparams.n_merge_neighbors,
+            sim=self.hparams.sim,
+        )
+
+        self.stage = Stage.BurnIn
+        self.last_action = Action.NoAction
+        self.action = Action.NoAction
 
     def forward(self, batch: Tensor):
         return self.cluster_net(batch)
@@ -95,11 +133,15 @@ class DPMClusteringModel(pl.LightningModule):
         self.cluster_gmm.initialize_params(xs, None, self.prior, mode=self.hparams.mu_init_fn)
 
     def on_train_epoch_start(self) -> None:
-        # self.stage = TrainingStage.TrainClustering
-        pass
+        if self.stage == Stage.BurnIn:
+            if self.current_epoch >= self.hparams.epoch_start_m:
+                self.stage = Stage.Clustering
+
+        if self.stage == Stage.Clustering:
+            if self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub:
+                self.stage = Stage.SubClustering
 
     def training_step(self, batch, batch_idx, optimizer_idx=0):
-        optimizer_idx = OptimizerIdx(optimizer_idx)
         out = {}
         x = batch
         r = self.cluster_net(x)
@@ -109,33 +151,28 @@ class DPMClusteringModel(pl.LightningModule):
 
         if optimizer_idx == OptimizerIdx.Cluster:
             loss = cluster_loss
-        elif optimizer_idx == OptimizerIdx.SubCluster:
-            if self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub:
-                r = r.detach()
-                z = r.argmax(dim=-1)
-                ri = self.subcluster_net(x, z)
 
-                subcluster_loss = self.subcluster_gmm.e_step(x, ri)
-                out['subcluster_loss'] = cluster_loss.detach()
-
-                loss = subcluster_loss
-            else:
-                return None
-        else:
-            raise ValueError(f"Unknown optimizer_idx: {optimizer_idx}")
-
-        out['loss'] = loss
-
-        if optimizer_idx == OptimizerIdx.Cluster:
             out.update({
                 'r': r.detach(),
                 'x': x.detach(),
             })
-        if optimizer_idx == OptimizerIdx.SubCluster:
+        elif optimizer_idx == OptimizerIdx.SubCluster and self.is_subclusters_initialized():
+            r = r.detach()
+            z = r.argmax(dim=-1)
+            ri = self.subcluster_net(x, z)
+
+            subcluster_loss = self.subcluster_gmm.e_step(x, ri)
+            out['subcluster_loss'] = cluster_loss.detach()
+
+            loss = subcluster_loss
+
             out.update({
                 'ri': ri.detach(),
             })
+        else:
+            return None
 
+        out['loss'] = loss
         return out
 
     def training_epoch_end(self, outputs) -> None:
@@ -143,8 +180,7 @@ class DPMClusteringModel(pl.LightningModule):
         r = torch.cat(dicts_extract(flat_iter(outputs), 'r'), dim=0)
 
         # Clustering M step
-        update_params = self.current_epoch > self.hparams.epoch_start_m
-        if update_params:
+        if self.stage >= Stage.Clustering:
             logger.info("Updating cluster params")
             self.cluster_gmm.m_step(X, r, self.prior)
 
@@ -154,15 +190,34 @@ class DPMClusteringModel(pl.LightningModule):
             self.subcluster_gmm.initialize_params(X, r, self.prior, mode=self.hparams.mu_sub_init_fn)
 
         # Subcluster M step
-        update_params_sub = self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub and update_params
-        if update_params_sub:
+        if self.stage >= Stage.SubClustering:
             logger.info("Updating subcluster params")
             ri = torch.cat(dicts_extract(flat_iter(outputs), 'ri'), dim=0)
             self.subcluster_gmm.m_step(X, r, ri, self.prior)
 
+        # Decide on a Merge or Split action
+        self.action = Action.NoAction
+        if self.stage >= Stage.SubClustering:
+            if self.last_action != Action.Split:
+                self.action = Action.Split
+            elif self.last_action != Action.Merge:
+                self.action = Action.Merge
+
+        # Perform the action
+        if self.action == Action.Split:
+            # self.last_action = Action.Split
+            decisions = self.ms_rules.split_decisions(X, r, ri)
+            logger.info('Split decisions: {}'.format(decisions))
+            u = 0
+        elif self.action == self.action.Merge:
+            # self.last_action = Action.Merge
+            decisions = self.ms_rules.merge_decisions(X, r)
+            u = 1
+
         self.log_dict({
-            'update_params': update_params,
-            'update_params_sub': update_params_sub,
+            'stage_burnin': self.stage == Stage.BurnIn,
+            'stage_clustering': self.stage == Stage.Clustering,
+            'stage_subclustering': self.stage == Stage.SubClustering,
         })
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
@@ -172,17 +227,15 @@ class DPMClusteringModel(pl.LightningModule):
         r = self.forward(x)
         out['r'] = r.detach()
 
-        if self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub:
-            z = r.detach().argmax(dim=-1)
-            ri = self.subcluster_net(x, z)
-            out['ri'] = ri.detach()
+        z = r.detach().argmax(dim=-1)
+        ri = self.subcluster_net(x, z)
+        out['ri'] = ri.detach()
 
         return out
 
     def validation_epoch_end(self, outputs, dataloader_idx=0):
         self.val_r = torch.cat(dicts_extract(outputs, 'r'), dim=0)
-        self.val_ri = torch.cat(dicts_extract(outputs, 'ri'),
-                                dim=0) if self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub else None
+        self.val_ri = torch.cat(dicts_extract(outputs, 'ri'), dim=0)
 
     def configure_optimizers(self):
         optimizers = []
@@ -207,3 +260,9 @@ class DPMClusteringModel(pl.LightningModule):
 
     def predict_dataloader(self):
         return CustomLoader(self.dataset, **self.hparams.loader_args)
+
+    def is_subclusters_initialized(self):
+        return self.hparams.subcluster and self.current_epoch >= self.hparams.epoch_start_msub
+
+
+

@@ -53,7 +53,7 @@ class GMMVisualizerCallback(Callback):
         if trainer.current_epoch % self.logging_interval != 0 and trainer.current_epoch != trainer.max_epochs:
             return
 
-        visualize_subclusters = trainer.current_epoch > pl_module.hparams.epoch_start_msub and pl_module.hparams.subcluster
+        visualize_subclusters = pl_module.hparams.subcluster and trainer.current_epoch >= pl_module.hparams.epoch_start_msub
 
         logger.info(f'Visualizing decision boundaries at epoch {trainer.current_epoch}')
         X_t = self.X_t
@@ -164,7 +164,7 @@ class GMMVisualizerCallback(Callback):
                 ax.scatter(
                     sub_mus[indices, 0], sub_mus[indices, 1],
                     marker=m, c="k",
-                    edgecolors=[colors[i.floor_divide(2)].numpy() for i in indices],
+                    edgecolors=[colors[i.div(2, rounding_mode='floor')].numpy() for i in indices],
                     label="Net Centers",
                     s=self.marker_size * 2, linewidth=2,
                     alpha=0.6, zorder=3

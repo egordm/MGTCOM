@@ -17,12 +17,12 @@ class Priors:
             self,
             K,
             kappa: float, nu: float, sigma_scale: float,
-            pi_counts=0.1, counts=10
+            pi_counts=0.1, counts=10, prior_sigma_choice='data_std'
     ) -> None:
         super().__init__()
         self.pi_prior = DirichletPrior(K, counts)
         self.pi_counts = pi_counts
-        self.mus_covs_prior = NIWPrior(kappa, nu, sigma_scale)
+        self.mus_covs_prior = NIWPrior(kappa, nu, sigma_scale, prior_sigma_choice)
 
     def update_pi_prior(self, K_new, counts=10):
         self.pi_prior = DirichletPrior(K_new, counts)
@@ -87,15 +87,23 @@ class NIWPrior:
     m: Tensor
     psi: Tensor
 
-    def __init__(self, kappa: float, nu: float, sigma_scale: float) -> None:
+    def __init__(self, kappa: float, nu: float, sigma_scale: float, prior_sigma_choice='data_std') -> None:
         super().__init__()
         self.sigma_scale = sigma_scale
         self.kappa = kappa
         self.nu = nu
+        self.prior_sigma_choice = prior_sigma_choice
 
     def init_priors(self, samples: Tensor):
         self.m = torch.mean(samples, dim=0)
-        self.psi = torch.eye(samples.shape[1]) * self.sigma_scale
+
+        if self.prior_sigma_choice == 'data_std':
+            self.psi = torch.diag(samples.std(dim=0)) * self.sigma_scale
+        elif self.prior_sigma_choice == 'isotropic':
+            self.psi = torch.eye(samples.shape[1]) * self.sigma_scale
+        else:
+            raise ValueError(f"Invalid prior_sigma_choice={self.prior_sigma_choice}")
+
         return self.m, self.psi
 
     def compute_params_post(self, samples_k: Tensor, mu_k: Tensor):

@@ -35,6 +35,6 @@ class IsoGMMLoss(torch.nn.Module):
         x_tag = X.repeat(1, gmm.tot_components()).view(-1, gmm.repr_dim)
         mus_tag = gmm.mus.repeat(X.shape[0], 1)
         r_tag = r.flatten()
-        loss = torch.mean(r_tag * self.dist_fn(x_tag, mus_tag).pow(2))
+        loss = (r_tag * self.dist_fn(x_tag, mus_tag).pow(2)).sum() / len(X)
 
         return loss
