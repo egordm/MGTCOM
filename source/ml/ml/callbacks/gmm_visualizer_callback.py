@@ -61,8 +61,8 @@ class GMMVisualizerCallback(Callback):
         sub_I = self.subsampler.transform(pl_module.val_ri.argmax(dim=-1).cpu()) if visualize_subclusters else None
 
         # Extract Cluster parameters
-        mus = pl_module.cluster_gmm.mus.data.detach().cpu()
-        covs = pl_module.cluster_gmm.covs.data.detach().cpu()
+        mus = pl_module.cluster_gmm.mus.detach().cpu()
+        covs = pl_module.cluster_gmm.covs.detach().cpu()
         k = pl_module.cluster_gmm.n_components
 
         if visualize_subclusters:

@@ -1,7 +1,7 @@
-import logging
+from collections import namedtuple
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 import torch
 from torch import Tensor
@@ -15,6 +15,8 @@ from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
+GMMParams = namedtuple('GMMParams', ['pi', 'mus', 'covs'])
+
 
 def eps_norm(x: Tensor, eps: float = 1e-6) -> Tensor:
     return (x + eps) / (x + eps).sum(dim=-1, keepdim=True)
@@ -26,15 +28,18 @@ class InitMode(Enum):
     SoftAssignment = 'soft_assignment'
 
 
+class GMMLoss(Enum):
+    KL = 'kl'
+    Iso = 'iso'
+
+
 class GaussianMixtureModel(torch.nn.Module):
-    pi: torch.nn.Parameter
-    mus: torch.nn.Parameter
-    covs: torch.nn.Parameter
+    components: List[MultivariateNormal]
 
     def __init__(
             self, n_components: int, repr_dim: int,
             loss: str = 'kl', sim='euclidean', init_mode: InitMode = InitMode.KMeans,
-            pi_init=None, mus_init=None, covs_init=None
+            init_params: GMMParams = None,
     ) -> None:
         super().__init__()
         self.n_components = n_components
@@ -49,25 +54,29 @@ class GaussianMixtureModel(torch.nn.Module):
         else:
             raise NotImplementedError
 
-        self._init_net(pi_init, mus_init, covs_init)
+        self._pi = torch.nn.Parameter(torch.ones(self.n_components) / self.n_components, requires_grad=False)
+        self._mus = torch.nn.Parameter(torch.randn(self.n_components, self.repr_dim), requires_grad=False)
+        self._covs = torch.nn.Parameter(
+            torch.eye(self.repr_dim).reshape(1, self.repr_dim, self.repr_dim).repeat(self.n_components, 1, 1),
+            requires_grad=False)
 
-    def _init_net(self, pi_init, mus_init, covs_init):
-        if mus_init is None:
-            mus_init = torch.randn(self.n_components, self.repr_dim)
-        assert mus_init.shape == (self.n_components, self.repr_dim)
-        self.mus = torch.nn.Parameter(mus_init, requires_grad=False)
+        if init_params is not None:
+            self.set_params(*init_params)
 
-        if covs_init is None:
-            covs_init = torch.eye(self.repr_dim).reshape(1, self.repr_dim, self.repr_dim) \
-                .repeat(self.n_components, 1, 1)
-        assert covs_init.shape == (self.n_components, self.repr_dim, self.repr_dim)
-        self.covs = torch.nn.Parameter(covs_init, requires_grad=False)
+    def set_params(self, pi: Tensor, mus: Tensor, covs: Tensor):
+        self.n_components = len(pi)
+        assert pi.shape == (self.n_components,)
+        assert mus.shape == (self.n_components, self.repr_dim)
+        assert covs.shape == (self.n_components, self.repr_dim, self.repr_dim)
 
-        if pi_init is None:
-            pi_init = torch.ones(self.n_components) / self.n_components
-        self.pi = torch.nn.Parameter(pi_init, requires_grad=False)
+        self._pi.data = pi
+        self._mus.data = mus
+        self._covs.data = covs
+        self.components = [MultivariateNormal(mu, cov) for mu, cov in zip(mus, covs)]
 
-    def initialize_params(self, X: Tensor, prior: Priors):
+        return self
+
+    def reinit_params(self, X: Tensor, prior: Priors):
         if self.init_mode == InitMode.KMeans:
             z = KMeans(self.repr_dim, self.n_components, sim=self.sim).fit(X).assign(X)
         elif self.init_mode == InitMode.KMeans1D:
@@ -78,24 +87,20 @@ class GaussianMixtureModel(torch.nn.Module):
         (_, D) = X.shape
         pi, mus, covs = compute_hard_assignment(X, z, self.n_components, prior.mus_covs_prior.psi)
         pi_, mus, covs = prior.compute_post_params(D, pi * len(X), pi, mus, covs)
-
-        self.mus.data, self.covs.data, self.pi.data = mus, covs, pi
+        self.set_params(pi, mus, covs)
 
     def update_params(self, X: Tensor, r: Tensor, prior: Priors):
         (_, D) = X.shape
         pi, mus, covs = compute_soft_assignment(X, r, self.n_components)
         pi, mus, covs = prior.compute_post_params(D, r.sum(dim=0), pi, mus, covs)
-
-        self.mus.data, self.covs.data, self.pi.data = mus, covs, pi
+        self.set_params(pi, mus, covs)
 
     def estimate_log_prob(self, x: Tensor):
-        weighted_r_E = []
-        for k in range(self.n_components):
-            gmm_k = MultivariateNormal(self.mus[k], self.covs[k])
-            prob_k = gmm_k.log_prob(x.detach())
-            weighted_r_E.append(prob_k + torch.log(self.pi[k]))
+        weighted_r_E = torch.stack([
+            torch.log(pi_k) + component.log_prob(x.detach())
+            for pi_k, component in zip(self.pi, self.components)
+        ], dim=1)
 
-        weighted_r_E = torch.stack(weighted_r_E, dim=1)
         max_values, _ = weighted_r_E.max(dim=1, keepdim=True)
         r_E_norm = torch.logsumexp(weighted_r_E - max_values, dim=1, keepdim=True) + max_values
         r_E = torch.exp(weighted_r_E - r_E_norm)
@@ -112,16 +117,26 @@ class GaussianMixtureModel(torch.nn.Module):
     def __len__(self):
         return self.n_components
 
+    @property
+    def pi(self):
+        return self._pi.data
+
+    @property
+    def mus(self):
+        return self._mus.data
+
+    @property
+    def covs(self):
+        return self._covs.data
+
 
 class StackedGaussianMixtureModel(torch.nn.Module):
     def __init__(
             self, n_components: int, n_subcomponents: int, repr_dim: int,
-            loss: str = 'iso', init_mode: InitMode = InitMode.KMeans1D,
-            sim='euclidean',
-            pi_init=None, mus_init=None, covs_init=None
+            loss: str = 'iso', sim='euclidean', init_mode: InitMode = InitMode.KMeans1D,
+            init_params: List[GMMParams] = None
     ) -> None:
         super().__init__()
-        assert loss == 'iso', 'Only isotropic GMMs are supported'
 
         self.repr_dim = repr_dim
         self.n_subcomponents = n_subcomponents
@@ -129,30 +144,27 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         self.loss = loss
         self.init_mode = init_mode
 
+        assert loss == 'iso', 'Only isotropic GMMs are supported'
+        self.loss_fn = IsoGMMLoss(sim=sim)
+
         self.components = torch.nn.ModuleList([
             GaussianMixtureModel(
                 n_subcomponents, repr_dim,
                 loss=self.loss, sim=sim, init_mode=self.init_mode,
-                pi_init=pi_init[i] if pi_init else None,
-                mus_init=mus_init[i] if mus_init else None,
-                covs_init=covs_init[i] if covs_init else None,
+                init_params=init_params[i] if init_params is not None else None
             )
             for i in range(n_components)
         ])
 
-        self.loss_fn = IsoGMMLoss(sim=sim)
-
-    def initialize_params(self, X: Tensor, r: Optional[Tensor], prior: Priors):
+    def reinit_params(self, X: Tensor, r: Optional[Tensor], prior: Priors):
         z = r.argmax(dim=-1)
+        N_K = unique_count(z, len(self))
 
-        n_empty = 0
-        for i, component in enumerate(self.components):
-            X_k = X[z == i]
-            n_empty += (len(X_k) == 0)
-            component.initialize_params(X_k if len(X_k) >= self.n_subcomponents else X, prior)
+        for i, (N_k, component) in enumerate(zip(N_K, self.components)):
+            if N_k < self.n_subcomponents:
+                logger.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
 
-        if n_empty > 0:
-            logging.warning(f'Encountered {n_empty} empty clusters while initializing subclusters')
+            component.reinit_params(X[z == i] if N_k >= self.n_subcomponents else X, prior)
 
     def update_params(self, X: Tensor, r: Tensor, ri: Tensor, prior: Priors):
         z = r.argmax(dim=-1)
@@ -164,21 +176,17 @@ class StackedGaussianMixtureModel(torch.nn.Module):
             N_k = r_k.sum(dim=0)
 
             if len(X_k) < self.n_subcomponents or (N_k == 0).any() or len(torch.unique(z_k)) < self.n_subcomponents:
-                if len(X_k) < self.n_subcomponents:
-                    logger.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
-                    submodel.initialize_params(X, prior)
-                    submodel.pi.data = torch.tensor([0, len(X_k)]) / len(X)
-                else:
-                    logger.warning(f'Encountered concentrated cluster {i} while updating subclusters. Reinitializing')
-                    submodel.initialize_params(X_k, prior)
+                logger.warning('Encountered {} cluster {} while updating subclusters. Reinitializing'
+                               .format('empty' if len(X_k) < self.n_subcomponents else 'concentrated', i))
+                submodel.reinit_params(X_k if len(X_k) >= self.n_subcomponents else X, prior)
             else:
                 submodel.update_params(X_k, r_k, prior)
 
-    def add_component(self, pi_init=None, mus_init=None, covs_init=None) -> GaussianMixtureModel:
+    def add_component(self, init_params: GMMParams = None) -> GaussianMixtureModel:
         component = GaussianMixtureModel(
             self.n_subcomponents, self.repr_dim,
             loss='iso', sim=self.sim,
-            pi_init=pi_init, mus_init=mus_init, covs_init=covs_init
+            init_params=init_params
         )
         self.components.append(component)
         return component
@@ -190,27 +198,27 @@ class StackedGaussianMixtureModel(torch.nn.Module):
     def m_step(self, X: Tensor, r: Tensor, ri: Tensor, prior: Priors):
         self.update_params(X, r, ri, prior)
 
-    @property
-    def pi(self):
-        return torch.cat([submodel.pi.data for submodel in self.components], dim=0)
-
-    @property
-    def mus(self):
-        return torch.cat([submodel.mus.data for submodel in self.components], dim=0)
-
-    @property
-    def covs(self):
-        return torch.cat([submodel.covs.data for submodel in self.components], dim=0)
-
-    @property
-    def n_components(self):
-        return len(self.components) * self.n_subcomponents
-
     def __len__(self):
         return len(self.components)
 
     def __getitem__(self, idx):
         return self.components[idx]
+
+    @property
+    def n_components(self):
+        return len(self.components) * self.n_subcomponents
+
+    @property
+    def pi(self):
+        return torch.cat([submodel.pi for submodel in self.components], dim=0)
+
+    @property
+    def mus(self):
+        return torch.cat([submodel.mus for submodel in self.components], dim=0)
+
+    @property
+    def covs(self):
+        return torch.cat([submodel.covs for submodel in self.components], dim=0)
 
 
 EPS = 0.0001

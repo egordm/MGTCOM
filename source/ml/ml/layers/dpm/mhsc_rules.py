@@ -111,17 +111,17 @@ class MHSCRules:
             X_k = X[z == i]
             ri_k = ri[z == i, self.gmm_sub.n_subcomponents * i: self.gmm_sub.n_subcomponents * (i + 1)]
 
-            decisions[i] = self.split_rule(X_k, ri_k, self.gmm.mus.data[i], self.gmm_sub[i].mus.data)
+            decisions[i] = self.split_rule(X_k, ri_k, self.gmm.mus[i], self.gmm_sub[i].mus)
 
         return decisions
 
     def merge_decisions(self, X: Tensor, r: Tensor) -> Tensor:
         # Compute probable merge candidates by merging the most neighboring subclusters
         neigh = NearestNeighbors(n_neighbors=min(self.n_merge_neighbors, self.gmm.n_components), metric=self.sim)
-        neigh.fit(self.gmm.mus.data)
+        neigh.fit(self.gmm.mus)
 
         candidates = []
-        ds, js = neigh.kneighbors(self.gmm.mus.data, return_distance=True)
+        ds, js = neigh.kneighbors(self.gmm.mus, return_distance=True)
         for i in range(self.gmm.n_components):
             candidates.extend([(d, i, j) for (d, j) in zip(ds[i], js[i]) if j < i])
         candidates = list(sorted(candidates, key=lambda x: x[0]))
@@ -138,7 +138,7 @@ class MHSCRules:
             ind = torch.logical_or(z == i, z == j)
             X_K = X[ind]
             r_K = r[ind][:, [i, j]]
-            mus = self.gmm.mus.data[[i, j], :]
+            mus = self.gmm.mus[[i, j], :]
 
             decision, dominant_k = self.merge_rule(X_K, r_K, mus)
             if decision:
@@ -152,21 +152,20 @@ class MHSCRules:
         z = r.argmax(dim=-1)
 
         # Split clusters
-        pi_new = self.gmm.pi.data[~decisions]
-        mus_new = self.gmm.mus.data[~decisions]
-        covs_new = self.gmm.covs.data[~decisions]
+        pi_new, mus_new, covs_new = self.gmm.pi[~decisions], self.gmm.mus[~decisions], self.gmm.covs[~decisions]
 
         pis_to_add, mus_to_add, covs_to_add = [], [], []
         for k in decisions.nonzero():
             component = self.gmm_sub[k]
-            pis_to_add.append(component.pi.data)
-            mus_to_add.append(component.mus.data)
-            covs_to_add.append(component.covs.data)
+            pis_to_add.append(component.pi)
+            mus_to_add.append(component.mus)
+            covs_to_add.append(component.covs)
 
-        self.gmm.pi.data = torch.cat([pi_new, torch.cat(pis_to_add, dim=0)], dim=0)
-        self.gmm.mus.data = torch.cat([mus_new, torch.cat(mus_to_add, dim=0)], dim=0)
-        self.gmm.covs.data = torch.cat([covs_new, torch.cat(covs_to_add, dim=0)], dim=0)
-        self.gmm.n_components = len(self.gmm.mus.data)
+        self.gmm.set_params(
+            torch.cat([pi_new, torch.cat(pis_to_add, dim=0)], dim=0),
+            torch.cat([mus_new, torch.cat(mus_to_add, dim=0)], dim=0),
+            torch.cat([covs_new, torch.cat(covs_to_add, dim=0)], dim=0),
+        )
 
         # Create new subclusters
         self.gmm_sub.components = torch.nn.ModuleList([
@@ -179,7 +178,7 @@ class MHSCRules:
 
             for j in range(self.gmm_sub.n_subcomponents):
                 X_kj = X_k[z_k == j] if sum(z_k == j) >= self.gmm_sub.n_subcomponents else None
-                self.gmm_sub.add_component().initialize_params(X_kj, self.prior)
+                self.gmm_sub.add_component().reinit_params(X_kj, self.prior)
 
     def merge(self, decisions: Tensor, X: Tensor, r: Tensor, ri: Tensor):
         z = r.argmax(dim=-1)
@@ -197,14 +196,12 @@ class MHSCRules:
             X_k = X[torch.logical_or(z == i, z == j)]
             if len(X_k) <= self.n_merge_neighbors:
                 # Too few points to merge (so use the clusters as subclusters)
-                self.gmm_sub.add_component(self.gmm.pi.data[pair], self.gmm.mus.data[pair], self.gmm.covs.data[pair])
+                self.gmm_sub.add_component((self.gmm.pi[pair], self.gmm.mus[pair], self.gmm.covs[pair]))
             else:
-                self.gmm_sub.add_component().initialize_params(X_k, self.prior)
+                self.gmm_sub.add_component().reinit_params(X_k, self.prior)
 
         # Merge clusters
-        pis_new = self.gmm.pi.data[~mask]
-        mus_new = self.gmm.mus.data[~mask]
-        covs_new = self.gmm.covs.data[~mask]
+        pis_new, mus_new, covs_new = self.gmm.pi[~mask], self.gmm.mus[~mask], self.gmm.covs[~mask]
 
         pi_merged, mus_merged, covs_merged = [], [], []
         for pair in decisions:
@@ -212,11 +209,11 @@ class MHSCRules:
             N_k = N_K[pair].sum()
 
             if N_k > 0:
-                mu_news = (N_K[pair, None] * self.gmm.mus.data[pair]).sum(dim=0, keepdims=True) / N_k
+                mu_news = (N_K[pair, None] * self.gmm.mus[pair]).sum(dim=0, keepdims=True) / N_k
                 cov_news = compute_covs_soft_assignment(r_mod.sum(dim=0, keepdims=True), X, r_mod, 1, mu_news)
             else:
-                mu_news = self.gmm.mus.data[pair, :].mean(dim=0, keepdims=True)
-                cov_news = self.gmm.covs.data[pair[0]].unsqueeze(0)
+                mu_news = self.gmm.mus[pair, :].mean(dim=0, keepdims=True)
+                cov_news = self.gmm.covs[pair[0]].unsqueeze(0)
 
             pi_new = (self.gmm.pi[pair]).sum(dim=0, keepdims=True)
             pi_new_, mu_news, cov_news = self.prior.compute_post_params(D, r_mod.sum(dim=0), pi_new, mu_news, cov_news)
@@ -225,7 +222,8 @@ class MHSCRules:
             mus_merged.append(mu_news)
             covs_merged.append(cov_news)
 
-        self.gmm.pi.data = torch.cat([pis_new, torch.cat(pi_merged, dim=0)], dim=0)
-        self.gmm.mus.data = torch.cat([mus_new, torch.cat(mus_merged, dim=0)], dim=0)
-        self.gmm.covs.data = torch.cat([covs_new, torch.cat(covs_merged, dim=0)], dim=0)
-        self.gmm.n_components = len(self.gmm.mus.data)
+        self.gmm.set_params(
+            torch.cat([pis_new, torch.cat(pi_merged, dim=0)], dim=0),
+            torch.cat([mus_new, torch.cat(mus_merged, dim=0)], dim=0),
+            torch.cat([covs_new, torch.cat(covs_merged, dim=0)], dim=0),
+        )

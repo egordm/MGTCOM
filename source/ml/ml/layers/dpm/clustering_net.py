@@ -183,7 +183,6 @@ class SubClusteringNet(torch.nn.Module):
             self._decouple_net()
 
 
-
 def split_weights(weight: Tensor, bias: Tensor, split_mode: SplitMode) -> Tuple[Tensor, Tensor]:
     if split_mode == SplitMode.Same:
         return (

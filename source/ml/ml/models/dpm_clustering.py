@@ -136,7 +136,7 @@ class DPMClusteringModel(pl.LightningModule):
         self.prior.init_priors(xs)
 
         logger.info(f"Initializing cluster params")
-        self.cluster_gmm.initialize_params(xs, self.prior)
+        self.cluster_gmm.reinit_params(xs, self.prior)
 
     def on_train_epoch_start(self) -> None:
         if self.stage == Stage.BurnIn:
@@ -193,7 +193,7 @@ class DPMClusteringModel(pl.LightningModule):
         # Initialize subcluster GMM (later in the training)
         if self.hparams.subcluster and self.current_epoch + 1 == self.hparams.epoch_start_msub:
             logger.info("Initializing subcluster params")
-            self.subcluster_gmm.initialize_params(X, r, self.prior)
+            self.subcluster_gmm.reinit_params(X, r, self.prior)
 
         # Subcluster M step
         if self.stage >= Stage.SubClustering:
@@ -289,14 +289,14 @@ class DPMClusteringModel(pl.LightningModule):
     def sanity_check(self):
         # Debug: do a few asserts
         assert self.cluster_gmm.n_components == self.k
-        assert self.cluster_gmm.pi.data.shape == (self.k,)
-        assert self.cluster_gmm.mus.data.shape == (self.k, self.repr_dim)
-        assert self.cluster_gmm.covs.data.shape == (self.k, self.repr_dim, self.repr_dim)
+        assert self.cluster_gmm.pi.shape == (self.k,)
+        assert self.cluster_gmm.mus.shape == (self.k, self.repr_dim)
+        assert self.cluster_gmm.covs.shape == (self.k, self.repr_dim, self.repr_dim)
         assert self.subcluster_gmm.n_components == self.k * self.subcluster_gmm.n_subcomponents
         for component in self.subcluster_gmm.components:
-            assert component.pi.data.shape == (2,)
-            assert component.mus.data.shape == (2, self.repr_dim)
-            assert component.covs.data.shape == (2, self.repr_dim, self.repr_dim)
+            assert component.pi.shape == (2,)
+            assert component.mus.shape == (2, self.repr_dim)
+            assert component.covs.shape == (2, self.repr_dim, self.repr_dim)
 
         assert len(self.subcluster_gmm) == self.k
         assert self.cluster_net.in_net.weight.data.shape == (self.hparams.lat_dim, self.repr_dim)
