@@ -105,7 +105,6 @@ class DPMClusteringModel(pl.LightningModule):
             self.hparams.prior_nu = repr_dim + 1
 
         self.prior = Priors(
-            K=self.k, pi_counts=self.hparams.prior_dir_counts,
             kappa=self.hparams.prior_kappa, nu=self.hparams.prior_nu,
             sigma_scale=self.hparams.prior_sigma_scale, prior_sigma_choice=self.hparams.prior_sigma_choice,
         )
@@ -137,7 +136,7 @@ class DPMClusteringModel(pl.LightningModule):
         self.prior.init_priors(xs)
 
         logger.info(f"Initializing cluster params")
-        self.cluster_gmm.initialize_params(xs, None, self.prior)
+        self.cluster_gmm.initialize_params(xs, self.prior)
 
     def on_train_epoch_start(self) -> None:
         if self.stage == Stage.BurnIn:

@@ -6,9 +6,11 @@ from torch import Tensor
 from sklearn.neighbors import NearestNeighbors
 
 from ml.layers.dpm import Priors, StackedGaussianMixtureModel, GaussianMixtureModel, compute_covs_soft_assignment
+from ml.utils import unique_count
 
 SplitDecisions = Tensor
 MergeDecisions = List[Tuple[int, int]]
+
 
 class MHSCRules:
     """
@@ -177,10 +179,12 @@ class MHSCRules:
 
             for j in range(self.gmm_sub.n_subcomponents):
                 X_kj = X_k[z_k == j] if sum(z_k == j) >= self.gmm_sub.n_subcomponents else None
-                self.gmm_sub.add_component().initialize_params(X_kj, None, self.prior)
+                self.gmm_sub.add_component().initialize_params(X_kj, self.prior)
 
     def merge(self, decisions: Tensor, X: Tensor, r: Tensor, ri: Tensor):
         z = r.argmax(dim=-1)
+        (_, D) = X.shape
+        N_K = unique_count(z, self.gmm.n_components)
         mask = torch.zeros(len(self.gmm), dtype=torch.bool)
         mask[decisions.flatten()] = True
 
@@ -193,13 +197,9 @@ class MHSCRules:
             X_k = X[torch.logical_or(z == i, z == j)]
             if len(X_k) <= self.n_merge_neighbors:
                 # Too few points to merge (so use the clusters as subclusters)
-                self.gmm_sub.add_component(
-                    pi_init=self.gmm.pi.data[pair],
-                    mus_init=self.gmm.mus.data[pair],
-                    covs_init=self.gmm.covs.data[pair],
-                )
+                self.gmm_sub.add_component(self.gmm.pi.data[pair], self.gmm.mus.data[pair], self.gmm.covs.data[pair])
             else:
-                self.gmm_sub.add_component().initialize_params(X_k, None, self.prior)
+                self.gmm_sub.add_component().initialize_params(X_k, self.prior)
 
         # Merge clusters
         pis_new = self.gmm.pi.data[~mask]
@@ -207,34 +207,25 @@ class MHSCRules:
         covs_new = self.gmm.covs.data[~mask]
 
         pi_merged, mus_merged, covs_merged = [], [], []
-        for (i, j) in decisions:
-            N_k_i, N_k_j = sum(z == i), sum(z == j)
-            N_k = N_k_i + N_k_j
+        for pair in decisions:
+            r_mod = r[:, pair].sum(dim=-1).reshape(-1, 1)
+            N_k = N_K[pair].sum()
 
-            r_mod = r[:, [i, j]].sum(dim=-1).reshape(-1, 1)
             if N_k > 0:
-                mu_new = (self.gmm.mus.data[i] * N_k_i + self.gmm.mus.data[j] * N_k_j) / N_k
-                cov_new = compute_covs_soft_assignment(X, r_mod, 1, mu_new)
+                mu_news = (N_K[pair, None] * self.gmm.mus.data[pair]).sum(dim=0, keepdims=True) / N_k
+                cov_news = compute_covs_soft_assignment(r_mod.sum(dim=0, keepdims=True), X, r_mod, 1, mu_news)
             else:
-                mu_new = self.gmm.mus.data[[i, j], :].mean(dim=0)
-                cov_new = self.gmm.covs.data[i].unsqueeze(0)
+                mu_news = self.gmm.mus.data[pair, :].mean(dim=0, keepdims=True)
+                cov_news = self.gmm.covs.data[pair[0]].unsqueeze(0)
 
-            pi_new = (self.gmm.pi[i] + self.gmm.pi[j]).reshape(1)
-
-            r_tot = r_mod.sum(dim=0)
-            cov_new = self.prior.compute_post_cov(r_tot, mu_new, cov_new)
-            mu_new = self.prior.compute_post_mus(pi_new * len(r), mu_new)
+            pi_new = (self.gmm.pi[pair]).sum(dim=0, keepdims=True)
+            pi_new_, mu_news, cov_news = self.prior.compute_post_params(D, r_mod.sum(dim=0), pi_new, mu_news, cov_news)
 
             pi_merged.append(pi_new)
-            mus_merged.append(mu_new)
-            covs_merged.append(cov_new)
+            mus_merged.append(mu_news)
+            covs_merged.append(cov_news)
 
         self.gmm.pi.data = torch.cat([pis_new, torch.cat(pi_merged, dim=0)], dim=0)
         self.gmm.mus.data = torch.cat([mus_new, torch.cat(mus_merged, dim=0)], dim=0)
         self.gmm.covs.data = torch.cat([covs_new, torch.cat(covs_merged, dim=0)], dim=0)
         self.gmm.n_components = len(self.gmm.mus.data)
-
-
-
-
-

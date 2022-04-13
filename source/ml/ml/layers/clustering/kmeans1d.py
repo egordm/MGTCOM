@@ -42,6 +42,8 @@ class KMeans1D:
         self.kmeans.fit(tr, weights, init_centroids)
         self.centroids = self.mat.reverse_transform(self.kmeans.centroids)
 
+        return self
+
     def assign(self, x):
         assert self.centroids is not None, "should train before assigning"
         x = ensure_numpy(x)

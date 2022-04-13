@@ -64,6 +64,8 @@ class KMeans:
         centroids = faiss.vector_float_to_array(self.clus.centroids)
         self.centroids = centroids.reshape(self.k, self.repr_dim)
 
+        return self
+
     def assign(self, x):
         assert self.centroids is not None, "should train before assigning"
         x = ensure_numpy(x)

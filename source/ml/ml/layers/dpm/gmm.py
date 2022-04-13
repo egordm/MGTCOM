@@ -3,14 +3,14 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-import numpy as np
 import torch
 from torch import Tensor
 from torch.distributions.multivariate_normal import MultivariateNormal
 
-from ml.layers.dpm import initialize_kmeans, Priors, initialize_kmeans1d, initialize_soft_assignment, \
-    compute_mus_soft_assignment, compute_covs_soft_assignment
+from ml.layers.clustering import KMeans, KMeans1D
+from ml.layers.dpm import Priors
 from ml.layers.loss.gmm_loss import KLGMMLoss, IsoGMMLoss
+from ml.utils import unique_count, compute_cov
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -58,7 +58,7 @@ class GaussianMixtureModel(torch.nn.Module):
         self.mus = torch.nn.Parameter(mus_init, requires_grad=False)
 
         if covs_init is None:
-            covs_init = torch.eye(self.repr_dim).reshape(1, self.repr_dim, self.repr_dim)\
+            covs_init = torch.eye(self.repr_dim).reshape(1, self.repr_dim, self.repr_dim) \
                 .repeat(self.n_components, 1, 1)
         assert covs_init.shape == (self.n_components, self.repr_dim, self.repr_dim)
         self.covs = torch.nn.Parameter(covs_init, requires_grad=False)
@@ -67,31 +67,24 @@ class GaussianMixtureModel(torch.nn.Module):
             pi_init = torch.ones(self.n_components) / self.n_components
         self.pi = torch.nn.Parameter(pi_init, requires_grad=False)
 
-    def initialize_params(self, X: Tensor, r: Optional[Tensor], prior: Priors):
+    def initialize_params(self, X: Tensor, prior: Priors):
         if self.init_mode == InitMode.KMeans:
-            mus, covs, pi = initialize_kmeans(X, self.n_components, prior, sim=self.sim)
+            z = KMeans(self.repr_dim, self.n_components, sim=self.sim).fit(X).assign(X)
         elif self.init_mode == InitMode.KMeans1D:
-            mus, covs, pi = initialize_kmeans1d(X, self.n_components, prior, sim=self.sim)
-        elif self.init_mode == InitMode.SoftAssignment:
-            mus, covs, pi = initialize_soft_assignment(X, r, self.n_components, prior)
+            z = KMeans1D(self.repr_dim, self.n_components, sim=self.sim).fit(X).assign(X)
         else:
             raise NotImplementedError(f'Unknown initialization mode: {self.init_mode}')
+
+        (_, D) = X.shape
+        pi, mus, covs = compute_hard_assignment(X, z, self.n_components, prior.mus_covs_prior.psi)
+        pi_, mus, covs = prior.compute_post_params(D, pi * len(X), pi, mus, covs)
 
         self.mus.data, self.covs.data, self.pi.data = mus, covs, pi
 
     def update_params(self, X: Tensor, r: Tensor, prior: Priors):
-        pi = r.sum(dim=0) / len(r)
-
-        mus = compute_mus_soft_assignment(X, r, self.n_components)
-        covs = compute_covs_soft_assignment(X, r, self.n_components, mus)
-
-        pi = prior.compute_post_pi(pi)
-        mus = prior.compute_post_mus(pi * len(r), mus)
-        r_tot = r.sum(dim=0)
-        covs = torch.stack([
-            prior.compute_post_cov(r_tot[i], mus[i], covs[i])
-            for i in range(self.n_components)
-        ])
+        (_, D) = X.shape
+        pi, mus, covs = compute_soft_assignment(X, r, self.n_components)
+        pi, mus, covs = prior.compute_post_params(D, r.sum(dim=0), pi, mus, covs)
 
         self.mus.data, self.covs.data, self.pi.data = mus, covs, pi
 
@@ -104,7 +97,6 @@ class GaussianMixtureModel(torch.nn.Module):
 
         weighted_r_E = torch.stack(weighted_r_E, dim=1)
         max_values, _ = weighted_r_E.max(dim=1, keepdim=True)
-        # r_E_norm = torch.log(torch.sum(torch.exp(weighted_r_E - max_values), dim=1, keepdim=True)) + max_values
         r_E_norm = torch.logsumexp(weighted_r_E - max_values, dim=1, keepdim=True) + max_values
         r_E = torch.exp(weighted_r_E - r_E_norm)
 
@@ -157,7 +149,7 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         for i, component in enumerate(self.components):
             X_k = X[z == i]
             n_empty += (len(X_k) == 0)
-            component.initialize_params(X_k if len(X_k) >= self.n_subcomponents else X, None, prior)
+            component.initialize_params(X_k if len(X_k) >= self.n_subcomponents else X, prior)
 
         if n_empty > 0:
             logging.warning(f'Encountered {n_empty} empty clusters while initializing subclusters')
@@ -165,36 +157,22 @@ class StackedGaussianMixtureModel(torch.nn.Module):
     def update_params(self, X: Tensor, r: Tensor, ri: Tensor, prior: Priors):
         z = r.argmax(dim=-1)
 
-        pi = ri.sum(dim=0) / len(ri)
-        pi = prior.compute_post_pi(pi)
-
         for i, submodel in enumerate(self.components):
             X_k = X[z == i]
             r_k = ri[z == i, self.n_subcomponents * i: self.n_subcomponents * (i + 1)]
             z_k = r_k.argmax(dim=-1)
-            denom = r_k.sum(dim=0)
+            N_k = r_k.sum(dim=0)
 
-            if len(X_k) < self.n_subcomponents or (denom == 0).any() or len(torch.unique(z_k)) < self.n_subcomponents:
+            if len(X_k) < self.n_subcomponents or (N_k == 0).any() or len(torch.unique(z_k)) < self.n_subcomponents:
                 if len(X_k) < self.n_subcomponents:
                     logger.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
-                    submodel.initialize_params(X, None, prior)
+                    submodel.initialize_params(X, prior)
                     submodel.pi.data = torch.tensor([0, len(X_k)]) / len(X)
                 else:
                     logger.warning(f'Encountered concentrated cluster {i} while updating subclusters. Reinitializing')
-                    submodel.initialize_params(X_k, None, prior)
+                    submodel.initialize_params(X_k, prior)
             else:
-                pi_k = pi[self.n_subcomponents * i: self.n_subcomponents * (i + 1)]
-                mus_k = compute_mus_soft_assignment(X_k, r_k, self.n_subcomponents)
-                covs_k = compute_covs_soft_assignment(X_k, r_k, self.n_subcomponents, mus_k)
-
-                r_tot = ri.sum(dim=0)
-                covs_k = torch.stack([
-                    prior.compute_post_cov(r_tot[i], mus_k[i], covs_k[i])
-                    for i in range(self.n_subcomponents)
-                ])
-                mus_k = prior.compute_post_mus(pi_k * len(ri), mus_k)
-
-                submodel.mus.data, submodel.covs.data, submodel.pi.data = mus_k, covs_k, pi_k
+                submodel.update_params(X_k, r_k, prior)
 
     def add_component(self, pi_init=None, mus_init=None, covs_init=None) -> GaussianMixtureModel:
         component = GaussianMixtureModel(
@@ -233,3 +211,41 @@ class StackedGaussianMixtureModel(torch.nn.Module):
 
     def __getitem__(self, idx):
         return self.components[idx]
+
+
+EPS = 0.0001
+
+
+def compute_hard_assignment(X: Tensor, z: Tensor, k: int, cov_init: Tensor):
+    N_K = unique_count(z, k)
+
+    pi = (N_K + EPS) / N_K.sum()
+    mus = torch.zeros(k, X.shape[1]).index_add_(0, z, X) / N_K.unsqueeze(1)
+    covs = torch.stack([
+        compute_cov(X[z == i] - mus[i].unsqueeze(0)) if N_K[i] > 0 else cov_init
+        for i in range(k)
+    ])
+    return pi, mus, covs
+
+
+def compute_soft_assignment(X: Tensor, r: Tensor, k: int):
+    N_K = r.sum(dim=0) + EPS
+
+    pi = N_K / len(r)
+    mus = torch.stack([
+        (r[:, i].unsqueeze(1) * X).sum(dim=0) / N_K[i]
+        for i in range(k)
+    ])
+    covs = compute_covs_soft_assignment(N_K, X, r, k, mus)
+    return pi, mus, covs
+
+
+def compute_covs_soft_assignment(N_K, X: Tensor, r: Tensor, k: int, mus: Tensor):
+    covs = []
+    for i in range(k):
+        X_diff = X - mus[i].unsqueeze(0)
+        if len(X) > 0:
+            covs.append(torch.matmul((r[:, i].unsqueeze(0) * X_diff.T), X_diff) / N_K[i])
+        else:
+            covs.append(torch.eye(mus.shape[1]) * EPS)
+    return torch.stack(covs)
