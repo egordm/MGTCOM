@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor
@@ -8,6 +8,7 @@ from datasets.utils.base import DATASET_REGISTRY, GraphDataset
 from ml.callbacks.clustering_monitor import ClusteringMonitor
 from ml.callbacks.gmm_visualizer_callback import GMMVisualizerCallback
 from ml.data import ConcatDataset, PretrainedEmbeddingsDataset
+from ml.data.generated.synthetic_gmm import SyntheticGMMDataset
 from ml.models.dpm_clustering import DPMClusteringModelParams, DPMClusteringModel
 from ml.utils.config import TrainerParams, dataset_choices
 from shared import parse_args, get_logger, RESULTS_PATH
@@ -21,17 +22,25 @@ logger = get_logger(EXECUTOR_NAME)
 @dataclass
 class Args:
     dataset: str = dataset_choices()
-    pretrained_path: List[str] = None
+    pretrained_path: Optional[List[str]] = None
     hparams: DPMClusteringModelParams = DPMClusteringModelParams()
     trainer: TrainerParams = TrainerParams()
 
 
 def train(args: Args):
     graph_dataset: GraphDataset = DATASET_REGISTRY[args.dataset]()
-    dataset = ConcatDataset([
-        PretrainedEmbeddingsDataset.from_pretrained(path)
-        for path in args.pretrained_path
-    ])
+    if args.pretrained_path:
+        logger.info(f'Using pretrained embeddings from {args.pretrained_path}')
+        dataset = ConcatDataset([
+            PretrainedEmbeddingsDataset.from_pretrained(path)
+            for path in args.pretrained_path
+        ])
+    else:
+        logger.info('No pretrained embeddings provided, using synthetic dataset')
+        dataset = ConcatDataset([
+            SyntheticGMMDataset()
+        ])
+
     repr_dim = dataset[[0]].shape[-1]
     model = DPMClusteringModel(dataset, hparams=args.hparams, repr_dim=repr_dim)
 
