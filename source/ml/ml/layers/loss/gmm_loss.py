@@ -34,12 +34,10 @@ class IsoGMMLoss(torch.nn.Module):
         self.dist_fn = pairwise_dist_fn(sim)
 
     def forward(self, gmm: "GaussianMixtureModel", X: Tensor, r: Tensor):
-        x_tag = X.repeat(1, gmm.n_components).view(-1, gmm.repr_dim)
-        mus_tag = gmm.mus.repeat(X.shape[0], 1)
+        X_tag = X.repeat_interleave(len(gmm), dim=0)
+        mus_tag = gmm.mus.repeat(len(X), 1).view(-1, len(gmm))
         r_tag = r.flatten()
-        loss = (r_tag * self.dist_fn(x_tag, mus_tag).pow(2)).sum() / len(X)
-
-        # z = torch.masked_fill(self.dist_fn(x_tag, mus_tag).view(*r.shape), (r == 0), float('inf')).argmin(dim=-1)
-        # loss_cl = (r.argmax(dim=-1) != z).sum() / 2
+        dist_tag = self.dist_fn(X_tag, mus_tag).pow(2)
+        loss = (r_tag * dist_tag).sum() / len(X)
 
         return loss, None #, loss_cl

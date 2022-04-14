@@ -2,20 +2,21 @@ import logging
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import Optional, Dict, Union
+from typing import Optional
 
 import pytorch_lightning as pl
 import torch
 from simple_parsing import choice, field
 from tch_geometric.loader import CustomLoader
 from torch import Tensor
+from torch.optim import Optimizer
 from torch.utils.data import Dataset
 
 from ml.layers.dpm import ClusteringNet, SubClusteringNet, Priors, GaussianMixtureModel, StackedGaussianMixtureModel, \
-    SplitMode, MergeMode, InitMode
+    WeightsInitMode, InitMode
 from ml.layers.dpm.burnin_monitor import BurnInMonitor
 from ml.layers.dpm.mhsc_rules import MHSCRules
-from ml.utils import dicts_extract, flat_iter, OutputExtractor
+from ml.utils import dicts_extract, OutputExtractor
 from ml.utils.config import HParams, DataLoaderParams
 from shared import get_logger
 
@@ -26,13 +27,12 @@ logger = get_logger(Path(__file__).stem)
 class DPMClusteringModelParams(HParams):
     lat_dim: int = 32
     init_k: int = 1
-    # init_k: int = 2
-    subcluster: bool = True
+    subcluster: bool = False
 
     sim: str = choice(['cosine', 'dotp', 'euclidean'], default='euclidean')
 
-    cluster_burnin_patience: int = 6
-    subcluster_burnin_patience: int = 6
+    cluster_burnin_patience: int = 1
+    subcluster_burnin_patience: int = 1
 
     prior_dir_counts: float = 0.1
     prior_kappa: float = 0.0001
@@ -49,10 +49,11 @@ class DPMClusteringModelParams(HParams):
     merge_prob: Optional[float] = None
     min_split_points: int = 6
     n_merge_neighbors: int = 3
-    split_mode: SplitMode = SplitMode.Random
-    merge_mode: MergeMode = MergeMode.Same
+    init_weights: WeightsInitMode = WeightsInitMode.Random
+    init_weights_split_sub: WeightsInitMode = WeightsInitMode.Random
+    init_weights_merge_sub: WeightsInitMode = WeightsInitMode.Random
 
-    cluster_lr: float = 0.01
+    cluster_lr: float = 0.05
     subcluster_lr: float = 0.01
 
     loader_args: DataLoaderParams = DataLoaderParams()
@@ -97,8 +98,7 @@ class DPMClusteringModel(pl.LightningModule):
         self.repr_dim = repr_dim
 
         self.cluster_net = ClusteringNet(self.k, self.repr_dim, self.hparams.lat_dim)
-        self.subcluster_net = SubClusteringNet(self.k, self.repr_dim,
-                                               self.hparams.lat_dim) if self.hparams.subcluster else None
+        self.subcluster_net = SubClusteringNet(self.k, self.repr_dim, self.hparams.lat_dim) if self.hparams.subcluster else None
 
         if self.hparams.prior_nu < repr_dim + 1:
             logging.warning("prior_nu must be at least repr_dim + 1")
@@ -123,12 +123,13 @@ class DPMClusteringModel(pl.LightningModule):
         )
 
         self.stage = Stage.Clustering
-        self.last_action = Action.NoAction
+        # self.last_action = Action.NoAction
+        self.last_action = Action.Split
 
         self.cluster_burnin = BurnInMonitor(self.hparams.cluster_burnin_patience)
+        self.cluster_m_burnin = BurnInMonitor(self.hparams.cluster_burnin_patience)
         self.subcluster_burnin = BurnInMonitor(self.hparams.subcluster_burnin_patience)
-
-
+        self.subcluster_m_burnin = BurnInMonitor(self.hparams.subcluster_burnin_patience)
 
 
     def forward(self, batch: Tensor):
@@ -166,7 +167,7 @@ class DPMClusteringModel(pl.LightningModule):
             z = r.detach().argmax(dim=-1)
             ri = self.subcluster_net(x, z)
 
-            subcluster_loss, subcluster_cl = self.subcluster_gmm.e_step(x, ri)
+            subcluster_loss, subcluster_cl = self.subcluster_gmm.e_step(x, z, ri)
             loss = subcluster_loss
 
             out.update(dict(
@@ -188,11 +189,13 @@ class DPMClusteringModel(pl.LightningModule):
         # Cluster Monitoring
         cluster_loss, cluster_cl = outputs.extract_mean('cluster_loss'), 0 #, outputs.extract_mean('cluster_cl')
         cluster_burned_in, subcluster_burned_in = self.cluster_burnin.update(cluster_loss), False
+        cluster_m_burned_in, subcluster_m_burned_in = cluster_burned_in and self.cluster_m_burnin.update(cluster_loss), False
 
         # Subcluster Monitoring
         if self.stage == Stage.SubClustering:
             subcluster_loss, subcluster_cl = outputs.extract_mean('subcluster_loss'), 0 #, outputs.extract_mean('subcluster_cl')
-            subcluster_burned_in = cluster_burned_in and self.subcluster_burnin.update(subcluster_loss)
+            subcluster_burned_in = cluster_m_burned_in and self.subcluster_burnin.update(subcluster_loss)
+            subcluster_m_burned_in = subcluster_burned_in and self.subcluster_m_burnin.update(subcluster_loss)
             ri = outputs.extract_cat('ri')
         else:
             subcluster_loss, subcluster_cl = float('nan'), float('nan')
@@ -200,7 +203,7 @@ class DPMClusteringModel(pl.LightningModule):
 
         # Decide on a Merge or Split action
         action = Action.NoAction
-        if False and cluster_burned_in and subcluster_burned_in and self.stage >= Stage.SubClustering:
+        if subcluster_m_burned_in and self.stage >= Stage.SubClustering:
             if self.last_action != Action.Split:
                 action = Action.Split
                 self.last_action = Action.Split
@@ -208,21 +211,22 @@ class DPMClusteringModel(pl.LightningModule):
                 action = Action.Merge
                 self.last_action = Action.Merge
 
-        # Initialize subcluster GMM (once clusters have burned in)
-        if self.stage == Stage.Clustering and cluster_burned_in:
-            logger.info("Initializing subcluster params")
-            self.stage = Stage.SubClustering
-            self.subcluster_gmm.reinit_params(X, r, self.prior)
-
         # Clustering M step
         if cluster_burned_in:
             logger.info("Updating cluster params")
             self.cluster_gmm.m_step(X, r, self.prior)
 
         # Subcluster M step
+        # if self.stage == Stage.SubClustering and subcluster_burned_in:
         if self.stage == Stage.SubClustering and subcluster_burned_in:
             logger.info("Updating subcluster params")
             self.subcluster_gmm.m_step(X, r, ri, self.prior)
+
+        # Initialize subcluster GMM (once clusters have burned in)
+        if self.hparams.subcluster and self.stage == Stage.Clustering and cluster_burned_in:
+            logger.info("Initializing subcluster params")
+            self.stage = Stage.SubClustering
+            self.subcluster_gmm.reinit_params(X, r, self.prior)
 
         if action == Action.Split:
             self.split(X, r, ri)
@@ -232,8 +236,10 @@ class DPMClusteringModel(pl.LightningModule):
         self.log_dict({
             'epoch_cluster_loss': cluster_loss,
             'epoch_subcluster_loss': subcluster_loss,
-            'subcluster_burned_in': subcluster_burned_in,
-            'cluster_burned_in': cluster_burned_in,
+            'cbi': cluster_burned_in,
+            'mbi': cluster_m_burned_in,
+            'sbi': subcluster_burned_in,
+            'smbi': subcluster_m_burned_in,
         }, prog_bar=True)
 
     def split(self, X, r, ri):
@@ -243,21 +249,20 @@ class DPMClusteringModel(pl.LightningModule):
         if not decisions.any():
             return
 
+        cluster_opt: Optimizer
         cluster_opt, subcluster_opt = self.optimizers()
 
         # Split clustering network
         for p in self.cluster_net.out_net.parameters():
             cluster_opt.state.pop(p)
 
-        self.cluster_net.split(decisions, self.hparams.split_mode)
+        self.cluster_net.split(decisions, self.hparams.init_weights)
         cluster_opt.param_groups[1]['params'] = list(self.cluster_net.out_net.parameters())
         self.cluster_net.to(self.device)
 
         # Split subcluster network
-        for p in self.subcluster_net.parameters():
-            subcluster_opt.state.pop(p)
-
-        self.subcluster_net.split(decisions, self.hparams.split_mode)
+        subcluster_opt.state.clear()
+        self.subcluster_net.split(decisions, self.hparams.init_weights_split_sub)
         subcluster_opt.param_groups[0]['params'] = list(self.subcluster_net.parameters())
         self.subcluster_net.to(self.device)
 
@@ -266,7 +271,9 @@ class DPMClusteringModel(pl.LightningModule):
 
         self.k = self.cluster_gmm.n_components
         self.cluster_burnin.reset()
+        self.cluster_m_burnin.reset()
         self.subcluster_burnin.reset()
+        self.subcluster_m_burnin.reset()
 
         self.sanity_check()
 
@@ -277,21 +284,21 @@ class DPMClusteringModel(pl.LightningModule):
         if len(decisions) == 0:
             return
 
+        cluster_opt: Optimizer
+        subcluster_opt: Optimizer
         cluster_opt, subcluster_opt = self.optimizers()
 
         # Merge clustering network
         for p in self.cluster_net.out_net.parameters():
             cluster_opt.state.pop(p)
 
-        self.cluster_net.merge(decisions, self.hparams.merge_mode)
+        self.cluster_net.merge(decisions, self.hparams.init_weights)
         cluster_opt.param_groups[1]['params'] = list(self.cluster_net.out_net.parameters())
         self.cluster_net.to(self.device)
 
         # Merge subcluster network
-        for p in self.subcluster_net.parameters():
-            subcluster_opt.state.pop(p)
-
-        self.subcluster_net.merge(decisions, self.hparams.merge_mode)
+        subcluster_opt.state.clear()
+        self.subcluster_net.merge(decisions, self.hparams.init_weights_merge_sub)
         subcluster_opt.param_groups[0]['params'] = list(self.subcluster_net.parameters())
         self.subcluster_net.to(self.device)
 
@@ -300,7 +307,9 @@ class DPMClusteringModel(pl.LightningModule):
 
         self.k = self.cluster_gmm.n_components
         self.cluster_burnin.reset()
+        self.cluster_m_burnin.reset()
         self.subcluster_burnin.reset()
+        self.subcluster_m_burnin.reset()
 
         self.sanity_check()
 
@@ -317,10 +326,10 @@ class DPMClusteringModel(pl.LightningModule):
             assert component.covs.shape == (2, self.repr_dim, self.repr_dim)
 
         assert len(self.subcluster_gmm) == self.k
-        assert self.cluster_net.in_net.weight.data.shape == (self.hparams.lat_dim, self.repr_dim)
-        assert self.cluster_net.out_net.weight.data.shape == (self.k, self.hparams.lat_dim)
-        assert self.subcluster_net.in_net.weight.data.shape == (self.hparams.lat_dim * self.k, self.repr_dim)
-        assert self.subcluster_net.out_net.weight.data.shape == (self.k * 2, self.hparams.lat_dim * self.k)
+        # assert self.cluster_net.in_net.weight.data.shape == (self.hparams.lat_dim, self.repr_dim)
+        # assert self.cluster_net.out_net.weight.data.shape == (self.k, self.hparams.lat_dim)
+        # assert self.subcluster_net.in_net.weight.data.shape == (self.hparams.lat_dim * self.k, self.repr_dim)
+        # assert self.subcluster_net.out_net.weight.data.shape == (self.k * 2, self.hparams.lat_dim * self.k)
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         out = {}

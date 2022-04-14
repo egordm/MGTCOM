@@ -10,16 +10,12 @@ from torch.distributions.multivariate_normal import MultivariateNormal
 from ml.layers.clustering import KMeans, KMeans1D
 from ml.layers.dpm import Priors
 from ml.layers.loss.gmm_loss import KLGMMLoss, IsoGMMLoss
-from ml.utils import unique_count, compute_cov
+from ml.utils import unique_count, compute_cov, compute_cov_soft, EPS
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
 GMMParams = namedtuple('GMMParams', ['pi', 'mus', 'covs'])
-
-
-def eps_norm(x: Tensor, eps: float = 1e-6) -> Tensor:
-    return (x + eps) / (x + eps).sum(dim=-1, keepdim=True)
 
 
 class InitMode(Enum):
@@ -85,13 +81,13 @@ class GaussianMixtureModel(torch.nn.Module):
             raise NotImplementedError(f'Unknown initialization mode: {self.init_mode}')
 
         (_, D) = X.shape
-        pi, mus, covs = compute_hard_assignment(X, z, self.n_components, prior.mus_covs_prior.psi)
+        pi, mus, covs = compute_params_hard_assignment(X, z, self.n_components, prior.mus_covs_prior.psi)
         pi_, mus, covs = prior.compute_post_params(D, pi * len(X), pi, mus, covs)
         self.set_params(pi, mus, covs)
 
     def update_params(self, X: Tensor, r: Tensor, prior: Priors):
         (_, D) = X.shape
-        pi, mus, covs = compute_soft_assignment(X, r, self.n_components)
+        pi, mus, covs = compute_params_soft_assignment(X, r, self.n_components)
         pi, mus, covs = prior.compute_post_params(D, r.sum(dim=0), pi, mus, covs)
         self.set_params(pi, mus, covs)
 
@@ -118,15 +114,15 @@ class GaussianMixtureModel(torch.nn.Module):
         return self.n_components
 
     @property
-    def pi(self):
+    def pi(self) -> Tensor:
         return self._pi.data
 
     @property
-    def mus(self):
+    def mus(self) -> Tensor:
         return self._mus.data
 
     @property
-    def covs(self):
+    def covs(self) -> Tensor:
         return self._covs.data
 
 
@@ -143,9 +139,6 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         self.sim = sim
         self.loss = loss
         self.init_mode = init_mode
-
-        assert loss == 'iso', 'Only isotropic GMMs are supported'
-        self.loss_fn = IsoGMMLoss(sim=sim)
 
         self.components = torch.nn.ModuleList([
             GaussianMixtureModel(
@@ -170,8 +163,7 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         z = r.argmax(dim=-1)
 
         for i, submodel in enumerate(self.components):
-            X_k = X[z == i]
-            r_k = ri[z == i, self.n_subcomponents * i: self.n_subcomponents * (i + 1)]
+            X_k, r_k = X[z == i], ri[z == i, :]
             z_k = r_k.argmax(dim=-1)
             N_k = r_k.sum(dim=0)
 
@@ -185,14 +177,23 @@ class StackedGaussianMixtureModel(torch.nn.Module):
     def add_component(self, init_params: GMMParams = None) -> GaussianMixtureModel:
         component = GaussianMixtureModel(
             self.n_subcomponents, self.repr_dim,
-            loss='iso', sim=self.sim,
+            loss=self.loss, sim=self.sim,
             init_params=init_params
         )
         self.components.append(component)
         return component
 
-    def e_step(self, X: Tensor, ri: Tensor):
-        loss, loss_cl = self.loss_fn(self, X, ri)
+    def e_step(self, X: Tensor, z: Tensor, ri: Tensor):
+        N_K = unique_count(z, len(self))
+        loss, loss_cl = 0, None
+        for i, N_k in enumerate(N_K):
+            if N_k == 0:
+                continue
+
+            loss_k, loss_cl_k = self.components[i].e_step(X[z == i], ri[z == i])
+            loss += loss_k
+            # loss_cl += loss_cl_k
+
         return loss, loss_cl
 
     def m_step(self, X: Tensor, r: Tensor, ri: Tensor, prior: Priors):
@@ -209,34 +210,32 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         return len(self.components) * self.n_subcomponents
 
     @property
-    def pi(self):
+    def pi(self) -> Tensor:
         return torch.cat([submodel.pi for submodel in self.components], dim=0)
 
     @property
-    def mus(self):
+    def mus(self) -> Tensor:
         return torch.cat([submodel.mus for submodel in self.components], dim=0)
 
     @property
-    def covs(self):
+    def covs(self) -> Tensor:
         return torch.cat([submodel.covs for submodel in self.components], dim=0)
 
 
-EPS = 0.0001
-
-
-def compute_hard_assignment(X: Tensor, z: Tensor, k: int, cov_init: Tensor):
+def compute_params_hard_assignment(X: Tensor, z: Tensor, k: int, cov_init: Tensor) -> GMMParams:
     N_K = unique_count(z, k)
 
     pi = (N_K + EPS) / N_K.sum()
     mus = torch.zeros(k, X.shape[1]).index_add_(0, z, X) / N_K.unsqueeze(1)
     covs = torch.stack([
-        compute_cov(X[z == i] - mus[i].unsqueeze(0)) if N_K[i] > 0 else cov_init
+        compute_cov(X[z == i], mus[i]) if N_K[i] > 0 else cov_init
         for i in range(k)
     ])
+
     return pi, mus, covs
 
 
-def compute_soft_assignment(X: Tensor, r: Tensor, k: int):
+def compute_params_soft_assignment(X: Tensor, r: Tensor, k: int) -> GMMParams:
     N_K = r.sum(dim=0) + EPS
 
     pi = N_K / len(r)
@@ -244,16 +243,8 @@ def compute_soft_assignment(X: Tensor, r: Tensor, k: int):
         (r[:, i].unsqueeze(1) * X).sum(dim=0) / N_K[i]
         for i in range(k)
     ])
-    covs = compute_covs_soft_assignment(N_K, X, r, k, mus)
+    covs = torch.stack([
+        compute_cov_soft(X, mus[i], r[:, i])
+        for i in range(k)
+    ])
     return pi, mus, covs
-
-
-def compute_covs_soft_assignment(N_K, X: Tensor, r: Tensor, k: int, mus: Tensor):
-    covs = []
-    for i in range(k):
-        X_diff = X - mus[i].unsqueeze(0)
-        if len(X) > 0:
-            covs.append(torch.matmul((r[:, i].unsqueeze(0) * X_diff.T), X_diff) / N_K[i])
-        else:
-            covs.append(torch.eye(mus.shape[1]) * EPS)
-    return torch.stack(covs)

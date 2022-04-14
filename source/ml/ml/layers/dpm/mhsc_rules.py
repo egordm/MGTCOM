@@ -1,12 +1,11 @@
 from typing import Optional, Tuple, List
 
-import numpy as np
 import torch
-from torch import Tensor
 from sklearn.neighbors import NearestNeighbors
+from torch import Tensor
 
-from ml.layers.dpm import Priors, StackedGaussianMixtureModel, GaussianMixtureModel, compute_covs_soft_assignment
-from ml.utils import unique_count
+from ml.layers.dpm import Priors, StackedGaussianMixtureModel, GaussianMixtureModel
+from ml.utils import unique_count, compute_cov_soft
 
 SplitDecisions = Tensor
 MergeDecisions = List[Tuple[int, int]]
@@ -65,8 +64,8 @@ class MHSCRules:
             return False
 
         k = len(mu_sub)
-        I = ri.argmax(dim=-1)
-        X_K = [X[I == i] for i in range(k)]
+        z = ri.argmax(dim=-1)
+        X_K = [X[z == i] for i in range(k)]
         N_K = torch.tensor([len(X_k) for X_k in X_K], dtype=torch.float)
 
         # Subclusters are too small
@@ -75,6 +74,7 @@ class MHSCRules:
 
         # Compute Hastings ratio
         H, _ = self.compute_log_h_split(X, X_K, N_K, mu, mu_sub)
+        H, _ = self.compute_log_h_split(X, X_K, N_K, mu, mu_sub)
 
         # Accept split if H > 0 or with probability split_prob
         split_prob = self.split_prob or torch.exp(H)
@@ -82,10 +82,8 @@ class MHSCRules:
 
     def merge_rule(self, X: Tensor, ri: Tensor, mus: Tensor):
         k = len(mus)
-        I = ri.argmax(dim=-1)
-        if len(X) != len(I):
-            u = 0
-        X_K = [X[I == i] for i in range(k)]
+        z = ri.argmax(dim=-1)
+        X_K = [X[z == i] for i in range(k)]
         N_K = torch.tensor([len(X_k) for X_k in X_K], dtype=torch.float)
         N_c = sum(N_K)
 
@@ -108,8 +106,7 @@ class MHSCRules:
 
         z = r.argmax(dim=-1)
         for i in range(self.gmm.n_components):
-            X_k = X[z == i]
-            ri_k = ri[z == i, self.gmm_sub.n_subcomponents * i: self.gmm_sub.n_subcomponents * (i + 1)]
+            X_k, ri_k = X[z == i], ri[z == i]
 
             decisions[i] = self.split_rule(X_k, ri_k, self.gmm.mus[i], self.gmm_sub[i].mus)
 
@@ -172,8 +169,7 @@ class MHSCRules:
             component for not_split, component in zip(~decisions, self.gmm_sub.components) if not_split
         ])
         for i in decisions.nonzero():
-            X_k = X[z == i]
-            ri_k = ri[z == i, self.gmm_sub.n_subcomponents * i: self.gmm_sub.n_subcomponents * (i + 1)]
+            X_k, ri_k = X[z == i], ri[z == i]
             z_k = ri_k.argmax(dim=-1)
 
             for j in range(self.gmm_sub.n_subcomponents):
@@ -208,14 +204,16 @@ class MHSCRules:
             r_mod = r[:, pair].sum(dim=-1).reshape(-1, 1)
             N_k = N_K[pair].sum()
 
+            pi_new = (self.gmm.pi[pair]).sum(dim=0, keepdims=True)
             if N_k > 0:
                 mu_news = (N_K[pair, None] * self.gmm.mus[pair]).sum(dim=0, keepdims=True) / N_k
-                cov_news = compute_covs_soft_assignment(r_mod.sum(dim=0, keepdims=True), X, r_mod, 1, mu_news)
+                cov_news = torch.stack([
+                    compute_cov_soft(X, mu_news[0], r_mod[:, 0])
+                ])
             else:
                 mu_news = self.gmm.mus[pair, :].mean(dim=0, keepdims=True)
                 cov_news = self.gmm.covs[pair[0]].unsqueeze(0)
 
-            pi_new = (self.gmm.pi[pair]).sum(dim=0, keepdims=True)
             pi_new_, mu_news, cov_news = self.prior.compute_post_params(D, r_mod.sum(dim=0), pi_new, mu_news, cov_news)
 
             pi_merged.append(pi_new)

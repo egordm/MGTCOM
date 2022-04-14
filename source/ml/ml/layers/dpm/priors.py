@@ -120,8 +120,8 @@ class NIWPrior:
 
         mu_K = mu_k.unsqueeze(0)
         data_mu = torch.mean(samples_k, dim=0).unsqueeze(0)
-        samples_minus_mu = (samples_k - mu_k) / len(samples_k)
-        data_cov = (samples_minus_mu.T @ samples_minus_mu).unsqueeze(0)
+        samples_minus_mu = (samples_k - mu_k)
+        data_cov = (samples_minus_mu.T @ samples_minus_mu).unsqueeze(0) / len(samples_k)
 
         kappas_star, nus_star, mus_0_star, psis_star = self.compute_post(N_K, data_mu, data_cov, mu_K)
         return (

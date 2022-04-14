@@ -3,7 +3,7 @@ class BurnInMonitor:
     counter: int = 0
     burned_in: bool = False
 
-    def __init__(self, patience: int = 2, threshold=0.05) -> None:
+    def __init__(self, patience: int = 2, threshold=0.5) -> None:
         super().__init__()
         self.patience = patience
         self.threshold = threshold
