@@ -3,17 +3,17 @@ from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_scatter import scatter
 
-from ml.utils.distance import pairwise_sim_fn
+from ml.utils.distance import Metric
 
 
 class HingeLoss(torch.nn.Module):
-    def __init__(self, delta=1.0, agg_pos='mean', agg_neg='max', sim='euclidean') -> None:
+    def __init__(self, delta=1.0, agg_pos='mean', agg_neg='max', sim: Metric = Metric.L2) -> None:
         super().__init__()
         self.delta = delta
         self.agg_pos = agg_pos
         self.agg_neg = agg_neg
 
-        self.sim_fn = pairwise_sim_fn(sim)
+        self.sim_fn = sim.pairwise_sim_fn
 
     def forward(
             self,

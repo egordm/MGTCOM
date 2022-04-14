@@ -4,6 +4,7 @@ import torch
 from torch import Tensor
 
 from ml.layers.clustering.kmeans import ensure_numpy, KMeans
+from ml.utils import Metric
 
 
 class KMeans1D:
@@ -12,7 +13,7 @@ class KMeans1D:
     def __init__(
             self,
             repr_dim: int, k: int,
-            sim: str = 'dotp',
+            metric: Metric = Metric.L2,
             niter: int = 10, nredo: int = 5,
             gpu: bool = False, verbose: bool = False,
     ) -> None:
@@ -20,7 +21,7 @@ class KMeans1D:
         self.repr_dim = repr_dim
 
         self.kmeans = KMeans(
-            repr_dim=1, k=k, sim=sim,
+            repr_dim=1, k=k, metric=metric,
             niter=niter, nredo=nredo,
             gpu=gpu, verbose=verbose
         )

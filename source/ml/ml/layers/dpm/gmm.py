@@ -1,16 +1,17 @@
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import torch
 from torch import Tensor
 from torch.distributions.multivariate_normal import MultivariateNormal
+from torch.nn import ModuleList
 
 from ml.layers.clustering import KMeans, KMeans1D
 from ml.layers.dpm import Priors
 from ml.layers.loss.gmm_loss import KLGMMLoss, IsoGMMLoss
-from ml.utils import unique_count, compute_cov, compute_cov_soft, EPS
+from ml.utils import unique_count, compute_cov, compute_cov_soft, EPS, Metric
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -34,13 +35,13 @@ class GaussianMixtureModel(torch.nn.Module):
 
     def __init__(
             self, n_components: int, repr_dim: int,
-            loss: str = 'kl', sim='euclidean', init_mode: InitMode = InitMode.KMeans,
+            loss: str = 'kl', metric=Metric.L2, init_mode: InitMode = InitMode.KMeans,
             init_params: GMMParams = None,
     ) -> None:
         super().__init__()
         self.n_components = n_components
         self.repr_dim = repr_dim
-        self.sim = sim
+        self.metric = metric
         self.init_mode = init_mode
 
         if loss == 'kl':
@@ -74,9 +75,9 @@ class GaussianMixtureModel(torch.nn.Module):
 
     def reinit_params(self, X: Tensor, prior: Priors):
         if self.init_mode == InitMode.KMeans:
-            z = KMeans(self.repr_dim, self.n_components, sim=self.sim).fit(X).assign(X)
+            z = KMeans(self.repr_dim, self.n_components, self.metric).fit(X).assign(X)
         elif self.init_mode == InitMode.KMeans1D:
-            z = KMeans1D(self.repr_dim, self.n_components, sim=self.sim).fit(X).assign(X)
+            z = KMeans1D(self.repr_dim, self.n_components, self.metric).fit(X).assign(X)
         else:
             raise NotImplementedError(f'Unknown initialization mode: {self.init_mode}')
 
@@ -97,10 +98,7 @@ class GaussianMixtureModel(torch.nn.Module):
             for pi_k, component in zip(self.pi, self.components)
         ], dim=1)
 
-        max_values, _ = weighted_r_E.max(dim=1, keepdim=True)
-        r_E_norm = torch.logsumexp(weighted_r_E - max_values, dim=1, keepdim=True) + max_values
-        r_E = torch.exp(weighted_r_E - r_E_norm)
-
+        r_E = torch.softmax(weighted_r_E, dim=-1)
         return r_E
 
     def e_step(self, X: Tensor, r: Tensor):
@@ -127,23 +125,25 @@ class GaussianMixtureModel(torch.nn.Module):
 
 
 class StackedGaussianMixtureModel(torch.nn.Module):
+    components: Union[List[GaussianMixtureModel], ModuleList]
+
     def __init__(
             self, n_components: int, n_subcomponents: int, repr_dim: int,
-            loss: str = 'iso', sim='euclidean', init_mode: InitMode = InitMode.KMeans1D,
+            loss: str = 'iso', metric=Metric.L2, init_mode: InitMode = InitMode.KMeans1D,
             init_params: List[GMMParams] = None
     ) -> None:
         super().__init__()
 
         self.repr_dim = repr_dim
         self.n_subcomponents = n_subcomponents
-        self.sim = sim
+        self.metric = metric
         self.loss = loss
         self.init_mode = init_mode
 
         self.components = torch.nn.ModuleList([
             GaussianMixtureModel(
                 n_subcomponents, repr_dim,
-                loss=self.loss, sim=sim, init_mode=self.init_mode,
+                loss=self.loss, metric=metric, init_mode=self.init_mode,
                 init_params=init_params[i] if init_params is not None else None
             )
             for i in range(n_components)
@@ -177,7 +177,7 @@ class StackedGaussianMixtureModel(torch.nn.Module):
     def add_component(self, init_params: GMMParams = None) -> GaussianMixtureModel:
         component = GaussianMixtureModel(
             self.n_subcomponents, self.repr_dim,
-            loss=self.loss, sim=self.sim,
+            loss=self.loss, metric=self.metric,
             init_params=init_params
         )
         self.components.append(component)
@@ -190,7 +190,7 @@ class StackedGaussianMixtureModel(torch.nn.Module):
             if N_k == 0:
                 continue
 
-            loss_k, loss_cl_k = self.components[i].e_step(X[z == i], ri[z == i])
+            loss_k, loss_cl_k = self[i].e_step(X[z == i], ri[z == i])
             loss += loss_k
             # loss_cl += loss_cl_k
 
@@ -202,7 +202,7 @@ class StackedGaussianMixtureModel(torch.nn.Module):
     def __len__(self):
         return len(self.components)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> GaussianMixtureModel:
         return self.components[idx]
 
     @property

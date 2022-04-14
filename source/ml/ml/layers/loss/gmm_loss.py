@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import torch
 from torch import Tensor
 
-from ml.utils import pairwise_sim_fn, pairwise_dist_fn
+from ml.utils import pairwise_dist_fn
 
 if TYPE_CHECKING:
     from ml.layers.dpm import GaussianMixtureModel

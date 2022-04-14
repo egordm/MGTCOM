@@ -37,7 +37,4 @@ def unique_count(z: Tensor, k: int) -> Tensor:
     """
     Counts the number of elements in each of the k partitions.
     """
-    labels, counts = torch.unique(z, return_counts=True)
-    result = torch.zeros(k, dtype=torch.long)
-    result[labels] = counts
-    return result
+    return torch.bincount(z, minlength=k)

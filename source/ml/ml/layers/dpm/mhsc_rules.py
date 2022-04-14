@@ -5,7 +5,7 @@ from sklearn.neighbors import NearestNeighbors
 from torch import Tensor
 
 from ml.layers.dpm import Priors, StackedGaussianMixtureModel, GaussianMixtureModel
-from ml.utils import unique_count, compute_cov_soft
+from ml.utils import unique_count, compute_cov_soft, Metric
 
 SplitDecisions = Tensor
 MergeDecisions = List[Tuple[int, int]]
@@ -26,7 +26,7 @@ class MHSCRules:
             self,
             prior: Priors, gmm: GaussianMixtureModel, gmm_sub: StackedGaussianMixtureModel,
             alpha: float, split_prob: Optional[float], merge_prob: Optional[float],
-            min_split_points: int = 6, n_merge_neighbors=3, sim='euclidean',
+            min_split_points: int = 6, n_merge_neighbors=3, metric=Metric.L2,
     ) -> None:
         super().__init__()
         self.prior = prior
@@ -36,7 +36,7 @@ class MHSCRules:
         self.split_prob = split_prob
         self.merge_prob = merge_prob
         self.min_split_points = min_split_points
-        self.sim = sim
+        self.metric = metric
         self.n_merge_neighbors = n_merge_neighbors
 
     def compute_log_h_split(self, X: Tensor, X_K: Tensor, N_K: Tensor, mu: Tensor, mu_sub: Tensor):
@@ -65,7 +65,7 @@ class MHSCRules:
 
         k = len(mu_sub)
         z = ri.argmax(dim=-1)
-        X_K = [X[z == i] for i in range(k)]
+        X_K = unique_count(z, k)
         N_K = torch.tensor([len(X_k) for X_k in X_K], dtype=torch.float)
 
         # Subclusters are too small

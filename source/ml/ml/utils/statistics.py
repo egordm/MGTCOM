@@ -4,6 +4,10 @@ from torch import Tensor
 EPS = 0.0001
 
 
+def norm_eps(x: Tensor, eps: float = 1e-6) -> Tensor:
+    return (x + eps) / (x + eps).sum(dim=-1, keepdim=True)
+
+
 def compute_cov_old(X: Tensor):
     return torch.matmul(X.T, X) / float(X.shape[0])
 

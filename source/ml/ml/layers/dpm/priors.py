@@ -1,9 +1,24 @@
 from dataclasses import dataclass
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Dict, Union
 
 import numpy as np
 import torch
+from simple_parsing import choice, field
 from torch import Tensor, mvlgamma
+
+from shared import get_logger
+
+logger = get_logger(Path(__file__).stem)
+
+
+@dataclass
+class PriorParams:
+    prior_dir_counts: float = 0.1
+    prior_kappa: float = 0.0001
+    prior_nu: float = field(default=12.0, help="Need to be at least repr_dim + 1")
+    prior_sigma_choice: str = choice('data_std', 'isotropic', default='data_std')
+    prior_sigma_scale: float = 0.005
 
 
 class Priors:
@@ -18,28 +33,30 @@ class Priors:
     pi_prior: "DirichletPrior"
     mus_covs_prior: "NIWPrior"
 
-    def __init__(
-            self,
-            kappa: float, nu: float, sigma_scale: float, prior_sigma_choice='data_std'
-    ) -> None:
-        super().__init__()
-        self.prior_sigma_choice = prior_sigma_choice
-        self.kappa = torch.tensor(kappa, dtype=torch.float)
-        self.nu = torch.tensor(nu, dtype=torch.float)
-        self.sigma_scale = sigma_scale
+    def __init__(self, repr_dim: int, params: PriorParams) -> None:
+        self.repr_dim = repr_dim
+        self.params = params
+
+        if self.params.prior_nu < repr_dim + 1:
+            logger.warning("prior_nu must be at least repr_dim + 1")
+            self.params.prior_nu = repr_dim + 1
 
     def init_priors(self, samples):
         mu_0 = torch.mean(samples, dim=0)
 
-        if self.prior_sigma_choice == 'data_std':
-            psi = torch.diag(samples.std(dim=0)) * self.sigma_scale
-        elif self.prior_sigma_choice == 'isotropic':
-            psi = torch.eye(samples.shape[1]) * self.sigma_scale
+        if self.params.prior_sigma_choice == 'data_std':
+            psi = torch.diag(samples.std(dim=0)) * self.params.prior_sigma_scale
+        elif self.params.prior_sigma_choice == 'isotropic':
+            psi = torch.eye(samples.shape[1]) * self.params.prior_sigma_scale
         else:
-            raise ValueError(f"Invalid prior_sigma_choice={self.prior_sigma_choice}")
+            raise ValueError(f"Invalid prior_sigma_choice={self.params.prior_sigma_choice}")
 
         self.pi_prior = DirichletPrior()
-        self.mus_covs_prior = NIWPrior(self.kappa, self.nu, mu_0, psi)
+        self.mus_covs_prior = NIWPrior(
+            torch.tensor(self.params.prior_kappa, dtype=torch.float),
+            torch.tensor(self.params.prior_nu, dtype=torch.float),
+            mu_0, psi
+        )
 
     def compute_post_params(
             self, D: float, N_K: Tensor,

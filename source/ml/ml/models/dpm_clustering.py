@@ -13,10 +13,10 @@ from torch.optim import Optimizer
 from torch.utils.data import Dataset
 
 from ml.layers.dpm import ClusteringNet, SubClusteringNet, Priors, GaussianMixtureModel, StackedGaussianMixtureModel, \
-    WeightsInitMode, InitMode
+    WeightsInitMode, InitMode, PriorParams
 from ml.layers.dpm.burnin_monitor import BurnInMonitor
 from ml.layers.dpm.mhsc_rules import MHSCRules
-from ml.utils import dicts_extract, OutputExtractor
+from ml.utils import dicts_extract, OutputExtractor, Metric
 from ml.utils.config import HParams, DataLoaderParams
 from shared import get_logger
 
@@ -29,16 +29,12 @@ class DPMClusteringModelParams(HParams):
     init_k: int = 1
     subcluster: bool = False
 
-    sim: str = choice(['cosine', 'dotp', 'euclidean'], default='euclidean')
+    metric: Metric = Metric.L2
 
     cluster_burnin_patience: int = 1
     subcluster_burnin_patience: int = 1
 
-    prior_dir_counts: float = 0.1
-    prior_kappa: float = 0.0001
-    prior_nu: float = field(default=12.0, help="Need to be at least repr_dim + 1")
-    prior_sigma_choice: str = choice(['data_std', 'isotropic'], default='data_std')
-    prior_sigma_scale: float = 0.005
+    prior_params: PriorParams = PriorParams()
 
     mu_init_fn: InitMode = InitMode.KMeans
     mu_sub_init_fn: InitMode = InitMode.KMeans1D
@@ -100,26 +96,19 @@ class DPMClusteringModel(pl.LightningModule):
         self.cluster_net = ClusteringNet(self.k, self.repr_dim, self.hparams.lat_dim)
         self.subcluster_net = SubClusteringNet(self.k, self.repr_dim, self.hparams.lat_dim) if self.hparams.subcluster else None
 
-        if self.hparams.prior_nu < repr_dim + 1:
-            logging.warning("prior_nu must be at least repr_dim + 1")
-            self.hparams.prior_nu = repr_dim + 1
-
-        self.prior = Priors(
-            kappa=self.hparams.prior_kappa, nu=self.hparams.prior_nu,
-            sigma_scale=self.hparams.prior_sigma_scale, prior_sigma_choice=self.hparams.prior_sigma_choice,
-        )
+        self.prior = Priors(repr_dim, PriorParams(**self.hparams.prior_params))
         self.cluster_gmm = GaussianMixtureModel(
-            self.k, self.repr_dim, sim=self.hparams.sim, loss='kl', init_mode=self.hparams.mu_init_fn
+            self.k, self.repr_dim, metric=self.hparams.metric, loss='kl', init_mode=self.hparams.mu_init_fn
         )
         self.subcluster_gmm = StackedGaussianMixtureModel(
-            self.k, 2, self.repr_dim, sim=self.hparams.sim, loss='iso', init_mode=self.hparams.mu_sub_init_fn
+            self.k, 2, self.repr_dim, metric=self.hparams.metric, loss='iso', init_mode=self.hparams.mu_sub_init_fn
         ) if self.hparams.subcluster else None
 
         self.ms_rules = MHSCRules(
             self.prior, self.cluster_gmm, self.subcluster_gmm,
             self.hparams.alpha, self.hparams.split_prob, self.hparams.merge_prob,
             self.hparams.min_split_points, self.hparams.n_merge_neighbors,
-            sim=self.hparams.sim,
+            metric=self.hparams.metric,
         )
 
         self.stage = Stage.Clustering

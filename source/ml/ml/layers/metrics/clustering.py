@@ -2,27 +2,17 @@ import numpy as np
 import torch
 from sklearn import metrics, utils, preprocessing
 
+from ml.utils import Metric
 from ml.utils.tensor import ensure_numpy
 
 
-def sim_to_sk(sim):
-    if sim == 'dotp':
-        return 'cosine'
-    elif sim == 'cosine':
-        return 'cosine'
-    elif sim == 'euclidean':
-        return 'euclidean'
-    else:
-        raise ValueError(f'Unknown similarity metric: {sim}')
-
-
-def silhouette_score(X, labels, sim='dotp', sample_size=None):
+def silhouette_score(X, labels, metric=Metric.L2, sample_size=None):
     if len(torch.unique(labels)) <= 1:
         return 0.0
 
     return metrics.silhouette_score(
         ensure_numpy(X), ensure_numpy(labels),
-        metric=sim_to_sk(sim), sample_size=sample_size
+        metric=metric.sk_metric(), sample_size=sample_size
     )
 
 
@@ -44,11 +34,11 @@ def check_number_of_labels(n_labels, n_samples):
         )
 
 
-def davies_bouldin_score(X, labels, sim='dotp'):
+def davies_bouldin_score(X, labels, metric=Metric.L2):
     if len(torch.unique(labels)) <= 1:
         return 0.0
 
-    metric = sim_to_sk(sim)
+    metric = metric.sk_metric() # TODO: dotp is not supported by sklearn, use precomputed?
     X = ensure_numpy(X)
     labels = ensure_numpy(labels)
 
