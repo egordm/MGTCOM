@@ -15,6 +15,7 @@ from pytorch_lightning.trainer.states import RunningStage
 from ml.data.transforms.mapping import PCAMapper, mapper_cls
 from ml.data.transforms.subsampling import Subsampler
 from ml.models.dpm_clustering import DPMClusteringModel, Stage
+from ml.utils.plot import create_colormap, draw_ellipse, plot_scatter, draw_ellipses
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -30,22 +31,20 @@ class GMMVisualizerCallback(Callback):
         self.logging_interval = logging_interval
         self.max_points = max_points
         self.enabled = True
-        self.cmap = mpl.cm.get_cmap('tab10')
-        self.cmap2 = mpl.cm.get_cmap('tab20')
         self.sub_cmap = mpl.cm.get_cmap('bwr')
         self.marker_size = mpl.rcParams['lines.markersize'] ** 2
         self.mapper_type = mapper
 
     def setup(self, trainer: Trainer, pl_module: DPMClusteringModel, stage: Optional[str] = None) -> None:
-        self.X = pl_module.dataset[torch.arange(len(pl_module.dataset), dtype=torch.long)].cpu()
-        self.mapper = mapper_cls(self.mapper_type if self.X.shape[1] != 2 else 'none')(n_components=2)
+        X = pl_module.dataset[torch.arange(len(pl_module.dataset), dtype=torch.long)].cpu()
+        self.mapper = mapper_cls(self.mapper_type if X.shape[1] != 2 else 'none')(n_components=2)
         logger.info('Fitting mapper')
-        self.mapper.fit(self.X)
+        self.mapper.fit(X)
 
         self.subsampler = Subsampler(max_points=self.max_points)
-        self.subsampler.fit(self.X)
+        self.subsampler.fit(X)
 
-        self.X_t = self.mapper.transform(self.subsampler.transform(self.X))
+        self.X_t = self.mapper.transform(self.subsampler.transform(X))
 
     def on_validation_epoch_end(self, trainer: Trainer, pl_module: DPMClusteringModel) -> None:
         if trainer.state.stage != RunningStage.VALIDATING:
@@ -100,8 +99,7 @@ class GMMVisualizerCallback(Callback):
             k, mus, covs, sub_mus, sub_covs,
             pl_module: DPMClusteringModel, title: str = ''
     ):
-        colors_sub = torch.tensor([self.sub_cmap(float(i)) for i in range(2)], dtype=torch.float)
-        colors = torch.tensor([self.cmap(i) for i in range(k)], dtype=torch.float)
+        colors = create_colormap(k)
 
         # Figure frame
         _min, _max = X_t.min(axis=0).values, X_t.max(axis=0).values
@@ -113,7 +111,7 @@ class GMMVisualizerCallback(Callback):
         self.plot_clusters(
             ax_clusters, X_t, I, sub_I,
             mus, covs, sub_mus, sub_covs,
-            colors, colors_sub
+            colors
         )
         cont = self.plot_decision_regions(ax_boundaries, X_t, I, colors, pl_module)
 
@@ -132,44 +130,38 @@ class GMMVisualizerCallback(Callback):
     def plot_clusters(
             self, ax, X_t, I, sub_I,
             mus, covs, sub_mus, sub_covs,
-            colors, colors_sub
+            colors
     ):
-        for i, center in enumerate(mus):
-            ell = self.draw_ellipse(ax, center, covs[i], color=colors[i])
-            ax.add_artist(ell)
-
-        if sub_covs is not None:
-            for i, sub_center in enumerate(sub_mus):
-                ell = self.draw_ellipse(ax, sub_center, sub_covs[i], color=colors[i // 2])
-                ax.add_artist(ell)
-
-        ax.scatter(
-            X_t[:, 0], X_t[:, 1],
-            facecolors=colors[I].numpy(), alpha=0.5,
-            edgecolors=colors_sub[sub_I % 2].numpy() if sub_I is not None else None,
-            linewidth=2,
-            s=self.marker_size, zorder=1
+        # Draw points
+        plot_scatter(
+            ax, X_t[:, 0], X_t[:, 1],
+            facecolors=colors[I], alpha=0.6,
+            markers=['<', '>'], marker_idx=sub_I,
+            linewidth=2, s=self.marker_size, zorder=3
         )
 
-        ax.scatter(
-            mus[:, 0], mus[:, 1],
+        # Draw clusters
+        plot_scatter(
+            ax, mus[:, 0], mus[:, 1],
             marker="o", facecolor="k", edgecolors=colors,
             label="Net Centers",
             s=self.marker_size * 2, linewidth=2,
-            alpha=0.6, zorder=3
+            alpha=0.6, zorder=4
         )
+        draw_ellipses(ax, mus, covs, colors, alpha=0.6, zorder=1)
 
-        if sub_mus is not None:
-            indices = torch.arange(len(mus)) * 2
-            for m, indices in [('<', indices), ('>', indices + 1)]:
-                ax.scatter(
-                    sub_mus[indices, 0], sub_mus[indices, 1],
-                    marker=m, c="k",
-                    edgecolors=[colors[i.div(2, rounding_mode='floor')].numpy() for i in indices],
-                    label="Net Centers",
-                    s=self.marker_size * 2, linewidth=2,
-                    alpha=0.6, zorder=3
-                )
+        # Draw subclusters
+        if sub_covs is not None:
+            indices = (torch.arange(len(sub_mus)) / 2).floor().long()
+
+            draw_ellipses(ax, sub_mus, sub_covs, colors[indices], alpha=0.6, zorder=2)
+            plot_scatter(
+                ax, sub_mus[indices, 0], sub_mus[indices, 1],
+                c="k", edgecolors=colors[indices],
+                label="Net Centers",
+                markers=['<', '>'], marker_idx=(torch.arange(len(sub_mus)) % 2),
+                linewidth=2, s=self.marker_size * 2, zorder=5
+            )
 
         ax.set_title("Net Clusters and Covariances")
 
@@ -197,15 +189,3 @@ class GMMVisualizerCallback(Callback):
         )
         ax.set_title("Decision Boundary")
         return cont
-
-    def draw_ellipse(self, ax, mus, cov, color, **kwargs):
-        covariance = cov  # np.eye(gmm.means_.shape[1]) * gmm.covariances_[n]
-        v, w = np.linalg.eigh(covariance)
-        u = w[0] / np.linalg.norm(w[0])
-        angle = np.arctan2(u[1], u[0])
-        angle = 180 * angle / np.pi  # convert to degrees
-        v = 2. * np.sqrt(2.) * np.sqrt(np.abs(v))
-        ell = mpl.patches.Ellipse(mus, v[0], v[1], 180 + angle, color=color.numpy(), **kwargs)
-        ell.set_clip_box(ax.bbox)
-        ell.set_alpha(0.4)
-        return ell
