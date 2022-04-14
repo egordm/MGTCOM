@@ -50,6 +50,8 @@ class ClusteringNet(torch.nn.Module):
             self.out_net.bias.data = torch.cat([bias_not_split, bias_new], dim=0)
             self.k = k_new
 
+            del out_net
+
     def merge(self, decisions: Tensor, merge_mode: MergeMode):
         out_net = self.out_net
         k_new = self.k - len(decisions)
@@ -69,6 +71,8 @@ class ClusteringNet(torch.nn.Module):
             self.out_net.weight.data = torch.cat([weights_not_merge, weights_new], dim=0)
             self.out_net.bias.data = torch.cat([bias_not_merge, bias_new], dim=0)
             self.k = k_new
+
+            del out_net
 
 
 class SubClusteringNet(torch.nn.Module):
@@ -90,9 +94,10 @@ class SubClusteringNet(torch.nn.Module):
             out_gradient_mask[self.out_dim * i:self.out_dim * (i + 1), i * 2:(i + 1) * 2] = 1
 
         self.out_net.weight.data *= out_gradient_mask.T
-        self.out_net.weight.register_hook(
-            lambda grad: grad.mul_(out_gradient_mask.T.to(device=grad.device))
-        )
+
+        def mask_gradient(grad):
+            return grad.mul_(out_gradient_mask.T)
+        self.out_net.weight.register_hook(mask_gradient)
 
     def forward(self, x: Tensor, z: Tensor) -> Tensor:
         x = F.relu(self.in_net(x))
@@ -134,13 +139,26 @@ class SubClusteringNet(torch.nn.Module):
             out_bias = out_net.bias.data.view(self.k, 2)
             out_bias_not_split, out_bias_split = out_bias[~decisions, :], out_bias[decisions, :, ]
 
-            out_weights_new, out_bias_new = split_weights(out_weights_split, out_bias_split, split_mode)
+            if split_mode == SplitMode.Same:
+                out_weights_new, out_bias_new = (
+                    out_weights_split.repeat_interleave(2, dim=0).repeat_interleave(2, dim=2),
+                    out_weights_split.repeat_interleave(2, dim=0).repeat_interleave(2, dim=2),
+                )
+            elif split_mode == SplitMode.Random:
+                out_weights_new, out_bias_new = (
+                    torch.nn.init.xavier_uniform_(torch.FloatTensor(len(out_weights_split) * 2, 2, len(out_weights_split) * 2, self.out_dim)),
+                    torch.zeros(len(out_bias_split) * 2, *out_bias_split.shape[1:]),
+                )
+            else:
+                raise NotImplementedError
 
             self.out_net.weight.data.view(k_new, 2, k_new, self.out_dim)[:out_weights_not_split.size(0), :, :out_weights_not_split.size(2), :] = out_weights_not_split
             self.out_net.weight.data.view(k_new, 2, k_new, self.out_dim)[out_weights_not_split.size(0):, :, out_weights_not_split.size(2):, :] = out_weights_new
             self.out_net.bias.data.view(k_new, 2)[:, :] = torch.cat([out_bias_not_split, out_bias_new], dim=0)
 
             self.k = k_new
+
+            del in_net, out_net
             self._decouple_net()
 
     def merge(self, decisions: Tensor, merge_mode: MergeMode):
@@ -180,6 +198,8 @@ class SubClusteringNet(torch.nn.Module):
             self.out_net.bias.data.view(k_new, 2)[:, :] = torch.cat([out_bias_not_merge, out_bias_new], dim=0)
 
             self.k = k_new
+
+            del in_net, out_net
             self._decouple_net()
 
 
@@ -191,8 +211,8 @@ def split_weights(weight: Tensor, bias: Tensor, split_mode: SplitMode) -> Tuple[
         )
     elif split_mode == SplitMode.Random:
         return (
-            torch.FloatTensor(len(weight) * 2, *weight.shape[1:]).uniform_(-1, 1),
-            torch.FloatTensor(len(bias) * 2, *bias.shape[1:]),
+            torch.nn.init.xavier_uniform_(torch.FloatTensor(len(weight) * 2, *weight.shape[1:])),
+            torch.zeros(len(bias) * 2, *bias.shape[1:]),
         )
     else:
         raise NotImplementedError
@@ -206,8 +226,8 @@ def merge_weights(weight: Tensor, bias: Tensor, merge_mode: MergeMode) -> Tuple[
         )
     elif merge_mode == MergeMode.Random:
         return (
-            torch.empty_like(weight).uniform_(-1, 1),
-            torch.empty_like(bias),
+            torch.nn.init.xavier_uniform_(torch.empty_like(weight)),
+            torch.zeros_like(bias),
         )
     else:
         raise NotImplementedError

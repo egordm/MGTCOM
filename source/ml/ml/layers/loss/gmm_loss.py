@@ -18,12 +18,14 @@ class KLGMMLoss(torch.nn.Module):
         super().__init__()
         self.kl_div = torch.nn.KLDivLoss(reduction='batchmean')
 
-    def forward(self, gmm: "GaussianMixtureModel", x: Tensor, r: Tensor):
+    def forward(self, gmm: "GaussianMixtureModel", X: Tensor, r: Tensor):
         r = eps_norm(r)
-        r_E = eps_norm(gmm.estimate_log_prob(x))
+        r_E = eps_norm(gmm.estimate_log_prob(X))
         loss = self.kl_div(torch.log(r), r_E)
 
-        return loss
+        # loss_cl = (r.argmax(dim=-1) != r_E.argmax(dim=-1)).sum() / r.shape[1]
+
+        return loss, None #, loss_cl
 
 
 class IsoGMMLoss(torch.nn.Module):
@@ -37,4 +39,7 @@ class IsoGMMLoss(torch.nn.Module):
         r_tag = r.flatten()
         loss = (r_tag * self.dist_fn(x_tag, mus_tag).pow(2)).sum() / len(X)
 
-        return loss
+        # z = torch.masked_fill(self.dist_fn(x_tag, mus_tag).view(*r.shape), (r == 0), float('inf')).argmin(dim=-1)
+        # loss_cl = (r.argmax(dim=-1) != z).sum() / 2
+
+        return loss, None #, loss_cl

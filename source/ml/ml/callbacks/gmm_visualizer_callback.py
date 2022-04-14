@@ -14,7 +14,7 @@ from pytorch_lightning.trainer.states import RunningStage
 
 from ml.data.transforms.mapping import PCAMapper, mapper_cls
 from ml.data.transforms.subsampling import Subsampler
-from ml.models.dpm_clustering import DPMClusteringModel
+from ml.models.dpm_clustering import DPMClusteringModel, Stage
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -30,8 +30,9 @@ class GMMVisualizerCallback(Callback):
         self.logging_interval = logging_interval
         self.max_points = max_points
         self.enabled = True
-        self.cmap = mpl.cm.get_cmap('tab20')
-        self.sub_cmap = mpl.cm.get_cmap('binary')
+        self.cmap = mpl.cm.get_cmap('tab10')
+        self.cmap2 = mpl.cm.get_cmap('tab20')
+        self.sub_cmap = mpl.cm.get_cmap('bwr')
         self.marker_size = mpl.rcParams['lines.markersize'] ** 2
         self.mapper_type = mapper
 
@@ -53,7 +54,7 @@ class GMMVisualizerCallback(Callback):
         if trainer.current_epoch % self.logging_interval != 0 and trainer.current_epoch != trainer.max_epochs:
             return
 
-        visualize_subclusters = pl_module.hparams.subcluster and trainer.current_epoch >= pl_module.hparams.epoch_start_msub
+        visualize_subclusters = pl_module.stage == Stage.SubClustering
 
         logger.info(f'Visualizing decision boundaries at epoch {trainer.current_epoch}')
         X_t = self.X_t
@@ -99,7 +100,7 @@ class GMMVisualizerCallback(Callback):
             k, mus, covs, sub_mus, sub_covs,
             pl_module: DPMClusteringModel, title: str = ''
     ):
-        colors_sub = torch.tensor([self.cmap(i) for i in range(2)], dtype=torch.float)
+        colors_sub = torch.tensor([self.sub_cmap(float(i)) for i in range(2)], dtype=torch.float)
         colors = torch.tensor([self.cmap(i) for i in range(k)], dtype=torch.float)
 
         # Figure frame
@@ -144,15 +145,15 @@ class GMMVisualizerCallback(Callback):
 
         ax.scatter(
             X_t[:, 0], X_t[:, 1],
-            c=colors[I], alpha=0.5,
-            edgecolors=colors_sub[sub_I % 2] if sub_I is not None else None,
+            facecolors=colors[I].numpy(), alpha=0.5,
+            edgecolors=colors_sub[sub_I % 2].numpy() if sub_I is not None else None,
             linewidth=2,
             s=self.marker_size, zorder=1
         )
 
         ax.scatter(
             mus[:, 0], mus[:, 1],
-            marker="o", c="k", edgecolors=colors,
+            marker="o", facecolor="k", edgecolors=colors,
             label="Net Centers",
             s=self.marker_size * 2, linewidth=2,
             alpha=0.6, zorder=3

@@ -1,4 +1,9 @@
 from collections import defaultdict
+from dataclasses import dataclass
+from typing import List, Union
+
+import torch
+from torch import Tensor
 
 
 def merge_dicts(ds, merge_fn=None):
@@ -24,3 +29,17 @@ def flat_iter(l):
             yield from flat_iter(el)
         else:
             yield el
+
+
+@dataclass
+class OutputExtractor:
+    outputs: dict
+
+    def extract(self, key) -> List[Tensor]:
+        return dicts_extract(flat_iter(self.outputs), key)
+
+    def extract_cat(self, key) -> Union[Tensor, float]:
+        return torch.cat(self.extract(key), dim=0)
+
+    def extract_mean(self, key) -> Union[Tensor, float]:
+        return sum(self.extract(key)) / len(self.outputs)

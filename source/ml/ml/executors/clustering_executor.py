@@ -43,7 +43,8 @@ def train(args: Args):
         LearningRateMonitor(logging_interval='step'),
         ClusteringMonitor(),
         # ClusteringVisualizerCallback(),
-        GMMVisualizerCallback(),
+        GMMVisualizerCallback(logging_interval=3),
+        # GMMVisualizerCallback(logging_interval=1),
     ]
 
     logger.info('Training model')

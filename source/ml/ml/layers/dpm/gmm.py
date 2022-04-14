@@ -108,8 +108,8 @@ class GaussianMixtureModel(torch.nn.Module):
         return r_E
 
     def e_step(self, X: Tensor, r: Tensor):
-        loss = self.loss_fn(self, X, r)
-        return loss
+        loss, loss_cl = self.loss_fn(self, X, r)
+        return loss, loss_cl
 
     def m_step(self, X: Tensor, r: Tensor, prior: Priors):
         self.update_params(X, r, prior)
@@ -192,8 +192,8 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         return component
 
     def e_step(self, X: Tensor, ri: Tensor):
-        loss = self.loss_fn(self, X, ri)
-        return loss
+        loss, loss_cl = self.loss_fn(self, X, ri)
+        return loss, loss_cl
 
     def m_step(self, X: Tensor, r: Tensor, ri: Tensor, prior: Priors):
         self.update_params(X, r, ri, prior)
