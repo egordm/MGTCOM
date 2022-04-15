@@ -32,7 +32,7 @@ class GMMVisualizerCallback(Callback):
         self.max_points = max_points
         self.enabled = True
         self.sub_cmap = mpl.cm.get_cmap('bwr')
-        self.marker_size = mpl.rcParams['lines.markersize'] ** 2
+        self.marker_size = mpl.rcParams['lines.markersize'] ** 1.5
         self.mapper_type = mapper
 
     def setup(self, trainer: Trainer, pl_module: DPMClusteringModel, stage: Optional[str] = None) -> None:
@@ -103,7 +103,7 @@ class GMMVisualizerCallback(Callback):
 
         # Figure frame
         _min, _max = X_t.min(axis=0).values, X_t.max(axis=0).values
-        fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(10, 6))
+        fig, axes = plt.subplots(nrows=1, ncols=2,   sharey=True, figsize=(10, 6))
         fig.tight_layout(rect=[0, -0.02, 1, 0.95])
         (ax_clusters, ax_boundaries) = axes
 
@@ -156,7 +156,7 @@ class GMMVisualizerCallback(Callback):
 
             draw_ellipses(ax, sub_mus, sub_covs, colors[indices], alpha=0.6, zorder=2)
             plot_scatter(
-                ax, sub_mus[indices, 0], sub_mus[indices, 1],
+                ax, sub_mus[:, 0], sub_mus[:, 1],
                 c="k", edgecolors=colors[indices],
                 label="Net Centers",
                 markers=['<', '>'], marker_idx=(torch.arange(len(sub_mus)) % 2),

@@ -183,6 +183,13 @@ class StackedGaussianMixtureModel(torch.nn.Module):
         self.components.append(component)
         return component
 
+    def estimate_log_prob(self, x: Tensor, z: Tensor):
+        log_probs = torch.zeros((len(x), self.n_subcomponents), device=x.device)
+        for i, submodel in enumerate(self.components):
+            if sum(z == i) > 0:
+                log_probs[z == i] = submodel.estimate_log_prob(x[z == i])
+        return log_probs
+
     def e_step(self, X: Tensor, z: Tensor, ri: Tensor):
         N_K = unique_count(z, len(self))
         loss, loss_cl = 0, None

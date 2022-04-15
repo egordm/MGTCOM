@@ -27,11 +27,11 @@ logger = get_logger(Path(__file__).stem)
 class DPMClusteringModelParams(HParams):
     lat_dim: int = 32
     init_k: int = 1
-    subcluster: bool = False
+    subcluster: bool = True
 
     metric: Metric = Metric.L2
 
-    cluster_burnin_patience: int = 1
+    cluster_burnin_patience: int = 4
     subcluster_burnin_patience: int = 1
 
     prior_params: PriorParams = PriorParams()
@@ -135,32 +135,39 @@ class DPMClusteringModel(pl.LightningModule):
 
     def on_train_epoch_start(self) -> None:
         if self.hparams.subcluster and self.stage == Stage.Clustering and self.cluster_burnin.burned_in:
-            self.stage = Stage.SubClustering
+            # self.stage = Stage.SubClustering
+            pass
+
 
     def training_step(self, batch, batch_idx, optimizer_idx=0):
         out = {}
         x = batch
         r = self.cluster_net(x)
+        r_E = self.cluster_gmm.estimate_log_prob(x)
 
         if optimizer_idx == OptimizerIdx.Cluster:
             cluster_loss, cluster_cl = self.cluster_gmm.e_step(x, r)
             loss = cluster_loss
+            cluster_cl = (r.argmax(dim=-1) == r_E.argmax(dim=-1)).float().mean()
 
             out.update(dict(
                 r=r.detach(),
                 x=x.detach(),
                 cluster_loss=cluster_loss.detach(),
-                # cluster_cl=cluster_cl.detach(),
+                r_E=r_E.detach(),
+                cluster_cl=cluster_cl.detach(),
             ))
         elif optimizer_idx == OptimizerIdx.SubCluster and self.stage == Stage.SubClustering:
             z = r.detach().argmax(dim=-1)
             ri = self.subcluster_net(x, z)
+            ri_E = self.subcluster_gmm.estimate_log_prob(x, z)
 
             subcluster_loss, subcluster_cl = self.subcluster_gmm.e_step(x, z, ri)
             loss = subcluster_loss
 
             out.update(dict(
                 ri=ri.detach(),
+                ri_E=ri_E.detach(),
                 subcluster_loss=subcluster_loss.detach(),
                 # subcluster_cl=subcluster_cl.detach(),
             ))
@@ -174,10 +181,11 @@ class DPMClusteringModel(pl.LightningModule):
         outputs = OutputExtractor(outputs)
 
         X, r = outputs.extract_cat('x'), outputs.extract_cat('r')
+        r_E = outputs.extract_cat('r_E')
 
         # Cluster Monitoring
-        cluster_loss, cluster_cl = outputs.extract_mean('cluster_loss'), 0 #, outputs.extract_mean('cluster_cl')
-        cluster_burned_in, subcluster_burned_in = self.cluster_burnin.update(cluster_loss), False
+        cluster_loss, cluster_cl = outputs.extract_mean('cluster_loss'), outputs.extract_mean('cluster_cl')
+        cluster_burned_in, subcluster_burned_in = self.cluster_burnin.update(cluster_cl), False
         cluster_m_burned_in, subcluster_m_burned_in = cluster_burned_in and self.cluster_m_burnin.update(cluster_loss), False
 
         # Subcluster Monitoring
@@ -186,9 +194,11 @@ class DPMClusteringModel(pl.LightningModule):
             subcluster_burned_in = cluster_m_burned_in and self.subcluster_burnin.update(subcluster_loss)
             subcluster_m_burned_in = subcluster_burned_in and self.subcluster_m_burnin.update(subcluster_loss)
             ri = outputs.extract_cat('ri')
+            ri_E = outputs.extract_cat('ri_E')
         else:
             subcluster_loss, subcluster_cl = float('nan'), float('nan')
             ri = None
+            ri_E = None
 
         # Decide on a Merge or Split action
         action = Action.NoAction
@@ -201,29 +211,38 @@ class DPMClusteringModel(pl.LightningModule):
                 self.last_action = Action.Merge
 
         # Clustering M step
-        if cluster_burned_in:
+        # if cluster_burned_in:
+        if True:
             logger.info("Updating cluster params")
-            self.cluster_gmm.m_step(X, r, self.prior)
+            # self.cluster_gmm.m_step(X, r, self.prior)
+            self.cluster_gmm.m_step(X, r_E, self.prior)
 
         # Subcluster M step
         # if self.stage == Stage.SubClustering and subcluster_burned_in:
-        if self.stage == Stage.SubClustering and subcluster_burned_in:
+        if self.stage == Stage.SubClustering:
+        # if True:
             logger.info("Updating subcluster params")
-            self.subcluster_gmm.m_step(X, r, ri, self.prior)
+            # self.subcluster_gmm.m_step(X, r, ri, self.prior)
+            self.subcluster_gmm.m_step(X, r_E, ri_E, self.prior)
 
         # Initialize subcluster GMM (once clusters have burned in)
-        if self.hparams.subcluster and self.stage == Stage.Clustering and cluster_burned_in:
+        # if self.hparams.subcluster and self.stage == Stage.Clustering and cluster_burned_in:
+        if self.hparams.subcluster and self.stage == Stage.Clustering and self.current_epoch > 3:
             logger.info("Initializing subcluster params")
             self.stage = Stage.SubClustering
-            self.subcluster_gmm.reinit_params(X, r, self.prior)
+            # self.subcluster_gmm.reinit_params(X, r, self.prior)
+            self.subcluster_gmm.reinit_params(X, r_E, self.prior)
 
         if action == Action.Split:
-            self.split(X, r, ri)
+            # self.split(X, r, ri)
+            self.split(X, r_E, ri_E)
         elif action == Action.Merge:
-            self.merge(X, r, ri)
+            # self.merge(X, r, ri)
+            self.merge(X, r_E, ri_E)
 
         self.log_dict({
             'epoch_cluster_loss': cluster_loss,
+            'cl': cluster_cl,
             'epoch_subcluster_loss': subcluster_loss,
             'cbi': cluster_burned_in,
             'mbi': cluster_m_burned_in,
@@ -326,6 +345,10 @@ class DPMClusteringModel(pl.LightningModule):
 
         r = self.forward(x)
         out['r'] = r.detach()
+        if hasattr(self.cluster_gmm, 'components'):
+            out['r_E'] = self.cluster_gmm.estimate_log_prob(x).detach()
+        else:
+            out['r_E'] = r.detach()
 
         if self.hparams.subcluster:
             z = r.detach().argmax(dim=-1)
@@ -335,7 +358,8 @@ class DPMClusteringModel(pl.LightningModule):
         return out
 
     def validation_epoch_end(self, outputs, dataloader_idx=0):
-        self.val_r = torch.cat(dicts_extract(outputs, 'r'), dim=0)
+        # self.val_r = torch.cat(dicts_extract(outputs, 'r'), dim=0)
+        self.val_r = torch.cat(dicts_extract(outputs, 'r_E'), dim=0)
         if self.hparams.subcluster:
             self.val_ri = torch.cat(dicts_extract(outputs, 'ri'), dim=0)
 

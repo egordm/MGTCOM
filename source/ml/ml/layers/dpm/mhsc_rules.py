@@ -65,8 +65,9 @@ class MHSCRules:
 
         k = len(mu_sub)
         z = ri.argmax(dim=-1)
-        X_K = unique_count(z, k)
+        X_K = [X[z == i] for i in range(k)]
         N_K = torch.tensor([len(X_k) for X_k in X_K], dtype=torch.float)
+        N_K = unique_count(z, k)
 
         # Subclusters are too small
         if any(N_k < self.min_split_points for N_k in N_K):
@@ -114,7 +115,7 @@ class MHSCRules:
 
     def merge_decisions(self, X: Tensor, r: Tensor) -> Tensor:
         # Compute probable merge candidates by merging the most neighboring subclusters
-        neigh = NearestNeighbors(n_neighbors=min(self.n_merge_neighbors, self.gmm.n_components), metric=self.sim)
+        neigh = NearestNeighbors(n_neighbors=min(self.n_merge_neighbors, self.gmm.n_components), metric=self.metric.sk_metric())
         neigh.fit(self.gmm.mus)
 
         candidates = []
