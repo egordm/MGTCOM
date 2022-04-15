@@ -127,7 +127,7 @@ class NIWPrior:
         """
         kappas_star, nus_star, mus_0_star, psis_star = self.compute_post(N_K, data_mus, data_covs, mus)
         mus_new = mus_0_star  # Eq. (18)
-        covs_new = psis_star / (nus_star.unsqueeze(2) + D + 2)  # Eq. (19)
+        covs_new = psis_star / (nus_star.unsqueeze(2) - D + 1)  # Eq. (19)
         return mus_new, covs_new
 
     def log_marginal_likelihood(self, samples_k: Tensor, mu_k: Tensor):

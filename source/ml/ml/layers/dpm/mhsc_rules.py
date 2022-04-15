@@ -1,5 +1,6 @@
 from typing import Optional, Tuple, List
 
+import numpy as np
 import torch
 from sklearn.neighbors import NearestNeighbors
 from torch import Tensor
@@ -9,6 +10,8 @@ from ml.utils import unique_count, compute_cov_soft, Metric
 
 SplitDecisions = Tensor
 MergeDecisions = List[Tuple[int, int]]
+
+u = 0.5
 
 
 class MHSCRules:
@@ -46,12 +49,13 @@ class MHSCRules:
         log_ll_c = self.prior.log_marginal_likelihood(X, mu)
         log_ll_K = torch.tensor([self.prior.log_marginal_likelihood(X_k, mu_sub[k, :]) for k, X_k in enumerate(X_K)])
 
-        lgamma_N_K = [torch.lgamma(N_k) if N_k > 0 else 0 for N_k in N_K]
-        lgamma_N_c = torch.lgamma(N_c)
+        # use u instead for beter convergence for smaller datasets
+        lgamma_N_K = [torch.lgamma(N_k * u) if N_k > 0 else 0 for N_k in N_K]
+        lgamma_N_c = torch.lgamma(N_c * u)
 
         # Note: np.log(self.alpha) is changed to nonlog. I have a few small datasets
         H = (
-                (self.alpha + sum(lgamma_N_K) + sum(log_ll_K))
+                (np.log(self.alpha) + sum(lgamma_N_K) + sum(log_ll_K))
                 - (lgamma_N_c + log_ll_c)
         )
 
