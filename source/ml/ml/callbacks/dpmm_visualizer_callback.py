@@ -14,8 +14,7 @@ from pytorch_lightning.trainer.states import RunningStage
 
 from ml.data.transforms.mapping import PCAMapper, mapper_cls
 from ml.data.transforms.subsampling import Subsampler
-from ml.models.dpm_clustering import DPMClusteringModel, Stage
-from ml.models.dpmmsc import DPMMSubClusteringModel
+from ml.models.dpmmsc import DPMMSubClusteringModel, Stage
 from ml.utils.plot import create_colormap, draw_ellipse, plot_scatter, draw_ellipses
 from shared import get_logger
 
@@ -49,6 +48,9 @@ class DPMMVisualizerCallback(Callback):
 
     def on_validation_epoch_end(self, trainer: Trainer, pl_module: DPMMSubClusteringModel) -> None:
         if trainer.state.stage != RunningStage.VALIDATING:
+            return
+
+        if pl_module.stage == Stage.GatherSamples:
             return
 
         if trainer.current_epoch % self.logging_interval != 0 and trainer.current_epoch != trainer.max_epochs:
@@ -104,13 +106,13 @@ class DPMMVisualizerCallback(Callback):
     def visualize(
             self, X_t, I, sub_I,
             k, mus, covs, sub_mus, sub_covs,
-            pl_module: DPMClusteringModel, title: str = ''
+            pl_module: DPMMSubClusteringModel, title: str = ''
     ):
         colors = create_colormap(k)
 
         # Figure frame
         _min, _max = X_t.min(axis=0).values, X_t.max(axis=0).values
-        fig, axes = plt.subplots(nrows=1, ncols=2,   sharey=True, figsize=(10, 6))
+        fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(10, 6))
         fig.tight_layout(rect=[0, -0.02, 1, 0.95])
         (ax_clusters, ax_boundaries) = axes
 

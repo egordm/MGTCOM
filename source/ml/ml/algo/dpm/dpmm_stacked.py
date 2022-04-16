@@ -1,14 +1,13 @@
 from pathlib import Path
-from typing import Union, List, Optional, Tuple
+from typing import Union, List
 
 import torch
 from torch import Tensor
 from torch.nn import ModuleList
 
 from ml.algo.dpm.dpmm import DirichletProcessMixtureModel, InitMode
-from ml.algo.dpm.priors import DirichletPrior, NIWPrior, MultivarNormalParams
+from ml.algo.dpm.mhmc import MHMC
 from ml.algo.dpm.statistics import DPMMObs
-from ml.layers.dpm import compute_params_soft_assignment
 from ml.utils import Metric, unique_count
 from shared import get_logger
 
@@ -18,36 +17,33 @@ logger = get_logger(Path(__file__).stem)
 class StackedDirichletProcessMixtureModel(torch.nn.Module):
     components: Union[List[DirichletProcessMixtureModel], ModuleList]
 
-    def __init__(
-            self,
-            n_components: int, n_subcomponents: int, repr_dim: int, metric: Metric,
-            pi_prior: DirichletPrior, mu_cov_prior: NIWPrior
-    ):
+    def __init__(self, n_components: int, n_subcomponents: int, repr_dim: int, metric: Metric, mhmc: MHMC):
         super().__init__()
         self.n_components = n_components
         self.n_subcomponents = n_subcomponents
         self.repr_dim = repr_dim
         self.metric = metric
-        self.pi_prior = pi_prior
-        self.mu_cov_prior = mu_cov_prior
+        self.mhmc = mhmc
 
         self.components = torch.nn.ModuleList([
-            DirichletProcessMixtureModel(n_subcomponents, repr_dim, self.metric, pi_prior, mu_cov_prior)
+            DirichletProcessMixtureModel(n_subcomponents, repr_dim, self.metric, self.mhmc)
             for _ in range(n_components)
         ])
-        self.is_initialized = False
 
-    def reinitialize(self, X: Tensor, r: Tensor, mode: InitMode = InitMode.KMeans):
+    @property
+    def is_initialized(self) -> bool:
+        return all([c.is_initialized for c in self.components])
+
+    def reinitialize(self, X: Tensor, r: Tensor, mode: InitMode = InitMode.KMeans, incremental=False):
         z = r.argmax(dim=1)
         for i, component in enumerate(self.components):
             X_k = X[z == i]
             r_k = r[z == i]
             if len(X_k) < self.n_subcomponents:
                 logger.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
-
-            component.reinitialize(X_k if len(X_k) >= self.n_subcomponents else X, r_k, mode=mode)
-
-        self.is_initialized = True
+                component.reinitialize(X, r_k, mode=mode)
+            elif not self.is_initialized or not incremental:
+                component.reinitialize(X_k, r_k, mode=mode)
 
     def update_params(self, obs: DPMMObs):
         for i, component in enumerate(self.components):
@@ -87,9 +83,10 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
 
     def add_component(self) -> DirichletProcessMixtureModel:
         component = DirichletProcessMixtureModel(
-            self.n_subcomponents, self.n_feat, self.metric, self.pi_prior, self.mu_cov_prior
+            self.n_subcomponents, self.repr_dim, self.metric, self.mhmc
         )
         self.components.append(component)
+        self.n_components = len(self.components)
         return component
 
     @property
@@ -103,4 +100,10 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
     @property
     def covs(self) -> Tensor:
         return torch.cat([component.covs for component in self.components], dim=0)
+
+    def __getitem__(self, item) -> DirichletProcessMixtureModel:
+        return self.components[item]
+
+    def __len__(self):
+        return self.n_components
 

@@ -46,3 +46,12 @@ def scatter_sum(X: Tensor, z: Tensor, k: int) -> Tensor:
 
 def tensor_partition(X: Tensor, z: Tensor, k: int) -> List[Tensor]:
     return [X[z == i] for i in range(k)]
+
+
+def mask_from_idx(idx: Tensor, n: int) -> Tensor:
+    """
+    Creates a mask from an index vector.
+    """
+    mask = torch.zeros(n, dtype=torch.bool)
+    mask[idx] = True
+    return mask

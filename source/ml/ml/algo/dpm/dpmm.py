@@ -1,13 +1,13 @@
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import torch
 from torch import Tensor
 from torch.distributions import MultivariateNormal
 
 from ml.algo.clustering import KMeans, KMeans1D
-from ml.algo.dpm.priors import MultivarNormalParams, DirichletPrior, NIWPrior
+from ml.algo.dpm.mhmc import MHMC
 from ml.algo.dpm.statistics import compute_params_hard_assignment, compute_params_soft_assignment, DPMMObs
 from ml.layers.loss.gmm_loss import eps_norm
 from ml.utils import Metric
@@ -23,21 +23,15 @@ class InitMode(Enum):
 
 
 class DirichletProcessMixtureModel(torch.nn.Module):
-    pi_prior: DirichletPrior
-    mu_cov_prior: NIWPrior
+    mhmc: MHMC
     components: List[MultivariateNormal] = None
 
-    def __init__(
-            self,
-            n_components: int, repr_dim: int, metric: Metric,
-            pi_prior: DirichletPrior, mu_cov_prior: NIWPrior
-    ):
+    def __init__(self, n_components: int, repr_dim: int, metric: Metric, mhmc: MHMC):
         super().__init__()
         self.n_components = n_components
         self.repr_dim = repr_dim
         self.metric = metric
-        self.pi_prior = pi_prior
-        self.mu_cov_prior = mu_cov_prior
+        self.mhmc = mhmc
 
         self._pis = torch.nn.Parameter(torch.ones(self.n_components) / self.n_components, requires_grad=False)
         self._mus = torch.nn.Parameter(torch.randn(self.n_components, self.repr_dim), requires_grad=False)
@@ -73,8 +67,8 @@ class DirichletProcessMixtureModel(torch.nn.Module):
         self.update_params(obs)
 
     def update_params(self, obs: DPMMObs):
-        pis_post = self.pi_prior.compute_posterior(obs.Ns)
-        mus_post, covs_post = self.mu_cov_prior.compute_posterior_mv(obs.Ns, obs.mus, obs.covs)
+        pis_post = self.mhmc.pi_prior.compute_posterior(obs.Ns)
+        mus_post, covs_post = self.mhmc.mu_cov_prior.compute_posterior_mv(obs.Ns, obs.mus, obs.covs)
         self._set_params(pis_post, mus_post, covs_post)
 
     def compute_params(self, X: Tensor, r: Tensor) -> DPMMObs:

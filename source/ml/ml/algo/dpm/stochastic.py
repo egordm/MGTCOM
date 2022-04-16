@@ -13,6 +13,7 @@ class DPMMObsMeanFilter:
 
     def __init__(self, k: int, repr_dim: int) -> None:
         super().__init__()
+        self.repr_dim = repr_dim
         self.Ns = torch.zeros(k, dtype=torch.float)
         self.mus = torch.zeros(k, repr_dim, dtype=torch.float)
         self.covs = torch.zeros(k, repr_dim, repr_dim, dtype=torch.float)
@@ -29,7 +30,7 @@ class DPMMObsMeanFilter:
             self.covs / self.Ns.reshape(-1, 1, 1)
         )
 
-    def reset(self):
-        self.Ns = torch.zeros(self.Ns.shape, dtype=torch.float)
-        self.mus = torch.zeros(self.mus.shape, dtype=torch.float)
-        self.covs = torch.zeros(self.covs.shape, dtype=torch.float)
+    def reset(self, k: int) -> None:
+        self.Ns = torch.zeros(k, dtype=torch.float)
+        self.mus = torch.zeros(k, self.repr_dim, dtype=torch.float)
+        self.covs = torch.zeros(k, self.repr_dim, self.repr_dim, dtype=torch.float)
