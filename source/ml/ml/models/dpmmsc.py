@@ -5,6 +5,7 @@ from typing import Dict, List
 
 import pytorch_lightning as pl
 import torch
+import torchmetrics
 from tch_geometric.loader import CustomLoader
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -15,6 +16,7 @@ from ml.algo.dpm.mhmc import MHMC
 from ml.algo.dpm.priors import DirichletPrior, NIWPrior
 from ml.algo.dpm.statistics import merge_params, DPMMObs
 from ml.algo.dpm.stochastic import DPMMObsMeanFilter
+from ml.layers.dpm.burnin_monitor import BurnInMonitor
 from ml.utils import HParams, Metric, OutputExtractor, DataLoaderParams, mask_from_idx
 from shared import get_logger
 
@@ -39,6 +41,9 @@ class DPMMSCModelParams(HParams):
     subcluster: bool = True
     # subcluster: bool = False
     metric: Metric = Metric.L2
+
+    burnin_patience: int = 3
+    early_stopping_patience: int = 5
 
     prior_alpha: float = 10
     prior_nu: float = 10
@@ -85,9 +90,13 @@ class DPMMSubClusteringModel(pl.LightningModule):
             )
             self.subcluster_mp = DPMMObsMeanFilter(hparams.init_k * 2, self.repr_dim)
 
+        self.burnin_monitor = BurnInMonitor(self.hparams.burnin_patience, threshold=0)
+        self.data_ll = torchmetrics.MeanMetric()
+
         self.stage = Stage.GatherSamples
         self.prev_action = Action.NoAction
         self.train_samples = []
+        self.prev_params = None
 
     @property
     def k(self):
@@ -97,7 +106,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
         out = {}
 
         if self.clusters.is_initialized:
-            r = self.clusters.estimate_log_prob(X)
+            r = self.clusters.estimate_assignment(X)
             z = r.argmax(dim=-1)
             out.update(dict(r=r.detach(), z=z.detach()))
 
@@ -109,6 +118,8 @@ class DPMMSubClusteringModel(pl.LightningModule):
         return out
 
     def on_train_epoch_start(self) -> None:
+        self.prev_params = (self.clusters.mus.clone(), self.clusters.covs.clone())
+
         if self.stage == Stage.GatherSamples and len(self.train_samples) > 0:
             X = torch.cat(self.train_samples, dim=0)
 
@@ -116,20 +127,20 @@ class DPMMSubClusteringModel(pl.LightningModule):
                 self.clusters.reinitialize(X, None, self.hparams.cluster_init_mode)
 
             if not self.subclusters.is_initialized:
-                r = self.clusters.estimate_log_prob(X)
+                r = self.clusters.estimate_assignment(X)
                 self.subclusters.reinitialize(X, r, self.hparams.subcluster_init_mode, incremental=True)
 
             self.mhmc.mu_cov_prior.update(X, self.hparams.prior_sigma_scale)
-
             self.stage = Stage.BurnIn
-
-        if self.stage == Stage.BurnIn and self.current_epoch > 20:
-            self.stage = Stage.Mutation
 
         self.train_samples = []
         self.cluster_mp.reset(self.clusters.n_components)
         if self.hparams.subcluster:
             self.subcluster_mp.reset(self.subclusters.n_components * self.subclusters.n_subcomponents)
+
+    def on_train_batch_start(self, batch, batch_idx: int, unused: int = 0):
+        if self.burnin_monitor.counter > self.hparams.early_stopping_patience + self.hparams.burnin_patience:
+            return -1
 
     def training_step(self, batch, batch_idx, optimizer_idx=0):
         X = batch.detach()
@@ -138,10 +149,13 @@ class DPMMSubClusteringModel(pl.LightningModule):
             self.train_samples.append(X.cpu())
 
         if self.clusters.is_initialized:
-            r = self.clusters.estimate_log_prob(X)
+            r = self.clusters.estimate_assignment(X)
             z = r.argmax(dim=-1)
             obs = self.clusters.compute_params(X, r.detach())
             self.cluster_mp.push(obs)
+
+            ll = self.clusters.estimate_log_prob(X)
+            self.data_ll.update(ll.sum(dim=-1))
 
             if self.hparams.subcluster and self.subclusters.is_initialized:
                 ri = self.subclusters.estimate_log_prob(X, z.detach())
@@ -149,7 +163,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
                 self.subcluster_mp.push(obs)
 
     def training_epoch_end(self, outputs):
-        obs_c, obs_sc = None, None
+        obs_c, obs_sc, burned_in = None, None, False
 
         if self.stage >= Stage.BurnIn:
             logger.info("Updating cluster params")
@@ -164,6 +178,14 @@ class DPMMSubClusteringModel(pl.LightningModule):
                     u = 0
 
                 self.subclusters.update_params(obs_sc)
+
+            # Monitor Data log likelihood. If it oscillates, then we have converged
+            data_ll = self.data_ll.compute()
+            self.log('data_ll', self.data_ll, prog_bar=True)
+            burned_in = self.burnin_monitor.update(data_ll)
+            if burned_in:
+                logger.info("Cluster params have converged")
+                self.stage = Stage.Mutation
 
         if self.stage == Stage.Mutation:
             if self.prev_action != Action.Split:
@@ -200,6 +222,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
             self.subclusters.add_component()
 
         self.stage = Stage.GatherSamples
+        self.burnin_monitor.reset()
 
     def merge(self, obs_c: DPMMObs, obs_sc: DPMMObs):
         if self.k < 2:
@@ -233,6 +256,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
             ))
 
         self.stage = Stage.BurnIn
+        self.burnin_monitor.reset()
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         X = batch.detach()

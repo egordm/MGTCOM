@@ -75,13 +75,17 @@ class DirichletProcessMixtureModel(torch.nn.Module):
         obs = compute_params_soft_assignment(X, r, self.n_components)
         return obs
 
+    def estimate_assignment(self, X: Tensor) -> Tensor:
+        weighted_r_E = self.estimate_log_prob(X)
+        r_E = torch.softmax(weighted_r_E, dim=-1)
+        return r_E
+
     def estimate_log_prob(self, X: Tensor) -> Tensor:
         weighted_r_E = torch.stack([
             torch.log(pi) + component.log_prob(X)
             for pi, component in zip(self.pis, self.components)
         ], dim=1)
-        r_E = torch.softmax(weighted_r_E, dim=-1)
-        return r_E
+        return weighted_r_E
 
     def compute_loss(self, r: Tensor, r_E: Tensor) -> Tensor:
         return self.kl_div(torch.log(eps_norm(r)), eps_norm(r_E))

@@ -77,7 +77,7 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
         r_E = torch.zeros(X.shape[0], self.n_subcomponents)
         for i, (component, N_k) in enumerate(zip(self.components, Ns)):
             if N_k > 0:
-                r_E[z == i] = component.estimate_log_prob(X[z == i])
+                r_E[z == i] = component.estimate_assignment(X[z == i])
 
         return r_E
 

@@ -186,7 +186,7 @@ class DPMMVisualizerCallback(Callback):
         # horizontal stack vectors to create x1,x2 input for the model
         grid_t = np.hstack((r1, r2))
         grid = self.mapper.inverse_transform(torch.from_numpy(grid_t))
-        yhat = pl_module.clusters.estimate_log_prob(grid.float().to(pl_module.device))
+        yhat = pl_module.clusters.estimate_assignment(grid.float().to(pl_module.device))
         yhat_maxed = yhat.max(axis=1).values.cpu()
 
         cont = ax.contourf(xx, yy, yhat_maxed.reshape(xx.shape), alpha=0.5, cmap="jet")
