@@ -7,6 +7,7 @@ from torch.nn import ModuleList
 
 from ml.algo.dpm.dpmm import DirichletProcessMixtureModel, InitMode
 from ml.algo.dpm.priors import DirichletPrior, NIWPrior, MultivarNormalParams
+from ml.algo.dpm.statistics import DPMMObs
 from ml.layers.dpm import compute_params_soft_assignment
 from ml.utils import Metric, unique_count
 from shared import get_logger
@@ -48,17 +49,17 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
 
         self.is_initialized = True
 
-    def update_params(self, params: MultivarNormalParams, Ns: Tensor):
+    def update_params(self, obs: DPMMObs):
         for i, component in enumerate(self.components):
             component.update_params(
-                MultivarNormalParams(
-                    params.mus[i * self.n_subcomponents:(i+1) * self.n_subcomponents, :],
-                    params.covs[i * self.n_subcomponents:(i+1) * self.n_subcomponents, :, :],
+                DPMMObs(
+                    obs.Ns[i * self.n_subcomponents:(i + 1) * self.n_subcomponents],
+                    obs.mus[i * self.n_subcomponents:(i+1) * self.n_subcomponents, :],
+                    obs.covs[i * self.n_subcomponents:(i+1) * self.n_subcomponents, :, :],
                 ),
-                Ns[i * self.n_subcomponents:(i+1) * self.n_subcomponents]
             )
 
-    def compute_params(self, X: Tensor, z: Tensor, r: Tensor) -> Tuple[Tensor, MultivarNormalParams]:
+    def compute_params(self, X: Tensor, z: Tensor, r: Tensor) -> DPMMObs:
         Ns = unique_count(z, self.n_components)
 
         Ns_K = torch.zeros(self.n_components * self.n_subcomponents)
@@ -69,13 +70,11 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
             X_k, r_k = X[z == i], r[z == i]
             (
                 Ns_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents],
-                (
-                    mus_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents, :],
-                    covs_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents, :, :]
-                )
+                mus_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents, :],
+                covs_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents, :, :]
             ) = component.compute_params(X_k, r_k)
 
-        return Ns_K, MultivarNormalParams(mus_K, covs_K)
+        return DPMMObs(Ns_K, mus_K, covs_K)
 
     def estimate_log_prob(self, X: Tensor, z: Tensor) -> Tensor:
         Ns = unique_count(z, self.n_components)

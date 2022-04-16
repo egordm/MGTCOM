@@ -6,27 +6,27 @@ from torch import Tensor
 from ml.utils import unique_count, EPS, scatter_sum
 
 MultivarNormalParams = NamedTuple("MultivarNormalParams", [("mus", Tensor), ("covs", Tensor)])
+DPMMParams = NamedTuple("DPMMParams", [("pis", Tensor), ("mus", Tensor), ("covs", Tensor)])
+DPMMObs = NamedTuple("DPMMObs", [("Ns", Tensor), ("mus", Tensor), ("covs", Tensor)])
 
-GMMParams = NamedTuple("MultivarNormalParamList", [("pis", Tensor), ("mus", Tensor), ("covs", Tensor)])
 
+def compute_params_hard_assignment(X: Tensor, z: Tensor, k: int) -> DPMMObs:
+    Ns = unique_count(z, k)
 
-def compute_params_hard_assignment(X: Tensor, z: Tensor, k: int) -> Tuple[Tensor, MultivarNormalParams]:
-    N_K = unique_count(z, k)
-
-    mus = scatter_sum(X, z, k) / N_K.unsqueeze(1)
+    mus = scatter_sum(X, z, k) / Ns.unsqueeze(1)
     covs = torch.stack([
         compute_cov(X[z == i], mus[i])
         for i in range(k)
     ])
 
-    return N_K, MultivarNormalParams(mus, covs)
+    return DPMMObs(Ns, mus, covs)
 
 
-def compute_params_soft_assignment(X: Tensor, r: Tensor, k: int) -> Tuple[Tensor, MultivarNormalParams]:
-    N_K = r.sum(dim=0) + EPS
+def compute_params_soft_assignment(X: Tensor, r: Tensor, k: int) -> DPMMObs:
+    Ns = r.sum(dim=0) + EPS
 
     mus = torch.stack([
-        (r[:, i].unsqueeze(1) * X).sum(dim=0) / N_K[i]
+        (r[:, i].unsqueeze(1) * X).sum(dim=0) / Ns[i]
         for i in range(k)
     ])
     covs = torch.stack([
@@ -34,10 +34,10 @@ def compute_params_soft_assignment(X: Tensor, r: Tensor, k: int) -> Tuple[Tensor
         for i in range(k)
     ])
 
-    return N_K, MultivarNormalParams(mus, covs)
+    return DPMMObs(Ns, mus, covs)
 
 
-def compute_cov(X: Tensor, mu: Tensor):
+def compute_cov(X: Tensor, mu: Tensor) -> Tensor:
     if len(X) > 0:
         X_centered = X - mu.unsqueeze(0)
         return torch.matmul(X_centered.T, X_centered) / float(X.shape[0])
@@ -45,12 +45,10 @@ def compute_cov(X: Tensor, mu: Tensor):
         return torch.eye(mu.shape[-1]) * EPS
 
 
-def compute_cov_soft(X: Tensor, mu: Tensor, r: Tensor):
+def compute_cov_soft(X: Tensor, mu: Tensor, r: Tensor) -> Tensor:
     if len(X) > 0:
         N = r.sum(dim=0) + EPS
         X_centered = X - mu.unsqueeze(0)
         return torch.matmul(r * X_centered.T, X_centered) / N
     else:
         return torch.eye(mu.shape[-1]) * EPS
-
-

@@ -7,14 +7,13 @@ import numpy as np
 import torch
 from torch import Tensor
 
+from ml.algo.dpm.statistics import MultivarNormalParams
 from ml.utils import compute_cov
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
 Float = Union[float, Tensor]
-
-MultivarNormalParams = NamedTuple("MultivarNormalParams", [("mus", Tensor), ("covs", Tensor)])
 
 DirichletParams = NamedTuple('DirichletParams', [('alpha', Float)])
 
@@ -27,8 +26,9 @@ class DirichletPrior:
         return (Ns + self.params.alpha) / (Ns.sum() + self.params.alpha)
 
 
-NIWPriorParams = NamedTuple('NIWPriorPseudo', [('nu', Float), ('kappa', Float), ('mu', Tensor), ('psi', Tensor)])
-NIWPriorParamsList = NamedTuple('NIWPriorPseudo', [('nus', Float), ('kappas', Float), ('mus', Tensor), ('psis', Tensor)])
+NIWPriorParams = NamedTuple('NIWPriorParams', [('nu', Float), ('kappa', Float), ('mu', Tensor), ('psi', Tensor)])
+NIWPriorParamsList = NamedTuple('NIWPriorParamsList',
+                                [('nus', Float), ('kappas', Float), ('mus', Tensor), ('psis', Tensor)])
 
 
 @dataclass
@@ -47,7 +47,7 @@ class NIWPrior:
 
         return NIWPrior(NIWPriorParams(nu, kappa, mu, psi))
 
-    def compute_posterior(self, mus: Tensor, covs: Tensor, Ns: Tensor) -> NIWPriorParamsList:
+    def compute_posterior(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> NIWPriorParamsList:
         # mu = X.mean(dim=0)
         # cov = compute_cov(X, mu)
         Ns = Ns.reshape(-1, 1)
@@ -65,9 +65,9 @@ class NIWPrior:
 
         return NIWPriorParamsList(nus_post, kappas_post, mus_post, psis_post)
 
-    def compute_posterior_mv(self, mus: Tensor, covs: Tensor, Ns: Tensor) -> MultivarNormalParams:
+    def compute_posterior_mv(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> MultivarNormalParams:
         D = mus.shape[-1]
-        nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(mus, covs, Ns)
+        nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(Ns, mus, covs)
         covs_post = torch.stack([
             psis_post[i] / (nus_post[i] - D + 1) if N_k > 0 else self.params.psi
             for i, N_k in enumerate(Ns)
@@ -75,9 +75,9 @@ class NIWPrior:
 
         return MultivarNormalParams(mus_post, covs_post)
 
-    def marginal_log_prob(self, mus: Tensor, covs: Tensor, Ns: Tensor) -> Tensor:
+    def marginal_log_prob(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> Tensor:
         D = mus.shape[-1]
-        nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(mus, covs, Ns)
+        nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(Ns, mus, covs)
 
         # TODO: Compare
         return (

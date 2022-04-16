@@ -11,8 +11,7 @@ from torch.utils.data import Dataset
 from ml.algo.dpm.dpmm import DirichletProcessMixtureModel, InitMode
 from ml.algo.dpm.dpmm_stacked import StackedDirichletProcessMixtureModel
 from ml.algo.dpm.priors import DirichletPrior, DirichletParams, NIWPrior
-from ml.algo.dpm.statistics import MultivarNormalParams
-from ml.algo.dpm.stochastic import MeanParams
+from ml.algo.dpm.stochastic import DPMMObsMeanFilter
 from ml.utils import HParams, Metric, OutputExtractor, DataLoaderParams
 from shared import get_logger
 
@@ -59,12 +58,12 @@ class DPMMSubClusteringModel(pl.LightningModule):
         self.clusters = DirichletProcessMixtureModel(
             hparams.init_k, self.repr_dim, self.hparams.metric, self.pi_prior, self.mu_cov_prior
         )
-        self.cluster_mp = MeanParams(hparams.init_k, self.repr_dim)
+        self.cluster_mp = DPMMObsMeanFilter(hparams.init_k, self.repr_dim)
         if self.hparams.subcluster:
             self.subclusters = StackedDirichletProcessMixtureModel(
                 hparams.init_k, 2, self.repr_dim, self.hparams.metric, self.pi_prior, self.mu_cov_prior
             )
-            self.subcluster_mp = MeanParams(hparams.init_k * 2, self.repr_dim)
+            self.subcluster_mp = DPMMObsMeanFilter(hparams.init_k * 2, self.repr_dim)
 
     @property
     def k(self):
@@ -106,23 +105,23 @@ class DPMMSubClusteringModel(pl.LightningModule):
         r = self.clusters.estimate_log_prob(X)
         z = r.argmax(dim=-1)
 
-        Ns, (mus, covs) = self.clusters.compute_params(X, r)
-        self.cluster_mp.push(Ns, mus, covs)
+        obs = self.clusters.compute_params(X, r)
+        self.cluster_mp.push(obs)
 
         if self.hparams.subcluster:
             ri = self.subclusters.estimate_log_prob(X, z)
-            Ns_K, (mus_K, covs_K) = self.subclusters.compute_params(X, z, ri)
-            self.subcluster_mp.push(Ns_K, mus_K, covs_K)
+            obs = self.subclusters.compute_params(X, z, ri)
+            self.subcluster_mp.push(obs)
 
     def training_epoch_end(self, outputs):
         logger.info("Updating cluster params")
-        Ns, mus, covs = self.cluster_mp.compute()
-        self.clusters.update_params(MultivarNormalParams(mus, covs), Ns)
+        obs = self.cluster_mp.compute()
+        self.clusters.update_params(obs)
 
         if self.hparams.subcluster:
             logger.info("Updating subcluster params")
-            Nsi, musi, covsi = self.subcluster_mp.compute()
-            self.subclusters.update_params(MultivarNormalParams(musi, covsi), Nsi)
+            obs = self.subcluster_mp.compute()
+            self.subclusters.update_params(obs)
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         X = batch

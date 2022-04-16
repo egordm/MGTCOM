@@ -8,7 +8,7 @@ from torch.distributions import MultivariateNormal
 
 from ml.algo.clustering import KMeans, KMeans1D
 from ml.algo.dpm.priors import MultivarNormalParams, DirichletPrior, NIWPrior
-from ml.algo.dpm.statistics import compute_params_hard_assignment, compute_params_soft_assignment
+from ml.algo.dpm.statistics import compute_params_hard_assignment, compute_params_soft_assignment, DPMMObs
 from ml.layers.loss.gmm_loss import eps_norm
 from ml.utils import Metric
 from shared import get_logger
@@ -59,7 +59,7 @@ class DirichletProcessMixtureModel(torch.nn.Module):
 
     def reinitialize(self, X: Tensor, r: Optional[Tensor], mode: InitMode = InitMode.KMeans):
         if mode == InitMode.SoftAssignment:
-            Ns, params = compute_params_soft_assignment(X, r, self.n_components)
+            obs = compute_params_soft_assignment(X, r, self.n_components)
         else:
             if mode == InitMode.KMeans:
                 z = KMeans(self.repr_dim, self.n_components, self.metric).fit(X).assign(X)
@@ -68,18 +68,18 @@ class DirichletProcessMixtureModel(torch.nn.Module):
             else:
                 raise NotImplementedError(f'Unknown initialization mode: {mode}')
 
-            Ns, params = compute_params_hard_assignment(X, z, self.n_components)
+            obs = compute_params_hard_assignment(X, z, self.n_components)
 
-        self.update_params(params, Ns)
+        self.update_params(obs)
 
-    def update_params(self, params: MultivarNormalParams, Ns: Tensor):
-        pis_post = self.pi_prior.compute_posterior(Ns)
-        mus_post, covs_post = self.mu_cov_prior.compute_posterior_mv(params.mus, params.covs, Ns)
+    def update_params(self, obs: DPMMObs):
+        pis_post = self.pi_prior.compute_posterior(obs.Ns)
+        mus_post, covs_post = self.mu_cov_prior.compute_posterior_mv(obs.Ns, obs.mus, obs.covs)
         self._set_params(pis_post, mus_post, covs_post)
 
-    def compute_params(self, X: Tensor, r: Tensor) -> Tuple[Tensor, MultivarNormalParams]:
-        Ns, params = compute_params_soft_assignment(X, r, self.n_components)
-        return Ns, params
+    def compute_params(self, X: Tensor, r: Tensor) -> DPMMObs:
+        obs = compute_params_soft_assignment(X, r, self.n_components)
+        return obs
 
     def estimate_log_prob(self, X: Tensor) -> Tensor:
         weighted_r_E = torch.stack([

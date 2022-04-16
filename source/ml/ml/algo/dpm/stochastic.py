@@ -3,8 +3,10 @@ from typing import Tuple
 import torch
 from torch import Tensor
 
+from ml.algo.dpm.statistics import DPMMObs
 
-class MeanParams:
+
+class DPMMObsMeanFilter:
     Ns: Tensor
     mus: Tensor
     covs: Tensor
@@ -15,13 +17,17 @@ class MeanParams:
         self.mus = torch.zeros(k, repr_dim, dtype=torch.float)
         self.covs = torch.zeros(k, repr_dim, repr_dim, dtype=torch.float)
 
-    def push(self, N: Tensor, mus: Tensor, covs: Tensor) -> None:
-        self.Ns += N
-        self.mus += mus * N.reshape(-1, 1)
-        self.covs += covs * N.reshape(-1, 1, 1)
+    def push(self, obs: DPMMObs) -> None:
+        self.Ns += obs.Ns
+        self.mus += obs.mus * obs.Ns.reshape(-1, 1)
+        self.covs += obs.covs * obs.Ns.reshape(-1, 1, 1)
 
-    def compute(self) -> Tuple[Tensor, Tensor, Tensor]:
-        return self.Ns, self.mus / self.Ns.reshape(-1, 1), self.covs / self.Ns.reshape(-1, 1, 1)
+    def compute(self) -> DPMMObs:
+        return DPMMObs(
+            self.Ns,
+            self.mus / self.Ns.reshape(-1, 1),
+            self.covs / self.Ns.reshape(-1, 1, 1)
+        )
 
     def reset(self):
         self.Ns = torch.zeros(self.Ns.shape, dtype=torch.float)
