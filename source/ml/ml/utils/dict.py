@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import List, Union
 
 import torch
+from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 from torch import Tensor
 
 
@@ -33,7 +34,7 @@ def flat_iter(l):
 
 @dataclass
 class OutputExtractor:
-    outputs: dict
+    outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]
 
     def extract(self, key) -> List[Tensor]:
         return dicts_extract(flat_iter(self.outputs), key)

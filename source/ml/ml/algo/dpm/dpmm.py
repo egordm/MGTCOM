@@ -1,0 +1,108 @@
+from enum import Enum
+from pathlib import Path
+from typing import List, Optional, Tuple
+
+import torch
+from torch import Tensor
+from torch.distributions import MultivariateNormal
+
+from ml.algo.clustering import KMeans, KMeans1D
+from ml.algo.dpm.priors import MultivarNormalParams, DirichletPrior, NIWPrior
+from ml.algo.dpm.statistics import compute_params_hard_assignment, compute_params_soft_assignment
+from ml.layers.loss.gmm_loss import eps_norm
+from ml.utils import Metric
+from shared import get_logger
+
+logger = get_logger(Path(__file__).stem)
+
+
+class InitMode(Enum):
+    KMeans = 'kmeans'
+    KMeans1D = 'kmeans1d'
+    SoftAssignment = 'soft_assignment'
+
+
+class DirichletProcessMixtureModel(torch.nn.Module):
+    pi_prior: DirichletPrior
+    mu_cov_prior: NIWPrior
+    components: List[MultivariateNormal] = None
+
+    def __init__(
+            self,
+            n_components: int, repr_dim: int, metric: Metric,
+            pi_prior: DirichletPrior, mu_cov_prior: NIWPrior
+    ):
+        super().__init__()
+        self.n_components = n_components
+        self.repr_dim = repr_dim
+        self.metric = metric
+        self.pi_prior = pi_prior
+        self.mu_cov_prior = mu_cov_prior
+
+        self._pis = torch.nn.Parameter(torch.ones(self.n_components) / self.n_components, requires_grad=False)
+        self._mus = torch.nn.Parameter(torch.randn(self.n_components, self.repr_dim), requires_grad=False)
+        self._covs = torch.nn.Parameter(torch.eye(self.repr_dim).unsqueeze(0).repeat(self.n_components, 1, 1),
+                                        requires_grad=False)
+
+    @property
+    def is_initialized(self) -> bool:
+        return self.components is not None
+
+    def _set_params(self, pis: Tensor, mus: Tensor, covs: Tensor):
+        self.n_components = len(pis)
+        assert pis.shape == (self.n_components,)
+        assert mus.shape == (self.n_components, self.repr_dim)
+        assert covs.shape == (self.n_components, self.repr_dim, self.repr_dim)
+
+        self._pis.data, self._mus.data, self._covs.data = pis, mus, covs
+        self.components = [MultivariateNormal(mu, cov) for mu, cov in zip(mus, covs)]
+
+    def reinitialize(self, X: Tensor, r: Optional[Tensor], mode: InitMode = InitMode.KMeans):
+        if mode == InitMode.SoftAssignment:
+            Ns, params = compute_params_soft_assignment(X, r, self.n_components)
+        else:
+            if mode == InitMode.KMeans:
+                z = KMeans(self.repr_dim, self.n_components, self.metric).fit(X).assign(X)
+            elif mode == InitMode.KMeans1D:
+                z = KMeans1D(self.repr_dim, self.n_components, self.metric).fit(X).assign(X)
+            else:
+                raise NotImplementedError(f'Unknown initialization mode: {mode}')
+
+            Ns, params = compute_params_hard_assignment(X, z, self.n_components)
+
+        self.update_params(params, Ns)
+
+    def update_params(self, params: MultivarNormalParams, Ns: Tensor):
+        pis_post = self.pi_prior.compute_posterior(Ns)
+        mus_post, covs_post = self.mu_cov_prior.compute_posterior_mv(params.mus, params.covs, Ns)
+        self._set_params(pis_post, mus_post, covs_post)
+
+    def compute_params(self, X: Tensor, r: Tensor) -> Tuple[Tensor, MultivarNormalParams]:
+        Ns, params = compute_params_soft_assignment(X, r, self.n_components)
+        return Ns, params
+
+    def estimate_log_prob(self, X: Tensor) -> Tensor:
+        weighted_r_E = torch.stack([
+            torch.log(pi) + component.log_prob(X)
+            for pi, component in zip(self.pis, self.components)
+        ], dim=1)
+        r_E = torch.softmax(weighted_r_E, dim=-1)
+        return r_E
+
+    def compute_loss(self, r: Tensor, r_E: Tensor) -> Tensor:
+        return self.kl_div(torch.log(eps_norm(r)), eps_norm(r_E))
+
+    @property
+    def pis(self) -> Tensor:
+        return self._pis.data
+
+    @property
+    def mus(self) -> Tensor:
+        return self._mus.data
+
+    @property
+    def covs(self) -> Tensor:
+        return self._covs.data
+
+    def __len__(self):
+        return self.n_components

@@ -1,1 +1,2 @@
 simple_parsing==0.0.19.post0
+typing-extensions==4.1.1

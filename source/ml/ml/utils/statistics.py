@@ -8,10 +8,6 @@ def norm_eps(x: Tensor, eps: float = 1e-6) -> Tensor:
     return (x + eps) / (x + eps).sum(dim=-1, keepdim=True)
 
 
-def compute_cov_old(X: Tensor):
-    return torch.matmul(X.T, X) / float(X.shape[0])
-
-
 def compute_cov(X: Tensor, mu: Tensor):
     X_centered = X - mu.unsqueeze(0)
     return torch.matmul(X_centered.T, X_centered) / float(X.shape[0])

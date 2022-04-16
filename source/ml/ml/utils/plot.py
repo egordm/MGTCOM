@@ -43,6 +43,12 @@ def plot_scatter(ax, x, y, *args, markers=None, marker_idx=None, **kwargs):
             if 'edgecolors' in kwargs_local and hasattr(kwargs_local['edgecolors'], '__len__'):
                 kwargs_local['edgecolors'] = kwargs_local['edgecolors'][idx]
 
+            if 'marker' in kwargs_local:
+                kwargs_local.pop('marker')
+
             ax.scatter(x[idx], y[idx], marker=marker, *args, **kwargs_local)
     else:
+        if markers is not None:
+            kwargs['marker'] = markers[0]
+
         ax.scatter(x, y, *args, **kwargs)
