@@ -1,21 +1,20 @@
-from typing import Dict
-
 import torch
 from pytorch_lightning import Trainer
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from torch import Tensor
 from torch_geometric.data import HeteroData
-from torch_geometric.typing import NodeType
 
 from datasets import StarWars
+from datasets.utils.conversion import igraph_from_hetero
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.hgt_sampler import HGTSampler, HGTSamplerParams
 from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
 from ml.data.transforms.eval_split import EvalNodeSplitTransform
-from ml.layers.conv.hybrid_conv_net import HybridConvNet, HybridConvNetParams
+from ml.layers.fc_net import FCNet, FCNetParams
+from ml.layers.hybrid_conv_net import HybridConvNet, HybridConvNetParams
 from ml.models.node2vec import Node2VecModel
 from ml.utils import Metric
 
@@ -44,6 +43,7 @@ class HetEmbed(torch.nn.Module):
             # embed_num_nodes={},
             hparams=HybridConvNetParams(repr_dim=2, num_layers=2)
         )
+        self.out_net = FCNet(2, hparams=FCNetParams(repr_dim=2, hidden_dim=[4]))
 
     def forward(self, batch: HeteroData) -> Tensor:
         Z_dict = self.embedder(batch)
@@ -53,18 +53,18 @@ class HetEmbed(torch.nn.Module):
             node_type = store._key
             Z[store.batch_perm] = Z_dict[node_type]
 
-        return Z
+        return self.out_net(Z)
 
 
 model = Node2VecModel(
     embedder=HetEmbed(),
     metric=Metric.L2,
-    hparams={'lr': 0.01}
+    hparams={'lr': 0.05}
 )
 
 bar = CustomProgressBar()
 
-trainer = Trainer(gpus=None, max_epochs=5, callbacks=[bar])
+trainer = Trainer(gpus=None, max_epochs=50, callbacks=[bar])
 trainer.fit(model, loader)
 
 test_hgt_sampler = HGTSampler(test_data, hparams=HGTSamplerParams(num_samples=[2, 3]))
@@ -74,7 +74,20 @@ pred_data = test_hgt_sampler({
 z = model(pred_data)
 z = TSNE(n_components=2).fit_transform(z.detach().cpu().numpy())
 
+
+G, _, _, node_offsets = igraph_from_hetero(test_data)
+com = G.community_multilevel()
+membership = torch.tensor(com.membership, dtype=torch.long)
+print(f'Number of communities: {len(com)}')
+
+colors = [
+    '#ffc0cb', '#bada55', '#008080', '#420420', '#7fe5f0', '#065535',
+    '#ffd700'
+]
+
 plt.figure(figsize=(8, 8))
-plt.scatter(z[:, 0], z[:, 1], s=20)
+for i in range(len(com)):
+    mask = membership == i
+    plt.scatter(z[mask, 0], z[mask, 1], s=20, color=colors[i])
 plt.axis('off')
 plt.show()

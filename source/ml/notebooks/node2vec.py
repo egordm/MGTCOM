@@ -7,7 +7,7 @@ from datasets import StarWars
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
-from ml.layers.embedding.hetero_embedding import NodeEmbedding
+from ml.layers.hetero_embedding import NodeEmbedding
 from ml.models.node2vec import Node2VecModel
 from ml.utils import Metric
 

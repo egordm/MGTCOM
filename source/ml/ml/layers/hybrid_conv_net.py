@@ -1,5 +1,5 @@
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from dataclasses import dataclass
+from typing import Dict, Optional
 
 import torch
 from torch import Tensor
@@ -7,7 +7,7 @@ from torch_geometric.data import HeteroData
 from torch_geometric.nn import HGTConv, Linear
 from torch_geometric.typing import NodeType, Metadata
 
-from ml.layers.embedding.hetero_embedding import HeteroNodeEmbedding
+from ml.layers.embedding import HeteroNodeEmbedding
 from ml.utils import HParams
 
 
