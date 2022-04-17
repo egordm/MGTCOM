@@ -71,7 +71,7 @@ class ICEWS0515(GraphDataset):
             store.valid = torch.tensor(df['valid'].values.astype(bool), dtype=torch.bool)
             store.test = torch.tensor(df['test'].values.astype(bool), dtype=torch.bool)
 
-    def process(self):
+    def _preprocess(self):
         data = self._process_graph(self.raw_paths)
 
         data = ToUndirected(reduce=None)(data)
@@ -83,8 +83,9 @@ class ICEWS0515(GraphDataset):
             for n in [10, 20]
         }
 
-        if self.pre_transform is not None:
-            data = self.pre_transform(data)
-
-        torch.save(self.collate([data]), self.processed_paths[0])
         torch.save(snapshots, self.processed_paths[1])
+
+        return data
+
+    def process(self):
+        super().process()

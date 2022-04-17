@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 from torch_geometric.data import InMemoryDataset as THGInMemoryDataset, HeteroData
 from torch_geometric.data.storage import NodeStorage, EdgeStorage, BaseStorage
+from torch_geometric.transforms import RandomNodeSplit
 from torch_geometric.typing import NodeType, EdgeType, Metadata
 from pytorch_lightning.utilities.cli import _Registry
 
@@ -27,8 +28,13 @@ class GraphDataset(THGInMemoryDataset):
             root: Optional[str] = None,
             transform: Optional[Callable] = None,
             pre_transform: Optional[Callable] = None,
-            pre_filter: Optional[Callable] = None
+            pre_filter: Optional[Callable] = None,
+            num_val: float = 0.1,
+            num_test: float = 0.1,
     ):
+        self.num_val = num_val
+        self.num_test = num_test
+
         if not root:
             root = str(CACHE_PATH.joinpath('dataset', self.name))
 
@@ -103,3 +109,22 @@ class GraphDataset(THGInMemoryDataset):
 
         return data
 
+    @abstractmethod
+    def _preprocess(self):
+        pass
+
+    def process(self):
+        data = self._preprocess()
+
+        data = RandomNodeSplit(
+            split="train_rest",
+            num_splits=1,
+            num_val=self.num_val,
+            num_test=self.num_test,
+            key=None,
+        )(data)
+
+        if self.pre_transform is not None:
+            data = self.pre_transform(data)
+
+        torch.save(self.collate([data]), self.processed_paths[0])

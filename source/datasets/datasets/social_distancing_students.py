@@ -59,7 +59,7 @@ class SocialDistancingStudents(GraphDataset):
                 emb = model.encode(df['name'].values, show_progress_bar=True, convert_to_tensor=True).cpu()
             store.x = emb
 
-    def process(self):
+    def _preprocess(self):
         data = self._process_graph(self.raw_paths)
 
         data = ToUndirected(reduce=None)(data)
@@ -71,8 +71,8 @@ class SocialDistancingStudents(GraphDataset):
             for n in [5, 10]
         }
 
-        if self.pre_transform is not None:
-            data = self.pre_transform(data)
-
-        torch.save(self.collate([data]), self.processed_paths[0])
         torch.save(snapshots, self.processed_paths[1])
+        return data
+
+    def process(self):
+        super().process()
