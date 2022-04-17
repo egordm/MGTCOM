@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Union, Tuple
 
 import torch
 from torch import Tensor
@@ -30,20 +30,31 @@ class HeteroMappingTransform:
         else:
             return self.inverse_transform(*args, **kwargs)
 
-    def transform(self, entity_idx: Tensor) -> Dict[EntityType, Tensor]:
+    def transform(self, entity_idx: Tensor) -> Tuple[Dict[EntityType, Tensor], Dict[EntityType, Tensor]]:
         entity_idx_dict = {}
+        entity_perm_dict = {}
+
         prev_cumcount = 0
         for entity_type, cumcount in self.entity_cumcounts_dict.items():
-            node_idx_new = entity_idx[torch.logical_and(entity_idx >= prev_cumcount, entity_idx < cumcount)]
-            if len(node_idx_new) > 0:
-                entity_idx_dict[entity_type] = node_idx_new - prev_cumcount
+            perm = torch.logical_and(entity_idx >= prev_cumcount, entity_idx < cumcount).nonzero().flatten()
+            if len(perm) > 0:
+                entity_idx_dict[entity_type] = entity_idx[perm] - prev_cumcount
+                entity_perm_dict[entity_type] = perm
 
             prev_cumcount = cumcount
 
-        return entity_idx_dict
+        return entity_idx_dict, entity_perm_dict
 
-    def inverse_transform(self, entity_idx_dict: Dict[EntityType, Tensor]) -> Tensor:
-        return torch.cat([
-            entity_idx_dict[node_type] + self.entity_cumcounts_dict[node_type]
-            for node_type in entity_idx_dict.keys()
-        ], dim=0)
+    def inverse_transform(self, entity_idx_dict: Dict[EntityType, Tensor],
+                          entity_perm_dict: Dict[EntityType, Tensor] = None) -> Tensor:
+        if entity_perm_dict is None:
+            return torch.cat([
+                entity_idx_dict[node_type] + self.entity_cumcounts_dict[node_type]
+                for node_type in entity_idx_dict.keys()
+            ], dim=0)
+        else:
+            count = sum([len(perm) for perm in entity_perm_dict.values()])
+            entity_idx = torch.zeros(count, dtype=torch.long)
+            for node_type, perm in entity_perm_dict.items():
+                entity_idx[perm] = entity_idx_dict[node_type] + self.entity_cumcounts_dict[node_type]
+            return entity_idx
