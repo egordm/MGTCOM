@@ -3,8 +3,8 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from ml.layers.clustering.kmeans import ensure_numpy, KMeans
-from ml.utils import Metric
+from ml.algo.clustering import KMeans
+from ml.utils import Metric, ensure_numpy
 
 
 class KMeans1D:

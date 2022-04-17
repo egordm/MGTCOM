@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from torch import Tensor
 
 
-class PCAMapper:
+class PCATransform:
     def __init__(self, n_components=2) -> None:
         super().__init__()
         self.n_components = n_components
@@ -24,7 +24,7 @@ class PCAMapper:
         return torch.from_numpy(self.pca.inverse_transform(X_t))
 
 
-class UMAPMapper:
+class UMAPTransform:
     def __init__(self, n_components=2) -> None:
         super().__init__()
         self.n_components = n_components
@@ -41,7 +41,7 @@ class UMAPMapper:
         return torch.from_numpy(self.umap.inverse_transform(X_t))
 
 
-class Identity:
+class IdentityTransform:
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
 
@@ -57,10 +57,10 @@ class Identity:
 
 def mapper_cls(name: str) -> type:
     if name == 'pca':
-        return PCAMapper
+        return PCATransform
     elif name == 'umap':
-        return UMAPMapper
+        return UMAPTransform
     elif name == 'none':
-        return Identity
+        return IdentityTransform
     else:
         raise ValueError(f'Unknown mapper name: {name}')
