@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, Callable
 
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
+from torch import Tensor
 
 from ml.utils import Metric, OutputExtractor
 
@@ -23,14 +24,11 @@ class Node2VecModel(pl.LightningModule):
         self.metric = metric
         self.sim_fn = metric.pairwise_sim_fn
 
-    def forward(self, X: Any) -> Any:
-        return self.embedder(X)
+    def forward(self, batch) -> Any:
+        node_meta = batch
+        return self.embedder(node_meta)
 
-    def loss(self, batch):
-        pos_walks, neg_walks, node_ids = batch
-
-        Z = self.embedder(node_ids)
-
+    def loss(self, pos_walks: Tensor, neg_walks: Tensor, Z: Tensor):
         pos_walks_Z = Z[pos_walks.view(-1)].view(*pos_walks.shape, Z.shape[-1])
         p_head, p_rest = pos_walks_Z[:, 0].unsqueeze(dim=1), pos_walks_Z[:, 1:]
         p_sim = self.sim_fn(p_head, p_rest).view(-1)
@@ -44,7 +42,10 @@ class Node2VecModel(pl.LightningModule):
         return pos_loss + neg_loss
 
     def training_step(self, batch, batch_idx):
-        loss = self.loss(batch)
+        pos_walks, neg_walks, node_meta = batch
+        Z = self.embedder(node_meta)
+
+        loss = self.loss(pos_walks, neg_walks, Z)
         return loss
 
     def validation_step(self, batch, batch_idx):

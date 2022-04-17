@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from datasets import StarWars
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.data.loaders.nodes_loader import NodesLoader
-from ml.data.samplers.node2vec_sampler import Node2VecSampler
+from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
 from ml.layers.embedding.hetero_embedding import NodeEmbedding
 from ml.models.node2vec import Node2VecModel
 from ml.utils import Metric
@@ -15,7 +15,10 @@ dataset = StarWars()
 data = dataset.data
 hdata = data.to_homogeneous()
 
-sampler = Node2VecSampler(hdata.edge_index, walk_length=8, walks_per_node=8, context_size=4, num_nodes=hdata.num_nodes)
+sampler = Node2VecSampler(
+    hdata.edge_index, hdata.num_nodes,
+    hparams=Node2VecSamplerParams(walk_length=8, walks_per_node=8, context_size=4)
+)
 
 loader = NodesLoader(hdata.num_nodes, transform=sampler, batch_size=16, num_workers=0)
 test = next(iter(loader))
