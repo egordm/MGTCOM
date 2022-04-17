@@ -10,13 +10,9 @@ from tch_geometric.loader import CustomLoader
 from torch import Tensor
 from torch.utils.data import Dataset
 
-from ml.algo.dpm.dpmm import DirichletProcessMixtureModel, InitMode
-from ml.algo.dpm.dpmm_stacked import StackedDirichletProcessMixtureModel
-from ml.algo.dpm.mhmc import MHMC
-from ml.algo.dpm.priors import DirichletPrior, NIWPrior
-from ml.algo.dpm.statistics import merge_params, DPMMObs
+from ml.algo.dpm import BurnInMonitor, DPMMObs, merge_params, StackedDirichletProcessMixtureModel, \
+    DirichletProcessMixtureModel, NIWPrior, DirichletPrior, MHMC, InitMode
 from ml.algo.dpm.stochastic import DPMMObsMeanFilter
-from ml.layers.dpm.burnin_monitor import BurnInMonitor
 from ml.utils import HParams, Metric, OutputExtractor, DataLoaderParams, mask_from_idx
 from shared import get_logger
 
@@ -50,6 +46,7 @@ class DPMMSCModelParams(HParams):
     prior_kappa: float = 0.0001
     prior_sigma_scale: float = 0.005
 
+    ds_scale: float = 1.0
     min_split_points: int = 6
     n_merge_neighbors: int = 3
 
@@ -71,7 +68,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
 
         self.repr_dim = dataset[[0]].shape[-1]
         self.mhmc = MHMC(
-            ds_scale=1.0,
+            ds_scale=self.hparams.ds_scale,
             pi_prior=DirichletPrior.from_params(hparams.prior_alpha),
             mu_cov_prior=NIWPrior.from_params(
                 torch.zeros(self.repr_dim), torch.eye(self.repr_dim, self.repr_dim),

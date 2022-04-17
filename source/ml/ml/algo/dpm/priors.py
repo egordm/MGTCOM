@@ -23,9 +23,24 @@ class DirichletPrior:
 
     @staticmethod
     def from_params(alpha: float = 1.0) -> Self:
+        """
+        `from_params` takes a single float as an argument and returns a `DirichletPrior` object
+
+        :param alpha: The concentration parameter for the Dirichlet distribution
+        :type alpha: float
+        :return: A DirichletPrior object with a DirichletParams object as its attribute.
+        """
         return DirichletPrior(DirichletParams(torch.tensor(alpha)))
 
     def compute_posterior(self, Ns: torch.Tensor) -> Tensor:
+        """
+        > The posterior probability of a topic is the number of times it appears in a document plus the prior probability of
+        the topic, divided by the total number of words in the document plus the prior probability of the topic
+
+        :param Ns: the number of times each topic appears in the corpus
+        :type Ns: torch.Tensor
+        :return: The posterior probability of the topics given their document counts.
+        """
         return (Ns + self.params.alpha) / (Ns.sum() + self.params.alpha)
 
 
@@ -40,6 +55,20 @@ class NIWPrior:
 
     @staticmethod
     def from_params(mu: Tensor, psi: Tensor, nu: Float = 12.0, kappa: Float = 0.0001) -> Self:
+        """
+        `NIWPrior.from_params(mu, psi, nu, kappa)` returns a `NIWPrior` object with the parameters `mu`, `psi`, `nu`, and
+        `kappa`
+
+        :param mu: The mean of the distribution
+        :type mu: Tensor
+        :param psi: The precision matrix (inverse of the covariance matrix)
+        :type psi: Tensor
+        :param nu: The degrees of freedom of the distribution
+        :type nu: Float
+        :param kappa: The precision of the mean
+        :type kappa: Float
+        :return: A NIWPrior object
+        """
         D = mu.shape[-1]
         if nu < D:
             logger.warning("nu must be at least D + 1")
@@ -52,6 +81,14 @@ class NIWPrior:
         ))
 
     def update(self, X: Tensor, sigma_scale: float = 0.005):
+        """
+        > Update the parameters of the prior distribution with the mean and standard deviation of the data
+
+        :param X: Input data points
+        :type X: Tensor
+        :param sigma_scale: This is a hyperparameter that controls the variance of the prior
+        :type sigma_scale: float
+        """
         mu = X.mean(dim=0)
         psi = (torch.diag(X.std(dim=0)) * sigma_scale)
 
@@ -62,6 +99,18 @@ class NIWPrior:
         )
 
     def compute_posterior(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> NIWPriorParamsList:
+        """
+        > We update the parameters of the prior by adding the number of data points, the mean, and the covariance of the
+        data points to the prior parameters
+
+        :param Ns: number of data points in each topic
+        :type Ns: Tensor
+        :param mus: the mean of the data points in each topic
+        :type mus: Tensor
+        :param covs: the covariance of the data points in each topic
+        :type covs: Tensor
+        :return: The posterior parameters of the NIW prior.
+        """
         # mu = X.mean(dim=0)
         # cov = compute_cov(X, mu)
         Ns = Ns.reshape(-1, 1)
@@ -80,6 +129,18 @@ class NIWPrior:
         return NIWPriorParamsList(nus_post, kappas_post, mus_post, psis_post)
 
     def compute_posterior_mv(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> MultivarNormalParams:
+        """
+        > Given the number of samples, the mean, and the covariance of each topic, compute the posterior parameters of
+        the multivariate normal distribution
+
+        :param Ns: the number of data points in each topic
+        :type Ns: Tensor
+        :param mus: the mean of the data points in each topic
+        :type mus: Tensor
+        :param covs: the covariance matrices of the topics
+        :type covs: Tensor
+        :return: The posterior parameters of the multivariate normal distribution.
+        """
         D = mus.shape[-1]
         nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(Ns, mus, covs)
         covs_post = torch.stack([
@@ -90,6 +151,23 @@ class NIWPrior:
         return MultivarNormalParams(mus_post, covs_post)
 
     def marginal_log_prob(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> Tensor:
+        """
+        $$
+        \log p(N, \mu, \Sigma) = \log p(N) + \log p(\mu | N) + \log p(\Sigma | N)
+        $$
+
+        where $p(N)$ is the marginal probability of the number of data points, $p(\mu | N)$ is the marginal probability of
+        the mean given the number of data points, and $p(\Sigma | N)$ is the marginal probability of the covariance given
+        the number of data points
+
+        :param Ns: Number of samples
+        :type Ns: Tensor
+        :param mus: The mean of the data points
+        :type mus: Tensor
+        :param covs: The covariance of the data points
+        :type covs: Tensor
+        :return: The marginal log probability of the data.
+        """
         D = mus.shape[-1]
         nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(Ns, mus, covs)
 

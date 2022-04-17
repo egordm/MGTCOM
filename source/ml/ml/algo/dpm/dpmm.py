@@ -81,6 +81,14 @@ class DirichletProcessMixtureModel(torch.nn.Module):
         return r_E
 
     def estimate_log_prob(self, X: Tensor) -> Tensor:
+        """
+        > For each data point, we calculate the log probability of that data point under each component, and then we
+         weight each of those log probabilities by the probability of that topic.
+
+        :param X: Input data points.
+        :type X: Tensor
+        :return: The log probability of the data given the model.
+        """
         weighted_r_E = torch.stack([
             torch.log(pi) + component.log_prob(X)
             for pi, component in zip(self.pis, self.components)

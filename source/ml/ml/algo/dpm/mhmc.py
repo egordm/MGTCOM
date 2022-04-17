@@ -23,11 +23,20 @@ class MHMC:
     metric: Metric = Metric.L2
 
     def compute_log_h_split(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[Float, int]:
+        """
+        > Compute the log of the hastings probability of splitting a cluster into two clusters, given the data
+
+        :param obs_c: DPMMObs
+        :type obs_c: DPMMObs
+        :param obs_sc: the observations for the split cluster
+        :type obs_sc: DPMMObs
+        :return: The log of the probability of the split, and the index of the cluster that is being split.
+        """
         lgamma_N_c = torch.lgamma(obs_c.Ns * self.ds_scale)[0]
         lgamma_N_cs = torch.lgamma(obs_sc.Ns * self.ds_scale)
 
         log_ll_c = self.mu_cov_prior.marginal_log_prob(obs_c.Ns, obs_c.mus, obs_c.covs)[0]
-        log_ll_cs = self.mu_cov_prior.marginal_log_prob(obs_sc.Ns, obs_sc.mus, obs_sc.covs)
+        log_ll_cs = self.mu_cov_prior.marginal_log_prob(obs_c.Ns, obs_sc.mus, obs_sc.covs)
 
         H = (
                 torch.log(self.pi_prior.params.alpha) + sum(lgamma_N_cs) + sum(log_ll_cs)
@@ -57,6 +66,16 @@ class MHMC:
         return log_H > 0 or bool(torch.exp(log_H) > torch.rand(1)), max_k
 
     def propose_splits(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> SplitDecisions:
+        """
+        > For each cluster, we check if the cluster should be split by comparing the likelihood of the cluster under the
+        current model to the likelihood of the cluster under the proposed model
+
+        :param obs_c: Current observations for the cluster
+        :type obs_c: DPMMObs
+        :param obs_sc: The observations from the subclusters
+        :type obs_sc: DPMMObs
+        :return: A boolean tensor of size k, where k is the number of clusters in the current model.
+        """
         k = len(obs_c.mus)
         decisions = torch.zeros(k, dtype=torch.bool)
 

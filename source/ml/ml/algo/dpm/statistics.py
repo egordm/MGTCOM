@@ -126,4 +126,3 @@ def merge_params(Ns: Tensor, mus: Tensor, covs: Tensor) -> DPMMObs:
         covs_c = covs.mean(dim=0, keepdim=True)
 
     return DPMMObs(Ns_c, mus_c, covs_c)
-
