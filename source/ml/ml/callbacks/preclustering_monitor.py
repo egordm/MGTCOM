@@ -8,7 +8,7 @@ from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.trainer.states import RunningStage
 
 from datasets.utils.conversion import igraph_from_hetero
-from ml.layers.clustering import KMeans
+from ml.algo.clustering import KMeans
 from ml.layers.metrics import newman_girvan_modularity, silhouette_score, davies_bouldin_score
 from ml.models.base.embedding import BaseEmbeddingModel
 from shared import get_logger

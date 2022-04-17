@@ -9,7 +9,6 @@ from pytorch_lightning.trainer.states import RunningStage
 from torch import Tensor
 
 from ml.layers.metrics import silhouette_score, davies_bouldin_score
-from ml.models.dpm_clustering import DPMClusteringModel
 from ml.utils import Metric
 from shared import get_logger
 
