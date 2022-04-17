@@ -4,7 +4,7 @@ import torch
 from torch import Tensor
 
 
-class Subsampler:
+class SubsampleTransform:
     perm: Optional[Tensor]
 
     def __init__(self, max_points: int = 1000) -> None:
