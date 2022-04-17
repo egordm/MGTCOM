@@ -1,4 +1,2 @@
 from .concat_dataset import ConcatDataset
 from .embeddings_dataset import PretrainedEmbeddingsDataset
-from .hetero_edges_dataset import HeteroEdgesDataset
-from .hetero_nodes_dataset import HeteroNodesDataset

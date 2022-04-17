@@ -11,9 +11,8 @@ from ml.utils.tensor import partition_values
 
 
 class HeteroNodesDataset(Dataset):
-    def __init__(self, data: HeteroData, temporal: bool = False):
+    def __init__(self, data: HeteroData):
         self.data = data
-        self.temporal = temporal
 
         node_borders = np.cumsum([0] + [store.num_nodes for store in data.node_stores])
         self.node_ranges = list(zip(node_borders[:-1], node_borders[1:]))
