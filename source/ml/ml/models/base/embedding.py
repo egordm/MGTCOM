@@ -1,3 +1,5 @@
+from enum import Enum
+from functools import reduce
 from typing import Dict, Union, List, Optional
 
 import pytorch_lightning as pl
@@ -9,10 +11,34 @@ from torch_geometric.typing import NodeType
 from ml.utils import OutputExtractor, OptimizerParams
 
 
+class EmbeddingCombineMode(Enum):
+    """
+    Defines the way the embeddings are combined.
+    """
+    ADD = 0
+    MULT = 1
+    CONCAT = 2
+
+    @property
+    def combine_fn(self):
+        if self == EmbeddingCombineMode.ADD:
+            return lambda xs: reduce(torch.Tensor.add_, xs, torch.zeros_like(xs[0]))
+        elif self == EmbeddingCombineMode.MULT:
+            return lambda xs: reduce(torch.Tensor.mul_, xs, torch.ones_like(xs[0]))
+        elif self == EmbeddingCombineMode.CONCAT:
+            return lambda xs: torch.cat(xs, dim=-1)
+        else:
+            raise ValueError(f"Unknown combine mode {self}")
+
+
 class BaseEmbeddingModel(pl.LightningModule):
     hparams: OptimizerParams
     val_Z_dict: Dict[NodeType, Tensor] = None
     val_Z: Tensor = None
+
+    @property
+    def repr_dim(self):
+        raise NotImplementedError()
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         outputs = OutputExtractor(outputs)

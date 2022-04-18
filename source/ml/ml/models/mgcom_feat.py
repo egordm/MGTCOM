@@ -6,6 +6,7 @@ from typing import Optional, Dict, List, Union, Tuple
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS, STEP_OUTPUT
+from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
@@ -50,11 +51,13 @@ class MGCOMFeatModel(BaseEmbeddingModel):
             self,
             metadata: Metadata, num_nodes_dict: Dict[NodeType, int],
             hparams: MGCOMFeatModelParams,
-            optimizer_params: OptimizerParams,
+            optimizer_params: Optional[OptimizerParams] = None,
+            add_out_net: bool = True,
     ) -> None:
         super().__init__()
         self.save_hyperparameters(hparams.to_dict())
-        self.save_hyperparameters(optimizer_params.to_dict())
+        if optimizer_params is not None:
+            self.save_hyperparameters(optimizer_params.to_dict())
 
         self.embedder = HybridConvNet(
             metadata,
@@ -69,27 +72,36 @@ class MGCOMFeatModel(BaseEmbeddingModel):
                 num_heads=self.hparams.conv_num_heads,
             )
         )
-        self.out_net = FCNet(
-            self.hparams.feat_dim,
-            hparams=FCNetParams(
-                repr_dim=self.hparams.repr_dim,
-                hidden_dim=self.hparams.hidden_dim,
+        if add_out_net:
+            self.out_net = FCNet(
+                self.hparams.feat_dim,
+                hparams=FCNetParams(
+                    repr_dim=self.hparams.repr_dim,
+                    hidden_dim=self.hparams.hidden_dim,
+                )
             )
-        )
 
         # noinspection PyTypeChecker
         self.n2v_model = Node2VecModel(
             embedder=None,
-            metric=Metric.L2,
+            metric=self.hparams.metric,
         )
+
+    @property
+    def repr_dim(self):
+        return self.hparams.repr_dim
 
     def forward(self, batch):
         node_meta = batch
-        return self.embedder(node_meta)
+        Z_emb = self.embedder(node_meta)
+        Z_feat = {
+            node_type: self.out_net(z_emb)
+            for node_type, z_emb in Z_emb.items()
+        }
 
-    def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
-        pos_walks, neg_walks, node_meta = batch
+        return Z_feat
 
+    def _forward_emb(self, node_meta) -> Tensor:
         Z_dict = self.embedder(node_meta)
 
         # Transform hetero data to homogenous data in the sampled order
@@ -98,7 +110,15 @@ class MGCOMFeatModel(BaseEmbeddingModel):
             node_type = store._key
             Z[store.batch_perm] = Z_dict[node_type]
 
-        loss = self.n2v_model.loss(pos_walks, neg_walks, Z)
+        return Z
+
+    def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
+        pos_walks, neg_walks, node_meta = batch
+
+        Z_emb = self._forward_emb(node_meta)
+        Z_feat = self.out_net(Z_emb)
+
+        loss = self.n2v_model.loss(pos_walks, neg_walks, Z_feat)
         return loss
 
 
