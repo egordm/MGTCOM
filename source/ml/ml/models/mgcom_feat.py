@@ -144,8 +144,8 @@ class MGCOMFeatDataModule(pl.LightningDataModule):
         self.loader_params = loader_params
 
         self.dataset = dataset
-        data = EnsureTimestampsTransform(warn=True)(dataset.data)
-        self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform()(data)
+        self.data = EnsureTimestampsTransform(warn=True)(dataset.data)
+        self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform()(self.data)
 
     @property
     def metadata(self) -> Metadata:
@@ -178,7 +178,7 @@ class MGCOMFeatDataModule(pl.LightningDataModule):
         sampler = self._build_hgt_sampler(self.val_data)
 
         return HeteroNodesLoader(
-            self.val_data.num_nodes_dict, transform=sampler,
+            self.val_data.num_nodes_dict, transform_nodes_fn=sampler,
             shuffle=False,
             **self.loader_params.to_dict(),
         )
@@ -187,7 +187,16 @@ class MGCOMFeatDataModule(pl.LightningDataModule):
         sampler = self._build_hgt_sampler(self.test_data)
 
         return HeteroNodesLoader(
-            self.test_data.num_nodes_dict, transform=sampler,
+            self.test_data.num_nodes_dict, transform_nodes_fn=sampler,
+            shuffle=False,
+            **self.loader_params.to_dict(),
+        )
+
+    def predict_dataloader(self) -> EVAL_DATALOADERS:
+        sampler = self._build_hgt_sampler(self.data)
+
+        return HeteroNodesLoader(
+            self.data.num_nodes_dict, transform_nodes_fn=sampler,
             shuffle=False,
             **self.loader_params.to_dict(),
         )
