@@ -65,13 +65,15 @@ class EvalNodeSplitTransform(BaseTransform):
 
         result = data.clone()
         for node_type, mask in new_mask.items():
-            store = result[node_type]
+            out_store = result[node_type]
+            store = data[out_store._key]
 
             for key, value in store.items():
                 if store.is_node_attr(key):
-                    store[key] = value[mask]
+                    out_store[key] = value[mask]
 
-        for store in result.edge_stores:
+        for out_store in result.edge_stores:
+            store = data[out_store._key]
             src, _, dst = store._key
             mask_src = new_mask[src][store.edge_index[0, :]]
             mask_dst = new_mask[dst][store.edge_index[1, :]]
@@ -79,12 +81,12 @@ class EvalNodeSplitTransform(BaseTransform):
 
             for key, value in store.items():
                 if key == 'edge_index':
-                    store[key] = torch.stack([
+                    out_store[key] = torch.stack([
                         new_ids[src][value[0, mask]],
                         new_ids[dst][value[1, mask]],
                     ])
 
                 elif store.is_edge_attr(key):
-                    store[key] = value[mask]
+                    out_store[key] = value[mask]
 
         return result
