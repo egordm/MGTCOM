@@ -6,11 +6,9 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor
 
 from datasets.utils.base import DATASET_REGISTRY, GraphDataset
-from ml.callbacks.clustering_monitor import ClusteringMonitor
 from ml.callbacks.dpmm_visualizer_callback import DPMMVisualizerCallback
-from ml.callbacks.gmm_visualizer_callback import GMMVisualizerCallback
 from ml.data import ConcatDataset, PretrainedEmbeddingsDataset
-from ml.data.generated.synthetic_gmm import SyntheticGMMDataset
+from ml.data.datasets.synthetic_gmm import SyntheticGMMDataset
 from ml.models.dpmmsc import DPMMSubClusteringModel, DPMMSCModelParams
 from ml.utils.config import TrainerParams, dataset_choices
 from shared import parse_args, get_logger, RESULTS_PATH

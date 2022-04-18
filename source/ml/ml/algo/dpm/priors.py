@@ -32,7 +32,7 @@ class DirichletPrior:
         """
         return DirichletPrior(DirichletParams(torch.tensor(alpha)))
 
-    def compute_posterior(self, Ns: torch.Tensor) -> Tensor:
+    def compute_posterior(self, Ns: Tensor) -> Tensor:
         """
         > The posterior probability of a topic is the number of times it appears in a document plus the prior probability of
         the topic, divided by the total number of words in the document plus the prior probability of the topic

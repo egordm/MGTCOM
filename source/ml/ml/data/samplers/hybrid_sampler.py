@@ -1,13 +1,16 @@
+from typing import Union
+
 from torch import Tensor
 
 from ml.algo.transforms import HeteroMappingTransform
+from ml.data.samplers.ballroom_sampler import BallroomSampler
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.hgt_sampler import HGTSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecBatch
 
 
 class HybridSampler(Sampler):
-    def __init__(self, n2v_sampler: Node2VecSampler, hgt_sampler: HGTSampler) -> None:
+    def __init__(self, n2v_sampler: Union[Node2VecSampler, BallroomSampler], hgt_sampler: HGTSampler) -> None:
         super().__init__()
         self.n2v_sampler = n2v_sampler
         self.hgt_sampler = hgt_sampler

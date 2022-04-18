@@ -7,6 +7,7 @@ from torch_geometric.data import HeteroData
 from datasets.utils.base import Snapshots
 from datasets.utils.conversion import igraph_from_hetero
 from ml.data.samplers.ballroom_sampler import TemporalNodeIndex, NAN_TIMESTAMP
+from ml.data.transforms.ensure_timestamps import EnsureTimestampsTransform
 from ml.data.transforms.to_homogeneous import to_homogeneous
 from shared import get_logger
 
@@ -21,15 +22,7 @@ def extract_louvain_labels(data: HeteroData) -> Tensor:
 
 # noinspection PyProtectedMember
 def extract_timestamp_labels(data: HeteroData) -> Tensor:
-    for store in data.node_stores:
-        if 'timestamp_from' not in store.keys():
-            logger.warning(f'No timestamp_from defined in {store._key}')
-            store.timestamp_from = torch.full([store.num_nodes], fill_value=NAN_TIMESTAMP, dtype=torch.long)
-
-    for store in data.edge_stores:
-        if 'timestamp_from' not in store.keys():
-            logger.warning(f'No timestamp_from defined in {store._key}')
-            store.timestamp_from = torch.full([store.num_edges], fill_value=NAN_TIMESTAMP, dtype=torch.long)
+    data = EnsureTimestampsTransform(warn=True)(data)
 
     hdata = to_homogeneous(
         data,

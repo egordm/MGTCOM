@@ -1,9 +1,12 @@
+import time
+
 import torch
 from pytorch_lightning import Trainer
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from torch import Tensor
 from torch_geometric.data import HeteroData
+from umap import UMAP
 
 from datasets import StarWars
 from datasets.utils.conversion import igraph_from_hetero
@@ -72,7 +75,16 @@ pred_data = test_hgt_sampler({
     'Character': torch.arange(test_data['Character'].num_nodes)
 })
 z = model(pred_data)
-z = TSNE(n_components=2).fit_transform(z.detach().cpu().numpy())
+
+start = time.time()
+zt = TSNE(n_components=2).fit_transform(z.detach().cpu().numpy())
+end = time.time()
+print(f'TSNE took {end - start} seconds')
+
+start = time.time()
+z = UMAP(n_components=2).fit_transform(z.detach().cpu().numpy())
+end = time.time()
+print(f'UMAP took {end - start} seconds')
 # z = z.detach().cpu().numpy()
 
 
