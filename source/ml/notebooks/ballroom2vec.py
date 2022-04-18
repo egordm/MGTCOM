@@ -9,6 +9,7 @@ from datasets import StarWars
 from datasets.utils.conversion import igraph_from_hetero
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.data.loaders.nodes_loader import NodesLoader
+from ml.data.samplers.ballroom_sampler import BallroomSampler, BallroomSamplerParams
 from ml.data.samplers.hgt_sampler import HGTSampler, HGTSamplerParams
 from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
@@ -19,14 +20,30 @@ from ml.models.node2vec import Node2VecModel
 from ml.utils import Metric
 
 dataset = StarWars()
+data: HeteroData = dataset.data
+data['Character'].timestamp_from_node = torch.full([data.num_nodes], -1)
+# data['Character'].timestamp_from_node = torch.randint(-1, 7, [data.num_nodes])
+
 train_data, val_data, test_data = EvalNodeSplitTransform()(dataset.data)
-train_hdata = train_data.to_homogeneous()
-
-
-n2v_sampler = Node2VecSampler(
-    train_hdata.edge_index, train_hdata.num_nodes,
-    hparams=Node2VecSamplerParams(walk_length=8, walks_per_node=8, context_size=4)
+train_hdata = train_data.to_homogeneous(
+    node_attrs=['timestamp_from_node'],
+    edge_attrs=['timestamp_from'],
+    add_node_type=False, add_edge_type=False
 )
+
+n2v_sampler = BallroomSampler(
+    train_hdata.timestamp_from_node,
+    train_hdata.edge_index,
+    train_hdata.timestamp_from,
+    window=(0, 2),
+    hparams=BallroomSamplerParams(walk_length=6, walks_per_node=4, context_size=4)
+)
+# n2v_sampler = Node2VecSampler(
+#     train_hdata.edge_index, train_hdata.num_nodes,
+#     hparams=Node2VecSamplerParams(walk_length=8, walks_per_node=8, context_size=4)
+# )
+# uu = n2v_sampler.sample(torch.tensor([0, 1, 3, 4, 20, 42]))
+
 hgt_sampler = HGTSampler(train_data, hparams=HGTSamplerParams(num_samples=[2, 3]))
 sampler = HybridSampler(n2v_sampler=n2v_sampler, hgt_sampler=hgt_sampler)
 
