@@ -1,44 +1,63 @@
-from typing import Union
+from enum import Enum
 
 import torch
-import umap
-
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from torch import Tensor
+from umap import UMAP
+
+from ml.utils import Metric
 
 
-class PCATransform:
-    def __init__(self, n_components=2) -> None:
+class DimensionReductionMode(Enum):
+    PCA = "PCA"
+    TSNE = "TSNE"
+    UMAP = "UMAP"
+    Identity = "Identity"
+
+
+class DimensionReductionTransform:
+    def __init__(
+            self,
+            n_components=2,
+            mode: DimensionReductionMode = DimensionReductionMode.TSNE,
+            metric: Metric = Metric.L2
+    ) -> None:
         super().__init__()
         self.n_components = n_components
-        self.pca = PCA(n_components=2)
+        self.metric = metric
+        self.mode = mode
+
+        if mode == DimensionReductionMode.PCA:
+            self.mapper = PCA(n_components=n_components)
+        elif mode == DimensionReductionMode.TSNE:
+            self.mapper = TSNE(
+                n_components=n_components, metric=metric.sk_metric(),
+                learning_rate=200.0, init='random'
+            )
+        elif mode == DimensionReductionMode.UMAP:
+            self.mapper = UMAP(
+                n_components=2,
+                metric="cosine" if metric == Metric.COSINE else "euclidean"
+            )
+        else:
+            self.mapper = IdentityTransform()
 
     def fit(self, X: Tensor):
-        self.pca.fit(X.numpy())
+        if self.mode == DimensionReductionMode.TSNE:
+            pass
+        else:
+            self.mapper.fit(X.numpy())
         return self
 
     def transform(self, X: Tensor) -> Tensor:
-        return torch.from_numpy(self.pca.transform(X))
+        if self.mode == DimensionReductionMode.TSNE:
+            return torch.from_numpy(self.mapper.fit_transform(X))
+        else:
+            return torch.from_numpy(self.mapper.transform(X))
 
     def inverse_transform(self, X_t: Tensor) -> Tensor:
-        return torch.from_numpy(self.pca.inverse_transform(X_t))
-
-
-class UMAPTransform:
-    def __init__(self, n_components=2) -> None:
-        super().__init__()
-        self.n_components = n_components
-        self.umap = umap.UMAP(n_components=2)
-
-    def fit(self, X: Tensor):
-        self.umap.fit(X.numpy())
-        return self
-
-    def transform(self, X: Tensor) -> Tensor:
-        return torch.from_numpy(self.umap.transform(X))
-
-    def inverse_transform(self, X_t: Tensor) -> Tensor:
-        return torch.from_numpy(self.umap.inverse_transform(X_t))
+        return torch.from_numpy(self.mapper.inverse_transform(X_t))
 
 
 class IdentityTransform:
@@ -53,14 +72,3 @@ class IdentityTransform:
 
     def inverse_transform(self, X_t: Tensor) -> Tensor:
         return X_t
-
-
-def mapper_cls(name: str) -> type:
-    if name == 'pca':
-        return PCATransform
-    elif name == 'umap':
-        return UMAPTransform
-    elif name == 'none':
-        return IdentityTransform
-    else:
-        raise ValueError(f'Unknown mapper name: {name}')
