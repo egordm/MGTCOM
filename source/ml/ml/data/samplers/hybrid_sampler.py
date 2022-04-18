@@ -1,7 +1,4 @@
-from typing import Tuple
-
 from torch import Tensor
-from torch_geometric.data import HeteroData
 
 from ml.algo.transforms import HeteroMappingTransform
 from ml.data.samplers.base import Sampler

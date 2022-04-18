@@ -1,9 +1,9 @@
 from functools import lru_cache
 
-import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
+import numpy as np
 
+MARKER_SIZE = mpl.rcParams['lines.markersize'] ** 1.5
 
 @lru_cache()
 def create_colormap(n: int) -> np.ndarray:

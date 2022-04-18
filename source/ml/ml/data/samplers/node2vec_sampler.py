@@ -31,9 +31,9 @@ class Node2VecSamplerParams(HParams):
     """Number of random walks to start at each node."""
     num_neg_samples: int = 1
     """The number of negative samples to use for each positive sample."""
-    p = 1
+    p: float = 1
     """Likelihood of immediately revisiting a node in the walk."""
-    q = 1
+    q: float = 1
     """Control parameter to interpolate between breadth-first strategy and depth-first strategy."""
 
 
