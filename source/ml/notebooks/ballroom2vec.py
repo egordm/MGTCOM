@@ -9,7 +9,7 @@ from datasets import StarWars
 from datasets.utils.conversion import igraph_from_hetero
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.data.loaders.nodes_loader import NodesLoader
-from ml.data.samplers.ballroom_sampler import BallroomSampler, BallroomSamplerParams
+from ml.data.samplers.ballroom_sampler import BallroomSampler, BallroomSamplerParams, TemporalNodeIndex
 from ml.data.samplers.hgt_sampler import HGTSampler, HGTSamplerParams
 from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
@@ -109,3 +109,32 @@ for i in range(len(com)):
     plt.scatter(z[mask, 0], z[mask, 1], s=20, color=colors[i])
 plt.axis('off')
 plt.show()
+plt.title('Louvain Labels')
+
+
+
+test_hdata = test_data.to_homogeneous(
+    node_attrs=['timestamp_from_node'],
+    edge_attrs=['timestamp_from'],
+    add_node_type=False, add_edge_type=False
+)
+temporal_index = TemporalNodeIndex().fit(
+    train_hdata.timestamp_from_node,
+    train_hdata.edge_index,
+    train_hdata.timestamp_from
+)
+node_timestamps = torch.full([test_data.num_nodes], -1, dtype=torch.long)
+for (node_id, t) in zip(temporal_index.node_ids, temporal_index.node_timestamps):
+    if node_timestamps[int(node_id)] == -1:
+        node_timestamps[int(node_id)] = t
+num_timestamps = torch.max(node_timestamps) + 1
+
+
+plt.figure(figsize=(8, 8))
+for i in range(num_timestamps):
+    mask = node_timestamps == i
+    plt.scatter(z[mask, 0], z[mask, 1], s=20, color=colors[i])
+plt.axis('off')
+plt.title('Timestamp labels')
+plt.show()
+u = 0

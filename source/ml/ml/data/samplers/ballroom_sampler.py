@@ -162,10 +162,6 @@ class TemporalNodeIndex:
         self.node_timestamps_rev, perm = torch.sort(self.node_timestamps, descending=False)
         self.node_ids_rev = self.node_ids[perm]
 
-        # TODO: remove after debugging
-        self.node_ids = self.node_ids[13:]
-        self.node_timestamps = self.node_timestamps[13:]
-
         return self
 
     def node_to_timestamp(self, node_ids: Tensor) -> Tensor:
