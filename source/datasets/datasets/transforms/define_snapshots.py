@@ -24,7 +24,7 @@ class DefineSnapshots(BaseTransform):
             logging.warning(f'Not enough timestamps to define {self.n} snapshots')
 
         interval = (max_ts - min_ts + 1).float() / self.n
-        snapshots = torch.tensor( [
+        snapshots = torch.tensor([
             [min_ts + interval * i, min_ts + interval * (i + 1)]
             for i in range(self.n)
         ]).long()

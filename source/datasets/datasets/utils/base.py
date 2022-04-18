@@ -1,19 +1,22 @@
 from abc import abstractmethod
 from pathlib import Path
-from typing import Optional, Callable, Dict, List
+from typing import Optional, Callable, Dict, List, Union, Tuple
 
 import numpy as np
 import pandas as pd
 import torch
+from pytorch_lightning.utilities.cli import _Registry
+from torch import Tensor
 from torch_geometric.data import InMemoryDataset as THGInMemoryDataset, HeteroData
 from torch_geometric.data.storage import NodeStorage, EdgeStorage, BaseStorage
 from torch_geometric.transforms import RandomNodeSplit
-from torch_geometric.typing import NodeType, EdgeType, Metadata
-from pytorch_lightning.utilities.cli import _Registry
+from torch_geometric.typing import Metadata
 
 from shared.paths import CACHE_PATH
 
 DATASET_REGISTRY = _Registry()
+
+Snapshots = Union[Tensor, List[Tuple[int, int]]]
 
 
 class GraphDataset(THGInMemoryDataset):
@@ -22,6 +25,7 @@ class GraphDataset(THGInMemoryDataset):
     tags: List[str] = []
 
     data: HeteroData
+    snapshots: Dict[int, Snapshots] = None
 
     def __init__(
             self,

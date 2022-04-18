@@ -12,6 +12,7 @@ from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallba
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.models.mgcom_topo import MGCOMTopoModelParams, MGCOMTopoDataModuleParams, MGCOMTopoDataModule, MGCOMTopoModel
 from ml.utils import dataset_choices, DataLoaderParams, OptimizerParams, TrainerParams
+from ml.utils.labelling import extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
 from shared import get_logger, parse_args, RESULTS_PATH
 
 EXECUTOR_NAME = Path(__file__).stem
@@ -49,18 +50,19 @@ def train(args: Args):
     root_dir = RESULTS_PATH / run_name
     root_dir.mkdir(exist_ok=True, parents=True)
 
-    # Dataset dependent things
-    G, _, _, node_offsets = igraph_from_hetero(data_module.val_data)
-    comm = G.community_multilevel()
+    logger.info('Extracting labels for visualization')
+    node_labels = {}
+    node_labels['Louvain Labels'] = extract_louvain_labels(data_module.val_data)
+    if isinstance(dataset, GraphDataset) and dataset.snapshots is not None:
+        node_timestamps = extract_timestamp_labels(data_module.val_data)
+        for i, snapshot in dataset.snapshots.items():
+            snapshot_labels = extract_snapshot_labels(node_timestamps, snapshot)
+            node_labels[f'{i} Temporal Snapshots'] = snapshot_labels
 
     callbacks = [
         CustomProgressBar(),
         LearningRateMonitor(logging_interval='step'),
-        EmbeddingVisualizerCallback(
-            node_labels={
-                'Louvain Labels': torch.tensor(comm.membership, dtype=torch.long),
-            }
-        )
+        EmbeddingVisualizerCallback(node_labels=node_labels)
     ]
 
     logger.info('Training model')

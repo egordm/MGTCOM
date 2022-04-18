@@ -171,6 +171,7 @@ class MGCOMTopoDataModule(pl.LightningDataModule):
 
         return HeteroNodesLoader(
             self.val_data.num_nodes_dict, transform=sampler,
+            shuffle=False,
             **self.loader_params.to_dict(),
         )
 
@@ -179,5 +180,6 @@ class MGCOMTopoDataModule(pl.LightningDataModule):
 
         return HeteroNodesLoader(
             self.test_data.num_nodes_dict, transform=sampler,
+            shuffle=False,
             **self.loader_params.to_dict(),
         )

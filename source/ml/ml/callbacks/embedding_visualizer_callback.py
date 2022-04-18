@@ -2,13 +2,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict
 
-import torch
 from matplotlib import pyplot as plt
 from pytorch_lightning import Trainer, LightningModule
 from torch import Tensor
-from torch_geometric.data import HeteroData
 
-from datasets.utils.conversion import igraph_from_hetero
 from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.utils import HParams, Metric
@@ -55,11 +52,15 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
 
         for label_name, labels in self.node_labels.items():
             labels = self.transform_subsample.transform(labels)
-            self.visualize_embeddings(Z, labels, f'Embedding Visualization ({label_name})')
+            self.visualize_embeddings(
+                Z, labels,
+                f'Epoch {trainer.current_epoch} - Embedding Visualization ({label_name})'
+            )
 
     def visualize_embeddings(self, Z: Tensor, labels: Tensor, title) -> None:
         fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(10, 6))
-        num_labels = len(torch.unique(labels))
+        fig.tight_layout(rect=[0, 0, 1, 0.95])
+        num_labels = int(labels.max() + 1)
         colors = create_colormap(num_labels)
 
         # Draw points
