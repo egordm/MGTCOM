@@ -14,7 +14,7 @@ class NodeEmbedding(torch.nn.Module):
         self.embedding = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=repr_dim)
 
     def forward(self, node_idx: Tensor) -> Tensor:
-        Z = torch.zeros(len(node_idx), self.repr_dim)
+        Z = torch.zeros(len(node_idx), self.repr_dim, device=node_idx.device)
 
         existing_mask = (node_idx < self.num_nodes).nonzero()
         Z[existing_mask] = self.embedding(node_idx[existing_mask])

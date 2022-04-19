@@ -20,6 +20,7 @@ from ml.data.samplers.ballroom_sampler import BallroomSamplerParams, BallroomSam
 from ml.data.samplers.hgt_sampler import HGTSamplerParams, HGTSampler
 from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
+from ml.data.samplers.sage_sampler import SAGESamplerParams, SAGESampler
 from ml.data.transforms.ensure_timestamps import EnsureTimestampsTransform
 from ml.data.transforms.eval_split import EvalNodeSplitTransform
 from ml.data.transforms.to_homogeneous import to_homogeneous
@@ -127,7 +128,7 @@ class MGCOMFeatModel(BaseEmbeddingModel):
         Z_dict = self.embedder(node_meta)
 
         # Transform hetero data to homogenous data in the sampled order
-        Z = torch.zeros(node_meta.batch_size, self.embedder.repr_dim)
+        Z = torch.zeros(node_meta.batch_size, self.embedder.repr_dim, device=self.device)
         for store in node_meta.node_stores:
             node_type = store._key
             if node_type in Z_dict:
@@ -147,7 +148,12 @@ class MGCOMFeatModel(BaseEmbeddingModel):
 
 @dataclass
 class MGCOMFeatDataModuleParams(GraphDataModuleParams):
-    hgt_params: HGTSamplerParams = HGTSamplerParams()
+    sampler_method: ConvMethod = ConvMethod.HGT
+    num_samples: List[int] = field(default_factory=lambda: [3, 2])
+    """The number of nodes to sample in each iteration and for each (node type in case of HGT, and edge_type in case 
+    of SAGE). """
+    # sage_params: SAGESamplerParams = SAGESamplerParams()
+    # hgt_params: Optional[HGTSamplerParams] = None
 
 
 class MGCOMFeatDataModule(GraphDataModule):
@@ -165,8 +171,17 @@ class MGCOMFeatDataModule(GraphDataModule):
     def _build_n2v_sampler(self, data: HeteroData) -> Union[Node2VecSampler, BallroomSampler]:
         raise NotImplementedError
 
-    def _build_hgt_sampler(self, data: HeteroData) -> HGTSampler:
-        return HGTSampler(data, hparams=self.hparams.hgt_params)
+    def _build_hgt_sampler(self, data: HeteroData) -> Union[HGTSampler, SAGESampler]:
+        if self.hparams.sampler_method == ConvMethod.HGT:
+            return HGTSampler(data, hparams=HGTSamplerParams(
+                num_samples=self.hparams.num_samples,
+            ))
+        elif self.hparams.sampler_method == ConvMethod.SAGE:
+            return SAGESampler(data, hparams=SAGESamplerParams(
+                num_samples=self.hparams.num_samples,
+            ))
+        else:
+            raise ValueError("No sampler params provided")
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         data = self.train_data if not self.hparams.use_full_data else self.test_data

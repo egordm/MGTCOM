@@ -28,7 +28,7 @@ class Het2VecModel(Node2VecModel):
 
         # Transform hetero data to homogenous data in the sampled order
         batch_size = sum([len(v) for v in node_idx_dict.values()])
-        Z = torch.zeros(batch_size, self.embedder.repr_dim)
+        Z = torch.zeros(batch_size, self.embedder.repr_dim, device=self.device)
         for node_type, node_perm in node_perm_dict.items():
             Z[node_perm] = Z_dict[node_type]
 

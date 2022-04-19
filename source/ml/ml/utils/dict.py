@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Callable, Any
 
 import torch
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
@@ -47,3 +47,7 @@ class OutputExtractor:
 
     def extract_mean(self, key) -> Union[Tensor, float]:
         return sum(self.extract(key)) / len(self.outputs)
+
+
+def values_apply(d, fn: Callable[[Any], Any]):
+    return {k: fn(v) for k, v in d.items()}

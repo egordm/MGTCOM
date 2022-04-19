@@ -8,7 +8,7 @@ from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor
 from torch_geometric.typing import NodeType
 
-from ml.utils import OutputExtractor, OptimizerParams
+from ml.utils import OutputExtractor, OptimizerParams, values_apply
 
 
 class EmbeddingCombineMode(Enum):
@@ -52,7 +52,7 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         return dict(
-            Z_dict=self.forward(batch)
+            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu())
         )
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
@@ -62,7 +62,7 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         return dict(
-            Z_dict=self.forward(batch)
+            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu())
         )
 
     def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
@@ -72,7 +72,7 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         return dict(
-            Z_dict=self.forward(batch)
+            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu())
         )
 
     def configure_optimizers(self):
