@@ -32,6 +32,7 @@ class SaveGraphCallback(Callback):
         logger.info('Running K-means before saving graph')
         k = len(torch.unique(torch.cat(list(self.node_labels['Louvain Labels'].values()), dim=0))) \
             if 'Louvain Labels' in self.node_labels else 7
+        k = min(k, 24)
         I = KMeans(-1, k).fit(Z).assign(Z)
 
         logger.info("Saving graph")

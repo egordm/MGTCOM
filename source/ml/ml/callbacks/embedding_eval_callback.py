@@ -9,6 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from torch import Tensor
 from torch_geometric.data import HeteroData
 
+from ml.algo.transforms import SubsampleDictTransform, SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.data.graph_datamodule import GraphDataModule
 from ml.data.transforms.to_homogeneous import to_homogeneous
@@ -29,6 +30,7 @@ class EmbeddingEvalCallbackParams(HParams):
     """Metric to use for embedding evaluation."""
     lp_max_pairs: int = 5000
     """Maximum number of pairs to use for link prediction."""
+    met_max_points: int = 5000
 
 
 class EmbeddingEvalCallback(Callback):
@@ -59,6 +61,9 @@ class EmbeddingEvalCallback(Callback):
             for label_name, label_dict in data_module.test_inferred_labels().items()
         }
 
+        self.transform_subsample_train = SubsampleTransform(self.hparams.met_max_points)
+        self.transform_subsample_val = SubsampleTransform(self.hparams.met_max_points)
+
     def on_train_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         pass  # NOOP: cause we dont collect embeddings on train
 
@@ -73,13 +78,13 @@ class EmbeddingEvalCallback(Callback):
         Z_dict = pl_module.val_Z_dict
         Z = torch.cat(list(Z_dict.values()), dim=0)
 
-        val_metrics = self.collect_metrics(Z, self.val_labels, self.val_pairs)
+        val_metrics = self.collect_metrics(Z, self.val_labels, self.val_pairs, self.transform_subsample_val)
         pl_module.log_dict({
             f'val/eval/{metric}': value
             for metric, value in val_metrics.items()
         })
 
-        train_metrics = self.collect_metrics(Z, self.train_labels, self.train_pairs)
+        train_metrics = self.collect_metrics(Z, self.train_labels, self.train_pairs, self.transform_subsample_train)
         pl_module.log_dict({
             f'train/eval/{metric}': value
             for metric, value in train_metrics.items()
@@ -107,16 +112,23 @@ class EmbeddingEvalCallback(Callback):
     def collect_metrics(
             self,
             Z: Tensor, labels: Dict[str, Tensor],
-            lp_pairs: Tuple[Tensor, Tensor]
+            lp_pairs: Tuple[Tensor, Tensor],
+            subsampler: SubsampleTransform = None
     ) -> Dict[str, float]:
         output = dict(
             link_prediction_accuracy=link_prediction_measure(Z, *lp_pairs, metric=self.hparams.metric),
         )
 
         for label_name, labels in labels.items():
+            if subsampler is not None:
+                Z_sub = subsampler.transform(Z[:len(labels)])
+                labels = subsampler.transform(labels)
+            else:
+                Z_sub = Z
+
             output.update({
                 f'{metric} ({label_name})': value
-                for metric, value in self.supervised_clustering_metrics(Z[:len(labels)], labels).items()
+                for metric, value in self.supervised_clustering_metrics(Z_sub, labels).items()
             })
 
         return output

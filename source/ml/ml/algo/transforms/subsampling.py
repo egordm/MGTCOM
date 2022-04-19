@@ -14,7 +14,7 @@ class SubsampleTransform:
 
     def fit(self, X: Union[Tensor, int]):
         N = X if isinstance(X, int) else len(X)
-        if N > self.max_points:
+        if N > self.max_points and self.max_points > 0:
             self.perm = torch.randperm(N)[:self.max_points]
         else:
             self.perm = torch.arange(N)
@@ -46,7 +46,7 @@ class SubsampleDictTransform:
                 N_dict[key] = len(value)
 
         self.perm = {}
-        if N > self.max_points:
+        if self.max_points > 0 and N > self.max_points:
             for key, value in X.items():
                 self.perm[key] = torch.randperm(N_dict[key])[:int(N_dict[key] / float(self.max_points))]
         else:
