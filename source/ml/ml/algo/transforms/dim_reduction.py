@@ -1,6 +1,8 @@
 from enum import Enum
+from typing import Union
 
 import torch
+from matplotlib.transforms import IdentityTransform
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from torch import Tensor
@@ -17,6 +19,8 @@ class DimensionReductionMode(Enum):
 
 
 class DimensionReductionTransform:
+    mapper: Union[PCA, TSNE, UMAP, IdentityTransform]
+
     def __init__(
             self,
             n_components=2,
@@ -43,11 +47,14 @@ class DimensionReductionTransform:
         else:
             self.mapper = IdentityTransform()
 
+        self.is_fitted = False
+
     def fit(self, X: Tensor):
         if self.mode == DimensionReductionMode.TSNE:
             pass
         else:
             self.mapper.fit(X.numpy())
+        self.is_fitted = True
         return self
 
     def transform(self, X: Tensor) -> Tensor:

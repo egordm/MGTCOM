@@ -36,7 +36,7 @@ class MHMC:
         lgamma_N_cs = torch.lgamma(obs_sc.Ns * self.ds_scale)
 
         log_ll_c = self.mu_cov_prior.marginal_log_prob(obs_c.Ns, obs_c.mus, obs_c.covs)[0]
-        log_ll_cs = self.mu_cov_prior.marginal_log_prob(obs_c.Ns, obs_sc.mus, obs_sc.covs)
+        log_ll_cs = self.mu_cov_prior.marginal_log_prob(obs_sc.Ns, obs_sc.mus, obs_sc.covs)
 
         H = (
                 torch.log(self.pi_prior.params.alpha) + sum(lgamma_N_cs) + sum(log_ll_cs)

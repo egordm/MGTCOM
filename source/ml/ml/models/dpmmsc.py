@@ -1,19 +1,17 @@
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import pytorch_lightning as pl
 import torch
 import torchmetrics
-from tch_geometric.loader import CustomLoader
 from torch import Tensor
-from torch.utils.data import Dataset
 
 from ml.algo.dpm import BurnInMonitor, DPMMObs, merge_params, StackedDirichletProcessMixtureModel, \
-    DirichletProcessMixtureModel, NIWPrior, DirichletPrior, MHMC, InitMode
+    DirichletProcessMixtureModel, NIWPrior, DirichletPrior, MHMC, InitMode, DPMMParams
 from ml.algo.dpm.stochastic import DPMMObsMeanFilter
-from ml.utils import HParams, Metric, OutputExtractor, DataLoaderParams, mask_from_idx
+from ml.utils import HParams, Metric, OutputExtractor, mask_from_idx
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -33,9 +31,9 @@ class Stage(IntEnum):
 
 @dataclass
 class DPMMSCModelParams(HParams):
-    init_k: int = 1
+    init_k: int = 2
     subcluster: bool = True
-    # subcluster: bool = False
+    mutate: bool = True
     metric: Metric = Metric.L2
 
     burnin_patience: int = 3
@@ -53,20 +51,20 @@ class DPMMSCModelParams(HParams):
     cluster_init_mode: InitMode = InitMode.KMeans
     subcluster_init_mode: InitMode = InitMode.KMeans1D
 
-    loader_args: DataLoaderParams = DataLoaderParams()
-
 
 class DPMMSubClusteringModel(pl.LightningModule):
     hparams: DPMMSCModelParams
     train_samples: List[Tensor]
-    validation_outputs: Dict[str, Tensor]
 
-    def __init__(self, dataset: Dataset, hparams: DPMMSCModelParams) -> None:
+    val_outputs: Dict[str, Tensor] = None
+    test_outputs: Dict[str, Tensor] = None
+    pred_outputs: Dict[str, Tensor] = None
+
+    def __init__(self, repr_dim: int, hparams: DPMMSCModelParams) -> None:
         super().__init__()
         self.save_hyperparameters(hparams.to_dict())
-        self.dataset = dataset
 
-        self.repr_dim = dataset[[0]].shape[-1]
+        self.repr_dim = repr_dim
         self.mhmc = MHMC(
             ds_scale=self.hparams.ds_scale,
             pi_prior=DirichletPrior.from_params(hparams.prior_alpha),
@@ -93,14 +91,15 @@ class DPMMSubClusteringModel(pl.LightningModule):
         self.stage = Stage.GatherSamples
         self.prev_action = Action.NoAction
         self.train_samples = []
-        self.prev_params = None
 
     @property
     def k(self):
         return self.clusters.n_components
 
     def forward(self, X):
-        out = {}
+        out = {
+            'X': X,
+        }
 
         if self.clusters.is_initialized:
             r = self.clusters.estimate_assignment(X)
@@ -115,15 +114,15 @@ class DPMMSubClusteringModel(pl.LightningModule):
         return out
 
     def on_train_epoch_start(self) -> None:
-        self.prev_params = (self.clusters.mus.clone(), self.clusters.covs.clone())
-
         if self.stage == Stage.GatherSamples and len(self.train_samples) > 0:
             X = torch.cat(self.train_samples, dim=0)
 
             if not self.clusters.is_initialized:
+                logger.info(f'Initializing clusters with {self.hparams.cluster_init_mode}')
                 self.clusters.reinitialize(X, None, self.hparams.cluster_init_mode)
 
-            if not self.subclusters.is_initialized:
+            if self.hparams.subcluster and not self.subclusters.is_initialized:
+                logger.info(f'Initializing subclusters with {self.hparams.subcluster_init_mode}')
                 r = self.clusters.estimate_assignment(X)
                 self.subclusters.reinitialize(X, r, self.hparams.subcluster_init_mode, incremental=True)
 
@@ -134,6 +133,12 @@ class DPMMSubClusteringModel(pl.LightningModule):
         self.cluster_mp.reset(self.clusters.n_components)
         if self.hparams.subcluster:
             self.subcluster_mp.reset(self.subclusters.n_components * self.subclusters.n_subcomponents)
+
+        self.log_dict({
+            'stage_g': self.stage == Stage.GatherSamples,
+            'stage_b': self.stage == Stage.BurnIn,
+            'stage_m': self.stage == Stage.Mutation,
+        }, prog_bar=True)
 
     def on_train_batch_start(self, batch, batch_idx: int, unused: int = 0):
         if self.burnin_monitor.counter > self.hparams.early_stopping_patience + self.hparams.burnin_patience:
@@ -148,16 +153,16 @@ class DPMMSubClusteringModel(pl.LightningModule):
         if self.clusters.is_initialized:
             r = self.clusters.estimate_assignment(X)
             z = r.argmax(dim=-1)
-            obs = self.clusters.compute_params(X, r.detach())
-            self.cluster_mp.push(obs)
-
-            ll = self.clusters.estimate_log_prob(X)
-            self.data_ll.update(ll.sum(dim=-1))
+            obs_c = self.clusters.compute_params(X, r.detach())
+            self.cluster_mp.push(obs_c)
 
             if self.hparams.subcluster and self.subclusters.is_initialized:
                 ri = self.subclusters.estimate_log_prob(X, z.detach())
-                obs = self.subclusters.compute_params(X, z.detach(), ri.detach())
-                self.subcluster_mp.push(obs)
+                obs_sc = self.subclusters.compute_params(X, z.detach(), ri.detach())
+                self.subcluster_mp.push(obs_sc)
+
+            ll = self.clusters.estimate_log_prob(X)
+            self.data_ll.update(ll.sum(dim=-1))
 
     def training_epoch_end(self, outputs):
         obs_c, obs_sc, burned_in = None, None, False
@@ -172,7 +177,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
                 obs_sc = self.subcluster_mp.compute()
                 if (obs_sc.Ns == 0).any():
                     # TODO: handle this case or basically where the N gets bit too low
-                    u = 0
+                    logger.warning("Some subclusters have no samples. TODO: fix this")
 
                 self.subclusters.update_params(obs_sc)
 
@@ -184,7 +189,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
                 logger.info("Cluster params have converged")
                 self.stage = Stage.Mutation
 
-        if self.stage == Stage.Mutation:
+        if self.hparams.subcluster and self.hparams.mutate and self.stage == Stage.Mutation:
             if self.prev_action != Action.Split:
                 self.prev_action = Action.Split
                 self.split(obs_c, obs_sc)
@@ -221,7 +226,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
         self.stage = Stage.GatherSamples
         self.burnin_monitor.reset()
 
-    def merge(self, obs_c: DPMMObs, obs_sc: DPMMObs):
+    def merge(self, obs_c: DPMMObs, _obs_sc: DPMMObs):
         if self.k < 2:
             return
 
@@ -255,31 +260,56 @@ class DPMMSubClusteringModel(pl.LightningModule):
         self.stage = Stage.BurnIn
         self.burnin_monitor.reset()
 
-    def validation_step(self, batch, batch_idx, dataloader_idx=0):
-        X = batch.detach()
-        out = self.forward(X)
-        return out
-
-    def validation_epoch_end(self, outputs, dataloader_idx=0):
+    def _eval_epoch_end(self, outputs):
         outputs = OutputExtractor(outputs)
-        self.validation_outputs = {}
+        out = dict(
+            X=outputs.extract_cat('X'),
+        )
 
         if not self.stage == Stage.GatherSamples:
             r = outputs.extract_cat('r').cpu()
-            self.validation_outputs.update(dict(r=r))
+            out.update(dict(r=r))
 
             if self.hparams.subcluster:
                 ri = outputs.extract_cat('ri').cpu()
-                self.validation_outputs.update(dict(ri=ri))
+                out.update(dict(ri=ri))
+
+        return out
+
+    @property
+    def is_subclustering(self):
+        return self.hparams.subcluster and self.subclusters.is_initialized
+
+    @property
+    def cluster_params(self) -> DPMMParams:
+        return DPMMParams(self.clusters.pis, self.clusters.mus, self.clusters.covs)
+
+    @property
+    def subcluster_params(self) -> DPMMParams:
+        return DPMMParams(self.subclusters.pis, self.subclusters.mus, self.subclusters.covs) \
+            if self.is_subclustering else None
+
+    @property
+    def samplespace_changed(self) -> bool:
+        return False
+
+    def estimate_assignment(self, X: torch.Tensor) -> torch.Tensor:
+        return self.clusters.estimate_assignment(X)
+
+    def validation_step(self, batch, batch_idx):
+        return self.forward(batch)
+
+    def validation_epoch_end(self, outputs):
+        self.val_outputs = self._eval_epoch_end(outputs)
+
+    def test_step(self, batch, batch_idx):
+        return self.forward(batch)
+
+    def test_epoch_end(self, outputs):
+        self.test_outputs = self._eval_epoch_end(outputs)
+
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+        return self.forward(batch)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.001)
-
-    def train_dataloader(self):
-        return CustomLoader(self.dataset, shuffle=True, **self.hparams.loader_args)
-
-    def val_dataloader(self):
-        return CustomLoader(self.dataset, **self.hparams.loader_args)
-
-    def predict_dataloader(self):
-        return CustomLoader(self.dataset, **self.hparams.loader_args)

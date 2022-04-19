@@ -8,6 +8,8 @@ from torch.utils.data.dataset import Dataset
 
 
 class SyntheticGMMDataset(Dataset):
+    name = 'synthetic_gmm'
+
     def __init__(self, n_samples: int = 10000, repr_dim: int = 2, k: int = 15):
         super().__init__()
         self.repr_dim = repr_dim

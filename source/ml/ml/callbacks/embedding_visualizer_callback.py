@@ -42,7 +42,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         )
 
     def on_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
-        logger.info("Visualizing embeddings...")
+        logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")
         Z = pl_module.val_Z
         Z = self.transform_subsample.transform(Z)
 

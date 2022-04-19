@@ -8,7 +8,7 @@ from torch_geometric.data import HeteroData
 
 
 class PretrainedEmbeddingsDataset(Dataset):
-    def __init__(self, data: HeteroData) -> None:
+    def __init__(self, data: HeteroData, name=None) -> None:
         super().__init__()
         self.data = data
         self.repr_dim = next(store.num_features for store in data.node_stores)
@@ -16,6 +16,7 @@ class PretrainedEmbeddingsDataset(Dataset):
                    data.node_stores), "All node stores must have the same dimension"
 
         self.emb = torch.cat(list(data.x_dict.values()), dim=0)
+        self.name = name
         # TODO: add possibility to transform indices back to node_type indices
 
     def __len__(self):
@@ -25,10 +26,10 @@ class PretrainedEmbeddingsDataset(Dataset):
         return self.emb[idx]
 
     @staticmethod
-    def from_pretrained(file: Union[PathLike, str]):
+    def from_pretrained(file: Union[PathLike, str], name=None):
         emb_dict = torch.load(str(file))
         data = HeteroData()
         for node_type, emb in emb_dict.items():
             data[node_type].x = emb
 
-        return PretrainedEmbeddingsDataset(data)
+        return PretrainedEmbeddingsDataset(data, name=name)
