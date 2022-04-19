@@ -138,6 +138,8 @@ class DPMMSubClusteringModel(pl.LightningModule):
             'stage_g': self.stage == Stage.GatherSamples,
             'stage_b': self.stage == Stage.BurnIn,
             'stage_m': self.stage == Stage.Mutation,
+            'k': self.k,
+            'bi_count': self.burnin_monitor.counter,
         }, prog_bar=True)
 
     def on_train_batch_start(self, batch, batch_idx: int, unused: int = 0):

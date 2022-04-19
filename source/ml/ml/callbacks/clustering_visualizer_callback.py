@@ -4,7 +4,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import wandb
 from pytorch_lightning import Trainer
+from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor
 
 from ml.algo.dpm import DPMMParams
@@ -56,6 +58,8 @@ class ClusteringVisualizerCallback(IntermittentCallback):
         if pl_module.stage == Stage.GatherSamples:
             return
 
+        wandb_logger: WandbLogger = trainer.logger
+
         logger.info(f"Visualizing clustering at epoch {trainer.current_epoch}")
         visualize_subclusters = pl_module.is_subclustering
 
@@ -91,13 +95,24 @@ class ClusteringVisualizerCallback(IntermittentCallback):
         else:
             subcluster_params = None
 
-        self.visualize(
+        fig = self.visualize(
             X, z, zi,
             k, cluster_params, subcluster_params,
             pl_module,
             title=f'Epoch {trainer.current_epoch}'
         )
-        plt.show()
+        wandb_logger.log_metrics({
+            f'visualization/Clustering Visualization': wandb.Image(fig)
+        })
+        if wandb.run.offline:
+            plt.show()
+        else:
+            plt.close(fig)
+
+        self.visualize_distributions(
+            trainer, k,
+            pl_module.clusters.pis, pl_module.subcluster_params.pis if visualize_subclusters else None,
+        )
 
     def visualize(
             self, X: Tensor, z: Tensor, zi: Tensor,
@@ -131,6 +146,32 @@ class ClusteringVisualizerCallback(IntermittentCallback):
         cbar.set_label("Max network response", rotation=270, labelpad=10, y=0.45)
 
         fig.suptitle(title)
+        return fig
+
+    def visualize_distributions(self, trainer: Trainer, k: int, pis: Tensor, pis_sub: Tensor = None):
+        fig, (axc, axsc) = plt.subplots(nrows=1, ncols=2, sharey=False, figsize=(12, 6))
+        ind = np.arange(k)
+        axc.bar(ind, pis, label="Cluster Weights", align="center", alpha=0.3)
+        axc.set_xlabel("Clusters (k={})".format(k))
+        axc.set_ylabel("Normalized weights")
+        axc.set_title(f"Epoch {trainer.current_epoch}: Clusters weights")
+
+        if pis_sub is not None:
+            pi_sub_1 = pis_sub[0::2]
+            pi_sub_2 = pis_sub[1::2]
+            axsc.bar(ind, pi_sub_1, align="center", label="Sub Cluster 1")
+            axsc.bar(ind, pi_sub_2, align="center", bottom=pi_sub_1, label="Sub Cluster 2")
+            axsc.set_xlabel("Clusters (k={})".format(k))
+            axsc.set_ylabel("Normalized weights")
+            axsc.set_title(f"Epoch {trainer.current_epoch}: Clusters weights")
+
+        trainer.logger.log_metrics({
+            f'visualization/Cluster Distribution': wandb.Image(fig)
+        })
+        if wandb.run.offline:
+            plt.show()
+        else:
+            plt.close(fig)
 
     def plot_clusters(
             self, ax, X: Tensor, z: Tensor, zi: Tensor,

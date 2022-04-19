@@ -25,7 +25,7 @@ class EmbeddingVisualizerCallbackParams(HParams):
     dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.UMAP
     # dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.TSNE
     """Dimension reduction mode for embedding visualization."""
-    ev_max_points: int = 10000
+    ev_max_points: int = 1000
     """Maximum number of points to visualize."""
     ev_interval: int = 6
     """Interval between embedding visualization."""
@@ -70,7 +70,8 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
             wandb_logger.log_metrics({
                 f'visualization/Embedding Visualization ({label_name})': wandb.Image(fig)
             })
-            # plt.show()
+            if wandb.run.offline:
+                plt.show()
 
     def visualize_embeddings(self, Z: Tensor, labels: Tensor, title):
         fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(8, 8))

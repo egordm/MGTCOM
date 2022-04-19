@@ -8,6 +8,7 @@ from pytorch_lightning.loggers import WandbLogger
 from simple_parsing import Serializable
 from transformers.models.longformer.convert_longformer_original_pytorch_lightning_to_pytorch import LightningModel
 
+from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback, ClusteringEvalCallbackParams
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallbackParams
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallbackParams
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallbackParams
@@ -20,8 +21,9 @@ from shared import parse_args, get_logger, RESULTS_PATH
 @dataclass
 class CallbackArgs(Serializable):
     clustering_visualizer: ClusteringVisualizerCallbackParams = ClusteringVisualizerCallbackParams()
-    embedding_eval: EmbeddingEvalCallbackParams = EmbeddingEvalCallbackParams()
+    clustering_eval: ClusteringEvalCallbackParams = ClusteringEvalCallbackParams()
     embedding_visualizer: EmbeddingVisualizerCallbackParams = EmbeddingVisualizerCallbackParams()
+    embedding_eval: EmbeddingEvalCallbackParams = EmbeddingEvalCallbackParams()
 
 
 @dataclass
@@ -30,6 +32,7 @@ class BaseExecutorArgs(Serializable):
     run_name: Optional[str] = None
     show_config: bool = False
     debug: bool = False
+    offline: bool = False
 
     loader_params: DataLoaderParams = DataLoaderParams()
     optimizer_params: OptimizerParams = OptimizerParams()
@@ -84,9 +87,10 @@ class BaseExecutor:
 
         # Initialize wandb logger
         run_config = self.args.to_dict()
-        run_config.pop('wandb_project_name')
-        run_config.pop('run_name')
-        run_config.pop('show_config')
+        run_config.pop('wandb_project_name', None)
+        run_config.pop('run_name', None)
+        run_config.pop('show_config', None)
+        run_config.pop('offline', None)
 
         model_name = self.model.__class__.__name__
         wandb_config = {
@@ -107,6 +111,7 @@ class BaseExecutor:
             config=wandb_config,
             tags=self.tags(),
             job_type=self.TASK_NAME,
+            offline=self.args.offline,
             **wandb_args
         )
 

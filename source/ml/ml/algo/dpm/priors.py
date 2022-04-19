@@ -71,7 +71,7 @@ class NIWPrior:
         """
         D = mu.shape[-1]
         if nu < D:
-            logger.warning("nu must be at least D + 1")
+            logger.warning(f"nu must be at least D + 1. Setting nu to {D + 1}")
             nu = D + 1
 
         return NIWPrior(NIWPriorParams(

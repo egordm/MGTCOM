@@ -52,7 +52,8 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         return dict(
-            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu())
+            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu()),
+            batch_idx=batch_idx,
         )
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
@@ -62,7 +63,8 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         return dict(
-            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu())
+            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu()),
+            batch_idx=batch_idx,
         )
 
     def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
@@ -72,7 +74,8 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         return dict(
-            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu())
+            Z_dict=values_apply(self.forward(batch), lambda x: x.detach().cpu()),
+            batch_idx=batch_idx,
         )
 
     def configure_optimizers(self):

@@ -14,10 +14,11 @@ class KMeans:
 
     def __init__(
             self,
-            repr_dim: int, k: int,
+            repr_dim: int,
+            k: int,
             metric: Metric = Metric.L2,
             niter: int = 10, nredo: int = 5,
-            gpu: bool = False, verbose: bool = False,
+            gpu: bool = False, verbose: bool = False
     ) -> None:
         super().__init__()
         self.repr_dim = repr_dim
@@ -43,6 +44,7 @@ class KMeans:
             init_centroids = ensure_numpy(init_centroids)
 
         # Initialize clustering
+        self.repr_dim = x.shape[1]
         self.clus = faiss.Clustering(self.repr_dim, self.k, self.params)
         if init_centroids is not None:
             nc, d2 = init_centroids.shape
