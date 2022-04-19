@@ -1,14 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from pytorch_lightning import Trainer, LightningModule
-from pytorch_lightning.callbacks import Callback
-from pytorch_lightning.trainer.states import RunningStage
+from pytorch_lightning import Trainer
 from torch import Tensor
 
 from ml.algo.dpm import DPMMParams
@@ -28,7 +24,7 @@ class ClusteringVisualizerCallbackParams(HParams):
     """Dimension reduction mode for embedding visualization."""
     cv_max_points: int = 10000
     """Maximum number of points to visualize."""
-    cv_interval: int = 3
+    cv_interval: int = 1
     """Interval between clustering visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
@@ -157,13 +153,13 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             s=MARKER_SIZE * 8, linewidth=2,
             alpha=0.6, zorder=4
         )
-        draw_ellipses(ax, cluster_params.mus, cluster_params.covs, colors, alpha=0.3, zorder=1)
+        draw_ellipses(ax, cluster_params.mus, cluster_params.covs, colors, alpha=0.2, zorder=1)
 
         # Draw subclusters
         if subcluster_params is not None:
             indices = (torch.arange(len(subcluster_params.mus)) / 2).floor().long()
 
-            draw_ellipses(ax, subcluster_params.mus, subcluster_params.covs, colors[indices], alpha=0.4, zorder=2)
+            draw_ellipses(ax, subcluster_params.mus, subcluster_params.covs, colors[indices], alpha=0.2, zorder=2)
             plot_scatter(
                 ax, subcluster_params.mus[:, 0], subcluster_params.mus[:, 1],
                 edgecolor="k", facecolors=colors[indices],

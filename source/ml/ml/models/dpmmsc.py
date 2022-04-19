@@ -40,7 +40,7 @@ class DPMMSCModelParams(HParams):
     early_stopping_patience: int = 5
 
     prior_alpha: float = 10
-    prior_nu: float = 10
+    prior_nu: float = 3
     prior_kappa: float = 0.0001
     prior_sigma_scale: float = 0.005
 

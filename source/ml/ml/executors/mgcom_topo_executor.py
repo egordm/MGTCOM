@@ -10,6 +10,7 @@ from datasets.utils.base import DATASET_REGISTRY
 from datasets.utils.conversion import igraph_from_hetero
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
 from ml.callbacks.progress_bar import CustomProgressBar
+from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule
 from ml.utils import dataset_choices, DataLoaderParams, OptimizerParams, TrainerParams
 from ml.utils.labelling import extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
@@ -62,7 +63,8 @@ def train(args: Args):
     callbacks = [
         CustomProgressBar(),
         LearningRateMonitor(logging_interval='step'),
-        EmbeddingVisualizerCallback(node_labels=node_labels)
+        EmbeddingVisualizerCallback(node_labels=node_labels),
+        SaveEmbeddingsCallback(),
     ]
 
     logger.info('Training model')
@@ -73,6 +75,8 @@ def train(args: Args):
         # num_sanity_val_steps=0,
     )
     trainer.fit(model, data_module)
+    trainer.test(model, data_module)
+    trainer.predict(model, data_module)
 
 
 if __name__ == '__main__':

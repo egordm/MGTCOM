@@ -15,9 +15,9 @@ class EmbeddingCombineMode(Enum):
     """
     Defines the way the embeddings are combined.
     """
-    ADD = 0
-    MULT = 1
-    CONCAT = 2
+    ADD = 'add'
+    MULT = 'mul'
+    CONCAT = 'concat'
 
     @property
     def combine_fn(self):
