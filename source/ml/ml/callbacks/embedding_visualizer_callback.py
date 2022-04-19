@@ -2,13 +2,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict
 
+import torch
 from matplotlib import pyplot as plt
 from pytorch_lightning import Trainer, LightningModule
 from torch import Tensor
 
-from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform
+from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform, \
+    SubsampleDictTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.utils import HParams, Metric
+from ml.utils.labelling import NodeLabelling
 from ml.utils.plot import plot_scatter, create_colormap, MARKER_SIZE
 from shared import get_logger
 
@@ -28,30 +31,28 @@ class EmbeddingVisualizerCallbackParams(HParams):
 
 
 class EmbeddingVisualizerCallback(IntermittentCallback):
-    def __init__(self, node_labels: Dict[str, Tensor], hparams: EmbeddingVisualizerCallbackParams = None) -> None:
+    def __init__(self, val_node_labels: Dict[str, NodeLabelling], hparams: EmbeddingVisualizerCallbackParams = None) -> None:
         self.hparams = hparams or EmbeddingVisualizerCallbackParams()
         super().__init__(interval=self.hparams.ev_interval)
-        self.node_labels = node_labels
+        self.val_node_labels = val_node_labels
 
-        num_points = len(next(iter(self.node_labels.values())))
-        self.transform_subsample = SubsampleTransform(self.hparams.ev_max_points)
-        self.transform_subsample.fit(num_points)
-
+        self.transform_subsample = SubsampleDictTransform(self.hparams.ev_max_points)
         self.transform_df = DimensionReductionTransform(
             n_components=2, mode=self.hparams.dim_reduction_mode, metric=self.hparams.metric
         )
 
     def on_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")
-        Z = pl_module.val_Z
-        Z = self.transform_subsample.transform(Z)
+        Z_dict = self.transform_subsample.transform(pl_module.val_Z_dict)
+        Z = torch.cat(list(Z_dict.values()), dim=0)
 
         logger.info(f'Transforming embeddings using {self.hparams.dim_reduction_mode}...')
         self.transform_df.fit(Z)
         Z = self.transform_df.transform(Z)
 
-        for label_name, labels in self.node_labels.items():
-            labels = self.transform_subsample.transform(labels)
+        for label_name, labels_dict in self.val_node_labels.items():
+            labels_dict = self.transform_subsample.transform(labels_dict)
+            labels = torch.cat(list(labels_dict.values()), dim=0)
             self.visualize_embeddings(
                 Z, labels,
                 f'Epoch {trainer.current_epoch} - Embedding Visualization ({label_name})'

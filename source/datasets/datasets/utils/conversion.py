@@ -73,8 +73,8 @@ def igraph_from_hetero(
         attr_items = []
         for store in data.edge_stores:
             attr = attr_data[store._key]
-            attr_items.extend(attr.numpy() if torch.is_tensor(attr) else attr)
+            attr_items.append(attr.numpy() if torch.is_tensor(attr) else attr)
 
-        g.vs[attr_name] = np.concatenate(attr_items, axis=0)
+        g.es[attr_name] = np.concatenate(attr_items, axis=0)
 
     return g, node_type_to_idx, edge_type_to_idx, offsets

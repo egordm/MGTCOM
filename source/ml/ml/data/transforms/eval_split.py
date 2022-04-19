@@ -1,5 +1,6 @@
 from typing import Dict
 
+import numpy as np
 import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData
@@ -71,6 +72,10 @@ class EvalNodeSplitTransform(BaseTransform):
             for key, value in store.items():
                 if store.is_node_attr(key):
                     out_store[key] = value[mask]
+                elif isinstance(value, np.ndarray) and len(value) == store.num_nodes:
+                    out_store[key] = value[mask]
+
+            out_store.id = mask.nonzero().squeeze()
 
         for out_store in result.edge_stores:
             store = data[out_store._key]
@@ -87,6 +92,8 @@ class EvalNodeSplitTransform(BaseTransform):
                     ])
 
                 elif store.is_edge_attr(key):
+                    out_store[key] = value[mask]
+                elif isinstance(value, np.ndarray) and len(value) == store.num_edges:
                     out_store[key] = value[mask]
 
         return result

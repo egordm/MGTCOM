@@ -34,13 +34,7 @@ class EmbeddingCombineMode(Enum):
 class BaseEmbeddingModel(pl.LightningModule):
     hparams: OptimizerParams
     val_Z_dict: Dict[NodeType, Tensor] = None
-    val_Z: Tensor = None
-
     test_Z_dict: Dict[NodeType, Tensor] = None
-    test_Z: Tensor = None
-
-    pred_Z_dict: Dict[NodeType, Tensor] = None
-    pred_Z: Tensor = None
 
     @property
     def repr_dim(self):
@@ -59,7 +53,7 @@ class BaseEmbeddingModel(pl.LightningModule):
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         outputs = OutputExtractor(outputs)
         self.val_Z_dict = outputs.extract_cat_dict('Z_dict')
-        self.val_Z = torch.cat(list(self.val_Z_dict.values()), dim=0)
+        # self.val_Z = torch.cat(list(self.val_Z_dict.values()), dim=0)
 
     def test_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         return dict(
@@ -69,7 +63,7 @@ class BaseEmbeddingModel(pl.LightningModule):
     def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         outputs = OutputExtractor(outputs)
         self.test_Z_dict = outputs.extract_cat_dict('Z_dict')
-        self.test_Z = torch.cat(list(self.test_Z_dict.values()), dim=0)
+        # self.test_Z = torch.cat(list(self.test_Z_dict.values()), dim=0)
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         return dict(

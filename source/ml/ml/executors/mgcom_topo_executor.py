@@ -4,13 +4,16 @@ from pathlib import Path
 import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor
+from simple_parsing import Serializable
 
 from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
 from datasets.utils.conversion import igraph_from_hetero
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
 from ml.callbacks.progress_bar import CustomProgressBar
+from ml.callbacks.save_config_callback import SaveConfigCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
+from ml.callbacks.save_graph_callback import SaveGraphCallback
 from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule
 from ml.utils import dataset_choices, DataLoaderParams, OptimizerParams, TrainerParams
 from ml.utils.labelling import extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
@@ -23,7 +26,7 @@ logger = get_logger(EXECUTOR_NAME)
 
 
 @dataclass
-class Args:
+class Args(Serializable):
     dataset: str = dataset_choices()
     hparams: MGCOMFeatModelParams = MGCOMFeatModelParams()
     data_params: MGCOMTopoDataModuleParams = MGCOMTopoDataModuleParams()
@@ -53,18 +56,28 @@ def train(args: Args):
 
     logger.info('Extracting labels for visualization')
     node_labels = {}
-    node_labels['Louvain Labels'] = extract_louvain_labels(data_module.val_data)
+    node_labels['Louvain Labels'] = extract_louvain_labels(data_module.data)
     if isinstance(dataset, GraphDataset) and dataset.snapshots is not None:
-        node_timestamps = extract_timestamp_labels(data_module.val_data)
+        node_timestamps = extract_timestamp_labels(data_module.data)
         for i, snapshot in dataset.snapshots.items():
             snapshot_labels = extract_snapshot_labels(node_timestamps, snapshot)
             node_labels[f'{i} Temporal Snapshots'] = snapshot_labels
 
+    val_node_labels = {
+        label_name: {
+            node_type: label_dict[node_type][perm]
+            for node_type, perm in data_module.val_data.id_dict.items()
+        }
+        for label_name, label_dict in node_labels.items()
+    }
+    val_node_labels['Louvain Labels'] = extract_louvain_labels(data_module.val_data)
+
     callbacks = [
         CustomProgressBar(),
         LearningRateMonitor(logging_interval='step'),
-        EmbeddingVisualizerCallback(node_labels=node_labels),
-        SaveEmbeddingsCallback(),
+        EmbeddingVisualizerCallback(val_node_labels=val_node_labels),
+        SaveConfigCallback(args),
+        SaveGraphCallback(data_module.data, node_labels=node_labels),
     ]
 
     logger.info('Training model')
