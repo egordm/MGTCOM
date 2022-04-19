@@ -1,81 +1,59 @@
 from dataclasses import dataclass
-from pathlib import Path
+from typing import Type, List
 
-import torch
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import LearningRateMonitor
-from simple_parsing import Serializable
+from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
-from datasets.utils.conversion import igraph_from_hetero
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallback
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
-from ml.callbacks.progress_bar import CustomProgressBar
-from ml.callbacks.save_config_callback import SaveConfigCallback
-from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.callbacks.save_graph_callback import SaveGraphCallback
+from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule
-from ml.utils import dataset_choices, DataLoaderParams, OptimizerParams, TrainerParams
-from ml.utils.labelling import extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
-from shared import get_logger, parse_args, RESULTS_PATH
-
-EXECUTOR_NAME = Path(__file__).stem
-TASK_NAME = 'embedding_topo'
-
-logger = get_logger(EXECUTOR_NAME)
+from ml.utils import dataset_choices
 
 
 @dataclass
-class Args(Serializable):
+class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
     hparams: MGCOMFeatModelParams = MGCOMFeatModelParams()
     data_params: MGCOMTopoDataModuleParams = MGCOMTopoDataModuleParams()
-    loader_params: DataLoaderParams = DataLoaderParams()
-    optimizer_params: OptimizerParams = OptimizerParams()
-    trainer_params: TrainerParams = TrainerParams()
 
 
-def train(args: Args):
-    dataset: GraphDataset = DATASET_REGISTRY[args.dataset]()
+class MGCOMTopoExecutor(BaseExecutor):
+    args: Args
+    datamodule: MGCOMTopoDataModule
 
-    data_module = MGCOMTopoDataModule(
-        dataset=dataset,
-        hparams=args.data_params,
-        loader_params=args.loader_params,
-    )
+    TASK_NAME = 'embedding_topo'
 
-    model = MGCOMFeatModel(
-        data_module.metadata, data_module.num_nodes_dict,
-        hparams=args.hparams,
-        optimizer_params=args.optimizer_params,
-    )
+    def params_cls(self) -> Type[BaseExecutorArgs]:
+        return Args
 
-    run_name = f'{TASK_NAME}/{dataset.name}'
-    root_dir = RESULTS_PATH / run_name
-    root_dir.mkdir(exist_ok=True, parents=True)
+    def datamodule(self) -> LightningDataModule:
+        dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
+        return MGCOMTopoDataModule(
+            dataset=dataset,
+            hparams=self.args.data_params,
+            loader_params=self.args.loader_params,
+        )
 
-    callbacks = [
-        CustomProgressBar(),
-        LearningRateMonitor(logging_interval='step'),
-        EmbeddingVisualizerCallback(val_node_labels=data_module.val_inferred_labels()),
-        EmbeddingEvalCallback(data_module),
-        SaveConfigCallback(args),
-        SaveGraphCallback(data_module.data, node_labels=data_module.inferred_labels()),
-    ]
+    def model(self):
+        return MGCOMFeatModel(
+            self.datamodule.metadata, self.datamodule.num_nodes_dict,
+            hparams=self.args.hparams,
+            optimizer_params=self.args.optimizer_params,
+        )
 
-    logger.info('Training model')
-    trainer = Trainer(
-        **args.trainer_params.to_dict(),
-        default_root_dir=str(root_dir),
-        callbacks=callbacks,
-        # num_sanity_val_steps=0,
-    )
-    trainer.fit(model, data_module)
-    trainer.test(model, data_module)
-    trainer.predict(model, data_module)
+    def callbacks(self) -> List[Callback]:
+        return [
+            EmbeddingVisualizerCallback(val_node_labels=self.datamodule.val_inferred_labels()),
+            EmbeddingEvalCallback(self.datamodule),
+            SaveGraphCallback(self.datamodule.data, node_labels=self.datamodule.inferred_labels()),
+        ]
+
+    def run_name(self):
+        return self.args.dataset
 
 
 if __name__ == '__main__':
-    args: Args = parse_args(Args)[0]
-    train(args)
+    MGCOMTopoExecutor().cli()

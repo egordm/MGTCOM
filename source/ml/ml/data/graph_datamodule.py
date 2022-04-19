@@ -54,6 +54,12 @@ class GraphDataModule(pl.LightningDataModule):
     def num_nodes_dict(self) -> Dict[NodeType, int]:
         return self.train_data.num_nodes_dict
 
+    @property
+    def snapshots(self) -> Optional[Dict[int, Snapshots]]:
+        if isinstance(self.dataset, GraphDataset) and self.dataset.snapshots is not None:
+            return self.dataset.snapshots
+        return None
+
     def _edge_prediction_pairs(self, data: HeteroData, mask_name: str = 'train_mask') -> Tuple[Tensor, Tensor]:
         """
         It takes a heterogeneous graph and returns a tuple of two tensors, the edges and the edge labels.
@@ -108,15 +114,15 @@ class GraphDataModule(pl.LightningDataModule):
 
     @lru_cache(maxsize=1)
     def train_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.train_data)
+        return self._extract_inferred_labels(self.train_data, self.snapshots)
 
     @lru_cache(maxsize=1)
     def val_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.val_data)
+        return self._extract_inferred_labels(self.val_data, self.snapshots)
 
     @lru_cache(maxsize=1)
     def test_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.test_data)
+        return self._extract_inferred_labels(self.test_data, self.snapshots)
 
     @lru_cache(maxsize=1)
     def inferred_labels(self) -> Dict[str, NodeLabelling]:
