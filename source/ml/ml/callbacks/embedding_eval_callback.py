@@ -66,25 +66,28 @@ class EmbeddingEvalCallback(Callback):
         if trainer.state.stage != RunningStage.VALIDATING:
             return
 
+        if trainer.current_epoch % self.hparams.ee_interval != 0 and trainer.current_epoch != trainer.max_epochs:
+            return
+
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
         Z_dict = pl_module.val_Z_dict
         Z = torch.cat(list(Z_dict.values()), dim=0)
 
         val_metrics = self.collect_metrics(Z, self.val_labels, self.val_pairs)
         pl_module.log_dict({
-            f'val_{metric}': value
+            f'val/eval/{metric}': value
             for metric, value in val_metrics.items()
         })
 
         train_metrics = self.collect_metrics(Z, self.train_labels, self.train_pairs)
         pl_module.log_dict({
-            f'train_{metric}': value
+            f'train/eval/{metric}': value
             for metric, value in train_metrics.items()
         })
 
         pl_module.log_dict({
-            'train_acc': train_metrics['link_prediction_accuracy'],
-            'val_acc': val_metrics['link_prediction_accuracy']
+            'train/eval/acc': train_metrics['link_prediction_accuracy'],
+            'val/eval/acc': val_metrics['link_prediction_accuracy']
         }, prog_bar=True)
 
     def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
@@ -97,7 +100,7 @@ class EmbeddingEvalCallback(Callback):
 
         metrics = self.collect_metrics(Z, self.test_labels, self.test_pairs)
         pl_module.log_dict({
-            f'test_{metric}': value
+            f'test/eval/{metric}': value
             for metric, value in metrics.items()
         })
 

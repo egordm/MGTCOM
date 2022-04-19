@@ -3,8 +3,10 @@ from pathlib import Path
 from typing import Dict
 
 import torch
+import wandb
 from matplotlib import pyplot as plt
 from pytorch_lightning import Trainer, LightningModule
+from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor
 
 from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform, \
@@ -20,18 +22,20 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class EmbeddingVisualizerCallbackParams(HParams):
-    dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.TSNE
+    dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.UMAP
+    # dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.TSNE
     """Dimension reduction mode for embedding visualization."""
     ev_max_points: int = 10000
     """Maximum number of points to visualize."""
-    ev_interval: int = 3
+    ev_interval: int = 6
     """Interval between embedding visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
 
 
 class EmbeddingVisualizerCallback(IntermittentCallback):
-    def __init__(self, val_node_labels: Dict[str, NodeLabelling], hparams: EmbeddingVisualizerCallbackParams = None) -> None:
+    def __init__(self, val_node_labels: Dict[str, NodeLabelling],
+                 hparams: EmbeddingVisualizerCallbackParams = None) -> None:
         self.hparams = hparams or EmbeddingVisualizerCallbackParams()
         super().__init__(interval=self.hparams.ev_interval)
         self.val_node_labels = val_node_labels
@@ -42,6 +46,11 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         )
 
     def on_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        if trainer.current_epoch == 0:
+            return
+
+        wandb_logger: WandbLogger = trainer.logger
+
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")
         Z_dict = self.transform_subsample.transform(pl_module.val_Z_dict)
         Z = torch.cat(list(Z_dict.values()), dim=0)
@@ -53,13 +62,18 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         for label_name, labels_dict in self.val_node_labels.items():
             labels_dict = self.transform_subsample.transform(labels_dict)
             labels = torch.cat(list(labels_dict.values()), dim=0)
-            self.visualize_embeddings(
+            fig = self.visualize_embeddings(
                 Z, labels,
                 f'Epoch {trainer.current_epoch} - Embedding Visualization ({label_name})'
             )
 
-    def visualize_embeddings(self, Z: Tensor, labels: Tensor, title) -> None:
-        fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(10, 6))
+            wandb_logger.log_metrics({
+                f'visualization/Embedding Visualization ({label_name})': wandb.Image(fig)
+            })
+            # plt.show()
+
+    def visualize_embeddings(self, Z: Tensor, labels: Tensor, title):
+        fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(8, 8))
         fig.tight_layout(rect=[0, 0, 1, 0.95])
         num_labels = int(labels.max() + 1)
         colors = create_colormap(num_labels)
@@ -72,4 +86,4 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         )
 
         fig.suptitle(title)
-        plt.show()
+        return fig

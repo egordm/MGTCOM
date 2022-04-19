@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData
-from torch_geometric.typing import NodeType
+from torch_geometric.typing import NodeType, EdgeType
 
 from shared import get_logger
 
@@ -17,8 +17,8 @@ NAN_TIMESTAMP = -1
 
 
 def extract_attribute(
-        data: HeteroData, key: str, edge_attr=False, warn=False, error=True
-) -> Optional[Dict[NodeType, Union[Tensor, np.ndarray]]]:
+        data: HeteroData, key: str, edge_attr=False, warn=True, error=True
+) -> Optional[Dict[Union[NodeType, EdgeType], Union[Tensor, np.ndarray]]]:
     if key not in data.keys:
         if warn:
             logger.warning(f"{key} not in data.keys")
@@ -53,10 +53,11 @@ def extract_attribute(
         else:
             if warn:
                 logger.warning(f"{key} not in {entity_type} store")
-                if is_numpy:
-                    output[entity_type] = np.full([store.num_nodes], np.nan, dtype=dtype)
-                else:
-                    output[entity_type] = torch.tensor([store.num_nodes], dtype=dtype).fill_(np.nan)
+
+            if is_numpy:
+                output[entity_type] = np.full([store.num_nodes], -1, dtype=dtype)
+            else:
+                output[entity_type] = torch.full([store.num_nodes], -1, dtype=dtype)
 
     return output
 

@@ -8,6 +8,9 @@ from torch_geometric.nn import HGTConv, Linear
 from torch_geometric.typing import NodeType, Metadata
 
 from ml.layers.embedding import HeteroNodeEmbedding
+from ml.layers.hgt_cov_net import HGTConvNet, HGTConvNetParams
+
+from ml.layers.sage_conv_net import SAGEConvNetParams, SAGEConvNet
 from ml.utils import HParams
 
 
@@ -16,8 +19,8 @@ class HybridConvNetParams(HParams):
     repr_dim: int = 32
     hidden_dim: Optional[int] = None
 
-    num_layers: int = 2
-    num_heads: int = 2
+    hgt_params: Optional[HGTConvNetParams] = None
+    sage_params: Optional[SAGEConvNetParams] = None
 
 
 class HybridConvNet(torch.nn.Module):
@@ -43,12 +46,20 @@ class HybridConvNet(torch.nn.Module):
 
         self.dropout = torch.nn.Dropout(p=0.5)
 
-        self.convs = torch.nn.ModuleList()
-        for i in range(self.hparams.num_layers):
-            out_dim = self.hidden_dim if i < self.hparams.num_layers - 1 else self.repr_dim
-            self.convs.extend([
-                HGTConv(self.hidden_dim, out_dim, metadata, self.hparams.num_heads, group='mean')
-            ])
+        if self.hparams.hgt_params:
+            self.conv = HGTConvNet(
+                self.repr_dim,
+                metadata,
+                hparams=self.hparams.hgt_params,
+            )
+        elif self.hparams.sage_params:
+            self.conv = SAGEConvNet(
+                self.repr_dim,
+                metadata,
+                hparams=self.hparams.sage_params,
+            )
+        else:
+            self.conv = None
 
     def forward(self, data: HeteroData) -> Dict[NodeType, Tensor]:
         # Process nodes with included features
@@ -69,14 +80,13 @@ class HybridConvNet(torch.nn.Module):
         }
         X_dict = {**X_feat, **X_embed}
 
-        Z_dict = X_dict
-
         # Apply convolutions
-        for conv in self.convs:
-            Z_dict = conv(Z_dict, data.edge_index_dict)
+        if self.conv:
+            Z_dict = self.conv(data, X_dict)
+        else:
+            Z_dict = {
+                node_type: X_dict[node_type][:batch_size]
+                for node_type, batch_size in data.batch_size_dict.items()
+            }
 
-        # Return node represenations
-        return {
-            node_type: Z_dict[node_type][:batch_size]
-            for node_type, batch_size in data.batch_size_dict.items()
-        }
+        return Z_dict

@@ -16,8 +16,10 @@ class HParams(Serializable):
 class TrainerParams(HParams):
     max_epochs: int = 20
     """Number of epochs to train for."""
-    gpus: Optional[int] = None
-    """GPUs to use. If None, use CPU."""
+    cpu: bool = False
+    """Whether to use CPU or GPU."""
+    val_check_interval: float = 1.0
+    """Interval between validation epochs"""
 
 
 @dataclass
@@ -28,7 +30,7 @@ class OptimizerParams(HParams):
 
 @dataclass
 class DataLoaderParams(HParams):
-    num_workers: int = 0
+    num_workers: int = 16
     """Number of workers to use for data loading"""
     batch_size: int = 16
     """Batch size for training, validation and test"""

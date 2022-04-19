@@ -10,18 +10,22 @@ from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallba
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.callbacks.save_graph_callback import SaveGraphCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
-from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule
-from ml.utils import dataset_choices
+from ml.layers.embedding import HeteroNodeEmbedding
+from ml.models.het2vec import Het2VecModel, Het2VecDataModule, Het2VecDataModuleParams
+from ml.models.mgcom_feat import MGCOMTopoDataModule
+from ml.utils import dataset_choices, Metric, OptimizerParams
 
 
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
-    hparams: MGCOMFeatModelParams = MGCOMFeatModelParams()
-    data_params: MGCOMTopoDataModuleParams = MGCOMTopoDataModuleParams()
+    metric: Metric = Metric.L2
+    repr_dim: int = 32
+    optimizer_params = OptimizerParams()
+    data_params: Het2VecDataModuleParams = Het2VecDataModuleParams()
 
 
-class MGCOMTopoExecutor(BaseExecutor):
+class Het2VecExecutor(BaseExecutor):
     args: Args
     datamodule: MGCOMTopoDataModule
 
@@ -32,16 +36,21 @@ class MGCOMTopoExecutor(BaseExecutor):
 
     def datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
-        return MGCOMTopoDataModule(
+        return Het2VecDataModule(
             dataset=dataset,
             hparams=self.args.data_params,
             loader_params=self.args.loader_params,
         )
 
     def model(self):
-        return MGCOMFeatModel(
-            self.datamodule.metadata, self.datamodule.num_nodes_dict,
-            hparams=self.args.hparams,
+        embedder = HeteroNodeEmbedding(
+            self.datamodule.data.num_nodes_dict,
+            self.args.repr_dim,
+        )
+
+        return Het2VecModel(
+            embedder=embedder,
+            metric=self.args.metric,
             optimizer_params=self.args.optimizer_params,
         )
 
@@ -64,4 +73,4 @@ class MGCOMTopoExecutor(BaseExecutor):
 
 
 if __name__ == '__main__':
-    MGCOMTopoExecutor().cli()
+    Het2VecExecutor().cli()

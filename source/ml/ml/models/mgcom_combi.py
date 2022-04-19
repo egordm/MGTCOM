@@ -25,7 +25,9 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class MGCOMCombiModelParams(HParams):
     embed_node_types: List[NodeType] = field(default_factory=list)
+    """List of node types to embed instead of using features for."""
     metric: Metric = Metric.L2
+    """Metric to use for distance/similarity calculation."""
 
     feat_dim: int = 32
     conv_hidden_dim: Optional[int] = None

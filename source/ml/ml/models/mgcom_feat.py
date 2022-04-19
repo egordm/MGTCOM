@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Optional, Dict, List, Union, Tuple
 
@@ -24,7 +25,9 @@ from ml.data.transforms.eval_split import EvalNodeSplitTransform
 from ml.data.transforms.to_homogeneous import to_homogeneous
 from ml.evaluation import extract_edge_prediction_pairs
 from ml.layers.fc_net import FCNet, FCNetParams
+from ml.layers.hgt_cov_net import HGTConvNetParams
 from ml.layers.hybrid_conv_net import HybridConvNet, HybridConvNetParams
+from ml.layers.sage_conv_net import SAGEConvNetParams
 from ml.models.base.embedding import BaseEmbeddingModel
 from ml.models.node2vec import Node2VecModel
 from ml.utils import HParams, DataLoaderParams, Metric, OptimizerParams
@@ -33,12 +36,18 @@ from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
+class ConvMethod(Enum):
+    SAGE = 'sage'
+    HGT = 'hgt'
+    NONE = 'none'
+
 
 @dataclass
 class MGCOMFeatModelParams(HParams):
     embed_node_types: List[NodeType] = field(default_factory=list)
     metric: Metric = Metric.L2
 
+    conv_method: ConvMethod = ConvMethod.HGT
     feat_dim: int = 32
     conv_hidden_dim: Optional[int] = None
     conv_num_layers: int = 2
@@ -58,10 +67,12 @@ class MGCOMFeatModel(BaseEmbeddingModel):
             optimizer_params: Optional[OptimizerParams] = None,
             add_out_net: bool = True,
     ) -> None:
-        super().__init__()
+        super().__init__(optimizer_params)
         self.save_hyperparameters(hparams.to_dict())
-        if optimizer_params is not None:
-            self.save_hyperparameters(optimizer_params.to_dict())
+
+        for node_type in self.hparams.embed_node_types:
+            if node_type not in metadata[0]:
+                raise ValueError(f'Node type {node_type} not in metadata')
 
         self.embedder = HybridConvNet(
             metadata,
@@ -72,8 +83,15 @@ class MGCOMFeatModel(BaseEmbeddingModel):
             hparams=HybridConvNetParams(
                 repr_dim=self.hparams.feat_dim,
                 hidden_dim=self.hparams.conv_hidden_dim,
-                num_layers=self.hparams.conv_num_layers,
-                num_heads=self.hparams.conv_num_heads,
+                hgt_params=HGTConvNetParams(
+                    hidden_dim=self.hparams.conv_hidden_dim,
+                    num_layers=self.hparams.conv_num_layers,
+                    num_heads=self.hparams.conv_num_heads,
+                ) if self.hparams.conv_method == ConvMethod.HGT else None,
+                sage_params=SAGEConvNetParams(
+                    hidden_dim=self.hparams.conv_hidden_dim,
+                    num_layers=self.hparams.conv_num_layers,
+                ) if self.hparams.conv_method == ConvMethod.SAGE else None,
             )
         )
         if add_out_net:
@@ -112,7 +130,8 @@ class MGCOMFeatModel(BaseEmbeddingModel):
         Z = torch.zeros(node_meta.batch_size, self.embedder.repr_dim)
         for store in node_meta.node_stores:
             node_type = store._key
-            Z[store.batch_perm] = Z_dict[node_type]
+            if node_type in Z_dict:
+                Z[store.batch_perm] = Z_dict[node_type]
 
         return Z
 
@@ -150,13 +169,14 @@ class MGCOMFeatDataModule(GraphDataModule):
         return HGTSampler(data, hparams=self.hparams.hgt_params)
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
+        data = self.train_data if not self.hparams.use_full_data else self.test_data
         sampler = HybridSampler(
-            n2v_sampler=self._build_n2v_sampler(self.train_data),
-            hgt_sampler=self._build_hgt_sampler(self.train_data),
+            n2v_sampler=self._build_n2v_sampler(data),
+            hgt_sampler=self._build_hgt_sampler(data),
         )
 
         return NodesLoader(
-            self.train_data.num_nodes, transform=sampler,
+            data.num_nodes, transform=sampler,
             shuffle=True,
             **self.loader_params.to_dict(),
         )

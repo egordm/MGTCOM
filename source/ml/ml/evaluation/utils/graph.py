@@ -32,7 +32,7 @@ def extract_edge_prediction_pairs(
 
     pos_pairs = torch.unique(edge_index[:, mask].t(), dim=0).t()
     if pos_pairs.shape[1] > max_samples:
-        pos_pairs = pos_pairs[torch.randperm(pos_pairs.shape[1])[:max_samples]]
+        pos_pairs = pos_pairs[:, torch.randperm(pos_pairs.shape[1])[:max_samples]]
 
     neg_pairs = negative_sampling(edge_index, num_nodes, num_neg_samples=pos_pairs.shape[1])
 

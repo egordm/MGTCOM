@@ -1,28 +1,32 @@
-from typing import Any, Callable
+from typing import Any, Optional
 
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 from torch import Tensor
 
-from ml.utils import Metric, OutputExtractor
+from ml.models.base.embedding import BaseEmbeddingModel
+from ml.utils import Metric, OptimizerParams
 
 EPS = 1e-15
 
 
-class Node2VecModel(pl.LightningModule):
+class Node2VecModel(BaseEmbeddingModel):
     def __init__(
             self,
             embedder: torch.nn.Module,
             metric: Metric = Metric.L2,
             hparams: Any = None,
+            optimizer_params: Optional[OptimizerParams] = None
     ) -> None:
-        super().__init__()
+        super().__init__(optimizer_params)
         self.save_hyperparameters(hparams)
 
         self.embedder = embedder
         self.metric = metric
         self.sim_fn = metric.pairwise_sim_fn
+
+    @property
+    def repr_dim(self):
+        return self.embedder.repr_dim
 
     def forward(self, batch) -> Any:
         node_meta = batch
@@ -47,16 +51,3 @@ class Node2VecModel(pl.LightningModule):
 
         loss = self.loss(pos_walks, neg_walks, Z)
         return loss
-
-    def validation_step(self, batch, batch_idx):
-        X = batch
-        return self.forward(X)
-
-    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-        outputs = OutputExtractor(outputs)
-        epoch_loss = outputs.extract_mean('loss')
-        self.log('epoch_loss', epoch_loss, prog_bar=True)
-
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
-        return optimizer

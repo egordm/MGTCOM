@@ -1,12 +1,11 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Union
+from typing import List, Dict
 
 import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData
-from torch_geometric.loader.utils import filter_hetero_data, to_hetero_csc
+from torch_geometric.loader.utils import filter_hetero_data, to_hetero_csc, edge_type_to_str
 from torch_geometric.typing import NodeType
-from torch_geometric.loader import HGTLoader
 
 from ml.data.samplers.base import Sampler
 from ml.utils import HParams
@@ -48,11 +47,21 @@ class HGTSampler(Sampler):
             self.num_hops,
         )
 
+        # Bug in torch geometric tries to take not sampled edges
+        for edge_type in self.data.edge_types:
+            edge_type_str = edge_type_to_str(edge_type)
+            if edge_type_str not in row_dict:
+                row_dict[edge_type_str] = torch.tensor([], dtype=torch.long)
+                col_dict[edge_type_str] = torch.tensor([], dtype=torch.long)
+                edge_dict[edge_type_str] = torch.tensor([], dtype=torch.long)
+
         data = filter_hetero_data(self.data, node_dict, row_dict, col_dict, edge_dict, self.perm_dict)
-        for node_type, node_ids in node_ids_dict.items():
-            data[node_type].batch_size = len(node_ids)
+        for node_type, batch_ids in node_ids_dict.items():
+            data[node_type].batch_size = len(batch_ids)
+            data[node_type].batch_perm = torch.arange(len(batch_ids))
+
+        for node_type, node_ids in node_dict.items():
             data[node_type].node_idx = node_dict[node_type]
-            data[node_type].batch_perm = torch.arange(len(node_ids))
 
         data.batch_size = sum(data.batch_size_dict.values())
 

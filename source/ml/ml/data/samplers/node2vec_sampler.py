@@ -34,7 +34,8 @@ class Node2VecSamplerParams(HParams):
     p: float = 1
     """Likelihood of immediately revisiting a node in the walk."""
     q: float = 1
-    """Control parameter to interpolate between breadth-first strategy and depth-first strategy."""
+    """Control parameter to interpolate between breadth-first strategy and depth-first strategy. A larger value 
+    prefers breadth-first strategy."""
 
 
 class Node2VecSampler(Sampler):

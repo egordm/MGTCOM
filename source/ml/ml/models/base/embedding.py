@@ -36,6 +36,11 @@ class BaseEmbeddingModel(pl.LightningModule):
     val_Z_dict: Dict[NodeType, Tensor] = None
     test_Z_dict: Dict[NodeType, Tensor] = None
 
+    def __init__(self, optimizer_params: Optional[OptimizerParams] = None) -> None:
+        super().__init__()
+        if optimizer_params is not None:
+            self.save_hyperparameters(optimizer_params.to_dict())
+
     @property
     def repr_dim(self):
         raise NotImplementedError()

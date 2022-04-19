@@ -24,12 +24,17 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class GraphDataModuleParams(HParams):
     lp_max_pairs: int = 5000
+    use_full_data: bool = False
 
 
 class GraphDataModule(pl.LightningDataModule):
     dataset: GraphDataset
     hparams: Union[GraphDataModuleParams, DataLoaderParams]
     loader_params: DataLoaderParams
+
+    train_data: HeteroData
+    val_data: HeteroData
+    test_data: HeteroData
 
     def __init__(
             self,
@@ -45,6 +50,12 @@ class GraphDataModule(pl.LightningDataModule):
         self.dataset = dataset
         self.data = EnsureTimestampsTransform(warn=True)(dataset.data)
         self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform()(self.data)
+
+        logger.info('=' * 80)
+        logger.info(f'Using dataset {self.dataset.name}')
+        logger.info(f'- With node types: [{", ".join(self.data.node_types)}]')
+        logger.info(f'- With edge types: [{", ".join(map(str, self.data.edge_types))}]')
+        logger.info('=' * 80)
 
     @property
     def metadata(self) -> Metadata:

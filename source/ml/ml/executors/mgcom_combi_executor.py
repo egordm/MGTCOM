@@ -7,6 +7,7 @@ from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallback
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
+from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.callbacks.save_graph_callback import SaveGraphCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.models.mgcom_combi import MGCOMCombiModelParams, MGCOMCombiDataModuleParams, MGCOMCombiDataModule, \
@@ -47,9 +48,16 @@ class MGCOMCombiExecutor(BaseExecutor):
 
     def callbacks(self) -> List[Callback]:
         return [
-            EmbeddingVisualizerCallback(val_node_labels=self.datamodule.val_inferred_labels()),
-            EmbeddingEvalCallback(self.datamodule),
+            EmbeddingVisualizerCallback(
+                val_node_labels=self.datamodule.val_inferred_labels(),
+                hparams=self.args.callback_params.embedding_visualizer
+            ),
+            EmbeddingEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.embedding_eval
+            ),
             SaveGraphCallback(self.datamodule.data, node_labels=self.datamodule.inferred_labels()),
+            SaveEmbeddingsCallback(),
         ]
 
     def run_name(self):
