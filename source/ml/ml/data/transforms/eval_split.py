@@ -51,21 +51,26 @@ class EvalNodeSplitTransform(BaseTransform):
             self.split_masked(data, data.test_mask_dict, new_mask, new_ids, new_count)
         ]
 
+        # for store in data.node_stores:
+        #     store.eval_id = new_ids[store._key]
+
         return result
 
     def split_masked(
             self,
             data: HeteroData, mask_dict: Dict[NodeType, Tensor],
-            new_mask, new_ids, new_count
+            new_mask, new_ids, new_count,
     ):
-        for node_type, mask in mask_dict.items():
+        for node_type in data.node_types:
+            mask = mask_dict[node_type]
             num_nodes = mask.sum()
             new_mask[node_type] = torch.logical_or(mask, new_mask[node_type])
             new_ids[node_type][mask] = torch.arange(new_count[node_type], new_count[node_type] + num_nodes)
             new_count[node_type] += num_nodes
 
         result = data.clone()
-        for node_type, mask in new_mask.items():
+        for node_type in data.node_types:
+            mask = new_mask[node_type]
             out_store = result[node_type]
             store = data[out_store._key]
 

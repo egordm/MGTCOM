@@ -12,6 +12,8 @@ from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
 from datasets.transforms.define_snapshots import DefineSnapshots
+from datasets.utils.base import Snapshots
+from ml.data.graph_datamodule import GraphDataModule, GraphDataModuleParams
 from ml.data.loaders.nodes_loader import NodesLoader, HeteroNodesLoader
 from ml.data.samplers.ballroom_sampler import BallroomSamplerParams, BallroomSampler
 from ml.data.samplers.hgt_sampler import HGTSamplerParams, HGTSampler
@@ -20,11 +22,13 @@ from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerPa
 from ml.data.transforms.ensure_timestamps import EnsureTimestampsTransform
 from ml.data.transforms.eval_split import EvalNodeSplitTransform
 from ml.data.transforms.to_homogeneous import to_homogeneous
+from ml.evaluation import extract_edge_prediction_pairs
 from ml.layers.fc_net import FCNet, FCNetParams
 from ml.layers.hybrid_conv_net import HybridConvNet, HybridConvNetParams
 from ml.models.base.embedding import BaseEmbeddingModel
 from ml.models.node2vec import Node2VecModel
 from ml.utils import HParams, DataLoaderParams, Metric, OptimizerParams
+from ml.utils.labelling import NodeLabelling, extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -123,14 +127,12 @@ class MGCOMFeatModel(BaseEmbeddingModel):
 
 
 @dataclass
-class MGCOMFeatDataModuleParams(HParams):
+class MGCOMFeatDataModuleParams(GraphDataModuleParams):
     hgt_params: HGTSamplerParams = HGTSamplerParams()
 
 
-class MGCOMFeatDataModule(pl.LightningDataModule):
-    dataset: GraphDataset
+class MGCOMFeatDataModule(GraphDataModule):
     hparams: Union[MGCOMFeatDataModuleParams, DataLoaderParams]
-    loader_params: DataLoaderParams
 
     def __init__(
             self,
@@ -138,22 +140,7 @@ class MGCOMFeatDataModule(pl.LightningDataModule):
             hparams: MGCOMFeatDataModuleParams,
             loader_params: DataLoaderParams,
     ) -> None:
-        super().__init__()
-        self.save_hyperparameters(hparams.to_dict())
-        self.save_hyperparameters(loader_params.to_dict())
-        self.loader_params = loader_params
-
-        self.dataset = dataset
-        self.data = EnsureTimestampsTransform(warn=True)(dataset.data)
-        self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform()(self.data)
-
-    @property
-    def metadata(self) -> Metadata:
-        return self.dataset.metadata
-
-    @property
-    def num_nodes_dict(self) -> Dict[NodeType, int]:
-        return self.train_data.num_nodes_dict
+        super().__init__(dataset, hparams, loader_params)
 
     @abstractmethod
     def _build_n2v_sampler(self, data: HeteroData) -> Union[Node2VecSampler, BallroomSampler]:

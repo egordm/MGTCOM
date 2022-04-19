@@ -9,9 +9,9 @@ from pytorch_lightning.utilities.cli import _Registry
 from torch import Tensor
 from torch_geometric.data import InMemoryDataset as THGInMemoryDataset, HeteroData
 from torch_geometric.data.storage import NodeStorage, EdgeStorage, BaseStorage
-from torch_geometric.transforms import RandomNodeSplit
 from torch_geometric.typing import Metadata
 
+from datasets.transforms.random_node_split import RandomNodeSplit
 from shared.paths import CACHE_PATH
 
 DATASET_REGISTRY = _Registry()

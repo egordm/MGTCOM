@@ -38,7 +38,7 @@ def davies_bouldin_score(X, labels, metric=Metric.L2):
     if len(torch.unique(labels)) <= 1:
         return 0.0
 
-    metric = metric.sk_metric() # TODO: dotp is not supported by sklearn, use precomputed?
+    metric = metric.sk_metric()  # TODO: dotp is not supported by sklearn, use precomputed?
     X = ensure_numpy(X)
     labels = ensure_numpy(labels)
 

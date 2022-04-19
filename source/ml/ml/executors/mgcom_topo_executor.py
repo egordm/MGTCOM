@@ -9,6 +9,7 @@ from simple_parsing import Serializable
 from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
 from datasets.utils.conversion import igraph_from_hetero
+from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallback
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.callbacks.save_config_callback import SaveConfigCallback
@@ -54,30 +55,13 @@ def train(args: Args):
     root_dir = RESULTS_PATH / run_name
     root_dir.mkdir(exist_ok=True, parents=True)
 
-    logger.info('Extracting labels for visualization')
-    node_labels = {}
-    node_labels['Louvain Labels'] = extract_louvain_labels(data_module.data)
-    if isinstance(dataset, GraphDataset) and dataset.snapshots is not None:
-        node_timestamps = extract_timestamp_labels(data_module.data)
-        for i, snapshot in dataset.snapshots.items():
-            snapshot_labels = extract_snapshot_labels(node_timestamps, snapshot)
-            node_labels[f'{i} Temporal Snapshots'] = snapshot_labels
-
-    val_node_labels = {
-        label_name: {
-            node_type: label_dict[node_type][perm]
-            for node_type, perm in data_module.val_data.id_dict.items()
-        }
-        for label_name, label_dict in node_labels.items()
-    }
-    val_node_labels['Louvain Labels'] = extract_louvain_labels(data_module.val_data)
-
     callbacks = [
         CustomProgressBar(),
         LearningRateMonitor(logging_interval='step'),
-        EmbeddingVisualizerCallback(val_node_labels=val_node_labels),
+        EmbeddingVisualizerCallback(val_node_labels=data_module.val_inferred_labels()),
+        EmbeddingEvalCallback(data_module),
         SaveConfigCallback(args),
-        SaveGraphCallback(data_module.data, node_labels=node_labels),
+        SaveGraphCallback(data_module.data, node_labels=data_module.inferred_labels()),
     ]
 
     logger.info('Training model')
