@@ -4,7 +4,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Dict, List, Union, Tuple
 
-import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS, STEP_OUTPUT
 from torch import Tensor
@@ -13,26 +12,21 @@ from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
 from datasets.transforms.define_snapshots import DefineSnapshots
-from datasets.utils.base import Snapshots
-from ml.data.graph_datamodule import GraphDataModule, GraphDataModuleParams
+from ml.models.base.graph_datamodule import GraphDataModule, GraphDataModuleParams
 from ml.data.loaders.nodes_loader import NodesLoader, HeteroNodesLoader
 from ml.data.samplers.ballroom_sampler import BallroomSamplerParams, BallroomSampler
 from ml.data.samplers.hgt_sampler import HGTSamplerParams, HGTSampler
 from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
 from ml.data.samplers.sage_sampler import SAGESamplerParams, SAGESampler
-from ml.data.transforms.ensure_timestamps import EnsureTimestampsTransform
-from ml.data.transforms.eval_split import EvalNodeSplitTransform
 from ml.data.transforms.to_homogeneous import to_homogeneous
-from ml.evaluation import extract_edge_prediction_pairs
 from ml.layers.fc_net import FCNet, FCNetParams
 from ml.layers.hgt_cov_net import HGTConvNetParams
 from ml.layers.hybrid_conv_net import HybridConvNet, HybridConvNetParams
 from ml.layers.sage_conv_net import SAGEConvNetParams
-from ml.models.base.embedding import BaseEmbeddingModel
+from ml.models.base.embedding import HeteroEmbeddingModel
 from ml.models.node2vec import Node2VecModel
 from ml.utils import HParams, DataLoaderParams, Metric, OptimizerParams
-from ml.utils.labelling import NodeLabelling, extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -58,7 +52,7 @@ class MGCOMFeatModelParams(HParams):
     hidden_dim: List[int] = field(default_factory=lambda: [32])
 
 
-class MGCOMFeatModel(BaseEmbeddingModel):
+class MGCOMFeatModel(HeteroEmbeddingModel):
     hparams: Union[MGCOMFeatModelParams, OptimizerParams]
 
     def __init__(

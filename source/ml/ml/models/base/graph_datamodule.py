@@ -5,7 +5,7 @@ from typing import Optional, Dict, Union, Tuple
 
 import pytorch_lightning as pl
 from torch import Tensor
-from torch_geometric.data import HeteroData
+from torch_geometric.data import HeteroData, Data
 from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
@@ -32,9 +32,10 @@ class GraphDataModule(pl.LightningDataModule):
     hparams: Union[GraphDataModuleParams, DataLoaderParams]
     loader_params: DataLoaderParams
 
-    train_data: HeteroData
-    val_data: HeteroData
-    test_data: HeteroData
+    train_data: Union[HeteroData, Data]
+    val_data: Union[HeteroData, Data]
+    test_data: Union[HeteroData, Data]
+    heterogenous: bool = True
 
     def __init__(
             self,
@@ -71,7 +72,7 @@ class GraphDataModule(pl.LightningDataModule):
             return self.dataset.snapshots
         return None
 
-    def _edge_prediction_pairs(self, data: HeteroData, mask_name: str = 'train_mask') -> Tuple[Tensor, Tensor]:
+    def _edge_prediction_pairs(self, data: Union[HeteroData, Data], mask_name: str = 'train_mask') -> Tuple[Tensor, Tensor]:
         """
         It takes a heterogeneous graph and returns a tuple of two tensors, the edges and the edge labels.
 
@@ -80,11 +81,15 @@ class GraphDataModule(pl.LightningDataModule):
         :param mask_name: The name of the edge mask attribute, defaults to train_mask
         :type mask_name: str (optional)
         """
-        hdata = to_homogeneous(
-            data,
-            node_attrs=[], edge_attrs=[mask_name],
-            add_node_type=False, add_edge_type=False
-        )
+        if isinstance(data, HeteroData):
+            hdata = to_homogeneous(
+                data,
+                node_attrs=[], edge_attrs=[mask_name],
+                add_node_type=False, add_edge_type=False
+            )
+        else:
+            hdata = data
+
         return extract_edge_prediction_pairs(
             hdata.edge_index, hdata.num_nodes, getattr(hdata, f'edge_{mask_name}'),
             max_samples=self.hparams.lp_max_pairs

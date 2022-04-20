@@ -5,18 +5,12 @@ from typing import Dict, Tuple
 import torch
 from pytorch_lightning import Trainer, LightningModule, Callback
 from pytorch_lightning.trainer.states import RunningStage
-from sklearn.linear_model import LogisticRegression
 from torch import Tensor
-from torch_geometric.data import HeteroData
 
-from ml.algo.transforms import SubsampleDictTransform, SubsampleTransform
-from ml.callbacks.base.intermittent_callback import IntermittentCallback
-from ml.data.graph_datamodule import GraphDataModule
-from ml.data.transforms.to_homogeneous import to_homogeneous
-from ml.evaluation import extract_edge_prediction_pairs, silhouette_score, davies_bouldin_score, link_prediction_measure
-from ml.models.mgcom_feat import MGCOMFeatDataModule
+from ml.algo.transforms import SubsampleTransform
+from ml.models.base.graph_datamodule import GraphDataModule
+from ml.evaluation import silhouette_score, davies_bouldin_score, link_prediction_measure
 from ml.utils import HParams, Metric
-from ml.utils.labelling import NodeLabelling
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)

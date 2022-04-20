@@ -7,6 +7,7 @@ from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallback
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
+from ml.callbacks.lp_eval_callback import LPEvalCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.callbacks.save_graph_callback import SaveGraphCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
@@ -19,8 +20,8 @@ from ml.utils import dataset_choices, Metric, OptimizerParams
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
-    metric: Metric = Metric.L2
-    repr_dim: int = 32
+    metric: Metric = Metric.DOTP
+    repr_dim: int = 128
     optimizer_params = OptimizerParams()
     data_params: Het2VecDataModuleParams = Het2VecDataModuleParams()
 
@@ -56,14 +57,15 @@ class Het2VecExecutor(BaseExecutor):
 
     def callbacks(self) -> List[Callback]:
         return [
-            EmbeddingVisualizerCallback(
-                val_node_labels=self.datamodule.val_inferred_labels(),
-                hparams=self.args.callback_params.embedding_visualizer
-            ),
-            EmbeddingEvalCallback(
-                self.datamodule,
-                hparams=self.args.callback_params.embedding_eval
-            ),
+            # EmbeddingVisualizerCallback(
+            #     val_node_labels=self.datamodule.val_inferred_labels(),
+            #     hparams=self.args.callback_params.embedding_visualizer
+            # ),
+            # EmbeddingEvalCallback(
+            #     self.datamodule,
+            #     hparams=self.args.callback_params.embedding_eval
+            # ),
+            LPEvalCallback(self.datamodule),
             SaveGraphCallback(self.datamodule.data, node_labels=self.datamodule.inferred_labels()),
             SaveEmbeddingsCallback(),
         ]

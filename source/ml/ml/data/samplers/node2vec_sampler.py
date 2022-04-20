@@ -22,12 +22,12 @@ Node2VecBatch = NamedTuple('Node2VecBatch', [("pos_walks", Tensor), ("neg_walks"
 
 @dataclass
 class Node2VecSamplerParams(HParams):
-    walk_length: int = 10
+    walk_length: int = 20
     """Length of the random walk."""
-    context_size: int = 4
+    context_size: int = 10
     """The actual context size which is considered for positive samples. This parameter increases the effective 
     sampling rate by reusing samples across different source nodes.."""
-    walks_per_node: int = 5
+    walks_per_node: int = 10
     """Number of random walks to start at each node."""
     num_neg_samples: int = 1
     """The number of negative samples to use for each positive sample."""

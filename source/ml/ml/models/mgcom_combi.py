@@ -14,7 +14,7 @@ from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
 from ml.data.transforms.to_homogeneous import to_homogeneous
 from ml.layers.fc_net import FCNet, FCNetParams
-from ml.models.base.embedding import BaseEmbeddingModel, EmbeddingCombineMode
+from ml.models.base.embedding import HeteroEmbeddingModel, EmbeddingCombineMode
 from ml.models.mgcom_feat import MGCOMFeatDataModuleParams, MGCOMFeatModel, MGCOMTempoDataModule
 from ml.utils import HParams, DataLoaderParams, Metric, OptimizerParams
 from shared import get_logger
@@ -45,7 +45,7 @@ class MGCOMCombiModelParams(HParams):
     emb_combine_mode: EmbeddingCombineMode = EmbeddingCombineMode.CONCAT
 
 
-class MGCOMCombiModel(BaseEmbeddingModel):
+class MGCOMCombiModel(HeteroEmbeddingModel):
     hparams: Union[MGCOMCombiModelParams, OptimizerParams]
 
     def __init__(

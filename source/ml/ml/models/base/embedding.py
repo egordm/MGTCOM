@@ -31,16 +31,66 @@ class EmbeddingCombineMode(Enum):
             raise ValueError(f"Unknown combine mode {self}")
 
 
-class BaseEmbeddingModel(pl.LightningModule):
+class BaseModel(pl.LightningModule):
     hparams: OptimizerParams
-    val_Z_dict: Dict[NodeType, Tensor] = None
-    test_Z_dict: Dict[NodeType, Tensor] = None
+
+    train_outputs: Dict[str, Any] = None
+    val_outputs: Dict[str, Any] = None
+    test_outputs: Dict[str, Any] = None
 
     def __init__(self, optimizer_params: Optional[OptimizerParams] = None) -> None:
         super().__init__()
         if optimizer_params is not None:
             self.save_hyperparameters(optimizer_params.to_dict())
 
+    def on_validation_epoch_start(self) -> None:
+        self.val_outputs = {}
+
+    def on_test_epoch_start(self) -> None:
+        self.test_outputs = {}
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+
+
+class EmbeddingModel(BaseModel):
+    @property
+    def repr_dim(self):
+        raise NotImplementedError()
+
+    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+        outputs = OutputExtractor(outputs)
+        epoch_loss = outputs.extract_mean('loss')
+        self.log('epoch_loss', epoch_loss, prog_bar=True)
+
+    def validation_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
+        return dict(
+            Z=self.forward(batch).detach().cpu(),
+            batch_idx=batch_idx,
+        )
+
+    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        outputs = OutputExtractor(outputs)
+        self.val_outputs['Z'] = outputs.extract_cat('Z')
+
+    def test_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
+        return dict(
+            Z=self.forward(batch).detach().cpu(),
+            batch_idx=batch_idx,
+        )
+
+    def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        outputs = OutputExtractor(outputs)
+        self.test_outputs['Z'] = outputs.extract_cat('Z')
+
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+        return dict(
+            Z=self.forward(batch),
+            batch_idx=batch_idx,
+        )
+
+
+class HeteroEmbeddingModel(BaseModel):
     @property
     def repr_dim(self):
         raise NotImplementedError()
@@ -58,8 +108,7 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         outputs = OutputExtractor(outputs)
-        self.val_Z_dict = outputs.extract_cat_dict('Z_dict')
-        # self.val_Z = torch.cat(list(self.val_Z_dict.values()), dim=0)
+        self.val_outputs['Z_dict'] = outputs.extract_cat_dict('Z_dict')
 
     def test_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         return dict(
@@ -69,8 +118,7 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         outputs = OutputExtractor(outputs)
-        self.test_Z_dict = outputs.extract_cat_dict('Z_dict')
-        # self.test_Z = torch.cat(list(self.test_Z_dict.values()), dim=0)
+        self.test_outputs['Z_dict'] = outputs.extract_cat_dict('Z_dict')
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         return dict(
@@ -80,4 +128,5 @@ class BaseEmbeddingModel(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+        # optimizer = torch.optim.SparseAdam(self.parameters(), lr=self.hparams.lr)
         return optimizer
