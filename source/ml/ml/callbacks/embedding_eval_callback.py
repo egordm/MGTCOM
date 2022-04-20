@@ -8,6 +8,7 @@ from pytorch_lightning.trainer.states import RunningStage
 from torch import Tensor
 
 from ml.algo.transforms import SubsampleTransform
+from ml.models.base.embedding import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.evaluation import silhouette_score, davies_bouldin_score, link_prediction_measure
 from ml.utils import HParams, Metric
@@ -36,11 +37,7 @@ class EmbeddingEvalCallback(Callback):
         self.hparams = hparams or EmbeddingEvalCallbackParams()
         super().__init__()
         self.data_module = data_module
-        self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
-
-        self.train_pairs = data_module.train_prediction_pairs()
-        self.val_pairs = data_module.val_prediction_pairs()
-        self.test_pairs = data_module.test_prediction_pairs()
+        # self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 
         self.train_labels = {
             label_name: torch.cat(list(label_dict.values()), dim=0)
@@ -61,7 +58,7 @@ class EmbeddingEvalCallback(Callback):
     def on_train_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         pass  # NOOP: cause we dont collect embeddings on train
 
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if trainer.state.stage != RunningStage.VALIDATING:
             return
 
@@ -69,49 +66,41 @@ class EmbeddingEvalCallback(Callback):
             return
 
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
-        Z_dict = pl_module.val_Z_dict
+        Z_dict = pl_module.val_outputs['Z_dict']
         Z = torch.cat(list(Z_dict.values()), dim=0)
 
-        val_metrics = self.collect_metrics(Z, self.val_labels, self.val_pairs, self.transform_subsample_val)
+        val_metrics = self.collect_metrics(Z, self.val_labels, self.transform_subsample_val)
         pl_module.log_dict({
-            f'val/eval/{metric}': value
+            f'eval/val/{metric}': value
             for metric, value in val_metrics.items()
         })
 
-        train_metrics = self.collect_metrics(Z, self.train_labels, self.train_pairs, self.transform_subsample_train)
+        train_metrics = self.collect_metrics(Z, self.train_labels, self.transform_subsample_train)
         pl_module.log_dict({
-            f'train/eval/{metric}': value
+            f'eval/test/{metric}': value
             for metric, value in train_metrics.items()
         })
 
-        pl_module.log_dict({
-            'train/eval/acc': train_metrics['link_prediction_accuracy'],
-            'val/eval/acc': val_metrics['link_prediction_accuracy']
-        }, prog_bar=True)
-
-    def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_test_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if trainer.state.stage != RunningStage.TESTING:
             return
 
         logger.info(f"Evaluating test embeddings")
-        Z_dict = pl_module.test_Z_dict
+        Z_dict = pl_module.val_outputs['Z_dict']
         Z = torch.cat(list(Z_dict.values()), dim=0)
 
-        metrics = self.collect_metrics(Z, self.test_labels, self.test_pairs)
+        metrics = self.collect_metrics(Z, self.test_labels)
         pl_module.log_dict({
-            f'test/eval/{metric}': value
+            f'eval/test/{metric}': value
             for metric, value in metrics.items()
         })
 
     def collect_metrics(
             self,
             Z: Tensor, labels: Dict[str, Tensor],
-            lp_pairs: Tuple[Tensor, Tensor],
             subsampler: SubsampleTransform = None
     ) -> Dict[str, float]:
-        output = dict(
-            link_prediction_accuracy=link_prediction_measure(Z, *lp_pairs, metric=self.hparams.metric),
-        )
+        output = {}
 
         for label_name, labels in labels.items():
             if subsampler is not None:

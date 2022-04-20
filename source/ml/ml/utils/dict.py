@@ -48,6 +48,9 @@ class OutputExtractor:
     def extract_mean(self, key) -> Union[Tensor, float]:
         return sum(self.extract(key)) / len(self.outputs)
 
+    def has_key(self, key):
+        return any(key in d for d in flat_iter(self.outputs))
+
 
 def values_apply(d, fn: Callable[[Any], Any]):
     return {k: fn(v) for k, v in d.items()}

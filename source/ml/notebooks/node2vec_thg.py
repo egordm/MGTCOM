@@ -22,9 +22,9 @@ def main():
     dataset = StarWars()
     data = to_homogeneous(dataset[0])
     epochs = 200
-    # dataset = DBLPHCN()
-    # data = to_homogeneous(dataset[0])
-    # epochs = 20
+    dataset = DBLPHCN()
+    data = to_homogeneous(dataset[0])
+    epochs = 20
 
     pairs, labels = extract_edge_prediction_pairs(
         data.edge_index, data.num_nodes, getattr(data, f'edge_val_mask'),

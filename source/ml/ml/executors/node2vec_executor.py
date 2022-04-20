@@ -6,6 +6,7 @@ from pytorch_lightning import Callback, LightningDataModule
 from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
 from ml.callbacks.lp_eval_callback import LPEvalCallback
+from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.layers.embedding import NodeEmbedding
 from ml.models.node2vec import Node2VecDataModule, Node2VecDataModuleParams, Node2VecModel
@@ -51,7 +52,11 @@ class Node2VecExecutor(BaseExecutor):
 
     def callbacks(self) -> List[Callback]:
         return [
-            LPEvalCallback(self.datamodule)
+            LPEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.lp_eval,
+            ),
+            SaveEmbeddingsCallback(),
         ]
 
     def run_name(self):

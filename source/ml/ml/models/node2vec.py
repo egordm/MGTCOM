@@ -21,7 +21,7 @@ class Node2VecModel(EmbeddingModel):
     def __init__(
             self,
             embedder: torch.nn.Module,
-            metric: Metric = Metric.L2,
+            metric: Metric = Metric.DOTP,
             hparams: Any = None,
             optimizer_params: Optional[OptimizerParams] = None
     ) -> None:
@@ -43,14 +43,16 @@ class Node2VecModel(EmbeddingModel):
     def loss(self, pos_walks: Tensor, neg_walks: Tensor, Z: Tensor):
         pos_walks_Z = Z[pos_walks.view(-1)].view(*pos_walks.shape, Z.shape[-1])
         p_head, p_rest = pos_walks_Z[:, 0].unsqueeze(dim=1), pos_walks_Z[:, 1:]
-        # p_sim = self.sim_fn(p_head, p_rest).view(-1)
-        p_sim = (p_head * p_rest).sum(dim=-1).view(-1)  # Always use dot product
+        p_sim = self.sim_fn(p_head, p_rest).view(-1)
+        # p_sim = (p_head * p_rest).sum(dim=-1).view(-1)  # Always use dot product
+        # p_sim = -1 * (p_head - p_rest).pow(2).sum(dim=-1).view(-1)  # L2
         pos_loss = -torch.log(torch.sigmoid(p_sim) + EPS).mean()
 
         neg_walks_Z = Z[neg_walks.view(-1)].view(*neg_walks.shape, Z.shape[-1])
         n_head, n_rest = neg_walks_Z[:, 0].unsqueeze(dim=1), neg_walks_Z[:, 1:]
-        # n_sim = self.sim_fn(n_head, n_rest).view(-1)
-        n_sim = (n_head * n_rest).sum(dim=-1).view(-1)  # Always use dot product
+        n_sim = self.sim_fn(n_head, n_rest).view(-1)
+        # n_sim = (n_head * n_rest).sum(dim=-1).view(-1)  # Always use dot product
+        # n_sim = -1 * (n_head - n_rest).pow(2).sum(dim=-1).view(-1)  # L2
         neg_loss = -torch.log(1 - torch.sigmoid(n_sim) + EPS).mean()
 
         return pos_loss + neg_loss

@@ -18,7 +18,7 @@ logger = get_logger(Path(__file__).stem)
 class LPEvalCallbackParams(HParams):
     lp_interval: int = 1
     """Interval between embedding evalutations."""
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
     lp_max_pairs: int = 5000
     """Maximum number of pairs to use for link prediction."""

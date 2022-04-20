@@ -21,7 +21,7 @@ class SaveConfigCallback(Callback):
         if self.log:
             logger.info("=" * 80)
             logger.info(f"Current config:")
-            config_str = self.config.dumps_yaml(Dumper=MyDumper, default_flow_style=False)
+            config_str = self.config.dumps_yaml(Dumper=MyDumper)
 
             logger.info(f"\n{config_str}")
             logger.info("=" * 80)
@@ -36,3 +36,6 @@ class SaveConfigCallback(Callback):
 class MyDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
         return super(MyDumper, self).increase_indent(flow, False)
+
+    def ignore_aliases(self, data):
+        return True

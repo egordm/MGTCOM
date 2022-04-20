@@ -22,7 +22,7 @@ class Het2VecModel(HeteroEmbeddingModel):
     def __init__(
             self,
             embedder: torch.nn.Module,
-            metric: Metric = Metric.L2,
+            metric: Metric = Metric.DOTP,
             optimizer_params: Optional[OptimizerParams] = None
     ) -> None:
         super().__init__(optimizer_params)

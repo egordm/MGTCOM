@@ -40,7 +40,7 @@ class Metric(Enum):
         elif self == Metric.COSINE:
             return pairwise_cosine_dist
         elif self == Metric.DOTP:
-            return pairwise_dotp_dist
+            return pairwise_dotp
         else:
             raise ValueError('Unknown metric')
 
@@ -51,7 +51,7 @@ class Metric(Enum):
         elif self == Metric.COSINE:
             return pairwise_cosine
         elif self == Metric.DOTP:
-            return pairwise_dotp
+            return pairwise_dotp_dist
 
     def faiss_metric(self):
         if self == Metric.L2:

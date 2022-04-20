@@ -20,7 +20,7 @@ from ml.utils import dataset_choices, Metric, OptimizerParams
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     repr_dim: int = 128
     optimizer_params = OptimizerParams()
     data_params: Het2VecDataModuleParams = Het2VecDataModuleParams()
@@ -57,16 +57,23 @@ class Het2VecExecutor(BaseExecutor):
 
     def callbacks(self) -> List[Callback]:
         return [
-            # EmbeddingVisualizerCallback(
-            #     val_node_labels=self.datamodule.val_inferred_labels(),
-            #     hparams=self.args.callback_params.embedding_visualizer
-            # ),
-            # EmbeddingEvalCallback(
-            #     self.datamodule,
-            #     hparams=self.args.callback_params.embedding_eval
-            # ),
-            LPEvalCallback(self.datamodule),
-            SaveGraphCallback(self.datamodule.data, node_labels=self.datamodule.inferred_labels()),
+            EmbeddingVisualizerCallback(
+                val_node_labels=self.datamodule.val_inferred_labels(),
+                hparams=self.args.callback_params.embedding_visualizer
+            ),
+            EmbeddingEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.embedding_eval
+            ),
+            LPEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.lp_eval,
+            ),
+            SaveGraphCallback(
+                self.datamodule.data,
+                node_labels=self.datamodule.inferred_labels(),
+                hparams=self.args.callback_params.save_graph
+            ),
             SaveEmbeddingsCallback(),
         ]
 

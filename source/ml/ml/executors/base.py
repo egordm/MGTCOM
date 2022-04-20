@@ -12,8 +12,10 @@ from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback, Cluste
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallbackParams
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallbackParams
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallbackParams
+from ml.callbacks.lp_eval_callback import LPEvalCallbackParams
 from ml.callbacks.progress_bar import CustomProgressBar
-from ml.callbacks.save_config_callback import SaveConfigCallback
+from ml.callbacks.save_config_callback import SaveConfigCallback, MyDumper
+from ml.callbacks.save_graph_callback import SaveGraphCallbackParams
 from ml.utils import DataLoaderParams, OptimizerParams, TrainerParams
 from shared import parse_args, get_logger, RESULTS_PATH
 
@@ -24,6 +26,8 @@ class CallbackArgs(Serializable):
     clustering_eval: ClusteringEvalCallbackParams = ClusteringEvalCallbackParams()
     embedding_visualizer: EmbeddingVisualizerCallbackParams = EmbeddingVisualizerCallbackParams()
     embedding_eval: EmbeddingEvalCallbackParams = EmbeddingEvalCallbackParams()
+    save_graph: SaveGraphCallbackParams = SaveGraphCallbackParams()
+    lp_eval: LPEvalCallbackParams = LPEvalCallbackParams()
 
 
 @dataclass
@@ -66,7 +70,7 @@ class BaseExecutor:
 
         if self.args.show_config:
             print('=' * 80)
-            print(self.args.dump_yaml())
+            print(self.args.dumps_yaml(Dumper=MyDumper))
             return
 
         if self.args.debug:

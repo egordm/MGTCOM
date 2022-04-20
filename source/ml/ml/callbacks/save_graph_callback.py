@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Any
 
@@ -10,7 +11,7 @@ from torch_geometric.typing import NodeType
 
 from datasets.utils.conversion import igraph_from_hetero
 from ml.algo.clustering import KMeans
-from ml.utils import OutputExtractor
+from ml.utils import OutputExtractor, Metric, HParams
 from ml.utils.graph import extract_attribute
 from ml.utils.labelling import NodeLabelling
 from shared import get_logger
@@ -18,11 +19,22 @@ from shared import get_logger
 logger = get_logger(Path(__file__).stem)
 
 
+@dataclass
+class SaveGraphCallbackParams(HParams):
+    metric: Metric = Metric.L2
+    """Metric to use for kmeans clustering."""
+
 class SaveGraphCallback(Callback):
-    def __init__(self, data: HeteroData, node_labels: Dict[str, NodeLabelling] = None) -> None:
+    def __init__(
+            self,
+            data: HeteroData,
+            node_labels: Dict[str, NodeLabelling] = None,
+            hparams: SaveGraphCallbackParams = None
+    ) -> None:
         super().__init__()
         self.data = data
         self.node_labels = node_labels or {}
+        self.hparams = hparams or SaveGraphCallbackParams()
 
     def on_predict_epoch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: List[Any]) -> None:
         outputs = OutputExtractor(outputs)
@@ -33,7 +45,7 @@ class SaveGraphCallback(Callback):
         k = len(torch.unique(torch.cat(list(self.node_labels['Louvain Labels'].values()), dim=0))) \
             if 'Louvain Labels' in self.node_labels else 7
         k = min(k, 24)
-        I = KMeans(-1, k).fit(Z).assign(Z)
+        I = KMeans(-1, k, metric=self.hparams.metric).fit(Z).assign(Z)
 
         logger.info("Saving graph")
         allowed_attrs = ['name', 'timestamp_from', 'timestamp_to', 'train_mask', 'test_mask', 'val_mask']

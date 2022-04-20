@@ -12,6 +12,7 @@ from torch import Tensor
 from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform, \
     SubsampleDictTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
+from ml.models.base.embedding import BaseModel
 from ml.utils import HParams, Metric
 from ml.utils.labelling import NodeLabelling
 from ml.utils.plot import plot_scatter, create_colormap, MARKER_SIZE
@@ -27,7 +28,7 @@ class EmbeddingVisualizerCallbackParams(HParams):
     """Dimension reduction mode for embedding visualization."""
     ev_max_points: int = 1000
     """Maximum number of points to visualize."""
-    ev_interval: int = 6
+    ev_interval: int = 20
     """Interval between embedding visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
@@ -45,14 +46,14 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
             n_components=2, mode=self.hparams.dim_reduction_mode, metric=self.hparams.metric
         )
 
-    def on_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if trainer.current_epoch == 0:
             return
 
         wandb_logger: WandbLogger = trainer.logger
 
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")
-        Z_dict = self.transform_subsample.transform(pl_module.val_Z_dict)
+        Z_dict = self.transform_subsample.transform(pl_module.val_outputs['Z_dict'])
         Z = torch.cat(list(Z_dict.values()), dim=0)
 
         logger.info(f'Transforming embeddings using {self.hparams.dim_reduction_mode}...')
