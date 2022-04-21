@@ -21,9 +21,6 @@ class NodeEmbedding(torch.nn.Module):
         return Z
 
 
-HeteroNodeEmbeddingInput = Tuple[Dict[NodeType, Tensor], Dict[NodeType, Tensor]]
-
-
 class HeteroNodeEmbedding(torch.nn.Module):
     def __init__(
             self,
