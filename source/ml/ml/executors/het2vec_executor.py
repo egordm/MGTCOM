@@ -20,7 +20,7 @@ from ml.utils import dataset_choices, Metric, OptimizerParams
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     repr_dim: int = 128
     optimizer_params = OptimizerParams()
     data_params: Het2VecDataModuleParams = Het2VecDataModuleParams()

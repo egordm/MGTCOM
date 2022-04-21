@@ -26,7 +26,7 @@ class ClusteringVisualizerCallbackParams(HParams):
     """Dimension reduction mode for embedding visualization."""
     cv_max_points: int = 10000
     """Maximum number of points to visualize."""
-    cv_interval: int = 1
+    cv_interval: int = 3
     """Interval between clustering visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""

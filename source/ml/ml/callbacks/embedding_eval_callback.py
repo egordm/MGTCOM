@@ -77,7 +77,7 @@ class EmbeddingEvalCallback(Callback):
 
         train_metrics = self.collect_metrics(Z, self.train_labels, self.transform_subsample_train)
         pl_module.log_dict({
-            f'eval/test/{metric}': value
+            f'eval/train/{metric}': value
             for metric, value in train_metrics.items()
         })
 
