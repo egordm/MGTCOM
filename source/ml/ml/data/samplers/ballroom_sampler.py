@@ -81,6 +81,8 @@ class BallroomSampler(Sampler):
 
         # Sample random neighborhoods given timestamp
         neighbor_idx = self.temporal_index.window_to_node(batch_timestamps, self.window)
+        if (neighbor_idx == NAN_NODE_ID).any():
+            neighbor_idx[neighbor_idx == NAN_NODE_ID] = batch[neighbor_idx == NAN_NODE_ID]
 
         # Do temporal random walk for all the neighborhoods
         neigh_walks, _ = self._temporal_random_walk(neighbor_idx, batch_timestamps)

@@ -9,11 +9,14 @@ from torch.distributions import MultivariateNormal
 from ml.algo.clustering import KMeans, KMeans1D
 from ml.algo.dpm.mhmc import MHMC
 from ml.algo.dpm.statistics import compute_params_hard_assignment, compute_params_soft_assignment, DPMMObs
-from ml.layers.loss.gmm_loss import eps_norm
 from ml.utils import Metric
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
+
+
+def eps_norm(x: Tensor, eps: float = 1e-6) -> Tensor:
+    return (x + eps) / (x + eps).sum(dim=-1, keepdim=True)
 
 
 class InitMode(Enum):

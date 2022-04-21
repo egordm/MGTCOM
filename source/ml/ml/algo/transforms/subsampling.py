@@ -48,7 +48,7 @@ class SubsampleDictTransform:
         self.perm = {}
         if self.max_points > 0 and N > self.max_points:
             for key, value in X.items():
-                self.perm[key] = torch.randperm(N_dict[key])[:int(N_dict[key] / float(self.max_points))]
+                self.perm[key] = torch.randperm(N_dict[key])[:int(N_dict[key] / N * float(self.max_points))]
         else:
             for key, value in X.items():
                 self.perm[key] = torch.arange(N_dict[key])
