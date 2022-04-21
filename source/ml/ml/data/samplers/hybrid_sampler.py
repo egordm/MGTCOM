@@ -2,7 +2,7 @@ from typing import Union
 
 from torch import Tensor
 
-from ml.algo.transforms import HeteroMappingTransform
+from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.samplers.ballroom_sampler import BallroomSampler
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.hgt_sampler import HGTSampler
@@ -14,7 +14,7 @@ class HybridSampler(Sampler):
         super().__init__()
         self.n2v_sampler = n2v_sampler
         self.hgt_sampler = hgt_sampler
-        self.mapper = HeteroMappingTransform(hgt_sampler.data.num_nodes_dict)
+        self.mapper = ToHeteroMappingTransform(hgt_sampler.data.num_nodes_dict)
 
     def sample(self, node_ids: Tensor) -> Node2VecBatch:
         pos_walks, neg_walks, node_idx = self.n2v_sampler.sample(node_ids)

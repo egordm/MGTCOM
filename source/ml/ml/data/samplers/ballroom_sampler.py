@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Callable, Any
 
 import torch
 from torch import Tensor
@@ -37,7 +37,8 @@ class BallroomSampler(Sampler):
             self,
             node_timestamps: Tensor, edge_index: Tensor, edge_timestamps: Tensor,
             window: Tuple[int, int],
-            hparams: BallroomSamplerParams = None
+            hparams: BallroomSamplerParams = None,
+            transform_meta: Callable[[Tensor], Any] = None,
     ) -> None:
         super().__init__()
 
@@ -45,6 +46,7 @@ class BallroomSampler(Sampler):
             raise ImportError('`BallroomSampler` requires `tch_geometric`.')
 
         self.hparams = hparams or BallroomSamplerParams()
+        self.transform_meta = transform_meta
         self.window = window
         self.walk_length = self.hparams.walk_length - 1
 
@@ -62,7 +64,8 @@ class BallroomSampler(Sampler):
         walks = perm.view(-1, self.hparams.context_size)
         pos_walks, neg_walks = walks[:pos_walks.shape[0]], walks[pos_walks.shape[0]:]
 
-        return Node2VecBatch(pos_walks, neg_walks, node_idx)
+        node_meta = node_idx if self.transform_meta is None else self.transform_meta(node_idx)
+        return Node2VecBatch(pos_walks, neg_walks, node_meta)
 
     def _pos_sample(self, node_ids: Tensor) -> Tensor:
         node_timestamps = self.temporal_index.node_to_timestamp(node_ids)

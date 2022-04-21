@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from dataclasses import dataclass
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Callable
 
 import torch
 from torch import Tensor
@@ -33,13 +33,19 @@ class Node2VecSamplerParams(HParams):
     """The number of negative samples to use for each positive sample."""
     p: float = 1
     """Likelihood of immediately revisiting a node in the walk."""
-    q: float = 1
-    """Control parameter to interpolate between breadth-first strategy and depth-first strategy. A larger value 
-    prefers breadth-first strategy."""
+    q: float = 0.5
+    """Control parameter to interpolate between breadth-first strategy (structural equivalence) 
+    and depth-first strategy (community detection). A larger value prefers BFS."""
 
 
 class Node2VecSampler(Sampler):
-    def __init__(self, edge_index: Tensor, num_nodes=None, hparams: Node2VecSamplerParams = None) -> None:
+    def __init__(
+            self,
+            edge_index: Tensor,
+            num_nodes=None,
+            hparams: Node2VecSamplerParams = None,
+            transform_meta: Callable[[Tensor], Any] = None,
+    ) -> None:
         """
         The Node2Vec model from the
             `"node2vec: Scalable Feature Learning for Networks"
@@ -56,6 +62,7 @@ class Node2VecSampler(Sampler):
 
         self.hparams = hparams or Node2VecSamplerParams()
         assert self.hparams.walk_length >= self.hparams.context_size
+        self.transform_meta = transform_meta
 
         self.num_nodes = maybe_num_nodes(edge_index, num_nodes)
         self.walk_length = self.hparams.walk_length - 1
@@ -71,7 +78,8 @@ class Node2VecSampler(Sampler):
         walks = perm.view(-1, self.hparams.context_size)
         pos_walks, neg_walks = walks[:pos_walks.shape[0]], walks[pos_walks.shape[0]:]
 
-        return Node2VecBatch(pos_walks, neg_walks, node_idx)
+        node_meta = node_idx if self.transform_meta is None else self.transform_meta(node_idx)
+        return Node2VecBatch(pos_walks, neg_walks, node_meta)
 
     def _pos_sample(self, node_ids: Tensor) -> Tensor:
         batch = node_ids.repeat(self.hparams.walks_per_node)
