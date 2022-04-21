@@ -5,15 +5,13 @@ import torch
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
 from torch import Tensor
 
-from datasets import GraphDataset
-from ml.algo.transforms import HeteroMappingTransform
-from ml.data import Compose
-from ml.models.base.graph_datamodule import GraphDataModuleParams
+from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams, Node2VecSampler
 from ml.models.base.embedding import HeteroEmbeddingModel
-from ml.models.base.hgraph_datamodule import HeterogenousGraphDataModule
+from ml.models.base.graph_datamodule import GraphDataModuleParams
+from ml.models.base.hgraph_datamodule import HeteroGraphDataModule
 from ml.models.node2vec import Node2VecModel
 from ml.utils import DataLoaderParams, OptimizerParams, Metric
 
@@ -34,28 +32,28 @@ class Het2VecModel(HeteroEmbeddingModel):
             optimizer_params=optimizer_params
         )
 
+    @property
+    def repr_dim(self):
+        return self.embedder.repr_dim
+
     def forward(self, batch):
         node_idx_dict, node_perm_dict = batch
         Z_emb = self.embedder(node_idx_dict)
-
         return Z_emb
 
-    def _forward_emb(self, node_meta) -> Tensor:
+    def forward_emb_flat(self, node_meta) -> Tensor:
         node_idx_dict, node_perm_dict = node_meta
         Z_dict = self.embedder(node_idx_dict)
 
-        # Transform hetero data to homogenous data in the sampled order
-        batch_size = sum([len(v) for v in node_idx_dict.values()])
-        Z = torch.zeros(batch_size, self.embedder.repr_dim, device=self.device)
-        for node_type, node_perm in node_perm_dict.items():
-            Z[node_perm] = Z_dict[node_type]
-
+        Z = ToHeteroMappingTransform.inverse_transform_values(
+            Z_dict, node_perm_dict, shape=[self.embedder.repr_dim], device=self.device
+        )
         return Z
 
     def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
         pos_walks, neg_walks, node_meta = batch
 
-        Z_emb = self._forward_emb(node_meta)
+        Z_emb = self.forward_emb_flat(node_meta)
 
         loss = self.n2v.loss(pos_walks, neg_walks, Z_emb)
         return loss
@@ -66,39 +64,21 @@ class Het2VecDataModuleParams(GraphDataModuleParams):
     n2v_params: Node2VecSamplerParams = Node2VecSamplerParams()
 
 
-class Het2VecDataModule(HeterogenousGraphDataModule):
+class Het2VecDataModule(HeteroGraphDataModule):
     hparams: Union[Het2VecDataModuleParams, DataLoaderParams]
 
-    def __init__(
-            self,
-            dataset: GraphDataset,
-            hparams: Het2VecDataModuleParams,
-            loader_params: DataLoaderParams,
-    ) -> None:
-        super().__init__(dataset, hparams, loader_params)
-        # Since induction doesnt work on node2vec
-        self.train_data, self.val_data, self.test_data = self.data, self.data, self.data
-
     def train_sampler(self) -> Optional[Sampler]:
-        data = self.test_data  # Since induction doesnt work on node2vec
-        mapper = HeteroMappingTransform(data.num_nodes_dict, to_hetero=True)
+        data = self.train_data
+        mapper = ToHeteroMappingTransform(data.num_nodes_dict)
 
         hdata = data.to_homogeneous(node_attrs=[], edge_attrs=[], add_node_type=False, add_edge_type=False)
-        n2v_sampler = Node2VecSampler(hdata.edge_index, hdata.num_nodes, hparams=self.hparams.n2v_params)
+        n2v_sampler = Node2VecSampler(
+            hdata.edge_index, hdata.num_nodes,
+            hparams=self.hparams.n2v_params,
+            transform_meta=mapper.transform
+        )
 
-        def remap_n2v_batch(batch):
-            pos_walks, neg_walks, node_meta = batch
-            node_meta_new = mapper(node_meta)
-            return (pos_walks, neg_walks, node_meta_new)
-
-        # noinspection PyTypeChecker
-        return Compose([
-            n2v_sampler,
-            remap_n2v_batch
-        ])
-
-    def eval_sampler(self) -> Optional[Sampler]:
-        return None
+        return n2v_sampler
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return NodesLoader(
@@ -107,5 +87,12 @@ class Het2VecDataModule(HeterogenousGraphDataModule):
             shuffle=True,
             **self.loader_params.to_dict()
         )
+
+    def eval_sampler(self) -> Optional[Sampler]:
+        return None
+
+    @property
+    def train_on_full_data(self):
+        return True
 
 

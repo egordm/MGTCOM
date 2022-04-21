@@ -17,7 +17,7 @@ from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
 from ml.data.transforms.eval_split import EvalNodeSplitTransform
 from ml.layers.fc_net import FCNet, FCNetParams
-from ml.layers.hybrid_conv_net import HybridConvNet, HybridConvNetParams
+from ml.layers.conv.hybrid_conv_net import HybridConvNet, HybridConvNetParams
 from ml.models.node2vec import Node2VecModel
 from ml.utils import Metric
 

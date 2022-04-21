@@ -5,8 +5,6 @@ from typing import Dict, Union, List, Optional, Any
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
-from torch import Tensor
-from torch_geometric.typing import NodeType
 
 from ml.utils import OutputExtractor, OptimizerParams, values_apply
 

@@ -54,3 +54,7 @@ class OutputExtractor:
 
 def values_apply(d, fn: Callable[[Any], Any]):
     return {k: fn(v) for k, v in d.items()}
+
+
+def dict_mapv(d: Dict[str, Any], fn: Callable[[Any], Any]):
+    return {k: fn(v) for k, v in d.items()}

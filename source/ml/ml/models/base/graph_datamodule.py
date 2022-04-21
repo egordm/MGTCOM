@@ -24,7 +24,7 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class GraphDataModuleParams(HParams):
     lp_max_pairs: int = 5000
-    use_full_data: bool = False
+    train_on_full_data: bool = False
 
 
 class GraphDataModule(pl.LightningDataModule):
@@ -50,12 +50,15 @@ class GraphDataModule(pl.LightningDataModule):
 
         self.dataset = dataset
         self.data = EnsureTimestampsTransform(warn=True)(dataset.data)
-        self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform()(self.data)
+        if self.train_on_full_data or self.hparams.train_on_full_data:
+            logger.warning("Using full dataset for training. There is no validation or test set.")
+            self.train_data, self.val_data, self.test_data = self.data, self.data, self.data
+        else:
+            self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform()(self.data)
 
         logger.info('=' * 80)
         logger.info(f'Using dataset {self.dataset.name}')
-        logger.info(f'- With node types: [{", ".join(self.data.node_types)}]')
-        logger.info(f'- With edge types: [{", ".join(map(str, self.data.edge_types))}]')
+        logger.info(str(self.data))
         logger.info('=' * 80)
 
     @property
@@ -72,7 +75,8 @@ class GraphDataModule(pl.LightningDataModule):
             return self.dataset.snapshots
         return None
 
-    def _edge_prediction_pairs(self, data: Union[HeteroData, Data], mask_name: str = 'train_mask') -> Tuple[Tensor, Tensor]:
+    def _edge_prediction_pairs(self, data: Union[HeteroData, Data], mask_name: str = 'train_mask') -> Tuple[
+        Tensor, Tensor]:
         """
         It takes a heterogeneous graph and returns a tuple of two tensors, the edges and the edge labels.
 
@@ -143,3 +147,7 @@ class GraphDataModule(pl.LightningDataModule):
     @lru_cache(maxsize=1)
     def inferred_labels(self) -> Dict[str, NodeLabelling]:
         return self._extract_inferred_labels(self.data)
+
+    @property
+    def train_on_full_data(self):
+        return False

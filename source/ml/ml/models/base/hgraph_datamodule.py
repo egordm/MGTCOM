@@ -3,9 +3,9 @@ from typing import Optional
 
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
 
-from ml.models.base.graph_datamodule import GraphDataModule
 from ml.data.loaders.nodes_loader import NodesLoader, HeteroNodesLoader
 from ml.data.samplers.base import Sampler
+from ml.models.base.graph_datamodule import GraphDataModule
 
 
 class HomogenousGraphDataModule(GraphDataModule):
@@ -52,7 +52,7 @@ class HomogenousGraphDataModule(GraphDataModule):
         )
 
 
-class HeterogenousGraphDataModule(GraphDataModule):
+class HeteroGraphDataModule(GraphDataModule):
     heterogenous: bool = True
 
     @abstractmethod
@@ -66,7 +66,7 @@ class HeterogenousGraphDataModule(GraphDataModule):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return HeteroNodesLoader(
             self.train_data.num_nodes_dict,
-            transform=self.train_sampler(),
+            transform_nodes_fn=self.train_sampler(),
             shuffle=True,
             **self.loader_params.to_dict()
         )

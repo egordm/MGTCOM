@@ -38,8 +38,6 @@ def main():
         max_samples=5000
     )
 
-
-
     # device = 'cuda' if torch.cuda.is_available() else 'cpu'
     device = 'cpu'
     model1 = Node2Vec(data.edge_index, embedding_dim=128, walk_length=20,
@@ -67,9 +65,9 @@ def main():
     # optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
     optimizer = torch.optim.Adam(list(model.parameters()), lr=0.01)
 
-    bar = CustomProgressBar()
-    trainer = Trainer(gpus=None, max_epochs=200, callbacks=[bar])
-    trainer.fit(model, loader)
+    # bar = CustomProgressBar()
+    # trainer = Trainer(gpus=None, max_epochs=200, callbacks=[bar])
+    # trainer.fit(model, loader)
 
     def train():
         model.train()
