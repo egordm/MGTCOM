@@ -7,7 +7,7 @@ from pytorch_lightning.trainer.states import RunningStage
 
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.evaluation import link_prediction_measure
-from ml.models.base.embedding import BaseModel
+from ml.models.base.embedding import BaseModel, BaseEmbeddingModel
 from ml.utils import HParams, Metric
 from shared import get_logger
 
@@ -16,8 +16,6 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class LPEvalCallbackParams(HParams):
-    lp_interval: int = 1
-    """Interval between embedding evalutations."""
     metric: Metric = Metric.DOTP
     """Metric to use for embedding evaluation."""
     lp_max_pairs: int = 5000
@@ -27,54 +25,51 @@ class LPEvalCallbackParams(HParams):
 class LPEvalCallback(Callback):
     def __init__(
             self,
-            data_module: GraphDataModule,
+            datamodule: GraphDataModule,
             hparams: LPEvalCallbackParams = None
     ) -> None:
         self.hparams = hparams or LPEvalCallbackParams()
         super().__init__()
-        self.data_module = data_module
+        self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 
-        self.train_pairs = data_module.train_prediction_pairs()
-        self.val_pairs = data_module.val_prediction_pairs()
-        self.test_pairs = data_module.test_prediction_pairs()
+        self.val_pairs = datamodule.val_prediction_pairs()
+        self.test_pairs = datamodule.test_prediction_pairs()
 
-    def on_train_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
-        pass  # NOOP: cause we dont collect embeddings on train
-
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: BaseEmbeddingModel) -> None:
         if trainer.state.stage != RunningStage.VALIDATING:
             return
 
-        if trainer.current_epoch % self.hparams.lp_interval != 0 and trainer.current_epoch != trainer.max_epochs:
-            return
-
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
-        if self.data_module.heterogenous:
-            Z_dict = pl_module.val_outputs['Z_dict']
-            Z = torch.cat(list(Z_dict.values()), dim=0)
+        if pl_module.heterogeneous:
+            Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True)
         else:
-            Z = pl_module.val_outputs['Z']
+            Z = pl_module.val_outputs.extract_cat('Z', cache=True)
 
-        acc = link_prediction_measure(Z, *self.val_pairs, metric=self.hparams.metric)
+        acc, metrics = link_prediction_measure(Z, *self.val_pairs, metric=self.hparams.metric)
 
         pl_module.log_dict({
-            f'eval/val/lp_acc': acc
-        }, prog_bar=True)
+            f'val/lp/acc': acc
+        }, prog_bar=True, logger=False)
 
-    def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        pl_module.log_dict({
+            f'eval/val/lp/{name}': value
+            for name, value in metrics.items()
+        })
+
+    def on_test_epoch_end(self, trainer: Trainer, pl_module: BaseEmbeddingModel) -> None:
         if trainer.state.stage != RunningStage.TESTING:
             return
 
         logger.info(f"Evaluating test embeddings")
-        if self.data_module.heterogenous:
-            Z_dict = pl_module.val_outputs['Z_dict']
-            Z = torch.cat(list(Z_dict.values()), dim=0)
+        if pl_module.heterogeneous:
+            Z = pl_module.test_outputs.extract_cat_kv('Z_dict', cache=True)
         else:
-            Z = pl_module.val_outputs['Z']
+            Z = pl_module.test_outputs.extract_cat('Z', cache=True)
 
-        acc = link_prediction_measure(Z, *self.val_pairs, metric=self.hparams.metric)
+        _, metrics = link_prediction_measure(Z, *self.test_pairs, metric=self.hparams.metric)
 
         pl_module.log_dict({
-            f'eval/test/lp_acc': acc
+            f'eval/test/lp/{name}': value
+            for name, value in metrics.items()
         })

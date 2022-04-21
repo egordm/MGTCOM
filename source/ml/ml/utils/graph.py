@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData
+from torch_geometric.data.storage import EdgeStorage, NodeStorage
 from torch_geometric.typing import NodeType, EdgeType
 
 from shared import get_logger
@@ -32,7 +33,7 @@ def extract_attribute(
     dtype = None
     has_attr = False
     for store in stores:
-        if key in store.keys() and ((not edge_attr and store.is_node_attr(key)) or (edge_attr and store.is_edge_attr(key))):
+        if key in store.keys() and isinstance(store, EdgeStorage if edge_attr else NodeStorage):
             has_attr = True
             is_numpy = isinstance(store[key], np.ndarray)
             dtype = store[key].dtype

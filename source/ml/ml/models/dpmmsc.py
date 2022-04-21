@@ -11,7 +11,8 @@ from torch import Tensor
 from ml.algo.dpm import BurnInMonitor, DPMMObs, merge_params, StackedDirichletProcessMixtureModel, \
     DirichletProcessMixtureModel, NIWPrior, DirichletPrior, MHMC, InitMode, DPMMParams
 from ml.algo.dpm.stochastic import DPMMObsMeanFilter
-from ml.utils import HParams, Metric, OutputExtractor, mask_from_idx
+from ml.utils import HParams, Metric, mask_from_idx
+from ml.utils.outputs import OutputExtractor
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)

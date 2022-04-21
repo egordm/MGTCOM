@@ -11,9 +11,10 @@ from torch_geometric.typing import NodeType
 
 from datasets.utils.conversion import igraph_from_hetero
 from ml.algo.clustering import KMeans
-from ml.utils import OutputExtractor, Metric, HParams
+from ml.utils import Metric, HParams
 from ml.utils.graph import extract_attribute
 from ml.utils.labelling import NodeLabelling
+from ml.utils.outputs import OutputExtractor
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -37,9 +38,7 @@ class SaveGraphCallback(Callback):
         self.hparams = hparams or SaveGraphCallbackParams()
 
     def on_predict_epoch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: List[Any]) -> None:
-        outputs = OutputExtractor(outputs)
-        Z_dict = outputs.extract_cat_dict('Z_dict')
-        Z = torch.cat(list(Z_dict.values()), dim=0)
+        Z = OutputExtractor(outputs).extract_cat_kv('Z_dict')
 
         logger.info('Running K-means before saving graph')
         k = len(torch.unique(torch.cat(list(self.node_labels['Louvain Labels'].values()), dim=0))) \

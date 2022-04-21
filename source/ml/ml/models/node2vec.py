@@ -64,9 +64,6 @@ class Node2VecModel(EmbeddingModel):
         loss = self.loss(pos_walks, neg_walks, Z)
         return loss
 
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.01)
-
 
 @dataclass
 class Node2VecDataModuleParams(GraphDataModuleParams):

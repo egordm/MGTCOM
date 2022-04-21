@@ -1,5 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Union, Dict, Callable, Any
 
 import torch
@@ -30,26 +31,6 @@ def flat_iter(l):
             yield from flat_iter(el)
         else:
             yield el
-
-
-@dataclass
-class OutputExtractor:
-    outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]
-
-    def extract(self, key) -> List[Tensor]:
-        return dicts_extract(flat_iter(self.outputs), key)
-
-    def extract_cat(self, key) -> Union[Tensor, float]:
-        return torch.cat(self.extract(key), dim=0)
-
-    def extract_cat_dict(self, key) -> Dict[str, Tensor]:
-        return merge_dicts(self.extract(key), lambda xs: torch.cat(xs, dim=0))
-
-    def extract_mean(self, key) -> Union[Tensor, float]:
-        return sum(self.extract(key)) / len(self.outputs)
-
-    def has_key(self, key):
-        return any(key in d for d in flat_iter(self.outputs))
 
 
 def values_apply(d, fn: Callable[[Any], Any]):

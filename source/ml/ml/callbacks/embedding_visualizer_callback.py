@@ -53,8 +53,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         wandb_logger: WandbLogger = trainer.logger
 
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")
-        Z_dict = self.transform_subsample.transform(pl_module.val_outputs['Z_dict'])
-        Z = torch.cat(list(Z_dict.values()), dim=0)
+        Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True)
 
         logger.info(f'Transforming embeddings using {self.hparams.dim_reduction_mode}...')
         self.transform_df.fit(Z)

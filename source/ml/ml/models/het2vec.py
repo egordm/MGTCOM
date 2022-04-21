@@ -4,6 +4,7 @@ from typing import Union, Optional
 import torch
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
 from torch import Tensor
+from torch_geometric.data import HeteroData
 
 from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.nodes_loader import NodesLoader
@@ -67,8 +68,7 @@ class Het2VecDataModuleParams(GraphDataModuleParams):
 class Het2VecDataModule(HeteroGraphDataModule):
     hparams: Union[Het2VecDataModuleParams, DataLoaderParams]
 
-    def train_sampler(self) -> Optional[Sampler]:
-        data = self.train_data
+    def train_sampler(self, data: HeteroData) -> Optional[Sampler]:
         mapper = ToHeteroMappingTransform(data.num_nodes_dict)
 
         hdata = data.to_homogeneous(node_attrs=[], edge_attrs=[], add_node_type=False, add_edge_type=False)
@@ -83,12 +83,12 @@ class Het2VecDataModule(HeteroGraphDataModule):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return NodesLoader(
             self.train_data.num_nodes,
-            transform=self.train_sampler(),
+            transform=self.train_sampler(self.train_data),
             shuffle=True,
             **self.loader_params.to_dict()
         )
 
-    def eval_sampler(self) -> Optional[Sampler]:
+    def eval_sampler(self, data: HeteroData) -> Optional[Sampler]:
         return None
 
     @property

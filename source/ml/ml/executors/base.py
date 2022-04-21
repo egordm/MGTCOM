@@ -2,12 +2,14 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import List, Type, Optional
 
+from matplotlib import pyplot as plt
 from pytorch_lightning import LightningDataModule, Callback, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
 from simple_parsing import Serializable
 from transformers.models.longformer.convert_longformer_original_pytorch_lightning_to_pytorch import LightningModel
 
+from ml.callbacks.classification_eval_callback import ClassificationEvalCallback, ClassificationEvalCallbackParams
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback, ClusteringEvalCallbackParams
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallbackParams
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallbackParams, EmbeddingEvalCallback
@@ -31,6 +33,7 @@ class CallbackArgs(Serializable):
     embedding_eval: EmbeddingEvalCallbackParams = EmbeddingEvalCallbackParams()
     save_graph: SaveGraphCallbackParams = SaveGraphCallbackParams()
     lp_eval: LPEvalCallbackParams = LPEvalCallbackParams()
+    classification_eval: ClassificationEvalCallbackParams = ClassificationEvalCallbackParams()
 
 
 @dataclass
@@ -131,8 +134,7 @@ class BaseExecutor:
             logger=wandb_logger,
             gpus=1 if not self.args.trainer_params.cpu else None,
             auto_lr_find=True,
-
-            # num_sanity_val_steps=0,
+            enable_model_summary=False,
         )
 
         self.logger.info(f'Training {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
@@ -183,6 +185,10 @@ class BaseExecutor:
             LPEvalCallback(
                 self.datamodule,
                 hparams=self.args.callback_params.lp_eval,
+            ),
+            ClassificationEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.classification_eval,
             ),
             SaveGraphCallback(
                 self.datamodule.data,

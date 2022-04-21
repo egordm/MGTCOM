@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Optional
 
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
+from torch_geometric.data import HeteroData, Data
 
 from ml.data.loaders.nodes_loader import NodesLoader, HeteroNodesLoader
 from ml.data.samplers.base import Sampler
@@ -12,17 +13,17 @@ class HomogenousGraphDataModule(GraphDataModule):
     heterogenous: bool = False
 
     @abstractmethod
-    def train_sampler(self) -> Optional[Sampler]:
+    def train_sampler(self, data: Data) -> Optional[Sampler]:
         raise NotImplementedError()
 
     @abstractmethod
-    def eval_sampler(self) -> Optional[Sampler]:
+    def eval_sampler(self, data: Data) -> Optional[Sampler]:
         raise NotImplementedError()
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return NodesLoader(
             self.train_data.num_nodes,
-            transform=self.train_sampler(),
+            transform=self.train_sampler(self.train_data),
             shuffle=True,
             **self.loader_params.to_dict()
         )
@@ -30,7 +31,7 @@ class HomogenousGraphDataModule(GraphDataModule):
     def val_dataloader(self) -> EVAL_DATALOADERS:
         return NodesLoader(
             self.val_data.num_nodes,
-            transform=self.eval_sampler(),
+            transform=self.eval_sampler(self.val_data),
             shuffle=False,
             **self.loader_params.to_dict(),
         )
@@ -38,7 +39,7 @@ class HomogenousGraphDataModule(GraphDataModule):
     def test_dataloader(self) -> EVAL_DATALOADERS:
         return NodesLoader(
             self.test_data.num_nodes,
-            transform=self.eval_sampler(),
+            transform=self.eval_sampler(self.test_data),
             shuffle=False,
             **self.loader_params.to_dict(),
         )
@@ -46,7 +47,7 @@ class HomogenousGraphDataModule(GraphDataModule):
     def predict_dataloader(self) -> EVAL_DATALOADERS:
         return NodesLoader(
             self.data.num_nodes,
-            transform=self.eval_sampler(),
+            transform=self.eval_sampler(self.data),
             shuffle=False,
             **self.loader_params.to_dict(),
         )
@@ -56,17 +57,17 @@ class HeteroGraphDataModule(GraphDataModule):
     heterogenous: bool = True
 
     @abstractmethod
-    def train_sampler(self) -> Optional[Sampler]:
+    def train_sampler(self, data: HeteroData) -> Optional[Sampler]:
         raise NotImplementedError()
 
     @abstractmethod
-    def eval_sampler(self) -> Optional[Sampler]:
+    def eval_sampler(self, data: HeteroData) -> Optional[Sampler]:
         raise NotImplementedError()
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return HeteroNodesLoader(
             self.train_data.num_nodes_dict,
-            transform_nodes_fn=self.train_sampler(),
+            transform_nodes_fn=self.train_sampler(self.train_data),
             shuffle=True,
             **self.loader_params.to_dict()
         )
@@ -74,7 +75,7 @@ class HeteroGraphDataModule(GraphDataModule):
     def val_dataloader(self) -> EVAL_DATALOADERS:
         return HeteroNodesLoader(
             self.val_data.num_nodes_dict,
-            transform_nodes_fn=self.eval_sampler(),
+            transform_nodes_fn=self.eval_sampler(self.val_data),
             shuffle=False,
             **self.loader_params.to_dict(),
         )
@@ -82,7 +83,7 @@ class HeteroGraphDataModule(GraphDataModule):
     def test_dataloader(self) -> EVAL_DATALOADERS:
         return HeteroNodesLoader(
             self.test_data.num_nodes_dict,
-            transform_nodes_fn=self.eval_sampler(),
+            transform_nodes_fn=self.eval_sampler(self.test_data),
             shuffle=False,
             **self.loader_params.to_dict(),
         )
@@ -90,7 +91,7 @@ class HeteroGraphDataModule(GraphDataModule):
     def predict_dataloader(self) -> EVAL_DATALOADERS:
         return HeteroNodesLoader(
             self.data.num_nodes_dict,
-            transform_nodes_fn=self.eval_sampler(),
+            transform_nodes_fn=self.eval_sampler(self.data),
             shuffle=False,
             **self.loader_params.to_dict(),
         )

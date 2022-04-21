@@ -44,7 +44,7 @@ logger = get_logger(EXECUTOR_NAME)
 #         logger.info('No pretrained embeddings provided, using synthetic dataset')
 #         dataset = SyntheticGMMDataset()
 #
-#     data_module = MGCOMComDetDataModule(
+#     datamodule = MGCOMComDetDataModule(
 #         dataset=dataset,
 #         hparams=args.data_params,
 #         loader_params=args.loader_params,
@@ -73,9 +73,9 @@ logger = get_logger(EXECUTOR_NAME)
 #         callbacks=callbacks,
 #         num_sanity_val_steps=0,
 #     )
-#     trainer.fit(model, data_module)
-#     trainer.test(model, data_module)
-#     trainer.predict(model, data_module)
+#     trainer.fit(model, datamodule)
+#     trainer.test(model, datamodule)
+#     trainer.predict(model, datamodule)
 #
 #
 # if __name__ == '__main__':

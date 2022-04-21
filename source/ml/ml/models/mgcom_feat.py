@@ -128,8 +128,7 @@ class MGCOMFeatDataModule(Het2VecDataModule):
 
         return sampler
 
-    def train_sampler(self) -> Optional[Sampler]:
-        data = self.train_data
+    def train_sampler(self, data: HeteroData) -> Optional[Sampler]:
         mapper = ToHeteroMappingTransform(data.num_nodes_dict)
         hgt_sampler = self._build_conv_sampler(data)
 
@@ -141,8 +140,8 @@ class MGCOMFeatDataModule(Het2VecDataModule):
         n2v_sampler = self._build_n2v_sampler(data, transform_meta)
         return n2v_sampler
 
-    def eval_sampler(self) -> Optional[Sampler]:
-        return self._build_conv_sampler(self.val_data)
+    def eval_sampler(self, data: HeteroData) -> Optional[Sampler]:
+        return self._build_conv_sampler(data)
 
     @property
     def train_on_full_data(self):

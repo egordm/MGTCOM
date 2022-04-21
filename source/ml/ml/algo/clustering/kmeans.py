@@ -17,7 +17,7 @@ class KMeans:
             repr_dim: int,
             k: int,
             metric: Metric = Metric.L2,
-            niter: int = 10, nredo: int = 5,
+            niter: int = 1000, nredo: int = 5,
             gpu: bool = False, verbose: bool = False
     ) -> None:
         super().__init__()

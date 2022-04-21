@@ -5,6 +5,7 @@ from typing import Optional, Dict, List, Union, Tuple
 import torch
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
 from torch import Tensor
+from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
@@ -134,8 +135,7 @@ class MGCOMCombiDataModule(MGCOMTempoDataModule, MGCOMTopoDataModule):
     ) -> None:
         MGCOMTempoDataModule.__init__(self, dataset, hparams, loader_params)
 
-    def train_sampler(self) -> Optional[Sampler]:
-        data = self.train_data
+    def train_sampler(self, data: HeteroData) -> Optional[Sampler]:
         mapper = ToHeteroMappingTransform(data.num_nodes_dict)
         hgt_sampler = self._build_conv_sampler(data)
 
