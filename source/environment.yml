@@ -14,6 +14,7 @@ dependencies:
   - pyg::pyg
   - conda-forge::python-igraph
   - conda-forge::umap-learn
+  - conda-forge::torchinfo
   - numpy
   - scipy
   - pandas

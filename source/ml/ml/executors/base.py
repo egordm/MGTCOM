@@ -10,12 +10,15 @@ from transformers.models.longformer.convert_longformer_original_pytorch_lightnin
 
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback, ClusteringEvalCallbackParams
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallbackParams
-from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallbackParams
-from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallbackParams
-from ml.callbacks.lp_eval_callback import LPEvalCallbackParams
+from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallbackParams, EmbeddingEvalCallback
+from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallbackParams, EmbeddingVisualizerCallback
+from ml.callbacks.lp_eval_callback import LPEvalCallbackParams, LPEvalCallback
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.callbacks.save_config_callback import SaveConfigCallback, MyDumper
-from ml.callbacks.save_graph_callback import SaveGraphCallbackParams
+from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
+from ml.callbacks.save_graph_callback import SaveGraphCallbackParams, SaveGraphCallback
+from ml.callbacks.save_modelsummary_callback import SaveModelSummaryCallback
+from ml.models.base.graph_datamodule import GraphDataModule
 from ml.utils import DataLoaderParams, OptimizerParams, TrainerParams
 from shared import parse_args, get_logger, RESULTS_PATH
 
@@ -84,6 +87,7 @@ class BaseExecutor:
             CustomProgressBar(),
             LearningRateMonitor(logging_interval='step'),
             SaveConfigCallback(self.args),
+            SaveModelSummaryCallback(),
             *self.callbacks()
         ]
 
@@ -107,7 +111,6 @@ class BaseExecutor:
         wandb_args = {}
         if self.args.run_name is not None:
             wandb_args['name'] = self.args.run_name
-
 
         wandb_logger = WandbLogger(
             project=self.args.wandb_project_name,
@@ -163,3 +166,28 @@ class BaseExecutor:
             tags.append(str(self.args.dataset))
 
         return tags
+
+    def _embedding_task_callbacks(self) -> List[Callback]:
+        if not isinstance(self.datamodule, GraphDataModule):
+            raise ValueError('Embedding task callbacks only work with GraphDataModule')
+
+        return [
+            EmbeddingVisualizerCallback(
+                val_node_labels=self.datamodule.val_inferred_labels(),
+                hparams=self.args.callback_params.embedding_visualizer
+            ),
+            EmbeddingEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.embedding_eval
+            ),
+            LPEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.lp_eval,
+            ),
+            SaveGraphCallback(
+                self.datamodule.data,
+                node_labels=self.datamodule.inferred_labels(),
+                hparams=self.args.callback_params.save_graph
+            ),
+            SaveEmbeddingsCallback(),
+        ]

@@ -56,26 +56,7 @@ class Het2VecExecutor(BaseExecutor):
         )
 
     def callbacks(self) -> List[Callback]:
-        return [
-            EmbeddingVisualizerCallback(
-                val_node_labels=self.datamodule.val_inferred_labels(),
-                hparams=self.args.callback_params.embedding_visualizer
-            ),
-            EmbeddingEvalCallback(
-                self.datamodule,
-                hparams=self.args.callback_params.embedding_eval
-            ),
-            LPEvalCallback(
-                self.datamodule,
-                hparams=self.args.callback_params.lp_eval,
-            ),
-            SaveGraphCallback(
-                self.datamodule.data,
-                node_labels=self.datamodule.inferred_labels(),
-                hparams=self.args.callback_params.save_graph
-            ),
-            SaveEmbeddingsCallback(),
-        ]
+        return self._embedding_task_callbacks()
 
     def run_name(self):
         return self.args.dataset

@@ -47,18 +47,7 @@ class MGCOMCombiExecutor(BaseExecutor):
         )
 
     def callbacks(self) -> List[Callback]:
-        return [
-            EmbeddingVisualizerCallback(
-                val_node_labels=self.datamodule.val_inferred_labels(),
-                hparams=self.args.callback_params.embedding_visualizer
-            ),
-            EmbeddingEvalCallback(
-                self.datamodule,
-                hparams=self.args.callback_params.embedding_eval
-            ),
-            SaveGraphCallback(self.datamodule.data, node_labels=self.datamodule.inferred_labels()),
-            SaveEmbeddingsCallback(),
-        ]
+        return self._embedding_task_callbacks()
 
     def run_name(self):
         return self.args.dataset
