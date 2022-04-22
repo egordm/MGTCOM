@@ -39,37 +39,40 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
                  hparams: EmbeddingVisualizerCallbackParams = None) -> None:
         self.hparams = hparams or EmbeddingVisualizerCallbackParams()
         super().__init__(interval=self.hparams.ev_interval)
-        self.val_node_labels = val_node_labels
 
-        self.transform_subsample = SubsampleDictTransform(self.hparams.ev_max_points)
+        self.val_subsample = SubsampleTransform(self.hparams.ev_max_points)
         self.transform_df = DimensionReductionTransform(
             n_components=2, mode=self.hparams.dim_reduction_mode, metric=self.hparams.metric
         )
+
+        self.val_labels = {
+            label_name: self.val_subsample.transform(torch.cat(list(labels_dict.values()), dim=0))
+            for label_name, labels_dict in val_node_labels.items()
+        }
 
     def on_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if trainer.current_epoch == 0:
             return
 
-        wandb_logger: WandbLogger = trainer.logger
-
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")
         Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True)
+        Z = self.val_subsample.transform(Z)
 
         logger.info(f'Transforming embeddings using {self.hparams.dim_reduction_mode}...')
         self.transform_df.fit(Z)
         Z = self.transform_df.transform(Z)
 
-        for label_name, labels_dict in self.val_node_labels.items():
-            labels_dict = self.transform_subsample.transform(labels_dict)
-            labels = torch.cat(list(labels_dict.values()), dim=0)
+        for label_name, labels in self.val_labels.items():
             fig = self.visualize_embeddings(
                 Z, labels,
                 f'Epoch {trainer.current_epoch} - Embedding Visualization ({label_name})'
             )
 
-            wandb_logger.log_metrics({
+            # noinspection PyTypeChecker
+            trainer.logger.log_metrics({
                 f'visualization/Embedding Visualization ({label_name})': wandb.Image(fig)
             })
+
             if wandb.run.offline:
                 plt.show()
 

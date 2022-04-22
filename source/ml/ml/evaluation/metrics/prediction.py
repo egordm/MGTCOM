@@ -2,6 +2,8 @@ from typing import Dict, NamedTuple, Tuple
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, f1_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 from torch import Tensor
 
 from ml.utils import Metric
@@ -48,8 +50,10 @@ def prediction_measure(
     is_multiclass = y.max() > 1
 
     X = X.numpy()
+    X = StandardScaler().fit_transform(X)
     y = y.numpy()
     clf = LogisticRegression(solver='lbfgs', multi_class='auto').fit(X, y)
+    # clf = SVC().fit(X, y)
     probs = clf.predict_proba(X)
     y_hat = probs.argmax(axis=1)
 

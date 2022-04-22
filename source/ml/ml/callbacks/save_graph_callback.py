@@ -5,6 +5,7 @@ from typing import Dict, List, Any
 import torch
 import wandb
 from pytorch_lightning import Callback, Trainer, LightningModule
+from sklearn.cluster import DBSCAN
 from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import NodeType
@@ -40,12 +41,6 @@ class SaveGraphCallback(Callback):
     def on_predict_epoch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: List[Any]) -> None:
         Z = OutputExtractor(outputs).extract_cat_kv('Z_dict')
 
-        logger.info('Running K-means before saving graph')
-        k = len(torch.unique(torch.cat(list(self.node_labels['Louvain Labels'].values()), dim=0))) \
-            if 'Louvain Labels' in self.node_labels else 7
-        k = min(k, 24)
-        I = KMeans(-1, k, metric=self.hparams.metric).fit(Z).assign(Z)
-
         logger.info("Saving graph")
         allowed_attrs = ['name', 'timestamp_from', 'timestamp_to', 'train_mask', 'test_mask', 'val_mask']
 
@@ -66,7 +61,16 @@ class SaveGraphCallback(Callback):
 
         node_attrs.update(self.node_labels)
         G, _, _, _ = igraph_from_hetero(self.data, node_attrs=node_attrs, edge_attrs=edge_attrs)
+
+        logger.info('Running K-means before saving graph')
+        k = len(torch.unique(torch.cat(list(self.node_labels['Louvain Labels'].values()), dim=0))) \
+            if 'Louvain Labels' in self.node_labels else 7
+        k = min(k, 24)
+        I = KMeans(-1, k, metric=self.hparams.metric).fit(Z).assign(Z)
         G.vs['precluster_km'] = I.numpy()
+
+        logger.info('Running DBSCAN before saving graph')
+        G.vs['precluster_dbscan'] = DBSCAN(eps=3, min_samples=2).fit_predict(Z)
 
         save_dir = Path(wandb.run.dir) / 'graph.graphml'
         logger.info(f"Saving graph to {save_dir}")
