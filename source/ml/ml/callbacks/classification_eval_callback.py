@@ -6,10 +6,11 @@ from pytorch_lightning import Trainer, LightningModule, Callback
 from pytorch_lightning.trainer.states import RunningStage
 
 from ml.algo.transforms import SubsampleTransform
+from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.evaluation import link_prediction_measure, prediction_measure
 from ml.models.base.embedding import BaseModel
-from ml.utils import HParams, Metric, merge_dicts
+from ml.utils import HParams, Metric, merge_dicts, prefix_keys
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -23,14 +24,14 @@ class ClassificationEvalCallbackParams(HParams):
     """Maximum number of pairs to use for classification."""
 
 
-class ClassificationEvalCallback(Callback):
+class ClassificationEvalCallback(IntermittentCallback):
     def __init__(
             self,
             datamodule: GraphDataModule,
             hparams: ClassificationEvalCallbackParams = None
     ) -> None:
         self.hparams = hparams or ClassificationEvalCallbackParams()
-        super().__init__()
+        super().__init__(1)
         self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 
@@ -46,10 +47,7 @@ class ClassificationEvalCallback(Callback):
             for label_name, labels_dict in datamodule.test_inferred_labels().items()
         }
 
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if trainer.state.stage != RunningStage.VALIDATING:
-            return
-
+    def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if len(self.val_labels) == 0:
             return
 
@@ -64,16 +62,10 @@ class ClassificationEvalCallback(Callback):
         for label_name, labels in self.val_labels.items():
             acc, metrics = prediction_measure(Z, labels)
 
-            pl_module.log_dict({
-                f'eval/val/cl/{label_name}/{name}': value
-                for name, value in metrics.items()
-            })
+            trainer.logger.log_metrics(prefix_keys(metrics, f'eval/val/cl/{label_name}/'))
 
-    def on_test_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if trainer.state.stage != RunningStage.TESTING:
-            return
-
-        if len(self.val_labels) == 0:
+    def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
+        if len(self.test_labels) == 0:
             return
 
         logger.info(f"Evaluating test embeddings")
@@ -87,7 +79,4 @@ class ClassificationEvalCallback(Callback):
         for label_name, labels in self.test_labels.items():
             acc, metrics = prediction_measure(Z, labels)
 
-            pl_module.log_dict({
-                f'eval/test/cl/{label_name}/{name}': value
-                for name, value in metrics.items()
-            })
+            trainer.logger.log_metrics(prefix_keys(metrics, f'eval/val/cl/{label_name}/'))

@@ -1,14 +1,13 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from enum import Enum
 from functools import reduce
-from typing import Dict, Union, List, Optional, Any
+from typing import Union, List, Optional, Any
 
-import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 
-from ml.utils import OptimizerParams, values_apply, dict_mapv
-from ml.utils.outputs import OutputExtractor
+from ml.models.base.base import BaseModel
+from ml.utils import dict_mapv
 
 
 class EmbeddingCombineMode(Enum):
@@ -29,42 +28,6 @@ class EmbeddingCombineMode(Enum):
             return lambda xs: torch.cat(xs, dim=-1)
         else:
             raise ValueError(f"Unknown combine mode {self}")
-
-
-class BaseModel(pl.LightningModule):
-    hparams: OptimizerParams
-
-    train_outputs: OutputExtractor = None
-    val_outputs: OutputExtractor = None
-    test_outputs: OutputExtractor = None
-
-    def __init__(self, optimizer_params: Optional[OptimizerParams] = None) -> None:
-        super().__init__()
-        if optimizer_params is not None:
-            self.save_hyperparameters(optimizer_params.to_dict())
-
-        self.lr = self.hparams.lr
-
-    def on_train_epoch_start(self) -> None:
-        self.train_outputs = {}
-
-    def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
-        self.train_outputs = OutputExtractor(outputs)
-
-    def on_validation_epoch_start(self) -> None:
-        self.val_outputs = {}
-
-    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
-        self.val_outputs = OutputExtractor(outputs)
-
-    def on_test_epoch_start(self) -> None:
-        self.test_outputs = {}
-
-    def test_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
-        self.test_outputs = OutputExtractor(outputs)
-
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.lr)
 
 
 class BaseEmbeddingModel(BaseModel):

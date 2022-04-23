@@ -26,7 +26,7 @@ class ClusteringVisualizerCallbackParams(HParams):
     """Dimension reduction mode for embedding visualization."""
     cv_max_points: int = 10000
     """Maximum number of points to visualize."""
-    cv_interval: int = 3
+    cv_interval: int = 1
     """Interval between clustering visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
@@ -41,24 +41,22 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             logger.warning(f'Using PCA for visualization because TSNE does not support transfrom function.')
             self.hparams.dim_reduction_mode = DimensionReductionMode.PCA
 
-        self.transform_subsample = SubsampleTransform(self.hparams.cv_max_points)
-        self.transform_df = DimensionReductionTransform(
+        self.subsample = SubsampleTransform(self.hparams.cv_max_points)
+        self.remap = DimensionReductionTransform(
             n_components=2, mode=self.hparams.dim_reduction_mode, metric=self.hparams.metric
         )
 
     def _transform_params(self, params: DPMMParams) -> DPMMParams:
-        mus = self.transform_df.transform(params.mus)
+        mus = self.remap.transform(params.mus)
         sigmas = torch.stack([
-            torch.eye(2) * self.transform_df.transform(cov.diag().reshape(1, -1))
+            torch.eye(2) * self.remap.transform(cov.diag().reshape(1, -1))
             for cov in params.covs
         ])
         return DPMMParams(params.pis, mus, sigmas)
 
-    def on_run(self, trainer: Trainer, pl_module: DPMMSubClusteringModel) -> None:
+    def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: DPMMSubClusteringModel) -> None:
         if pl_module.stage == Stage.GatherSamples:
             return
-
-        wandb_logger: WandbLogger = trainer.logger
 
         logger.info(f"Visualizing clustering at epoch {trainer.current_epoch}")
         visualize_subclusters = pl_module.is_subclustering
@@ -66,25 +64,25 @@ class ClusteringVisualizerCallback(IntermittentCallback):
         # Collect sample data
         k = pl_module.k
         X = pl_module.val_outputs['X']
-        X = self.transform_subsample.transform(X)
+        X = self.subsample.transform(X)
 
         r = pl_module.val_outputs['r']
-        r = self.transform_subsample.transform(r)
+        r = self.subsample.transform(r)
         z = r.argmax(dim=-1)
 
         if visualize_subclusters:
             ri = pl_module.val_outputs['ri']
-            ri = self.transform_subsample.transform(ri)
+            ri = self.subsample.transform(ri)
             zi = ri.argmax(dim=-1)
         else:
             ri, zi = None, None
 
         # Transform sample data
-        if not self.transform_df.is_fitted or pl_module.samplespace_changed:
+        if not self.remap.is_fitted or pl_module.samplespace_changed:
             logger.info(f'Transforming embeddings using {self.hparams.dim_reduction_mode}...')
-            self.transform_df.fit(X)
+            self.remap.fit(X)
 
-        X = self.transform_df.transform(X)
+        X = self.remap.transform(X)
 
         # Collect cluster params
         cluster_params = pl_module.cluster_params
@@ -101,7 +99,8 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             pl_module,
             title=f'Epoch {trainer.current_epoch}'
         )
-        wandb_logger.log_metrics({
+        # noinspection PyTypeChecker
+        trainer.logger.log_metrics({
             f'visualization/Clustering Visualization': wandb.Image(fig)
         })
         if wandb.run.offline:
@@ -165,10 +164,11 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             axsc.set_ylabel("Normalized weights")
             axsc.set_title(f"Epoch {trainer.current_epoch}: Clusters weights")
 
+        # noinspection PyTypeChecker
         trainer.logger.log_metrics({
             f'visualization/Cluster Distribution': wandb.Image(fig)
         })
-        if wandb.run.offline:
+        if wandb.run.offline and False:
             plt.show()
         else:
             plt.close(fig)
@@ -222,7 +222,7 @@ class ClusteringVisualizerCallback(IntermittentCallback):
 
         # horizontal stack vectors to create x1,x2 input for the model
         grid_t = np.hstack((r1, r2))
-        grid = self.transform_df.inverse_transform(torch.from_numpy(grid_t))
+        grid = self.remap.inverse_transform(torch.from_numpy(grid_t))
         yhat = pl_module.estimate_assignment(grid.float().to(pl_module.device))
         yhat_maxed = yhat.max(dim=1).values.cpu()
 

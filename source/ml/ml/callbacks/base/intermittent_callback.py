@@ -18,8 +18,19 @@ class IntermittentCallback(Callback):
         if trainer.current_epoch % self.interval != 0 and trainer.current_epoch != trainer.max_epochs:
             return
 
-        self.on_run(trainer, pl_module)
+        self.on_validation_epoch_end_run(trainer, pl_module)
 
     @abstractmethod
-    def on_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        pass
+
+    def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        super().on_test_epoch_end(trainer, pl_module)
+
+        if trainer.state.stage != RunningStage.TESTING:
+            return
+
+        self.on_test_epoch_end_run(trainer, pl_module)
+
+    def on_test_epoch_end_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
         pass

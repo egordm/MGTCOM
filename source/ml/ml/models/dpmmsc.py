@@ -193,6 +193,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
                 self.stage = Stage.Mutation
 
         if self.hparams.subcluster and self.hparams.mutate and self.stage == Stage.Mutation:
+            # TODO: to do splits
             if self.prev_action != Action.Split:
                 self.prev_action = Action.Split
                 self.split(obs_c, obs_sc)

@@ -23,8 +23,9 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class SaveGraphCallbackParams(HParams):
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for kmeans clustering."""
+
 
 class SaveGraphCallback(Callback):
     def __init__(
@@ -68,9 +69,6 @@ class SaveGraphCallback(Callback):
         k = min(k, 24)
         I = KMeans(-1, k, metric=self.hparams.metric).fit(Z).assign(Z)
         G.vs['precluster_km'] = I.numpy()
-
-        logger.info('Running DBSCAN before saving graph')
-        G.vs['precluster_dbscan'] = DBSCAN(eps=3, min_samples=2).fit_predict(Z)
 
         save_dir = Path(wandb.run.dir) / 'graph.graphml'
         logger.info(f"Saving graph to {save_dir}")

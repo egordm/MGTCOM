@@ -41,7 +41,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         super().__init__(interval=self.hparams.ev_interval)
 
         self.val_subsample = SubsampleTransform(self.hparams.ev_max_points)
-        self.transform_df = DimensionReductionTransform(
+        self.mapper = DimensionReductionTransform(
             n_components=2, mode=self.hparams.dim_reduction_mode, metric=self.hparams.metric
         )
 
@@ -50,7 +50,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
             for label_name, labels_dict in val_node_labels.items()
         }
 
-    def on_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if trainer.current_epoch == 0:
             return
 
@@ -59,8 +59,8 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         Z = self.val_subsample.transform(Z)
 
         logger.info(f'Transforming embeddings using {self.hparams.dim_reduction_mode}...')
-        self.transform_df.fit(Z)
-        Z = self.transform_df.transform(Z)
+        self.mapper.fit(Z)
+        Z = self.mapper.transform(Z)
 
         for label_name, labels in self.val_labels.items():
             fig = self.visualize_embeddings(
@@ -77,7 +77,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
                 plt.show()
 
     def visualize_embeddings(self, Z: Tensor, labels: Tensor, title):
-        fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(8, 8))
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 8))
         fig.tight_layout(rect=[0, 0, 1, 0.95])
         num_labels = int(labels.max() + 1)
         colors = create_colormap(num_labels)

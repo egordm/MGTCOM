@@ -39,3 +39,7 @@ def values_apply(d, fn: Callable[[Any], Any]):
 
 def dict_mapv(d: Dict[str, Any], fn: Callable[[Any], Any]):
     return {k: fn(v) for k, v in d.items()}
+
+
+def prefix_keys(d: Dict[str, Any], prefix: str):
+    return {prefix + k: v for k, v in d.items()}

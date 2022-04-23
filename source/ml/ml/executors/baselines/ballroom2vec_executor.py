@@ -1,16 +1,14 @@
 from dataclasses import dataclass
-from typing import Type, List
+from typing import Type
 
-from pytorch_lightning import Callback, LightningDataModule
+from pytorch_lightning import LightningDataModule
 
 from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
-from ml.callbacks.lp_eval_callback import LPEvalCallback
-from ml.executors.base import BaseExecutor, BaseExecutorArgs
-from ml.executors.node2vec_executor import Node2VecExecutor
+from ml.executors.base import BaseExecutorArgs
+from ml.executors.baselines.node2vec_executor import Node2VecExecutor
 from ml.layers.embedding import NodeEmbedding
 from ml.models.ballroom2vec import Ballroom2VecDataModuleParams, Ballroom2VecDataModule, Ballroom2VecModel
-from ml.models.node2vec import Node2VecDataModule, Node2VecDataModuleParams, Node2VecModel
 from ml.utils import dataset_choices, Metric, OptimizerParams
 
 

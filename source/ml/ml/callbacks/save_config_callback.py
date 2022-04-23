@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import wandb
 import yaml
 from pytorch_lightning import Callback, Trainer, LightningModule
 from simple_parsing import Serializable
@@ -26,11 +27,9 @@ class SaveConfigCallback(Callback):
             logger.info(f"\n{config_str}")
             logger.info("=" * 80)
 
-        for train_logger in trainer.loggers:
-            if train_logger.save_dir is not None:
-                save_dir = Path(train_logger.save_dir)
-                logger.info(f"Saving config in: {save_dir}")
-                self.config.save_yaml(save_dir / 'config.yaml', Dumper=MyDumper, default_flow_style=False)
+        save_dir = Path(wandb.run.dir) / 'config.yaml'
+        logger.info(f"Saving config in: {save_dir}")
+        self.config.save_yaml(save_dir, Dumper=MyDumper, default_flow_style=False)
 
 
 class MyDumper(yaml.Dumper):

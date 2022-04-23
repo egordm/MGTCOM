@@ -22,5 +22,4 @@ class SaveModelSummaryCallback(Callback):
         )
 
         save_dir = Path(wandb.run.dir) / 'model_info.txt'
-        with open(save_dir, 'w') as f:
-            f.write(str(info))
+        save_dir.write_text(str(info))

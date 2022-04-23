@@ -8,10 +8,11 @@ from pytorch_lightning.trainer.states import RunningStage
 from torch import Tensor
 
 from ml.algo.transforms import SubsampleTransform
+from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.models.base.embedding import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.evaluation import silhouette_score, davies_bouldin_score, link_prediction_measure
-from ml.utils import HParams, Metric
+from ml.utils import HParams, Metric, prefix_keys
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -28,16 +29,15 @@ class EmbeddingEvalCallbackParams(HParams):
     met_max_points: int = 5000
 
 
-class EmbeddingEvalCallback(Callback):
+class EmbeddingEvalCallback(IntermittentCallback):
     def __init__(
             self,
             datamodule: GraphDataModule,
             hparams: EmbeddingEvalCallbackParams = None
     ) -> None:
         self.hparams = hparams or EmbeddingEvalCallbackParams()
-        super().__init__()
+        super().__init__(self.hparams.ee_interval)
         self.datamodule = datamodule
-        # self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 
         self.val_subsample = SubsampleTransform(self.hparams.met_max_points)
         self.test_subsample = SubsampleTransform(self.hparams.met_max_points)
@@ -51,13 +51,7 @@ class EmbeddingEvalCallback(Callback):
             for label_name, labels_dict in datamodule.test_inferred_labels().items()
         }
 
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if trainer.state.stage != RunningStage.VALIDATING:
-            return
-
-        if trainer.current_epoch % self.hparams.ee_interval != 0 and trainer.current_epoch != trainer.max_epochs:
-            return
-
+    def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
         if pl_module.heterogeneous:
             Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True)
@@ -67,15 +61,12 @@ class EmbeddingEvalCallback(Callback):
         Z = self.val_subsample.transform(Z)
 
         for label_name, labels in self.val_labels.items():
-            pl_module.log_dict({
-                f'eval/val/com/{label_name}/{name}': value
-                for name, value in self.supervised_clustering_metrics(Z, labels).items()
-            })
+            trainer.logger.log_metrics(prefix_keys(
+                self.clustering_metrics(Z, labels, metric=self.hparams.metric),
+                f'eval/val/ee/{label_name}/'
+            ))
 
-    def on_test_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if trainer.state.stage != RunningStage.TESTING:
-            return
-
+    def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         logger.info(f"Evaluating test embeddings")
         if pl_module.heterogeneous:
             Z = pl_module.test_outputs.extract_cat_kv('Z_dict', cache=True)
@@ -85,15 +76,15 @@ class EmbeddingEvalCallback(Callback):
         Z = self.test_subsample.transform(Z)
 
         for label_name, labels in self.test_labels.items():
-            pl_module.log_dict({
-                f'eval/val/com/{label_name}/{name}': value
-                for name, value in self.supervised_clustering_metrics(Z, labels).items()
-            })
+            trainer.logger.log_metrics(prefix_keys(
+                self.clustering_metrics(Z, labels, metric=self.hparams.metric),
+                f'eval/test/ee/{label_name}/'
+            ))
 
-    def supervised_clustering_metrics(self, Z: Tensor, labels: Tensor) -> Dict[str, float]:
-        sc = silhouette_score(Z, labels, metric=self.hparams.metric)
-        db = davies_bouldin_score(Z, labels, metric=self.hparams.metric)
-        return dict(
-            silhouette_score=sc,
-            davies_bouldin_score=db
-        )
+    @staticmethod
+    def clustering_metrics(X: Tensor, z: Tensor, metric: Metric) -> Dict[str, float]:
+        return {
+            'silhouette_score': silhouette_score(X, z, metric=metric),
+            'davies_bouldin_score': davies_bouldin_score(X, z, metric=metric),
+        }
+

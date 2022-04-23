@@ -1,7 +1,10 @@
 from functools import lru_cache
+from typing import Callable
 
 import matplotlib as mpl
 import numpy as np
+import torch
+from torch import Tensor
 
 MARKER_SIZE = mpl.rcParams['lines.markersize'] ** 1.5
 
@@ -52,3 +55,28 @@ def plot_scatter(ax, x, y, *args, markers=None, marker_idx=None, **kwargs):
             kwargs['marker'] = markers[0]
 
         ax.scatter(x, y, *args, **kwargs)
+
+
+def plot_decision_regions(ax, X, z, colors, cluster_fn: Callable[[Tensor], Tensor]):
+    X_min, X_max = X.min(axis=0).values, X.max(axis=0).values
+    arrays_for_meshgrid = [np.arange(X_min[d] - 0.1, X_max[d] + 0.1, 0.1) for d in range(X.shape[1])]
+    xx, yy = np.meshgrid(*arrays_for_meshgrid)
+
+    # flatten each grid to a vector
+    r1, r2 = xx.flatten(), yy.flatten()
+    r1, r2 = r1.reshape((len(r1), 1)), r2.reshape((len(r2), 1))
+
+    # horizontal stack vectors to create x1,x2 input for the model
+    grid_t = np.hstack((r1, r2))
+    yhat = cluster_fn(torch.from_numpy(grid_t))
+    yhat_maxed = yhat.max(dim=1).values.cpu()
+
+    cont = ax.contourf(xx, yy, yhat_maxed.reshape(xx.shape), alpha=0.5, cmap="jet")
+    ax.scatter(
+        X[:, 0],
+        X[:, 1],
+        c=colors[z],
+        s=MARKER_SIZE, zorder=1
+    )
+    ax.set_title("Decision Boundary")
+    return cont
