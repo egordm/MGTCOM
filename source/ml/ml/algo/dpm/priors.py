@@ -44,14 +44,24 @@ class DirichletPrior:
         return (Ns + self.params.alpha) / (Ns.sum() + self.params.alpha)
 
 
-NIWPriorParams = NamedTuple('NIWPriorParams', [('nu', Float), ('kappa', Float), ('mu', Tensor), ('psi', Tensor)])
-NIWPriorParamsList = NamedTuple('NIWPriorParamsList',
-                                [('nus', Float), ('kappas', Float), ('mus', Tensor), ('psis', Tensor)])
+class NIWParams(NamedTuple):
+    nu: Float
+    kappa: Float
+    mu: Tensor
+    psi: Tensor
+
+
+class NIWParamList(NamedTuple):
+    nus: Tensor
+    kappas: Tensor
+    mus: Tensor
+    psis: Tensor
 
 
 @dataclass
 class NIWPrior:
-    params: NIWPriorParams
+    params: NIWParams
+    D: int
 
     @staticmethod
     def from_params(mu: Tensor, psi: Tensor, nu: Float = 12.0, kappa: Float = 0.0001) -> Self:
@@ -74,11 +84,11 @@ class NIWPrior:
             logger.warning(f"nu must be at least D + 1. Setting nu to {D + 1}")
             nu = D + 1
 
-        return NIWPrior(NIWPriorParams(
+        return NIWPrior(NIWParams(
             torch.tensor(nu),
             torch.tensor(kappa),
             mu, psi,
-        ))
+        ), D)
 
     def update(self, X: Tensor, sigma_scale: float = 0.005):
         """
@@ -92,13 +102,13 @@ class NIWPrior:
         mu = X.mean(dim=0)
         psi = (torch.diag(X.std(dim=0)) * sigma_scale)
 
-        self.params = NIWPriorParams(
+        self.params = NIWParams(
             self.params.nu,
             self.params.kappa,
             mu, psi,
         )
 
-    def compute_posterior(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> NIWPriorParamsList:
+    def compute_posterior(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> NIWParamList:
         """
         > We update the parameters of the prior by adding the number of data points, the mean, and the covariance of the
         data points to the prior parameters
@@ -126,7 +136,7 @@ class NIWPrior:
                 * (mus - self.params.mu).unsqueeze(2) @ (mus - self.params.mu).unsqueeze(1)
         )
 
-        return NIWPriorParamsList(nus_post, kappas_post, mus_post, psis_post)
+        return NIWParamList(nus_post, kappas_post, mus_post, psis_post)
 
     def compute_posterior_mv(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> MultivarNormalParams:
         """
@@ -141,10 +151,9 @@ class NIWPrior:
         :type covs: Tensor
         :return: The posterior parameters of the multivariate normal distribution.
         """
-        D = mus.shape[-1]
         nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(Ns, mus, covs)
         covs_post = torch.stack([
-            psis_post[i] / (nus_post[i] - D + 1) if N_k > 0 else self.params.psi
+            psis_post[i] / (nus_post[i] - self.D + 1) if N_k > 0 else self.params.psi
             for i, N_k in enumerate(Ns)
         ], dim=0)
 
@@ -168,15 +177,14 @@ class NIWPrior:
         :type covs: Tensor
         :return: The marginal log probability of the data.
         """
-        D = mus.shape[-1]
         nus_post, kappas_post, mus_post, psis_post = self.compute_posterior(Ns, mus, covs)
 
         # TODO: Compare
         return (
-                -((Ns * D / 2) * np.log(torch.pi)).reshape(-1, 1)
-                + torch.mvlgamma(nus_post / 2.0, D)
-                - torch.mvlgamma(self.params.nu / 2.0, D)
+                -((Ns * self.D / 2) * np.log(torch.pi)).reshape(-1, 1)
+                + torch.mvlgamma(nus_post / 2.0, self.D)
+                - torch.mvlgamma(self.params.nu / 2.0, self.D)
                 + (self.params.nu / 2.0) * torch.logdet(self.params.psi)
                 - (nus_post / 2.0) * torch.logdet(psis_post).reshape(-1, 1)
-                + (D / 2.0) * (torch.log(self.params.kappa) - torch.log(kappas_post))
+                + (self.D / 2.0) * (torch.log(self.params.kappa) - torch.log(kappas_post))
         )

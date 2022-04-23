@@ -8,8 +8,8 @@ import torch
 import torchmetrics
 from torch import Tensor
 
-from ml.algo.dpm import BurnInMonitor, DPMMObs, merge_params, StackedDirichletProcessMixtureModel, \
-    DirichletProcessMixtureModel, NIWPrior, DirichletPrior, MHMC, InitMode, DPMMParams
+from ml.algo.dpm import BurnInMonitor, DPMMObs, merge_params, StackedDPMM, \
+    DPMM, NIWPrior, DirichletPrior, MHMC, InitMode, DPMMParams
 from ml.algo.dpm.stochastic import DPMMObsMeanFilter
 from ml.utils import HParams, Metric, mask_from_idx
 from ml.utils.outputs import OutputExtractor
@@ -75,13 +75,13 @@ class DPMMSubClusteringModel(pl.LightningModule):
             )
         )
 
-        self.clusters = DirichletProcessMixtureModel(
+        self.clusters = DPMM(
             hparams.init_k, self.repr_dim, self.hparams.metric, self.mhmc
         )
         self.cluster_mp = DPMMObsMeanFilter(hparams.init_k, self.repr_dim)
 
         if self.hparams.subcluster:
-            self.subclusters = StackedDirichletProcessMixtureModel(
+            self.subclusters = StackedDPMM(
                 hparams.init_k, 2, self.repr_dim, self.hparams.metric, self.mhmc
             )
             self.subcluster_mp = DPMMObsMeanFilter(hparams.init_k * 2, self.repr_dim)
@@ -108,7 +108,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
             out.update(dict(r=r.detach(), z=z.detach()))
 
             if self.hparams.subcluster and self.subclusters.is_initialized:
-                ri = self.subclusters.estimate_log_prob(X, z)
+                ri = self.subclusters.estimate_assignment(X, z)
                 zi = ri.argmax(dim=-1)
                 out.update(dict(ri=ri.detach(), zi=zi.detach()))
 
@@ -160,7 +160,7 @@ class DPMMSubClusteringModel(pl.LightningModule):
             self.cluster_mp.push(obs_c)
 
             if self.hparams.subcluster and self.subclusters.is_initialized:
-                ri = self.subclusters.estimate_log_prob(X, z.detach())
+                ri = self.subclusters.estimate_assignment(X, z.detach())
                 obs_sc = self.subclusters.compute_params(X, z.detach(), ri.detach())
                 self.subcluster_mp.push(obs_sc)
 

@@ -91,7 +91,7 @@ class HeteroGraphDataModule(GraphDataModule):
     def predict_dataloader(self) -> EVAL_DATALOADERS:
         return HeteroNodesLoader(
             self.data.num_nodes_dict,
-            transform_nodes_fn=self.eval_sampler(self.data),
+            transform_nodes_fn=self.eval_sampler(self.data), # TODO: embedding methods wont like this!
             shuffle=False,
             **self.loader_params.to_dict(),
         )

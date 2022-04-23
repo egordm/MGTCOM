@@ -5,7 +5,7 @@ import torch
 from torch import Tensor
 from torch.nn import ModuleList
 
-from ml.algo.dpm.dpmm import DirichletProcessMixtureModel, InitMode
+from ml.algo.dpm.dpmm import DPMM, InitMode
 from ml.algo.dpm.mhmc import MHMC
 from ml.algo.dpm.statistics import DPMMObs
 from ml.utils import Metric, unique_count
@@ -14,8 +14,8 @@ from shared import get_logger
 logger = get_logger(Path(__file__).stem)
 
 
-class StackedDirichletProcessMixtureModel(torch.nn.Module):
-    components: Union[List[DirichletProcessMixtureModel], ModuleList]
+class StackedDPMM(torch.nn.Module):
+    components: Union[List[DPMM], ModuleList]
 
     def __init__(self, n_components: int, n_subcomponents: int, repr_dim: int, metric: Metric, mhmc: MHMC):
         super().__init__()
@@ -26,7 +26,7 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
         self.mhmc = mhmc
 
         self.components = torch.nn.ModuleList([
-            DirichletProcessMixtureModel(n_subcomponents, repr_dim, self.metric, self.mhmc)
+            DPMM(n_subcomponents, repr_dim, self.metric, self.mhmc)
             for _ in range(n_components)
         ])
 
@@ -72,7 +72,7 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
 
         return DPMMObs(Ns_K, mus_K, covs_K)
 
-    def estimate_log_prob(self, X: Tensor, z: Tensor) -> Tensor:
+    def estimate_assignment(self, X: Tensor, z: Tensor) -> Tensor:
         Ns = unique_count(z, self.n_components)
         r_E = torch.zeros(X.shape[0], self.n_subcomponents)
         for i, (component, N_k) in enumerate(zip(self.components, Ns)):
@@ -81,8 +81,8 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
 
         return r_E
 
-    def add_component(self) -> DirichletProcessMixtureModel:
-        component = DirichletProcessMixtureModel(
+    def add_component(self) -> DPMM:
+        component = DPMM(
             self.n_subcomponents, self.repr_dim, self.metric, self.mhmc
         )
         self.components.append(component)
@@ -101,7 +101,7 @@ class StackedDirichletProcessMixtureModel(torch.nn.Module):
     def covs(self) -> Tensor:
         return torch.cat([component.covs for component in self.components], dim=0)
 
-    def __getitem__(self, item) -> DirichletProcessMixtureModel:
+    def __getitem__(self, item) -> DPMM:
         return self.components[item]
 
     def __len__(self):

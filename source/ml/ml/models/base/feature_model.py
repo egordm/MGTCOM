@@ -6,11 +6,11 @@ from typing import Union, List, Optional, Any
 import torch
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 
-from ml.models.base.base import BaseModel
+from ml.models.base.base_model import BaseModel
 from ml.utils import dict_mapv
 
 
-class EmbeddingCombineMode(Enum):
+class FeatureCombineMode(Enum):
     """
     Defines the way the embeddings are combined.
     """
@@ -20,17 +20,17 @@ class EmbeddingCombineMode(Enum):
 
     @property
     def combine_fn(self):
-        if self == EmbeddingCombineMode.ADD:
+        if self == FeatureCombineMode.ADD:
             return lambda xs: reduce(torch.Tensor.add_, xs, torch.zeros_like(xs[0]))
-        elif self == EmbeddingCombineMode.MULT:
+        elif self == FeatureCombineMode.MULT:
             return lambda xs: reduce(torch.Tensor.mul_, xs, torch.ones_like(xs[0]))
-        elif self == EmbeddingCombineMode.CONCAT:
+        elif self == FeatureCombineMode.CONCAT:
             return lambda xs: torch.cat(xs, dim=-1)
         else:
             raise ValueError(f"Unknown combine mode {self}")
 
 
-class BaseEmbeddingModel(BaseModel):
+class BaseFeatureModel(BaseModel):
     heterogeneous: bool = False
 
     @property
@@ -38,7 +38,7 @@ class BaseEmbeddingModel(BaseModel):
         raise NotImplementedError()
 
 
-class EmbeddingModel(BaseEmbeddingModel, ABC):
+class FeatureModel(BaseFeatureModel, ABC):
     heterogeneous: bool = False
 
     def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
@@ -55,7 +55,7 @@ class EmbeddingModel(BaseEmbeddingModel, ABC):
         return {'Z': self.forward(batch).detach().cpu(), 'batch_idx': batch_idx}
 
 
-class HeteroEmbeddingModel(BaseEmbeddingModel, ABC):
+class HeteroFeatureModel(BaseFeatureModel, ABC):
     heterogeneous: bool = True
 
     def validation_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:

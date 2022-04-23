@@ -5,14 +5,12 @@ from typing import Dict
 import torch
 import wandb
 from matplotlib import pyplot as plt
-from pytorch_lightning import Trainer, LightningModule
-from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning import Trainer
 from torch import Tensor
 
-from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform, \
-    SubsampleDictTransform
+from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
-from ml.models.base.embedding import BaseModel
+from ml.models.base.base_model import BaseModel
 from ml.utils import HParams, Metric
 from ml.utils.labelling import NodeLabelling
 from ml.utils.plot import plot_scatter, create_colormap, MARKER_SIZE
@@ -50,7 +48,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
             for label_name, labels_dict in val_node_labels.items()
         }
 
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: BaseModel) -> None:
+    def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if trainer.current_epoch == 0:
             return
 

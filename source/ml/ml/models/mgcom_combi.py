@@ -17,7 +17,7 @@ from ml.data.samplers.hybrid_sampler import HybridSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
 from ml.data.transforms.to_homogeneous import to_homogeneous
 from ml.layers.fc_net import FCNet, FCNetParams
-from ml.models.base.embedding import HeteroEmbeddingModel, EmbeddingCombineMode
+from ml.models.base.embedding import HeteroFeatureModel, FeatureCombineMode
 from ml.models.mgcom_feat import MGCOMFeatDataModuleParams, MGCOMFeatModel, MGCOMTempoDataModule, MGCOMTopoDataModule, \
     MGCOMFeatModelParams
 from ml.utils import HParams, DataLoaderParams, Metric, OptimizerParams, dict_mapv
@@ -36,10 +36,10 @@ class MGCOMCombiModelParams(MGCOMFeatModelParams):
     tempo_hidden_dim: List[int] = field(default_factory=lambda: [32])
     tempo_weight: float = 1.0
 
-    emb_combine_mode: EmbeddingCombineMode = EmbeddingCombineMode.CONCAT
+    emb_combine_mode: FeatureCombineMode = FeatureCombineMode.CONCAT
 
 
-class MGCOMCombiModel(HeteroEmbeddingModel):
+class MGCOMCombiModel(HeteroFeatureModel):
     hparams: Union[MGCOMCombiModelParams, OptimizerParams]
 
     def __init__(
@@ -53,7 +53,7 @@ class MGCOMCombiModel(HeteroEmbeddingModel):
         self.save_hyperparameters(optimizer_params.to_dict())
         self.embedding_combine_fn = self.hparams.emb_combine_mode.combine_fn
 
-        if self.hparams.emb_combine_mode != EmbeddingCombineMode.CONCAT:
+        if self.hparams.emb_combine_mode != FeatureCombineMode.CONCAT:
             assert self.hparams.topo_repr_dim == self.hparams.tempo_repr_dim, \
                 f"Temporal and topological representations must have the same dimensionality if " \
                 f"combine mode is not CONCAT, but got {self.hparams.tempo_repr_dim} and " \

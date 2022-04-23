@@ -7,7 +7,7 @@ from torch_geometric.data import HeteroData
 from torch_geometric.typing import NodeType
 
 
-def newman_girvan_modularity(
+def newman_girvan_modularity_hetero(
         data: HeteroData,
         clustering: Dict[NodeType, Tensor],
         num_clusters: int = None,
@@ -60,6 +60,50 @@ def newman_girvan_modularity(
     deg = torch.zeros(num_clusters, dtype=torch.long)
     for node_type, degrees in degree.items():
         deg = deg.scatter_add_(0, clustering[node_type], degrees)
+
+    # Aggregate the modularity
+    mod = (inc / num_edges) - (deg / (2 * num_edges)) ** 2
+    return mod.sum()
+
+
+def newman_girvan_modularity(
+        edge_index: Tensor,
+        clustering: Tensor,
+        num_clusters: int = None,
+) -> float:
+    # Create a undirected list of unique edges
+    edge_index = torch.unique(torch.cat([
+        edge_index.t(),
+        torch.flip(edge_index, dims=[0]).t()
+    ]), dim=0, sorted=True).t()
+
+    # Calculate number of edges
+    num_edges = edge_index.shape[1]
+    if num_edges == 0:
+        raise ValueError("A graph without link has an undefined modularity")
+
+    num_nodes = len(clustering)
+    assert num_nodes >= edge_index.max().item() + 1, "Edge index contains more nodes than clustering"
+
+    # Calculate node degrees
+    degree = torch.zeros(num_nodes, dtype=torch.long)
+    (row, col) = edge_index
+    degree = degree.scatter_add(0, row, torch.ones_like(row))
+    degree = degree.scatter_add(0, col, torch.ones_like(col))
+
+    # Calculate the modularity per community
+    if not num_clusters:
+        num_clusters = clustering.max().item() + 1
+
+    src_comms, dst_comms = clustering[row], clustering[col]
+    mask = (src_comms == dst_comms).nonzero().squeeze()
+
+    weights = torch.full([len(mask)], 1.0, dtype=torch.float)
+    weights[row[mask] == col[mask]] = 2.0
+    inc = torch.zeros(num_clusters).scatter_add_(0, src_comms[mask], weights)
+
+    deg = torch.zeros(num_clusters, dtype=torch.long)
+    deg = deg.scatter_add_(0, clustering, degree)
 
     # Aggregate the modularity
     mod = (inc / num_edges) - (deg / (2 * num_edges)) ** 2

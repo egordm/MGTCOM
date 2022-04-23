@@ -1,17 +1,16 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict
 
 import torch
-from pytorch_lightning import Trainer, LightningModule, Callback
-from pytorch_lightning.trainer.states import RunningStage
+from pytorch_lightning import Trainer
 from torch import Tensor
 
 from ml.algo.transforms import SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
-from ml.models.base.embedding import BaseModel
+from ml.evaluation import silhouette_score, davies_bouldin_score
+from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
-from ml.evaluation import silhouette_score, davies_bouldin_score, link_prediction_measure
 from ml.utils import HParams, Metric, prefix_keys
 from shared import get_logger
 

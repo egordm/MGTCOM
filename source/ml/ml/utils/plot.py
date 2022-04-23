@@ -8,9 +8,14 @@ from torch import Tensor
 
 MARKER_SIZE = mpl.rcParams['lines.markersize'] ** 1.5
 
+
 @lru_cache()
 def create_colormap(n: int) -> np.ndarray:
-    return np.random.random((n, 3))
+    result = np.array(mpl.cm.get_cmap('tab10').colors)
+    return np.concatenate([
+        result,
+        np.random.random((max(n - 10, 0), 3))
+    ])
 
 
 def draw_ellipses(ax, mus, covs, colors, **kwargs):

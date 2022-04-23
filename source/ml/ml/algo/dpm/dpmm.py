@@ -25,7 +25,7 @@ class InitMode(Enum):
     SoftAssignment = 'soft_assignment'
 
 
-class DirichletProcessMixtureModel(torch.nn.Module):
+class DPMM(torch.nn.Module):
     mhmc: MHMC
     components: List[MultivariateNormal] = None
 
@@ -75,7 +75,8 @@ class DirichletProcessMixtureModel(torch.nn.Module):
         self._set_params(pis_post, mus_post, covs_post)
 
     def compute_params(self, X: Tensor, r: Tensor) -> DPMMObs:
-        obs = compute_params_soft_assignment(X, r, self.n_components)
+        obs = compute_params_soft_assignment(X, r, self.n_components) # TODO: use soft assignment by default
+        # obs = compute_params_hard_assignment(X, r.argmax(-1), self.n_components)
         return obs
 
     def estimate_assignment(self, X: Tensor) -> Tensor:

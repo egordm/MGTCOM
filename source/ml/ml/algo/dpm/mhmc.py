@@ -1,15 +1,21 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Tuple, Union, List
 
 import torch
 from sklearn.neighbors import NearestNeighbors
+from torch import Tensor
 
 from ml.algo.dpm.priors import NIWPrior, DirichletPrior, Float
 from ml.algo.dpm.statistics import DPMMObs, merge_params
 from ml.utils import Metric
+from shared import get_logger
 
-SplitDecisions = Union[torch.Tensor, List[bool]]
-MergeDecisions = Union[torch.Tensor, List[Tuple[int, int]]]
+logger = get_logger(Path(__file__).stem)
+
+
+SplitDecisions = Union[Tensor, List[bool]]
+MergeDecisions = Union[Tensor, List[Tuple[int, int]]]
 
 
 @dataclass
@@ -45,27 +51,27 @@ class MHMC:
 
         return H, log_ll_cs.argmax()
 
-    def check_split(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> bool:
+    def check_split(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[Float, bool]:
         if sum(obs_c.Ns) < self.min_split_points + 1:
-            return False  # Supercluster is too small
+            return -torch.inf, False  # Supercluster is too small
 
         if (obs_sc.Ns < self.min_split_points).any():
-            return False  # Subclusters are too small
+            return -torch.inf, False  # Subclusters are too small
 
         log_H, _ = self.compute_log_h_split(obs_c, obs_sc)
 
         # Accept split if H > 1 or with probability H
-        return log_H > 0 or bool(torch.exp(log_H) > torch.rand(1))
+        return log_H, (log_H > 0 or bool(torch.exp(log_H) > torch.rand(1)))
 
-    def check_merge(self, obs_c: DPMMObs, obs_sc: DPMMObs):
+    def check_merge(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[Float, bool, int]:
         # Compute combined cluster center
         log_H, max_k = self.compute_log_h_split(obs_c, obs_sc)
         log_H = -log_H
 
         # Accept merge if H > 1 or with probability H
-        return log_H > 0 or bool(torch.exp(log_H) > torch.rand(1)), max_k
+        return log_H, (log_H > 0 or bool(torch.exp(log_H) > torch.rand(1))), max_k
 
-    def propose_splits(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> SplitDecisions:
+    def propose_splits(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[SplitDecisions, Tensor]:
         """
         > For each cluster, we check if the cluster should be split by comparing the likelihood of the cluster under the
         current model to the likelihood of the cluster under the proposed model
@@ -78,16 +84,17 @@ class MHMC:
         """
         k = len(obs_c.mus)
         decisions = torch.zeros(k, dtype=torch.bool)
+        Hs = torch.zeros(k, dtype=torch.float)
 
         for i in range(k):
-            decisions[i] = self.check_split(
+            Hs[i], decisions[i] = self.check_split(
                 DPMMObs(obs_c.Ns[[i]], obs_c.mus[[i]], obs_c.covs[[i]]),
                 DPMMObs(obs_sc.Ns[i * 2:(i + 1) * 2], obs_sc.mus[i * 2:(i + 1) * 2], obs_sc.covs[i * 2:(i + 1) * 2])
             )
 
-        return decisions
+        return decisions, Hs
 
-    def propose_merges(self, obs_c: DPMMObs) -> MergeDecisions:
+    def propose_merges(self, obs_c: DPMMObs) -> Tuple[MergeDecisions, Tensor]:
         """
         Compute probable merge candidates by merging k neighboring superclusters.
         :param obs_c:
@@ -106,16 +113,18 @@ class MHMC:
 
         considered = set()
         decisions = []
+        Hs = []
         for (_, i, j) in candidates:
             if i in considered or j in considered:
                 continue  # Skip if any of the clusters is already considered
 
             obs_sc = DPMMObs(obs_c.Ns[[i, j]], obs_c.mus[[i, j], :], obs_c.covs[[i, j], :, :])
             obs_c_new = merge_params(obs_sc.Ns, obs_sc.mus, obs_sc.covs)
-            decision, max_k = self.check_merge(obs_c_new, obs_sc)
+            H, decision, max_k = self.check_merge(obs_c_new, obs_sc)
 
             if decision:
                 considered.update([i, j])
                 decisions.append((i, j) if max_k == 0 else (j, i))
+                Hs.append(H)
 
-        return torch.tensor(decisions, dtype=torch.long)
+        return torch.tensor(decisions, dtype=torch.long), torch.tensor(Hs, dtype=torch.float)

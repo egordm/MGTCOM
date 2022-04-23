@@ -10,14 +10,14 @@ from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams, Node2VecSampler
-from ml.models.base.embedding import HeteroEmbeddingModel
+from ml.models.base.feature_model import HeteroFeatureModel
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.models.base.hgraph_datamodule import HeteroGraphDataModule
 from ml.models.node2vec import Node2VecModel
 from ml.utils import DataLoaderParams, OptimizerParams, Metric
 
 
-class Het2VecModel(HeteroEmbeddingModel):
+class Het2VecModel(HeteroFeatureModel):
     def __init__(
             self,
             embedder: torch.nn.Module,

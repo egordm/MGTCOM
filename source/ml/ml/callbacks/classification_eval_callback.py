@@ -2,15 +2,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import torch
-from pytorch_lightning import Trainer, LightningModule, Callback
-from pytorch_lightning.trainer.states import RunningStage
+from pytorch_lightning import Trainer
 
 from ml.algo.transforms import SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
+from ml.evaluation import prediction_measure
+from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
-from ml.evaluation import link_prediction_measure, prediction_measure
-from ml.models.base.embedding import BaseModel
-from ml.utils import HParams, Metric, merge_dicts, prefix_keys
+from ml.utils import HParams, Metric, prefix_keys
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)

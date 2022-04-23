@@ -5,7 +5,7 @@ import torch
 import wandb
 from pytorch_lightning import Callback, Trainer, LightningModule
 
-from ml.models.base.embedding import BaseModel
+from ml.models.base.base_model import BaseModel
 from ml.utils.outputs import OutputExtractor
 from shared import get_logger
 

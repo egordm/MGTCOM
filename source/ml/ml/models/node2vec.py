@@ -5,19 +5,19 @@ import torch
 from torch import Tensor
 
 from datasets import GraphDataset
+from ml.models.base.feature_model import FeatureModel
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams, Node2VecSampler
 from ml.data.transforms.to_homogeneous import to_homogeneous
 
-from ml.models.base.embedding import EmbeddingModel
 from ml.models.base.hgraph_datamodule import HomogenousGraphDataModule
 from ml.utils import Metric, OptimizerParams, DataLoaderParams
 
 EPS = 1e-15
 
 
-class Node2VecModel(EmbeddingModel):
+class Node2VecModel(FeatureModel):
     def __init__(
             self,
             embedder: torch.nn.Module,
