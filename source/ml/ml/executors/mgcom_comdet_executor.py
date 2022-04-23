@@ -10,6 +10,7 @@ from datasets.utils.base import DATASET_REGISTRY
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
+from ml.callbacks.save_graph_callback import SaveGraphCallback
 from ml.data import PretrainedEmbeddingsDataset, SyntheticGMMDataset
 from ml.executors.base import BaseExecutorArgs, BaseExecutor
 from ml.models.mgcom_comdet import MGCOMComDetDataModuleParams, MGCOMComDetDataModule, MGCOMComDetModel, \
@@ -75,6 +76,12 @@ class MGCOMComDetExecutor(BaseExecutor):
             ClusteringVisualizerCallback(hparams=self.args.callback_params.clustering_visualizer),
             ClusteringEvalCallback(self.datamodule, hparams=self.args.callback_params.clustering_eval),
             SaveEmbeddingsCallback(),
+            SaveGraphCallback(
+                self.datamodule.graph_dataset.data,
+                node_labels={},
+                hparams=self.args.callback_params.save_graph,
+                clustering=True,
+            ) if self.datamodule.graph_dataset is not None else None,
         ]
 
     def run_name(self):

@@ -2,25 +2,20 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Dict, List, Union, Tuple
 
-import torch
-from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
-from torch import Tensor
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
 from ml.algo.transforms import ToHeteroMappingTransform
-from ml.data.loaders.nodes_loader import NodesLoader
-from ml.data.samplers.ballroom_sampler import BallroomSamplerParams, BallroomSampler
+from ml.data.samplers.ballroom_sampler import BallroomSamplerParams
 from ml.data.samplers.base import Sampler
-from ml.data.samplers.hybrid_sampler import HybridSampler
-from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
-from ml.data.transforms.to_homogeneous import to_homogeneous
+from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams
 from ml.layers.fc_net import FCNet, FCNetParams
-from ml.models.base.embedding import HeteroFeatureModel, FeatureCombineMode
+from ml.models.base.feature_model import FeatureCombineMode, HeteroFeatureModel
 from ml.models.mgcom_feat import MGCOMFeatDataModuleParams, MGCOMFeatModel, MGCOMTempoDataModule, MGCOMTopoDataModule, \
     MGCOMFeatModelParams
-from ml.utils import HParams, DataLoaderParams, Metric, OptimizerParams, dict_mapv
+from ml.utils import DataLoaderParams, OptimizerParams, dict_mapv
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)

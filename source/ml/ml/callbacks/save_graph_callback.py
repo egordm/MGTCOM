@@ -32,15 +32,22 @@ class SaveGraphCallback(Callback):
             self,
             data: HeteroData,
             node_labels: Dict[str, NodeLabelling] = None,
-            hparams: SaveGraphCallbackParams = None
+            hparams: SaveGraphCallbackParams = None,
+            clustering: bool = False,
     ) -> None:
         super().__init__()
         self.data = data
         self.node_labels = node_labels or {}
         self.hparams = hparams or SaveGraphCallbackParams()
+        self.clustering = clustering
 
     def on_predict_epoch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: List[Any]) -> None:
-        Z = OutputExtractor(outputs).extract_cat_kv('Z_dict')
+        outputs = OutputExtractor(outputs)
+
+        if self.clustering:
+            Z = outputs.extract_cat('X')
+        else:
+            Z = outputs.extract_cat_kv('Z_dict')
 
         logger.info("Saving graph")
         allowed_attrs = ['name', 'timestamp_from', 'timestamp_to', 'train_mask', 'test_mask', 'val_mask']
@@ -69,6 +76,12 @@ class SaveGraphCallback(Callback):
         k = min(k, 24)
         I = KMeans(-1, k, metric=self.hparams.metric).fit(Z).assign(Z)
         G.vs['precluster_km'] = I.numpy()
+
+        if self.clustering and 'z' in outputs:
+            logger.info('Saving resulting clustering')
+            z = outputs.extract_cat('z')
+            G.vs['mgtcom'] = z.numpy()
+
 
         save_dir = Path(wandb.run.dir) / 'graph.graphml'
         logger.info(f"Saving graph to {save_dir}")
