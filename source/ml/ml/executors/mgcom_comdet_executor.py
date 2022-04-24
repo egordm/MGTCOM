@@ -2,11 +2,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Type, List
 
+import torch
 from pytorch_lightning import LightningDataModule, Callback
 from torch.utils.data import Dataset
 
 from datasets import GraphDataset
 from datasets.utils.base import DATASET_REGISTRY
+from datasets.utils.conversion import igraph_from_hetero
+from ml.algo.dpm import InitMode
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
@@ -65,10 +68,20 @@ class MGCOMComDetExecutor(BaseExecutor):
         )
 
     def model(self):
+        if self.datamodule.graph_dataset is not None and self.args.hparams.cluster_init_mode == InitMode.HardAssignment:
+            logger.info('Initializing clustering model using Louvain labels')
+            G, _, _, _ = igraph_from_hetero(self.datamodule.graph_dataset.data)
+            com = G.community_multilevel()
+            z = torch.tensor(com.membership, dtype=torch.long)
+            self.args.hparams.init_k = len(com)
+        else:
+            z = None
+
         return MGCOMComDetModel(
             self.dataset.repr_dim,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
+            init_z=z,
         )
 
     def callbacks(self) -> List[Callback]:

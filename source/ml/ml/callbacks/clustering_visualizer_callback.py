@@ -12,8 +12,7 @@ from torch import Tensor
 from ml.algo.dpm import DPMMParams
 from ml.algo.transforms import DimensionReductionMode, SubsampleTransform, DimensionReductionTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
-from ml.models.dpmmsc import DPMMSubClusteringModel, Stage
-from ml.models.mgcom_comdet import MGCOMComDetModel
+from ml.models.mgcom_comdet import MGCOMComDetModel, Stage
 from ml.utils import HParams, Metric
 from ml.utils.plot import create_colormap, plot_scatter, draw_ellipses, MARKER_SIZE, plot_decision_regions
 from shared import get_logger

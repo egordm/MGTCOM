@@ -23,6 +23,7 @@ class InitMode(Enum):
     KMeans = 'kmeans'
     KMeans1D = 'kmeans1d'
     SoftAssignment = 'soft_assignment'
+    HardAssignment = 'hard_assignment'
 
 
 class DPMM(torch.nn.Module):
@@ -54,14 +55,20 @@ class DPMM(torch.nn.Module):
         self._pis.data, self._mus.data, self._covs.data = pis, mus, covs
         self.components = [MultivariateNormal(mu, cov) for mu, cov in zip(mus, covs)]
 
-    def reinitialize(self, X: Tensor, r: Optional[Tensor], mode: InitMode = InitMode.KMeans):
+    def reinitialize(
+            self, X: Tensor, mode: InitMode = InitMode.KMeans,
+            r: Optional[Tensor] = None, z: Optional[Tensor] = None
+    ):
         if mode == InitMode.SoftAssignment:
+            assert r is not None, 'r is required for soft assignment initialization'
             obs = compute_params_soft_assignment(X, r, self.n_components)
         else:
             if mode == InitMode.KMeans:
                 z = KMeans(self.repr_dim, self.n_components, self.metric).fit(X).assign(X)
             elif mode == InitMode.KMeans1D:
                 z = KMeans1D(self.repr_dim, self.n_components, self.metric).fit(X).assign(X)
+            elif mode == InitMode.HardAssignment:
+                assert z is not None, 'z must be provided for hard assignment'
             else:
                 raise NotImplementedError(f'Unknown initialization mode: {mode}')
 
@@ -75,7 +82,7 @@ class DPMM(torch.nn.Module):
         self._set_params(pis_post, mus_post, covs_post)
 
     def compute_params(self, X: Tensor, r: Tensor) -> DPMMObs:
-        obs = compute_params_soft_assignment(X, r, self.n_components) # TODO: use soft assignment by default
+        obs = compute_params_soft_assignment(X, r, self.n_components)  # TODO: use soft assignment by default
         # obs = compute_params_hard_assignment(X, r.argmax(-1), self.n_components)
         return obs
 

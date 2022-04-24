@@ -41,9 +41,9 @@ class StackedDPMM(torch.nn.Module):
             r_k = r[z == i]
             if len(X_k) < self.n_subcomponents:
                 logger.warning(f'Encountered empty cluster {i} while updating subclusters. Reinitializing')
-                component.reinitialize(X, r_k, mode=mode)
+                component.reinitialize(X, mode=mode, r=r_k)
             elif not self.is_initialized or not incremental:
-                component.reinitialize(X_k, r_k, mode=mode)
+                component.reinitialize(X_k, mode=mode, r=r_k)
 
     def update_params(self, obs: DPMMObs):
         for i, component in enumerate(self.components):

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
+from typing import Optional
 
 import torch
 import torchmetrics
@@ -98,10 +99,10 @@ class DPMMSCModel(torch.nn.Module):
     def estimate_assignment(self, X: Tensor) -> Tensor:
         return self.clusters.estimate_assignment(X)
 
-    def reinitialize(self, X: Tensor, incremental=True):
+    def reinitialize(self, X: Tensor, incremental=True, z: Optional[Tensor] = None) -> None:
         if not self.clusters.is_initialized or not incremental:
             logger.info(f'Initializing clusters with {self.hparams.cluster_init_mode}')
-            self.clusters.reinitialize(X, None, self.hparams.cluster_init_mode)
+            self.clusters.reinitialize(X, self.hparams.cluster_init_mode, z=z)
 
         if self.hparams.subcluster and (not self.subclusters.is_initialized or not incremental):
             logger.info(f'Initializing subclusters with {self.hparams.subcluster_init_mode}')

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Union, List, Optional, Any
 
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EPOCH_OUTPUT
+from torch import Tensor
 from torch.utils.data import Dataset
 
 from datasets import GraphDataset
@@ -29,13 +30,15 @@ class MGCOMComDetModel(BaseModel):
             self,
             repr_dim: int,
             hparams: MGCOMComDetModelParams,
-            optimizer_params: Optional[OptimizerParams] = None
+            optimizer_params: Optional[OptimizerParams] = None,
+            init_z: Optional[Tensor] = None,
     ) -> None:
         super().__init__(optimizer_params)
         self.save_hyperparameters(hparams.to_dict())
         self.automatic_optimization = False
 
         self.dpmm_model = DPMMSCModel(repr_dim, hparams)
+        self.init_z = init_z
         self.stage = Stage.GatherSamples
         self.sample_space_version = 0
 
@@ -61,7 +64,7 @@ class MGCOMComDetModel(BaseModel):
 
         if self.stage == Stage.GatherSamples:
             X = self.train_outputs.extract_cat('X')
-            self.dpmm_model.reinitialize(X, incremental=True)
+            self.dpmm_model.reinitialize(X, incremental=True, z=self.init_z)
             self.stage = Stage.Clustering
         elif self.stage == Stage.Clustering:
             self.dpmm_model.step_m()
