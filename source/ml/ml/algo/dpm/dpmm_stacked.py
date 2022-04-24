@@ -5,7 +5,7 @@ import torch
 from torch import Tensor
 from torch.nn import ModuleList
 
-from ml.algo.dpm.dpmm import DPMM, InitMode
+from ml.algo.dpm.dpmm import DPMM, InitMode, UpdateMode
 from ml.algo.dpm.mhmc import MHMC
 from ml.algo.dpm.statistics import DPMMObs
 from ml.utils import Metric, unique_count
@@ -55,7 +55,7 @@ class StackedDPMM(torch.nn.Module):
                 ),
             )
 
-    def compute_params(self, X: Tensor, z: Tensor, r: Tensor) -> DPMMObs:
+    def compute_params(self, X: Tensor, z: Tensor, r: Tensor, mode: UpdateMode = UpdateMode.HardAssignment) -> DPMMObs:
         Ns = unique_count(z, self.n_components)
 
         Ns_K = torch.zeros(self.n_components * self.n_subcomponents)
@@ -68,7 +68,7 @@ class StackedDPMM(torch.nn.Module):
                 Ns_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents],
                 mus_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents, :],
                 covs_K[i * self.n_subcomponents: (i + 1) * self.n_subcomponents, :, :]
-            ) = component.compute_params(X_k, r_k)
+            ) = component.compute_params(X_k, r_k, mode=mode)
 
         return DPMMObs(Ns_K, mus_K, covs_K)
 

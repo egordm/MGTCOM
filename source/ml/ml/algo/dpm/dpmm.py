@@ -26,6 +26,11 @@ class InitMode(Enum):
     HardAssignment = 'hard_assignment'
 
 
+class UpdateMode(Enum):
+    SoftAssignment = 'soft_assignment'
+    HardAssignment = 'hard_assignment'
+
+
 class DPMM(torch.nn.Module):
     mhmc: MHMC
     components: List[MultivariateNormal] = None
@@ -55,6 +60,9 @@ class DPMM(torch.nn.Module):
         self._pis.data, self._mus.data, self._covs.data = pis, mus, covs
         self.components = [MultivariateNormal(mu, cov) for mu, cov in zip(mus, covs)]
 
+    def uninit(self):
+        self.components = None
+
     def reinitialize(
             self, X: Tensor, mode: InitMode = InitMode.KMeans,
             r: Optional[Tensor] = None, z: Optional[Tensor] = None
@@ -81,9 +89,14 @@ class DPMM(torch.nn.Module):
         mus_post, covs_post = self.mhmc.mu_cov_prior.compute_posterior_mv(obs.Ns, obs.mus, obs.covs)
         self._set_params(pis_post, mus_post, covs_post)
 
-    def compute_params(self, X: Tensor, r: Tensor) -> DPMMObs:
-        obs = compute_params_soft_assignment(X, r, self.n_components)  # TODO: use soft assignment by default
-        # obs = compute_params_hard_assignment(X, r.argmax(-1), self.n_components)
+    def compute_params(self, X: Tensor, r: Tensor, mode: UpdateMode = UpdateMode.HardAssignment) -> DPMMObs:
+        if mode == UpdateMode.SoftAssignment:
+            obs = compute_params_soft_assignment(X, r, self.n_components)
+        elif mode == UpdateMode.HardAssignment:
+            obs = compute_params_hard_assignment(X, r.argmax(-1), self.n_components)
+        else:
+            raise NotImplementedError(f'Unknown update mode: {mode}')
+
         return obs
 
     def estimate_assignment(self, X: Tensor) -> Tensor:

@@ -8,7 +8,7 @@ import torchmetrics
 from torch import Tensor
 
 from ml.algo.dpm import InitMode, MHMC, DirichletPrior, NIWPrior, DPMM, StackedDPMM, BurnInMonitor, DPMMObs, \
-    merge_params, DPMMParams
+    merge_params, DPMMParams, UpdateMode
 from ml.algo.dpm.stochastic import DPMMObsMeanFilter
 from ml.utils import Metric, HParams, mask_from_idx
 from shared import get_logger
@@ -43,6 +43,8 @@ class DPMMSCModelParams(HParams):
 
     cluster_init_mode: InitMode = InitMode.KMeans
     subcluster_init_mode: InitMode = InitMode.KMeans1D
+    cluster_update_mode: UpdateMode = UpdateMode.HardAssignment
+    subcluster_update_mode: UpdateMode = UpdateMode.HardAssignment
 
 
 class DPMMSCModel(torch.nn.Module):
@@ -115,13 +117,13 @@ class DPMMSCModel(torch.nn.Module):
         assert self.clusters.is_initialized, "Cluster model is not initialized"
         r = self.clusters.estimate_assignment(X)
         z = r.argmax(dim=-1)
-        obs_c = self.clusters.compute_params(X, r)
+        obs_c = self.clusters.compute_params(X, r, mode=self.hparams.cluster_update_mode)
         self.cluster_mp.push(obs_c)
 
         if self.hparams.subcluster:
             assert self.subclusters.is_initialized, "Subcluster model is not initialized"
             ri = self.subclusters.estimate_assignment(X, z)
-            obs_sc = self.subclusters.compute_params(X, z, ri)
+            obs_sc = self.subclusters.compute_params(X, z, ri, mode=self.hparams.subcluster_update_mode)
             self.subcluster_mp.push(obs_sc)
 
         # Keep track of the data log likelihood
@@ -136,11 +138,13 @@ class DPMMSCModel(torch.nn.Module):
         if self.hparams.subcluster:
             logger.info("Updating subcluster params")
             obs_sc = self.subcluster_mp.compute()
-            if (obs_sc.Ns == 0).any():
-                # TODO: handle this case or basically where the N gets bit too low
-                logger.warning("Some subclusters have no samples. TODO: fix this")
-
-            self.subclusters.update_params(obs_sc)
+            if (obs_sc.Ns < 1).any():
+                logger.warning("Some subclusters have no samples. Forcing reinitialization")
+                for i in (obs_sc.Ns < 1).nonzero().squeeze():
+                    self.subclusters[i].uninit()
+                    self.prev_action = Action.Split  # Ensure no splits take place (only merges)
+            else:
+                self.subclusters.update_params(obs_sc)
 
         # Monitor Data log likelihood. If it oscillates, then we have converged
         data_ll = self.data_ll_monitor.compute()
