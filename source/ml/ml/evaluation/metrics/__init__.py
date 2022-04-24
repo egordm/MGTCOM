@@ -1,3 +1,3 @@
 from .clustering import *
-from .modularity import *
+from .community import *
 from .prediction import *

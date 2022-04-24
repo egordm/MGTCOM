@@ -2,15 +2,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict
 
-import torch
-from pytorch_lightning import Trainer, LightningModule, Callback
+from pytorch_lightning import Trainer, LightningModule
 from torch import Tensor
 
-from datasets.utils.conversion import igraph_from_hetero
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.data.transforms.to_homogeneous import to_homogeneous
-from ml.evaluation import silhouette_score, davies_bouldin_score, newman_girvan_modularity, \
-    newman_girvan_modularity_hetero
+from ml.evaluation import silhouette_score, davies_bouldin_score, newman_girvan_modularity
+from ml.evaluation.metrics.community import conductance
 from ml.models.base.base_model import BaseModel
 from ml.models.mgcom_comdet import MGCOMComDetDataModule
 from ml.utils import HParams, Metric, prefix_keys
@@ -70,6 +68,7 @@ class ClusteringEvalCallback(IntermittentCallback):
             ))
 
             pl_module.log('modularity', metrics['modularity'], logger=False, prog_bar=True)
+            pl_module.log('conductance', metrics['conductance'], logger=False, prog_bar=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
         if 'X' not in pl_module.val_outputs:
@@ -102,4 +101,5 @@ class ClusteringEvalCallback(IntermittentCallback):
     def community_metrics(z: Tensor, edge_index: Tensor) -> Dict[str, float]:
         return {
             'modularity': newman_girvan_modularity(edge_index, z),
+            'conductance': conductance(edge_index, z),
         }
