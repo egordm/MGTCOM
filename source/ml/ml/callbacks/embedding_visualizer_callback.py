@@ -11,6 +11,7 @@ from torch import Tensor
 from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.models.base.base_model import BaseModel
+from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
 from ml.utils import HParams, Metric
 from ml.utils.labelling import NodeLabelling
 from ml.utils.plot import plot_scatter, create_colormap, MARKER_SIZE
@@ -50,6 +51,9 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if trainer.current_epoch == 0:
+            return
+
+        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage == StageE2E.Clustering:
             return
 
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")

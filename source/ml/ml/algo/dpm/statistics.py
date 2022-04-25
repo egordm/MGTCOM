@@ -24,7 +24,7 @@ def compute_params_hard_assignment(X: Tensor, z: Tensor, k: int) -> DPMMObs:
     """
     Ns = unique_count(z, k)
 
-    mus = scatter_sum(X, z, k) / Ns.unsqueeze(1)
+    mus = scatter_sum(X, z, k) / (Ns.unsqueeze(1) + EPS)
     covs = torch.stack([
         compute_cov(X[z == i], mus[i])
         for i in range(k)

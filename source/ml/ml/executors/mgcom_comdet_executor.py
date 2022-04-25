@@ -86,8 +86,13 @@ class MGCOMComDetExecutor(BaseExecutor):
 
     def callbacks(self) -> List[Callback]:
         return [
-            ClusteringVisualizerCallback(hparams=self.args.callback_params.clustering_visualizer),
-            ClusteringEvalCallback(self.datamodule, hparams=self.args.callback_params.clustering_eval),
+            ClusteringVisualizerCallback(
+                hparams=self.args.callback_params.clustering_visualizer
+            ),
+            ClusteringEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.clustering_eval
+            ),
             SaveEmbeddingsCallback(),
             SaveGraphCallback(
                 self.datamodule.graph_dataset.data,

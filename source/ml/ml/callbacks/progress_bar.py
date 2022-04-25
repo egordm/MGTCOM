@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, Union
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import TQDMProgressBar
@@ -16,5 +16,3 @@ class CustomProgressBar(TQDMProgressBar):
         trainer.logger.log_metrics({
             'trainer/epoch': trainer.current_epoch,
         })
-
-

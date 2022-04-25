@@ -19,8 +19,7 @@ class BaseModel(LightningModule):
         super().__init__()
         if optimizer_params is not None:
             self.save_hyperparameters(optimizer_params.to_dict())
-
-        self.lr = self.hparams.lr
+            self.lr = self.hparams.lr
 
     def on_train_epoch_start(self) -> None:
         self.train_outputs = None

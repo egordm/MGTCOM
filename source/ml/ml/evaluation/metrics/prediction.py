@@ -36,7 +36,8 @@ def link_prediction_measure(
 
 def prediction_measure(
         X: Tensor,
-        y: Tensor
+        y: Tensor,
+        max_iter: int = 100,
 ) -> Tuple[float, Dict[str, float]]:
     """
     It fits a logistic regression model to the data and returns the accuracy and ROC AUC
@@ -52,7 +53,7 @@ def prediction_measure(
     X = X.numpy()
     X = StandardScaler().fit_transform(X)
     y = y.numpy()
-    clf = LogisticRegression(solver='lbfgs', multi_class='auto').fit(X, y)
+    clf = LogisticRegression(solver='lbfgs', multi_class='auto', max_iter=max_iter).fit(X, y)
     # clf = SVC().fit(X, y)
     probs = clf.predict_proba(X)
     y_hat = probs.argmax(axis=1)

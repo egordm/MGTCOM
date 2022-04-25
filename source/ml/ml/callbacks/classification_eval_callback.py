@@ -59,7 +59,7 @@ class ClassificationEvalCallback(IntermittentCallback):
         Z = self.val_subsample.transform(Z)
 
         for label_name, labels in self.val_labels.items():
-            acc, metrics = prediction_measure(Z, labels)
+            acc, metrics = prediction_measure(Z, labels, max_iter=200)
 
             trainer.logger.log_metrics(prefix_keys(metrics, f'eval/val/cl/{label_name}/'))
 
@@ -76,6 +76,6 @@ class ClassificationEvalCallback(IntermittentCallback):
         Z = self.test_subsample.transform(Z)
 
         for label_name, labels in self.test_labels.items():
-            acc, metrics = prediction_measure(Z, labels)
+            acc, metrics = prediction_measure(Z, labels, max_iter=200)
 
             trainer.logger.log_metrics(prefix_keys(metrics, f'eval/val/cl/{label_name}/'))

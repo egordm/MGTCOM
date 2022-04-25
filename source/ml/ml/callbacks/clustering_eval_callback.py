@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 from pytorch_lightning import Trainer, LightningModule
 from torch import Tensor
@@ -11,6 +11,7 @@ from ml.evaluation import silhouette_score, davies_bouldin_score, newman_girvan_
 from ml.evaluation.metrics.community import conductance
 from ml.models.base.base_model import BaseModel
 from ml.models.mgcom_comdet import MGCOMComDetDataModule
+from ml.models.mgcom_e2e import MGCOME2EDataModule
 from ml.utils import HParams, Metric, prefix_keys
 from shared import get_logger
 
@@ -28,7 +29,7 @@ class ClusteringEvalCallbackParams(HParams):
 class ClusteringEvalCallback(IntermittentCallback):
     def __init__(
             self,
-            datamodule: MGCOMComDetDataModule,
+            datamodule: Union[MGCOMComDetDataModule, MGCOME2EDataModule],
             hparams: ClusteringEvalCallbackParams = None
     ) -> None:
         self.hparams = hparams or ClusteringEvalCallbackParams()
@@ -36,15 +37,16 @@ class ClusteringEvalCallback(IntermittentCallback):
         self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 
-        if datamodule.graph_dataset is not None:
+        if isinstance(datamodule, MGCOME2EDataModule) or datamodule.graph_dataset is not None:
+            data = datamodule.val_data if isinstance(datamodule, MGCOME2EDataModule) else datamodule.graph_dataset
             hdata = to_homogeneous(
-                datamodule.graph_dataset.data,
+                data,
                 node_attrs=[], edge_attrs=[],
                 add_node_type=False, add_edge_type=False
             )
-            self.edge_index = hdata.edge_index
+            self.val_edge_index = hdata.edge_index
         else:
-            self.edge_index = None
+            self.val_edge_index = None
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if 'X' not in pl_module.val_outputs or 'r' not in pl_module.val_outputs:
@@ -60,8 +62,8 @@ class ClusteringEvalCallback(IntermittentCallback):
             'eval/val/clu/'
         ))
 
-        if self.edge_index is not None:
-            metrics = self.community_metrics(z, self.edge_index)
+        if self.val_edge_index is not None:
+            metrics = self.community_metrics(z, self.val_edge_index)
             trainer.logger.log_metrics(prefix_keys(
                 metrics,
                 'eval/val/clu/'
@@ -84,9 +86,9 @@ class ClusteringEvalCallback(IntermittentCallback):
             'eval/test/clu/'
         ))
 
-        if self.edge_index is not None:
+        if self.val_edge_index is not None:
             trainer.logger.log_metrics(prefix_keys(
-                self.community_metrics(z, self.edge_index),
+                self.community_metrics(z, self.val_edge_index),
                 'eval/val/clu/'
             ))
 

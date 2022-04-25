@@ -64,6 +64,9 @@ class MHMC:
         return log_H, (log_H > 0 or bool(torch.exp(log_H) > torch.rand(1)))
 
     def check_merge(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[Float, bool, int]:
+        if (obs_sc.Ns < 1).any():  # One of the subclusters is empty. Always merge.
+            return torch.inf, True, obs_sc.Ns.argmax()
+
         # Compute combined cluster center
         log_H, max_k = self.compute_log_h_split(obs_c, obs_sc)
         log_H = -log_H

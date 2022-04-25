@@ -11,6 +11,7 @@ from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.evaluation import silhouette_score, davies_bouldin_score
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
+from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
 from ml.utils import HParams, Metric, prefix_keys
 from shared import get_logger
 
@@ -51,6 +52,9 @@ class EmbeddingEvalCallback(IntermittentCallback):
         }
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
+        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != StageE2E.Feature:
+            return
+
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
         if pl_module.heterogeneous:
             Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True)

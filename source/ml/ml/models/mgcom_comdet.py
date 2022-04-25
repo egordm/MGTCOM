@@ -9,10 +9,12 @@ from torch import Tensor
 from torch.utils.data import Dataset
 
 from datasets import GraphDataset
+from ml.algo.dpm import eps_norm
 from ml.algo.dpm.dpmm_sc import DPMMSCModelParams, DPMMSCModel
 from ml.models.base.base_model import BaseModel
 from ml.models.base.clustering_datamodule import ClusteringDataModule
 from ml.utils import HParams, DataLoaderParams, OptimizerParams
+from ml.utils.outputs import OutputExtractor
 
 
 class Stage(IntEnum):
@@ -46,7 +48,19 @@ class MGCOMComDetModel(BaseModel):
     def k(self):
         return self.dpmm_model.k
 
-    def training_step(self, batch) -> STEP_OUTPUT:
+    @property
+    def is_done(self) -> bool:
+        return self.dpmm_model.is_done
+
+    @property
+    def mus(self) -> Tensor:
+        return self.dpmm_model.clusters.mus
+
+    def on_train_batch_start(self, batch: Any, batch_idx: int, unused: int = 0) -> Optional[int]:
+        if self.is_done:
+            return -1
+
+    def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
         X = batch
         if self.stage == Stage.Clustering:
             self.dpmm_model.step_e(X)
@@ -55,15 +69,11 @@ class MGCOMComDetModel(BaseModel):
             'X': X
         }
 
-    def on_train_batch_start(self, batch: Any, batch_idx: int, unused: int = 0) -> Optional[int]:
-        if self.dpmm_model.is_done:
-            return -1
-
     def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         super().training_epoch_end(outputs)
 
         if self.stage == Stage.GatherSamples:
-            X = self.train_outputs.extract_cat('X')
+            X = self.train_outputs.extract_cat('X', cache=True)
             self.dpmm_model.reinitialize(X, incremental=True, z=self.init_z)
             self.stage = Stage.Clustering
         elif self.stage == Stage.Clustering:
@@ -98,6 +108,9 @@ class MGCOMComDetModel(BaseModel):
 
     def predict_step(self, batch, batch_idx: int, dataloader_idx: int = 0):
         return self.forward(batch)
+
+    def estimate_assignment(self, X: Tensor) -> Tensor:
+        return self.dpmm_model.clusters.estimate_assignment(X)
 
 
 @dataclass

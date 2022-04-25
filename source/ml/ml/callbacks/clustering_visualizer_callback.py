@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,6 +14,7 @@ from ml.algo.dpm import DPMMParams
 from ml.algo.transforms import DimensionReductionMode, SubsampleTransform, DimensionReductionTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.models.mgcom_comdet import MGCOMComDetModel, Stage
+from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
 from ml.utils import HParams, Metric
 from ml.utils.plot import create_colormap, plot_scatter, draw_ellipses, MARKER_SIZE, plot_decision_regions
 from shared import get_logger
@@ -56,7 +58,13 @@ class ClusteringVisualizerCallback(IntermittentCallback):
         ])
         return DPMMParams(params.pis, mus, sigmas)
 
-    def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: MGCOMComDetModel) -> None:
+    def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: Union[MGCOMComDetModel, MGCOME2EModel]) -> None:
+        if isinstance(pl_module, MGCOME2EModel):
+            if pl_module.stage == StageE2E.Feature or pl_module.val_outputs is None:
+                return
+
+            pl_module = pl_module.clustering_model
+
         if pl_module.stage == Stage.GatherSamples:
             return
 
@@ -145,8 +153,8 @@ class ClusteringVisualizerCallback(IntermittentCallback):
 
         # Crop the axes
         for ax in axes:
-            ax.set_xlim([_min[0], _max[0]])
-            ax.set_ylim([_min[1], _max[1]])
+            ax.set_xlim([float(_min[0]), float(_max[0])])
+            ax.set_ylim([float(_min[1]), float(_max[1])])
             ax.axes.xaxis.set_visible(False)
             ax.axes.yaxis.set_visible(False)
 

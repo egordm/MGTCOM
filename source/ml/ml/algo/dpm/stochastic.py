@@ -4,6 +4,7 @@ import torch
 from torch import Tensor
 
 from ml.algo.dpm.statistics import DPMMObs
+from ml.utils import EPS
 
 
 class DPMMObsMeanFilter:
@@ -26,8 +27,8 @@ class DPMMObsMeanFilter:
     def compute(self) -> DPMMObs:
         return DPMMObs(
             self.Ns,
-            self.mus / self.Ns.reshape(-1, 1),
-            self.covs / self.Ns.reshape(-1, 1, 1)
+            self.mus / (self.Ns.reshape(-1, 1) + EPS),
+            self.covs / (self.Ns.reshape(-1, 1, 1) + EPS),
         )
 
     def reset(self, k: int) -> None:

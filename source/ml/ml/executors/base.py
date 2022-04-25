@@ -136,6 +136,7 @@ class BaseExecutor:
             auto_lr_find=True,
             enable_model_summary=False,
         )
+        self.before_training(trainer)
 
         self.logger.info(f'Training {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         trainer.fit(self.model, self.datamodule)
@@ -157,6 +158,9 @@ class BaseExecutor:
     @abstractmethod
     def callbacks(self) -> List[Callback]:
         raise NotImplementedError
+
+    def before_training(self, trainer: Trainer):
+        pass
 
     def run_name(self):
         return 'base'

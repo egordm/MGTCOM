@@ -33,7 +33,7 @@ class OutputExtractor:
         return self.check_cache(key, lambda: torch.cat(list(self.extract_cat_dict(key, False).values()), dim=0), cache)
 
     def extract_mean(self, key, cache=False) -> Union[Tensor, float]:
-        return self.check_cache(key, sum(self.extract(key)) / len(self.outputs), cache)
+        return self.check_cache(key, lambda: sum(self.extract(key)) / len(self.outputs), cache)
 
     def __contains__(self, key):
         return any(key in d for d in flat_iter(self.outputs))

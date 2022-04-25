@@ -19,7 +19,7 @@ DATASET_REGISTRY = _Registry()
 Snapshots = Union[Tensor, List[Tuple[int, int]]]
 
 
-class GraphDataset(THGInMemoryDataset):
+class BaseGraphDataset(THGInMemoryDataset):
     name: str = ''
     description: str = ''
     tags: List[str] = []
@@ -27,6 +27,15 @@ class GraphDataset(THGInMemoryDataset):
     data: HeteroData
     snapshots: Dict[int, Snapshots] = None
 
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}()'
+
+    @property
+    def metadata(self) -> Metadata:
+        return self.data.metadata()
+
+
+class GraphDataset(BaseGraphDataset):
     def __init__(
             self,
             root: Optional[str] = None,
@@ -48,13 +57,6 @@ class GraphDataset(THGInMemoryDataset):
 
     def after_load(self):
         pass
-
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}()'
-
-    @property
-    def metadata(self) -> Metadata:
-        return self.data.metadata()
 
     def _process_node(self, data: HeteroData, store: NodeStorage, df: pd.DataFrame):
         df = df.set_index('id').sort_index()

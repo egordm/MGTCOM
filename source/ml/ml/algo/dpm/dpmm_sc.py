@@ -140,8 +140,8 @@ class DPMMSCModel(torch.nn.Module):
             obs_sc = self.subcluster_mp.compute()
             if (obs_sc.Ns < 1).any():
                 logger.warning("Some subclusters have no samples. Forcing reinitialization")
-                for i in (obs_sc.Ns < 1).nonzero().squeeze():
-                    self.subclusters[i].uninit()
+                for i in (obs_sc.Ns < 1).nonzero().squeeze(dim=1):
+                    self.subclusters[int(i / 2)].uninit()
                     self.prev_action = Action.Split  # Ensure no splits take place (only merges)
             else:
                 self.subclusters.update_params(obs_sc)
@@ -149,7 +149,12 @@ class DPMMSCModel(torch.nn.Module):
         # Monitor Data log likelihood. If it oscillates, then we have converged
         data_ll = self.data_ll_monitor.compute()
         burned_in = self.burnin_monitor.update(data_ll)
-        if burned_in:
+
+        if (obs_c.Ns < 1).any():
+            logger.info('Detected empty super clusters. Merging')
+            self.merge(obs_c, obs_sc)
+            self.prev_action = Action.Merge
+        elif burned_in:
             logger.info("Cluster params have converged")
             if self.hparams.subcluster and self.hparams.mutate:
                 self.mutate(obs_c, obs_sc)
