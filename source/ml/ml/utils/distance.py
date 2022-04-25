@@ -38,7 +38,7 @@ class Metric(Enum):
         if self == Metric.L2:
             return pairwise_l2_sim
         elif self == Metric.COSINE:
-            return pairwise_cosine_dist
+            return pairwise_cosine
         elif self == Metric.DOTP:
             return pairwise_dotp
         else:
@@ -49,7 +49,7 @@ class Metric(Enum):
         if self == Metric.L2:
             return pairwise_l2
         elif self == Metric.COSINE:
-            return pairwise_cosine
+            return pairwise_cosine_dist
         elif self == Metric.DOTP:
             return pairwise_dotp_dist
 

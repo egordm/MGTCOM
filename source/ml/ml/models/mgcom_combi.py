@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Dict, List, Union, Tuple
 
 import torch.nn
-from pytorch_lightning.utilities.types import STEP_OUTPUT
+from pytorch_lightning.utilities.types import STEP_OUTPUT, EPOCH_OUTPUT
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
@@ -37,7 +37,8 @@ class MGCOMCombiModelParams(MGCOMFeatModelParams):
     tempo_hidden_dim: List[int] = field(default_factory=lambda: [32])
     tempo_weight: float = 1.0
 
-    cluster_weight: float = 1.0
+    # cluster_weight: float = 0.2
+    cluster_weight: float = 0.1
 
     emb_combine_mode: FeatureCombineMode = FeatureCombineMode.CONCAT
 
@@ -158,7 +159,7 @@ class MGCOMCombiModel(HeteroFeatureModel):
         else:
             Z_tempo = None
 
-        if self.hparams.use_cluster and not self.pretraining:
+        if self.use_cluster_loss:
             if self.hparams.use_topo and self.hparams.use_tempo:
                 Z_combi = self.embedding_combine_fn([Z_topo, Z_tempo])
             else:
@@ -174,6 +175,20 @@ class MGCOMCombiModel(HeteroFeatureModel):
             "loss": loss,
             **out,
         }
+
+    @property
+    def use_cluster_loss(self):
+        return self.hparams.use_cluster and not self.pretraining
+
+    def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        super().training_epoch_end(outputs)
+
+        if self.hparams.use_topo:
+            self.log('epoch_loss_topo', self.train_outputs.extract_mean('loss_topo'), prog_bar=True)
+        if self.hparams.use_tempo:
+            self.log('epoch_loss_tempo', self.train_outputs.extract_mean('loss_tempo'), prog_bar=True)
+        if self.use_cluster_loss:
+            self.log('epoch_loss_cluster', self.train_outputs.extract_mean('loss_cluster'), prog_bar=True)
 
 
 @dataclass

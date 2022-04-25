@@ -25,7 +25,7 @@ class MGCOME2EModelParams(HParams):
 
     pretrain_epochs: int = 20
     feat_epochs: int = 10
-    cluster_epochs: int = 10
+    cluster_epochs: int = 20
 
 
 class MGCOME2EModel(HeteroFeatureModel):
@@ -56,6 +56,11 @@ class MGCOME2EModel(HeteroFeatureModel):
         self.stage = Stage.Feature
         self.epoch_counter = 0
 
+    def setup(self, stage: Optional[str] = None) -> None:
+        super().setup(stage)
+        self.combi_model.trainer = self.trainer
+        self.clustering_model.trainer = self.trainer
+
     @property
     def repr_dim(self):
         return self.combi_model.repr_dim
@@ -76,17 +81,12 @@ class MGCOME2EModel(HeteroFeatureModel):
 
     def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         super().training_epoch_end(outputs)
+        self.combi_model._current_fx_name = self._current_fx_name
+        self.clustering_model._current_fx_name = self._current_fx_name
 
         if self.stage == Stage.Feature:
-            self.log('epoch_loss', self.train_outputs.extract_mean('loss'), prog_bar=True)
-            if self.hparams.combi_params.use_topo:
-                self.log('epoch_loss_topo', self.train_outputs.extract_mean('loss_topo'), prog_bar=True)
-            if self.hparams.combi_params.use_tempo:
-                self.log('epoch_loss_tempo', self.train_outputs.extract_mean('loss_tempo'), prog_bar=True)
-            if 'loss_cluster' in self.train_outputs:
-                self.log('epoch_loss_cluster', self.train_outputs.extract_mean('loss_cluster'), prog_bar=True)
-
-        if self.stage == Stage.Clustering:
+            self.combi_model.training_epoch_end(outputs)
+        elif self.stage == Stage.Clustering:
             self.clustering_model.training_epoch_end(outputs)
 
         if self.current_epoch == self.hparams.pretrain_epochs:
