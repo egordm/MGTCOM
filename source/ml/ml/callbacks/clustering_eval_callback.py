@@ -70,7 +70,6 @@ class ClusteringEvalCallback(IntermittentCallback):
             ))
 
             pl_module.log('modularity', metrics['modularity'], logger=False, prog_bar=True)
-            pl_module.log('conductance', metrics['conductance'], logger=False, prog_bar=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
         if 'X' not in pl_module.val_outputs:

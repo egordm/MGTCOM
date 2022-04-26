@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import Optional
 
+import torch
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
 from torch_geometric.data import HeteroData, Data
 
@@ -45,9 +46,16 @@ class HomogenousGraphDataModule(GraphDataModule):
         )
 
     def predict_dataloader(self) -> EVAL_DATALOADERS:
+        # Node order dict is in same order as self.data
+        if 'id' in self.test_data.keys:
+            node_order = torch.argsort(self.test_data.id)
+        else:
+            node_order = None
+
         return NodesLoader(
-            self.data.num_nodes,
-            transform=self.eval_sampler(self.data),
+            self.test_data.num_nodes,
+            node_order=node_order,
+            transform=self.eval_sampler(self.test_data),
             shuffle=False,
             **self.loader_params.to_dict(),
         )
@@ -89,9 +97,19 @@ class HeteroGraphDataModule(GraphDataModule):
         )
 
     def predict_dataloader(self) -> EVAL_DATALOADERS:
+        # Node order dict is in same order as self.data
+        if 'id' in self.test_data.keys:
+            node_order_dict = {
+                node_type: torch.argsort(ids)
+                for node_type, ids in self.test_data.id_dict.items()
+            }
+        else:
+            node_order_dict = None
+
         return HeteroNodesLoader(
-            self.data.num_nodes_dict,
-            transform_nodes_fn=self.eval_sampler(self.data), # TODO: embedding methods wont like this!
+            self.test_data.num_nodes_dict,
+            node_order_dict=node_order_dict,
+            transform_nodes_fn=self.eval_sampler(self.test_data),  # TODO: embedding methods wont like this!
             shuffle=False,
             **self.loader_params.to_dict(),
         )

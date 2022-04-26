@@ -70,17 +70,19 @@ class EvalNodeSplitTransform(BaseTransform):
 
         result = data.clone()
         for node_type in data.node_types:
+            ids = torch.arange(data[node_type].num_nodes)
             mask = new_mask[node_type]
             out_store = result[node_type]
             store = data[out_store._key]
+            perm = torch.argsort(new_ids[node_type][mask])
 
             for key, value in store.items():
                 if store.is_node_attr(key):
-                    out_store[key] = value[mask]
+                    out_store[key] = value[mask][perm]
                 elif isinstance(value, np.ndarray) and len(value) == store.num_nodes:
-                    out_store[key] = value[mask]
+                    out_store[key] = value[mask][perm]
 
-            out_store.id = mask.nonzero().squeeze()
+            out_store.id = ids[mask][perm]
 
         for out_store in result.edge_stores:
             store = data[out_store._key]

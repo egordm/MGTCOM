@@ -54,7 +54,7 @@ def prediction_measure(
     X = StandardScaler().fit_transform(X)
     y = y.numpy()
     clf = LogisticRegression(solver='lbfgs', multi_class='auto', max_iter=max_iter).fit(X, y)
-    # clf = SVC().fit(X, y)
+    # clf = LogisticRegression(solver='saga', multi_class='auto', max_iter=max_iter).fit(X, y)
     probs = clf.predict_proba(X)
     y_hat = probs.argmax(axis=1)
 
