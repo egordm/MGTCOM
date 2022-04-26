@@ -1,4 +1,5 @@
 import shutil
+from typing import List
 
 import torch
 
@@ -45,15 +46,21 @@ class StarWars(GraphDataset):
         data = SortEdges()(data)
         data = NormalizeTimestamps()(data)
 
-        snapshots = {
+        self.snapshots = {
             n: DefineSnapshots(n)(data)
             for n in [5, 7]
         }
 
-        torch.save(snapshots, self.processed_paths[1])
+        torch.save(self.snapshots, self.processed_paths[1])
         return data
 
     def process(self):
         super().process()
+
+    @staticmethod
+    def labels() -> List[str]:
+        return ['louvain', 'label_snapshot_7']
+
+
 
 

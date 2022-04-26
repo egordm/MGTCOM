@@ -4,16 +4,18 @@ import torch
 from torch_geometric.data import HeteroData
 from torch_geometric.transforms import BaseTransform
 
-from ml.utils.graph import NAN_TIMESTAMP
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
+
+NAN_TIMESTAMP = -1
 
 
 class EnsureTimestampsTransform(BaseTransform):
     """
     It ensures that all node and edge stores have a `timestamp_from` field
     """
+
     def __init__(self, warn: bool = False):
         self.warn = warn
 

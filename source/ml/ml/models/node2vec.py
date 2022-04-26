@@ -3,14 +3,13 @@ from typing import Any, Optional, Union
 
 import torch
 from torch import Tensor
-import torch.nn.functional as F
 
 from datasets import GraphDataset
 from ml.models.base.feature_model import FeatureModel
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams, Node2VecSampler
-from ml.data.transforms.to_homogeneous import to_homogeneous
+from datasets.transforms.to_homogeneous import to_homogeneous
 
 from ml.models.base.hgraph_datamodule import HomogenousGraphDataModule
 from ml.utils import Metric, OptimizerParams, DataLoaderParams

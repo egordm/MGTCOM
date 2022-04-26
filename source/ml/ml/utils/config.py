@@ -34,6 +34,9 @@ class DataLoaderParams(HParams):
     """Number of workers to use for data loading"""
     batch_size: int = 16
     """Batch size for training, validation and test"""
+    persistent_workers = True
+    """Whether to use persistent workers"""
+    pin_memory = True
 
 
 def dataset_choices():

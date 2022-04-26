@@ -1,4 +1,4 @@
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 
 from torch_geometric.datasets import Planetoid
 
@@ -9,6 +9,8 @@ from shared import CACHE_PATH
 
 @DATASET_REGISTRY
 class Cora(Planetoid, BaseGraphDataset):
+    tags = ['ground-truth']
+
     def __init__(
             self,
             root: str = None,
@@ -39,3 +41,9 @@ class Cora(Planetoid, BaseGraphDataset):
 
     def process(self):
         super().process()
+
+    @staticmethod
+    def labels() -> List[str]:
+        return ['y']
+
+

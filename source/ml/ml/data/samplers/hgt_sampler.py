@@ -1,14 +1,16 @@
+import copy
 from dataclasses import dataclass, field
 from typing import List, Dict
 
 import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData
-from torch_geometric.loader.utils import filter_hetero_data, to_hetero_csc, edge_type_to_str
+from torch_geometric.loader.utils import to_hetero_csc, edge_type_to_str
 from torch_geometric.typing import NodeType
 
 from ml.data.samplers.base import Sampler
 from ml.utils import HParams
+from ml.utils.graph import filter_hetero_data, graph_clean_keys
 
 
 @dataclass
@@ -22,8 +24,8 @@ class HGTSampler(Sampler):
     def __init__(self, data: HeteroData, hparams: HGTSamplerParams = None) -> None:
         super().__init__()
         self.hparams = hparams or HGTSamplerParams()
+        self.data = graph_clean_keys(data, ['x', 'edge_index'])
 
-        self.data = data
         self.num_samples = hparams.num_samples if isinstance(hparams.num_samples, dict) \
             else {key: hparams.num_samples for key in data.node_types}
         self.num_hops = max([len(v) for v in self.num_samples.values()])

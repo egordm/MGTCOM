@@ -1,5 +1,7 @@
 import shutil
+from typing import List
 
+import numpy as np
 import pandas as pd
 import torch
 from torch_geometric.data import HeteroData
@@ -10,8 +12,11 @@ from datasets.transforms.normalize_timestamps import NormalizeTimestamps
 from datasets.transforms.sort_edges import SortEdges
 from datasets.transforms.undirected import ToUndirected
 from datasets.utils.base import GraphDataset, DATASET_REGISTRY
+from ml.utils import flat_iter
 from shared.paths import DatasetPath
 
+
+NUM_CLASSES = 14
 
 @DATASET_REGISTRY
 class DBLPHCN(GraphDataset):
@@ -46,6 +51,16 @@ class DBLPHCN(GraphDataset):
     def _process_node(self, data: HeteroData, store: NodeStorage, df: pd.DataFrame):
         super()._process_node(data, store, df)
 
+        # Extract the node labels
+        multilabel = torch.zeros([store.num_nodes, NUM_CLASSES], dtype=torch.bool)
+        cids = (df['cids'] + np.arange(store.num_nodes) * NUM_CLASSES)
+        cids = list(flat_iter(
+            cids.apply(lambda x: [] if np.isnan(x).any() else x).apply(list).tolist()
+        ))
+        multilabel.view(-1)[cids] = True
+        store.ground_truth = multilabel
+        store.y = multilabel.argmax(dim=-1)
+
         if store._key == 'Paper':
             from sentence_transformers import SentenceTransformer
 
@@ -61,13 +76,19 @@ class DBLPHCN(GraphDataset):
         data = SortEdges()(data)
         data = NormalizeTimestamps()(data)
 
-        snapshots = {
+        self.snapshots = {
             n: DefineSnapshots(n)(data)
             for n in [5, 7]
         }
 
-        torch.save(snapshots, self.processed_paths[1])
+        torch.save(self.snapshots, self.processed_paths[1])
         return data
 
     def process(self):
         super().process()
+
+    @staticmethod
+    def labels() -> List[str]:
+        return ['ground_truth', 'y', 'louvain', 'label_snapshot_7']
+
+

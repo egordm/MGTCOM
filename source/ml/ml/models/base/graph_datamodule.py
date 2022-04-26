@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -10,12 +11,12 @@ from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
 from datasets.utils.base import Snapshots
-from ml.data.transforms.ensure_timestamps import EnsureTimestampsTransform
+from datasets.transforms.ensure_timestamps import EnsureTimestampsTransform
+from datasets.utils.labels import NodeLabelling
 from ml.data.transforms.eval_split import EvalNodeSplitTransform
-from ml.data.transforms.to_homogeneous import to_homogeneous
+from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.evaluation import extract_edge_prediction_pairs
 from ml.utils import HParams, DataLoaderParams
-from ml.utils.labelling import NodeLabelling, extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -109,40 +110,25 @@ class GraphDataModule(pl.LightningDataModule):
         return self._edge_prediction_pairs(self.test_data, 'test_mask')
 
     def _extract_inferred_labels(
-            self, data: HeteroData, snapshots: Optional[Dict[int, Snapshots]] = None
+            self, data: HeteroData
     ) -> Dict[str, NodeLabelling]:
-        """
-        It extracts the Louvain labels, and if snapshots are provided, it extracts the snapshot labels
-
-        :param data: The data object that contains the graph and node features
-        :type data: HeteroData
-        :param snapshots: Optional[Dict[int, Snapshots]] = None
-        :type snapshots: Optional[Dict[int, Snapshots]]
-        :return: A dictionary of node labels.
-        """
-        logger.info('Extracting labels for visualization')
         node_labels = {}
-        node_labels['Louvain Labels'] = extract_louvain_labels(data)
-
-        if snapshots:
-            node_timestamps = extract_timestamp_labels(data)
-            for i, snapshot in snapshots.items():
-                snapshot_labels = extract_snapshot_labels(node_timestamps, snapshot)
-                node_labels[f'{i} Temporal Snapshots'] = snapshot_labels
+        for label in self.dataset.labels():
+            node_labels[label] = getattr(data, f'{label}_dict')
 
         return node_labels
 
     @lru_cache(maxsize=1)
     def train_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.train_data, self.snapshots)
+        return self._extract_inferred_labels(self.train_data)
 
     @lru_cache(maxsize=1)
     def val_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.val_data, self.snapshots)
+        return self._extract_inferred_labels(self.val_data)
 
     @lru_cache(maxsize=1)
     def test_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.test_data, self.snapshots)
+        return self._extract_inferred_labels(self.test_data)
 
     @lru_cache(maxsize=1)
     def inferred_labels(self) -> Dict[str, NodeLabelling]:

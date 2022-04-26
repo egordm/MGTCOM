@@ -25,7 +25,7 @@ class DimensionReductionTransform:
             self,
             n_components=2,
             mode: DimensionReductionMode = DimensionReductionMode.TSNE,
-            metric: Metric = Metric.L2
+            metric: Metric = Metric.DOTP
     ) -> None:
         super().__init__()
         self.n_components = n_components
@@ -42,7 +42,7 @@ class DimensionReductionTransform:
         elif mode == DimensionReductionMode.UMAP:
             self.mapper = UMAP(
                 n_components=2,
-                metric="cosine" if metric == Metric.COSINE else "euclidean"
+                metric="euclidean" if metric == Metric.L2 else "cosine"
             )
         else:
             self.mapper = IdentityTransform()

@@ -3,13 +3,11 @@ import os.path as osp
 import matplotlib.pyplot as plt
 import torch
 from sklearn.manifold import TSNE
-from torch_geometric.data import HeteroData
 
-from torch_geometric.datasets import Planetoid
 from torch_geometric.nn import Node2Vec
 
 from datasets import StarWars, DBLPHCN
-from ml.data.transforms.to_homogeneous import to_homogeneous
+from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.evaluation import extract_edge_prediction_pairs, link_prediction_measure
 from ml.utils import Metric
 

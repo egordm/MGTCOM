@@ -10,6 +10,7 @@ from torch_geometric.loader import NeighborLoader
 
 from ml.data.samplers.base import Sampler
 from ml.utils import HParams
+from ml.utils.graph import graph_clean_keys
 
 
 @dataclass
@@ -26,7 +27,7 @@ class SAGESampler(Sampler):
         super().__init__()
         self.hparams = hparams or SAGESamplerParams()
 
-        self.data = data
+        self.data = graph_clean_keys(data, ['x', 'edge_index'])
         self.num_samples = hparams.num_samples if isinstance(hparams.num_samples, dict) \
             else {key: hparams.num_samples for key in data.edge_types}
         assert isinstance(self.num_samples, dict)

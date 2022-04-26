@@ -6,11 +6,11 @@ from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import NodeType
 
-from datasets.utils.base import Snapshots
+from datasets.transforms.ensure_timestamps import EnsureTimestampsTransform
+from datasets.transforms.to_homogeneous import to_homogeneous
 from datasets.utils.conversion import igraph_from_hetero
-from ml.data.samplers.ballroom_sampler import TemporalNodeIndex, NAN_TIMESTAMP
-from ml.data.transforms.ensure_timestamps import EnsureTimestampsTransform
-from ml.data.transforms.to_homogeneous import to_homogeneous
+from datasets.utils.temporal import TemporalNodeIndex
+from datasets.utils.types import Snapshots
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)

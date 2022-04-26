@@ -2,7 +2,6 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import List, Type, Optional
 
-from matplotlib import pyplot as plt
 from pytorch_lightning import LightningDataModule, Callback, Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
@@ -10,7 +9,7 @@ from simple_parsing import Serializable
 from transformers.models.longformer.convert_longformer_original_pytorch_lightning_to_pytorch import LightningModel
 
 from ml.callbacks.classification_eval_callback import ClassificationEvalCallback, ClassificationEvalCallbackParams
-from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback, ClusteringEvalCallbackParams
+from ml.callbacks.clustering_eval_callback import ClusteringEvalCallbackParams
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallbackParams
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallbackParams, EmbeddingEvalCallback
 from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallbackParams, EmbeddingVisualizerCallback
@@ -38,7 +37,7 @@ class CallbackArgs(Serializable):
 
 @dataclass
 class BaseExecutorArgs(Serializable):
-    wandb_project_name: str = "ThesisDebug"
+    wandb_project_name: str = "ThesisExperiments"
     run_name: Optional[str] = None
     show_config: bool = False
     debug: bool = False
@@ -135,6 +134,7 @@ class BaseExecutor:
             gpus=1 if not self.args.trainer_params.cpu else None,
             auto_lr_find=True,
             enable_model_summary=False,
+            profiler="pytorch"
         )
         self.before_training(trainer)
 

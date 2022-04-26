@@ -5,16 +5,13 @@ from typing import Dict, List, Any
 import torch
 import wandb
 from pytorch_lightning import Callback, Trainer, LightningModule
-from sklearn.cluster import DBSCAN
-from torch import Tensor
 from torch_geometric.data import HeteroData
-from torch_geometric.typing import NodeType
 
 from datasets.utils.conversion import igraph_from_hetero
+from datasets.utils.labels import NodeLabelling
 from ml.algo.clustering import KMeans
 from ml.utils import Metric, HParams
 from ml.utils.graph import extract_attribute
-from ml.utils.labelling import NodeLabelling
 from ml.utils.outputs import OutputExtractor
 from shared import get_logger
 

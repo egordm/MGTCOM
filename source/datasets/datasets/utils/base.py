@@ -12,11 +12,14 @@ from torch_geometric.data.storage import NodeStorage, EdgeStorage, BaseStorage
 from torch_geometric.typing import Metadata
 
 from datasets.transforms.random_node_split import RandomNodeSplit
+from datasets.utils.labels import extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
+from datasets.utils.types import Snapshots
+from shared import get_logger
 from shared.paths import CACHE_PATH
 
-DATASET_REGISTRY = _Registry()
+logger = get_logger(Path(__file__).stem)
 
-Snapshots = Union[Tensor, List[Tuple[int, int]]]
+DATASET_REGISTRY = _Registry()
 
 
 class BaseGraphDataset(THGInMemoryDataset):
@@ -33,6 +36,10 @@ class BaseGraphDataset(THGInMemoryDataset):
     @property
     def metadata(self) -> Metadata:
         return self.data.metadata()
+
+    @staticmethod
+    def labels() -> List[str]:
+        return []
 
 
 class GraphDataset(BaseGraphDataset):
@@ -119,8 +126,26 @@ class GraphDataset(BaseGraphDataset):
     def _preprocess(self):
         pass
 
+    def _extract_labels(self, data: HeteroData):
+        logger.info('Extracting Louvain labels')
+        louvain = extract_louvain_labels(data)
+        for node_type, labels in louvain.items():
+            data[node_type].louvain = labels
+
+        if self.snapshots is not None:
+            logger.info('Extracting node timestamps')
+            node_timestamps = extract_timestamp_labels(data)
+            for i, snapshot in self.snapshots.items():
+                logger.info(f'Extracting timestamps for snapshot {i}')
+                snapshot_labels = extract_snapshot_labels(node_timestamps, snapshot)
+                for node_type, labels in snapshot_labels.items():
+                    setattr(data[node_type], f'label_snapshot_{i}', labels)
+
+        return data
+
     def process(self):
         data = self._preprocess()
+        data = self._extract_labels(data)
 
         data = RandomNodeSplit(
             split="train_rest",

@@ -6,7 +6,7 @@ from pytorch_lightning import Trainer, LightningModule
 from torch import Tensor
 
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
-from ml.data.transforms.to_homogeneous import to_homogeneous
+from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.evaluation import silhouette_score, davies_bouldin_score, newman_girvan_modularity
 from ml.evaluation.metrics.community import conductance
 from ml.models.base.base_model import BaseModel

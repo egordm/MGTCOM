@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from sklearn import metrics, utils, preprocessing
 
-from ml.utils import Metric
+from ml.utils import Metric, pairwise_dotp_dist
 from ml.utils.tensor import ensure_numpy
 
 
@@ -41,6 +41,11 @@ def davies_bouldin_score(X, labels, metric=Metric.L2):
     metric = metric.sk_metric()  # TODO: dotp is not supported by sklearn, use precomputed?
     X = ensure_numpy(X)
     labels = ensure_numpy(labels)
+
+    # if metric == Metric.DOTP:
+    #     pairwise_dist_fn = pairwise_dotp_dist()
+    # else:
+    #     pairwise_dist_fn = lambda x, y: metrics.pairwise_distances(x, y, metric=metric_sk)
 
     X, labels = utils.check_X_y(X, labels)
     le = preprocessing.LabelEncoder()

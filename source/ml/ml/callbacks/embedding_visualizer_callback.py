@@ -8,12 +8,12 @@ from matplotlib import pyplot as plt
 from pytorch_lightning import Trainer
 from torch import Tensor
 
+from datasets.utils.labels import NodeLabelling
 from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.models.base.base_model import BaseModel
 from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
 from ml.utils import HParams, Metric
-from ml.utils.labelling import NodeLabelling
 from ml.utils.plot import plot_scatter, create_colormap, MARKER_SIZE
 from shared import get_logger
 
@@ -27,9 +27,9 @@ class EmbeddingVisualizerCallbackParams(HParams):
     """Dimension reduction mode for embedding visualization."""
     ev_max_points: int = 1000
     """Maximum number of points to visualize."""
-    ev_interval: int = 20
+    ev_interval: int = 3
     """Interval between embedding visualization."""
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for embedding visualization."""
 
 

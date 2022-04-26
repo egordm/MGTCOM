@@ -5,18 +5,13 @@ import torch
 from pytorch_lightning import Trainer
 from sklearn.manifold import TSNE
 from torch.nn import Embedding
-from torch_geometric.data import HeteroData
 
-from torch_geometric.datasets import Planetoid
-from torch_geometric.nn import Node2Vec
-
-from datasets import StarWars, DBLPHCN
+from datasets import StarWars
 from ml.callbacks.progress_bar import CustomProgressBar
 from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
-from ml.data.transforms.to_homogeneous import to_homogeneous
+from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.evaluation import extract_edge_prediction_pairs, link_prediction_measure
-from ml.layers.embedding import NodeEmbedding
 from ml.models.node2vec import Node2VecModel
 from ml.utils import Metric, OutputExtractor
 
