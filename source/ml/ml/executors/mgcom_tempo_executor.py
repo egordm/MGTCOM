@@ -4,7 +4,7 @@ from typing import Type
 from pytorch_lightning import LightningDataModule
 
 from datasets import GraphDataset
-from datasets.utils.base import DATASET_REGISTRY
+from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutorArgs
 from ml.executors.mgcom_topo_executor import MGCOMTopoExecutor
 from ml.models.mgcom_feat import MGCOMFeatModelParams
