@@ -1,1 +1,1 @@
-from .base import GraphDataset
+from .graph_dataset import GraphDataset, BaseGraphDataset

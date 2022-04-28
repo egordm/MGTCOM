@@ -7,7 +7,7 @@ from datasets.transforms.define_snapshots import DefineSnapshots
 from datasets.transforms.normalize_timestamps import NormalizeTimestamps
 from datasets.transforms.sort_edges import SortEdges
 from datasets.transforms.undirected import ToUndirected
-from datasets.utils.base import GraphDataset, DATASET_REGISTRY
+from datasets.utils.graph_dataset import DATASET_REGISTRY, GraphDataset
 from shared.paths import DatasetPath
 
 

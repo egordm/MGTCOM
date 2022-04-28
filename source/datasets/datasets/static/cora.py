@@ -1,10 +1,15 @@
+from pathlib import Path
 from typing import Optional, Callable, List
 
+from torch_geometric.data import HeteroData
 from torch_geometric.datasets import Planetoid
 
 from datasets.transforms.random_node_split import RandomNodeSplit
-from datasets.utils.base import DATASET_REGISTRY, GraphDataset, BaseGraphDataset
-from shared import CACHE_PATH
+from datasets.utils.graph_dataset import DATASET_REGISTRY, BaseGraphDataset
+from datasets.utils.labels import extract_louvain_labels
+from shared import CACHE_PATH, get_logger
+
+logger = get_logger(Path(__file__).stem)
 
 
 @DATASET_REGISTRY
@@ -22,6 +27,7 @@ class Cora(Planetoid, BaseGraphDataset):
 
         def pre_transform_(data):
             data = data.to_heterogeneous()
+            self._extract_labels(data)
 
             data = RandomNodeSplit(
                 split="train_rest",
@@ -36,6 +42,12 @@ class Cora(Planetoid, BaseGraphDataset):
         super().__init__(root, "Cora", split, num_train_per_class, num_val, num_test, transform, pre_transform_)
         u = 0
 
+    def _extract_labels(self, data: HeteroData):
+        logger.info('Extracting Louvain labels')
+        louvain = extract_louvain_labels(data)
+        for node_type, labels in louvain.items():
+            data[node_type].louvain = labels
+
     def download(self):
         super().download()
 
@@ -44,6 +56,4 @@ class Cora(Planetoid, BaseGraphDataset):
 
     @staticmethod
     def labels() -> List[str]:
-        return ['y']
-
-
+        return ['y', 'louvain']

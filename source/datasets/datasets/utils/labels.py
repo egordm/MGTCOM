@@ -15,10 +15,10 @@ from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
-NodeLabelling = Dict[NodeType, Tensor]
+LabelDict = Dict[NodeType, Tensor]
 
 
-def extract_louvain_labels(data: HeteroData) -> NodeLabelling:
+def extract_louvain_labels(data: HeteroData) -> LabelDict:
     G, _, _, node_offsets = igraph_from_hetero(data)
     comm = G.community_multilevel()
     membership = torch.tensor(comm.membership, dtype=torch.long)
@@ -30,7 +30,7 @@ def extract_louvain_labels(data: HeteroData) -> NodeLabelling:
 
 
 # noinspection PyProtectedMember
-def extract_timestamp_labels(data: HeteroData) -> NodeLabelling:
+def extract_timestamp_labels(data: HeteroData) -> LabelDict:
     data = EnsureTimestampsTransform(warn=True)(data)
 
     hdata = to_homogeneous(
@@ -65,7 +65,7 @@ def extract_timestamp_labels(data: HeteroData) -> NodeLabelling:
     return node_timestamps_dict
 
 
-def extract_snapshot_labels(node_timestamps_dict: Dict[NodeType, Tensor], snapshots: Snapshots) -> NodeLabelling:
+def extract_snapshot_labels(node_timestamps_dict: Dict[NodeType, Tensor], snapshots: Snapshots) -> LabelDict:
     snapshots_from = torch.tensor([-1] + [start for (start, end) in snapshots], dtype=torch.long)
     labels = {
         node_type: torch.searchsorted(snapshots_from, node_timestamps, side='left') + 1

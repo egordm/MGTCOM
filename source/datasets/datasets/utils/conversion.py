@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import Dict, Tuple
+from pathlib import Path
+from typing import Dict, Tuple, Optional, Union
 
 import igraph
 import numpy as np
@@ -7,7 +8,12 @@ import torch
 from torch import Tensor
 
 from torch_geometric.data import HeteroData
+from torch_geometric.data.storage import EdgeStorage, NodeStorage
 from torch_geometric.typing import NodeType, EdgeType
+
+from shared import get_logger
+
+logger = get_logger(Path(__file__).stem)
 
 
 def igraph_from_hetero(
@@ -78,3 +84,49 @@ def igraph_from_hetero(
         g.es[attr_name] = np.concatenate(attr_items, axis=0)
 
     return g, node_type_to_idx, edge_type_to_idx, offsets
+
+
+def extract_attribute_dict(
+        data: HeteroData, key: str, edge_attr=False, warn=True, error=True
+) -> Optional[Dict[Union[NodeType, EdgeType], Union[Tensor, np.ndarray]]]:
+    if key not in data.keys:
+        if warn:
+            logger.warning(f"{key} not in data.keys")
+            return None
+        elif error:
+            raise KeyError(f"{key} not in data.keys")
+
+    stores = data.node_stores if not edge_attr else data.edge_stores
+
+    is_numpy = False
+    dtype = None
+    has_attr = False
+    for store in stores:
+        if key in store.keys() and isinstance(store, EdgeStorage if edge_attr else NodeStorage):
+            has_attr = True
+            is_numpy = isinstance(store[key], np.ndarray)
+            dtype = store[key].dtype
+
+    if not has_attr:
+        if warn:
+            logger.warning(f"{key} not in any {'edge' if edge_attr else 'node'} store")
+            return None
+        elif error:
+            raise KeyError(f"{key} not in any {'edge' if edge_attr else 'node'} store")
+
+    output = {}
+    for store in stores:
+        entity_type = store._key
+
+        if key in store.keys():
+            output[entity_type] = store[key]
+        else:
+            if warn:
+                logger.warning(f"{key} not in {entity_type} store")
+
+            if is_numpy:
+                output[entity_type] = np.full([store.num_nodes], -1, dtype=dtype)
+            else:
+                output[entity_type] = torch.full([store.num_nodes], -1, dtype=dtype)
+
+    return output

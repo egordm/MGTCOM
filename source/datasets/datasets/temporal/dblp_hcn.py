@@ -11,12 +11,12 @@ from datasets.transforms.define_snapshots import DefineSnapshots
 from datasets.transforms.normalize_timestamps import NormalizeTimestamps
 from datasets.transforms.sort_edges import SortEdges
 from datasets.transforms.undirected import ToUndirected
-from datasets.utils.base import GraphDataset, DATASET_REGISTRY
+from datasets.utils.graph_dataset import DATASET_REGISTRY, GraphDataset
 from ml.utils import flat_iter
 from shared.paths import DatasetPath
 
-
 NUM_CLASSES = 14
+
 
 @DATASET_REGISTRY
 class DBLPHCN(GraphDataset):
@@ -90,5 +90,3 @@ class DBLPHCN(GraphDataset):
     @staticmethod
     def labels() -> List[str]:
         return ['ground_truth', 'y', 'louvain', 'label_snapshot_7']
-
-
