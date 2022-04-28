@@ -4,12 +4,11 @@ from typing import Type, List
 from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
-from datasets.utils.base import DATASET_REGISTRY
+from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
-from ml.models.mgcom_combi import MGCOMCombiModelParams, MGCOMCombiDataModuleParams, MGCOMCombiDataModule, \
-    MGCOMCombiModel
+from ml.models.mgcom_combi import MGCOMCombiDataModuleParams, MGCOMCombiDataModule
 from ml.models.mgcom_e2e import MGCOME2EDataModule, MGCOME2EModel, MGCOME2EModelParams
 from ml.utils import dataset_choices
 

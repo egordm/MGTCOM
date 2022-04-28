@@ -73,13 +73,13 @@ class ClusteringVisualizerCallback(IntermittentCallback):
 
         # Collect sample data
         k = pl_module.dpmm_model.k
-        X = self.subsample.transform(pl_module.val_outputs.extract_cat('X', cache=True))
+        X = self.subsample.transform(pl_module.val_outputs.extract_cat('X', cache=True, device='cpu'))
 
-        r = self.subsample.transform(pl_module.val_outputs.extract_cat('r', cache=True))
+        r = self.subsample.transform(pl_module.val_outputs.extract_cat('r', cache=True, device='cpu'))
         z = r.argmax(dim=-1)
 
         if visualize_subclusters:
-            ri = self.subsample.transform(pl_module.val_outputs.extract_cat('ri', cache=True))
+            ri = self.subsample.transform(pl_module.val_outputs.extract_cat('ri', cache=True, device='cpu'))
             zi = ri.argmax(dim=-1)
         else:
             ri, zi = None, None
@@ -93,9 +93,9 @@ class ClusteringVisualizerCallback(IntermittentCallback):
         X = self.remap.transform(X)
 
         # Collect cluster params
-        cluster_params = self._transform_params(pl_module.dpmm_model.cluster_params)
+        cluster_params = self._transform_params(pl_module.dpmm_model.cluster_params.to('cpu'))
         if visualize_subclusters:
-            subcluster_params = self._transform_params(pl_module.dpmm_model.subcluster_params)
+            subcluster_params = self._transform_params(pl_module.dpmm_model.subcluster_params.to('cpu'))
         else:
             subcluster_params = None
 
@@ -105,9 +105,11 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             pl_module,
             title=f'Epoch {trainer.current_epoch}'
         )
-        # noinspection PyTypeChecker
-        trainer.logger.log_metrics({
-            f'viz/cluster_centers': wandb.Image(fig)
+
+        log_data = {}
+        log_data.update({
+            f'viz/cluster_centers': wandb.Image(fig),
+            'epoch': trainer.current_epoch
         })
         if wandb.run.offline:
             plt.show()
@@ -120,10 +122,13 @@ class ClusteringVisualizerCallback(IntermittentCallback):
                 cluster_params.pis, subcluster_params.pis if visualize_subclusters else None,
             )
             # noinspection PyTypeChecker
-            trainer.logger.log_metrics({
-                f'viz/cluster_distribution': wandb.Image(fig)
+            log_data.update({
+                f'viz/cluster_distribution': wandb.Image(fig),
+                'epoch': trainer.current_epoch
             })
             plt.close(fig)
+
+        trainer.logger.log_metrics(log_data)
 
     def visualize_clusters(
             self, X: Tensor, z: Tensor, zi: Tensor,
@@ -146,7 +151,7 @@ class ClusteringVisualizerCallback(IntermittentCallback):
         # Plot boundaries
         cont = plot_decision_regions(
             ax_boundaries, X, z, colors,
-            lambda x: pl_module.dpmm_model.estimate_assignment(self.remap.inverse_transform(x))
+            lambda x: pl_module.dpmm_model.estimate_assignment(self.remap.inverse_transform(x).to(pl_module.device)).cpu()
         )
         cbar = fig.colorbar(cont, ax=axes.ravel().tolist(), shrink=0.95)
         cbar.set_label("Max network response", rotation=270, labelpad=10, y=0.45)

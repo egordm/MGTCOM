@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union, overload
 
 import torch
 import torchmetrics
-from torch import Tensor
+from torch import Tensor, device, dtype
+from torch.nn.modules.module import T
 
 from ml.algo.dpm import InitMode, MHMC, DirichletPrior, NIWPrior, DPMM, StackedDPMM, BurnInMonitor, DPMMObs, \
     merge_params, DPMMParams, UpdateMode
@@ -72,6 +73,11 @@ class DPMMSCModel(torch.nn.Module):
         self.burnin_monitor = BurnInMonitor(self.hparams.burnin_patience, threshold=0)
         self.data_ll_monitor = torchmetrics.MeanMetric()
         self.prev_action = Action.NoAction
+
+    def to(self, device, *args, **kwargs):
+        res = super().to(*args, device=device, **kwargs)
+        self.mhmc.mu_cov_prior.to(device)
+        return res
 
     @property
     def k(self) -> int:
@@ -245,3 +251,11 @@ class DPMMSCModel(torch.nn.Module):
             ))
 
         return True
+
+    def to(self, *args, device=None, **kwargs):
+        super().to(*args, device=device, **kwargs)
+        self.mhmc.to(device)
+        self.clusters.to(device)
+        self.cluster_mp.to(device)
+        self.subclusters.to(device)
+        self.subcluster_mp.to(device)

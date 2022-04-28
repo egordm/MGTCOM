@@ -5,12 +5,12 @@ from typing import List, Dict
 import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData
-from torch_geometric.loader.utils import to_hetero_csc, edge_type_to_str
+from torch_geometric.loader.utils import to_hetero_csc, edge_type_to_str, filter_hetero_data
 from torch_geometric.typing import NodeType
 
 from ml.data.samplers.base import Sampler
 from ml.utils import HParams
-from ml.utils.graph import filter_hetero_data, graph_clean_keys
+from ml.utils.graph import graph_clean_keys
 
 
 @dataclass

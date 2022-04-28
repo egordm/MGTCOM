@@ -7,8 +7,8 @@ from pytorch_lightning import LightningDataModule, Callback
 from torch.utils.data import Dataset
 
 from datasets import GraphDataset
-from datasets.utils.base import DATASET_REGISTRY
 from datasets.utils.conversion import igraph_from_hetero
+from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.algo.dpm import InitMode
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
@@ -95,8 +95,7 @@ class MGCOMComDetExecutor(BaseExecutor):
             ),
             SaveEmbeddingsCallback(),
             SaveGraphCallback(
-                self.datamodule.graph_dataset.data,
-                node_labels={},
+                self.datamodule.graph_dataset,
                 hparams=self.args.callback_params.save_graph,
                 clustering=True,
             ) if self.datamodule.graph_dataset is not None else None,

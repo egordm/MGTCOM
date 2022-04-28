@@ -1,13 +1,36 @@
-from typing import NamedTuple, Tuple
+from typing import NamedTuple
 
 import torch
 from torch import Tensor
+from typing_extensions import Self
 
 from ml.utils import unique_count, EPS, scatter_sum
 
-MultivarNormalParams = NamedTuple("MultivarNormalParams", [("mus", Tensor), ("covs", Tensor)])
-DPMMParams = NamedTuple("DPMMParams", [("pis", Tensor), ("mus", Tensor), ("covs", Tensor)])
-DPMMObs = NamedTuple("DPMMObs", [("Ns", Tensor), ("mus", Tensor), ("covs", Tensor)])
+
+class MultivarNormalParams(NamedTuple):
+    mus: Tensor
+    covs: Tensor
+
+    def to(self, device) -> Self:
+        return MultivarNormalParams(self.mus.to(device), self.covs.to(device))
+
+
+class DPMMParams(NamedTuple):
+    pis: Tensor
+    mus: Tensor
+    covs: Tensor
+
+    def to(self, device):
+        return DPMMParams(self.pis.to(device), self.mus.to(device), self.covs.to(device))
+
+
+class DPMMObs(NamedTuple):
+    Ns: Tensor
+    mus: Tensor
+    covs: Tensor
+
+    def to(self, device) -> Self:
+        return DPMMObs(self.Ns.to(device), self.mus.to(device), self.covs.to(device))
 
 
 def compute_params_hard_assignment(X: Tensor, z: Tensor, k: int) -> DPMMObs:
@@ -73,7 +96,7 @@ def compute_cov(X: Tensor, mu: Tensor) -> Tensor:
         X_centered = X - mu.unsqueeze(0)
         return torch.matmul(X_centered.T, X_centered) / float(X.shape[0])
     else:
-        return torch.eye(mu.shape[-1]) * EPS
+        return torch.eye(mu.shape[-1], device=X.device) * EPS
 
 
 def compute_cov_soft(X: Tensor, mu: Tensor, r: Tensor) -> Tensor:
@@ -93,7 +116,7 @@ def compute_cov_soft(X: Tensor, mu: Tensor, r: Tensor) -> Tensor:
         X_centered = X - mu.unsqueeze(0)
         return torch.matmul(r * X_centered.T, X_centered) / N
     else:
-        return torch.eye(mu.shape[-1]) * EPS
+        return torch.eye(mu.shape[-1], device=X.device) * EPS
 
 
 def merge_params(Ns: Tensor, mus: Tensor, covs: Tensor) -> DPMMObs:

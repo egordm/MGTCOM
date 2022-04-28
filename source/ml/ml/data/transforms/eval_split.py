@@ -15,15 +15,17 @@ class EvalNodeSplitTransform(BaseTransform):
             num_splits: int = 1,
             num_val=0.1,
             num_test=0.1,
+            force_resplit: bool = False,
     ) -> None:
         super().__init__()
         self.split = split
         self.num_splits = num_splits
         self.num_val = num_val
         self.num_test = num_test
+        self.force_resplit = force_resplit
 
     def __call__(self, data: HeteroData):
-        if 'train_mask' not in data:
+        if 'train_mask' not in data or self.force_resplit:
             data = RandomNodeSplit(
                 split=self.split,
                 num_splits=self.num_splits,

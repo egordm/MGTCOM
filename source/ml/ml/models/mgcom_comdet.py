@@ -56,6 +56,10 @@ class MGCOMComDetModel(BaseModel):
     def mus(self) -> Tensor:
         return self.dpmm_model.clusters.mus
 
+    def on_train_start(self) -> None:
+        super().on_train_start()
+        self.dpmm_model.to(device=self.device)
+
     def on_train_batch_start(self, batch: Any, batch_idx: int, unused: int = 0) -> Optional[int]:
         if self.is_done:
             return -1
@@ -66,7 +70,7 @@ class MGCOMComDetModel(BaseModel):
             self.dpmm_model.step_e(X)
 
         return {
-            'X': X
+            'X': X.detach()
         }
 
     def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:

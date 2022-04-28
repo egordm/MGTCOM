@@ -133,8 +133,7 @@ class BaseExecutor:
             logger=wandb_logger,
             gpus=1 if not self.args.trainer_params.cpu else None,
             auto_lr_find=True,
-            enable_model_summary=False,
-            profiler="pytorch"
+            enable_model_summary=False
         )
         self.before_training(trainer)
 
@@ -179,7 +178,7 @@ class BaseExecutor:
 
         return [
             EmbeddingVisualizerCallback(
-                val_node_labels=self.datamodule.val_inferred_labels(),
+                self.datamodule,
                 hparams=self.args.callback_params.embedding_visualizer
             ),
             EmbeddingEvalCallback(
@@ -195,8 +194,7 @@ class BaseExecutor:
                 hparams=self.args.callback_params.classification_eval,
             ),
             SaveGraphCallback(
-                self.datamodule.data,
-                node_labels=self.datamodule.inferred_labels(),
+                self.datamodule.dataset,
                 hparams=self.args.callback_params.save_graph
             ),
             SaveEmbeddingsCallback(),

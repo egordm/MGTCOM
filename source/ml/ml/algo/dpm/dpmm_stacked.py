@@ -58,9 +58,10 @@ class StackedDPMM(torch.nn.Module):
     def compute_params(self, X: Tensor, z: Tensor, r: Tensor, mode: UpdateMode = UpdateMode.HardAssignment) -> DPMMObs:
         Ns = unique_count(z, self.n_components)
 
-        Ns_K = torch.zeros(self.n_components * self.n_subcomponents)
-        mus_K = torch.zeros(self.n_components * self.n_subcomponents, self.repr_dim)
-        covs_K = torch.zeros(self.n_components * self.n_subcomponents, self.repr_dim, self.repr_dim)
+        device = X.device
+        Ns_K = torch.zeros(self.n_components * self.n_subcomponents, device=device)
+        mus_K = torch.zeros(self.n_components * self.n_subcomponents, self.repr_dim, device=device)
+        covs_K = torch.zeros(self.n_components * self.n_subcomponents, self.repr_dim, self.repr_dim, device=device)
 
         for i, (component, N_k) in enumerate(zip(self.components, Ns)):
             X_k, r_k = X[z == i], r[z == i]
@@ -74,7 +75,7 @@ class StackedDPMM(torch.nn.Module):
 
     def estimate_assignment(self, X: Tensor, z: Tensor) -> Tensor:
         Ns = unique_count(z, self.n_components)
-        r_E = torch.zeros(X.shape[0], self.n_subcomponents)
+        r_E = torch.zeros(X.shape[0], self.n_subcomponents, device=X.device)
         for i, (component, N_k) in enumerate(zip(self.components, Ns)):
             if N_k > 0:
                 r_E[z == i] = component.estimate_assignment(X[z == i])
@@ -106,4 +107,8 @@ class StackedDPMM(torch.nn.Module):
 
     def __len__(self):
         return self.n_components
+
+    def to(self, device):
+        for component in self.components:
+            component.to(device)
 

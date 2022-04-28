@@ -61,7 +61,7 @@ class MHMC:
         log_H, _ = self.compute_log_h_split(obs_c, obs_sc)
 
         # Accept split if H > 1 or with probability H
-        return log_H, (log_H > 0 or bool(torch.exp(log_H) > torch.rand(1)))
+        return log_H, (log_H > 0 or bool(torch.exp(log_H) > torch.rand(1, device=log_H.device)))
 
     def check_merge(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[Float, bool, int]:
         if (obs_sc.Ns < 1).any():  # One of the subclusters is empty. Always merge.
@@ -72,7 +72,7 @@ class MHMC:
         log_H = -log_H
 
         # Accept merge if H > 1 or with probability H
-        return log_H, (log_H > 0 or bool(torch.exp(log_H) > torch.rand(1))), max_k
+        return log_H, (log_H > 0 or bool(torch.exp(log_H) > torch.rand(1, device=log_H.device))), max_k
 
     def propose_splits(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[SplitDecisions, Tensor]:
         """
@@ -105,11 +105,12 @@ class MHMC:
         """
         k = len(obs_c.mus)
 
+        mus = obs_c.mus.cpu()
         neigh = NearestNeighbors(n_neighbors=min(self.n_merge_neighbors, k), metric=self.metric.sk_metric())
-        neigh.fit(obs_c.mus)
+        neigh.fit(mus)
 
         candidates = []
-        Ds, Js = neigh.kneighbors(obs_c.mus, return_distance=True)
+        Ds, Js = neigh.kneighbors(mus, return_distance=True)
         for i, (D, J) in enumerate(zip(Ds, Js)):
             candidates.extend([(d, i, j) for (d, j) in zip(D, J) if j < i])
         candidates = list(sorted(candidates, key=lambda x: x[0]))
@@ -131,3 +132,6 @@ class MHMC:
                 Hs.append(H)
 
         return torch.tensor(decisions, dtype=torch.long), torch.tensor(Hs, dtype=torch.float)
+
+    def to(self, device):
+        self.mu_cov_prior.to(device)

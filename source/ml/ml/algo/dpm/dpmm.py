@@ -80,6 +80,7 @@ class DPMM(torch.nn.Module):
             else:
                 raise NotImplementedError(f'Unknown initialization mode: {mode}')
 
+            z = z.to(X.device)
             obs = compute_params_hard_assignment(X, z, self.n_components)
 
         self.update_params(obs)
@@ -136,3 +137,15 @@ class DPMM(torch.nn.Module):
 
     def __len__(self):
         return self.n_components
+
+    def to(self, device):
+        if self.components is not None:
+            self.components = [
+                MultivariateNormal(
+                    loc=component.loc.to(device),
+                    covariance_matrix=component.covariance_matrix.to(device),
+                    scale_tril=component.scale_tril.to(device),
+                )
+                for component in self.components
+            ]
+

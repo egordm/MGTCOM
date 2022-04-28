@@ -8,11 +8,11 @@ from torch import Tensor
 
 from ml.algo.transforms import SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
-from ml.evaluation import silhouette_score, davies_bouldin_score
+from ml.evaluation import silhouette_score, davies_bouldin_score, clustering_metrics
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
-from ml.utils import HParams, Metric, prefix_keys
+from ml.utils import HParams, Metric, prefix_keys, dict_mapv
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -42,14 +42,8 @@ class EmbeddingEvalCallback(IntermittentCallback):
         self.val_subsample = SubsampleTransform(self.hparams.met_max_points)
         self.test_subsample = SubsampleTransform(self.hparams.met_max_points)
 
-        self.val_labels = {
-            label_name: self.val_subsample.transform(torch.cat(list(labels_dict.values()), dim=0))
-            for label_name, labels_dict in datamodule.val_inferred_labels().items()
-        }
-        self.test_labels = {
-            label_name: self.test_subsample.transform(torch.cat(list(labels_dict.values()), dim=0))
-            for label_name, labels_dict in datamodule.test_inferred_labels().items()
-        }
+        self.val_labels = dict_mapv(datamodule.val_labels(), self.val_subsample.transform)
+        self.test_labels = dict_mapv(datamodule.test_labels(), self.test_subsample.transform)
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != StageE2E.Feature:
@@ -57,37 +51,29 @@ class EmbeddingEvalCallback(IntermittentCallback):
 
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
         if pl_module.heterogeneous:
-            Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True)
+            Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
         else:
-            Z = pl_module.val_outputs.extract_cat('Z', cache=True)
+            Z = pl_module.val_outputs.extract_cat('Z', cache=True, device='cpu')
 
         Z = self.val_subsample.transform(Z)
 
         for label_name, labels in self.val_labels.items():
-            trainer.logger.log_metrics(prefix_keys(
-                self.clustering_metrics(Z, labels, metric=self.hparams.metric),
+            pl_module.log_dict(prefix_keys(
+                clustering_metrics(Z, labels, metric=self.hparams.metric),
                 f'eval/val/ee/{label_name}/'
-            ))
+            ), on_epoch=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         logger.info(f"Evaluating test embeddings")
         if pl_module.heterogeneous:
-            Z = pl_module.test_outputs.extract_cat_kv('Z_dict', cache=True)
+            Z = pl_module.test_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
         else:
-            Z = pl_module.test_outputs.extract_cat('Z', cache=True)
+            Z = pl_module.test_outputs.extract_cat('Z', cache=True, device='cpu')
 
         Z = self.test_subsample.transform(Z)
 
         for label_name, labels in self.test_labels.items():
-            trainer.logger.log_metrics(prefix_keys(
-                self.clustering_metrics(Z, labels, metric=self.hparams.metric),
+            pl_module.log_dict(prefix_keys(
+                clustering_metrics(Z, labels, metric=self.hparams.metric),
                 f'eval/test/ee/{label_name}/'
-            ))
-
-    @staticmethod
-    def clustering_metrics(X: Tensor, z: Tensor, metric: Metric) -> Dict[str, float]:
-        return {
-            'silhouette_score': silhouette_score(X, z, metric=metric),
-            'davies_bouldin_score': davies_bouldin_score(X, z, metric=metric),
-        }
-
+            ), on_epoch=True)

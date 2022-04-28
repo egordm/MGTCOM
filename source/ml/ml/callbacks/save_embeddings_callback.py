@@ -18,13 +18,13 @@ class SaveEmbeddingsCallback(Callback):
         saved = False
         if 'Z_dict' in outputs:
             logger.info('Saving heterogenous embeddings...')
-            Z_dict = outputs.extract_cat_dict('Z_dict')
+            Z_dict = outputs.extract_cat_dict('Z_dict', device='cpu')
             self.save_embeddings(Z_dict, 'embeddings_hetero.pt')
             saved = True
 
         if 'Z' in outputs:
             logger.info('Saving homogeneous embeddings...')
-            Z = outputs.extract_cat('Z')
+            Z = outputs.extract_cat('Z', device='cpu')
             self.save_embeddings(Z, 'embeddings_homogeneous.pt')
             saved = True
 

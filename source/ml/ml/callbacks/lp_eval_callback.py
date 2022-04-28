@@ -38,9 +38,9 @@ class LPEvalCallback(IntermittentCallback):
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseFeatureModel) -> None:
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
         if pl_module.heterogeneous:
-            Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True)
+            Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
         else:
-            Z = pl_module.val_outputs.extract_cat('Z', cache=True)
+            Z = pl_module.val_outputs.extract_cat('Z', cache=True, device='cpu')
 
         acc, metrics = link_prediction_measure(Z, *self.val_pairs, metric=self.hparams.metric)
 
@@ -48,15 +48,15 @@ class LPEvalCallback(IntermittentCallback):
             f'val/lp/acc': acc
         }, prog_bar=True, logger=False)
 
-        trainer.logger.log_metrics(prefix_keys(metrics, 'eval/val/lp/'))
+        pl_module.log_dict(prefix_keys(metrics, 'eval/val/lp/'), on_epoch=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseFeatureModel) -> None:
         logger.info(f"Evaluating test embeddings")
         if pl_module.heterogeneous:
-            Z = pl_module.test_outputs.extract_cat_kv('Z_dict', cache=True)
+            Z = pl_module.test_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
         else:
-            Z = pl_module.test_outputs.extract_cat('Z', cache=True)
+            Z = pl_module.test_outputs.extract_cat('Z', cache=True, device='cpu')
 
         _, metrics = link_prediction_measure(Z, *self.test_pairs, metric=self.hparams.metric)
 
-        trainer.logger.log_metrics(prefix_keys(metrics, 'eval/test/lp/'))
+        pl_module.log_dict(prefix_keys(metrics, 'eval/test/lp/'), on_epoch=True)

@@ -137,10 +137,6 @@ class MGCOMFeatDataModule(Het2VecDataModule):
     def eval_sampler(self, data: HeteroData) -> Optional[Sampler]:
         return self._build_conv_sampler(data)
 
-    @property
-    def train_on_full_data(self):
-        return False
-
 
 @dataclass
 class MGCOMTopoDataModuleParams(MGCOMFeatDataModuleParams):

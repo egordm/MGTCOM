@@ -32,6 +32,12 @@ class DPMMObsMeanFilter:
         )
 
     def reset(self, k: int) -> None:
-        self.Ns = torch.zeros(k, dtype=torch.float)
-        self.mus = torch.zeros(k, self.repr_dim, dtype=torch.float)
-        self.covs = torch.zeros(k, self.repr_dim, self.repr_dim, dtype=torch.float)
+        device = self.Ns.device
+        self.Ns = torch.zeros(k, dtype=torch.float, device=device)
+        self.mus = torch.zeros(k, self.repr_dim, dtype=torch.float, device=device)
+        self.covs = torch.zeros(k, self.repr_dim, self.repr_dim, dtype=torch.float, device=device)
+
+    def to(self, device) -> None:
+        self.Ns = self.Ns.to(device)
+        self.mus = self.mus.to(device)
+        self.covs = self.covs.to(device)

@@ -10,13 +10,13 @@ from torch_geometric.data import HeteroData, Data
 from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
-from datasets.utils.base import Snapshots
 from datasets.transforms.ensure_timestamps import EnsureTimestampsTransform
-from datasets.utils.labels import NodeLabelling
+from datasets.utils.labels import LabelDict
+from datasets.utils.types import Snapshots
 from ml.data.transforms.eval_split import EvalNodeSplitTransform
 from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.evaluation import extract_edge_prediction_pairs
-from ml.utils import HParams, DataLoaderParams
+from ml.utils import HParams, DataLoaderParams, dict_catv
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -25,7 +25,16 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class GraphDataModuleParams(HParams):
     lp_max_pairs: int = 5000
+    """Maximum number of pairs to use for link prediction."""
     train_on_full_data: bool = False
+    """Whether to use the full dataset for training."""
+
+    split_force: bool = False
+    """Whether to force resplit the dataset. If false, predefined splits will be preferred."""
+    split_num_val: float = 0.1
+    """Fraction of the dataset to use for validation."""
+    split_num_test: float = 0.1
+    """Fraction of the dataset to use for testing."""
 
 
 class GraphDataModule(pl.LightningDataModule):
@@ -51,11 +60,15 @@ class GraphDataModule(pl.LightningDataModule):
 
         self.dataset = dataset
         self.data = EnsureTimestampsTransform(warn=True)(dataset.data)
-        if self.train_on_full_data or self.hparams.train_on_full_data:
+        if self.hparams.train_on_full_data:
             logger.warning("Using full dataset for training. There is no validation or test set.")
             self.train_data, self.val_data, self.test_data = self.data, self.data, self.data
         else:
-            self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform()(self.data)
+            self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform(
+                force_resplit=self.hparams.split_force,
+                num_val=self.hparams.split_num_val,
+                num_test=self.hparams.split_num_test,
+            )(self.data)
 
         logger.info('=' * 80)
         logger.info(f'Using dataset {self.dataset.name}')
@@ -109,31 +122,51 @@ class GraphDataModule(pl.LightningDataModule):
     def test_prediction_pairs(self) -> Tuple[Tensor, Tensor]:
         return self._edge_prediction_pairs(self.test_data, 'test_mask')
 
-    def _extract_inferred_labels(
+    def _extract_labels(
             self, data: HeteroData
-    ) -> Dict[str, NodeLabelling]:
+    ) -> Dict[str, LabelDict]:
         node_labels = {}
         for label in self.dataset.labels():
             node_labels[label] = getattr(data, f'{label}_dict')
 
         return node_labels
 
-    @lru_cache(maxsize=1)
-    def train_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.train_data)
+    def train_labels_dict(self) -> Dict[str, LabelDict]:
+        return self._extract_labels(self.train_data)
 
     @lru_cache(maxsize=1)
-    def val_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.val_data)
+    def train_labels(self) -> Dict[str, Tensor]:
+        return {
+            label_name: dict_catv(labels)
+            for label_name, labels in self.train_labels_dict().items()
+        }
+
+    def val_labels_dict(self) -> Dict[str, LabelDict]:
+        return self._extract_labels(self.val_data)
 
     @lru_cache(maxsize=1)
-    def test_inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.test_data)
+    def val_labels(self) -> Dict[str, Tensor]:
+        return {
+            label_name: dict_catv(labels)
+            for label_name, labels in self.val_labels_dict().items()
+        }
+
+    def test_labels_dict(self) -> Dict[str, LabelDict]:
+        return self._extract_labels(self.test_data)
 
     @lru_cache(maxsize=1)
-    def inferred_labels(self) -> Dict[str, NodeLabelling]:
-        return self._extract_inferred_labels(self.data)
+    def test_labels(self) -> Dict[str, Tensor]:
+        return {
+            label_name: dict_catv(labels)
+            for label_name, labels in self.test_labels_dict().items()
+        }
 
-    @property
-    def train_on_full_data(self):
-        return False
+    def labels_dict(self) -> Dict[str, LabelDict]:
+        return self._extract_labels(self.data)
+
+    @lru_cache(maxsize=1)
+    def labels(self) -> Dict[str, Tensor]:
+        return {
+            label_name: dict_catv(labels)
+            for label_name, labels in self.labels_dict().items()
+        }

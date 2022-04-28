@@ -6,6 +6,7 @@ from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
 from torch import Tensor
 from torch_geometric.data import HeteroData
 
+from datasets import GraphDataset
 from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.base import Sampler
@@ -68,6 +69,10 @@ class Het2VecDataModuleParams(GraphDataModuleParams):
 class Het2VecDataModule(HeteroGraphDataModule):
     hparams: Union[Het2VecDataModuleParams, DataLoaderParams]
 
+    def __init__(self, dataset: GraphDataset, hparams: GraphDataModuleParams, loader_params: DataLoaderParams) -> None:
+        hparams.train_on_full_data = True
+        super().__init__(dataset, hparams, loader_params)
+
     def train_sampler(self, data: HeteroData) -> Optional[Sampler]:
         mapper = ToHeteroMappingTransform(data.num_nodes_dict)
 
@@ -90,9 +95,3 @@ class Het2VecDataModule(HeteroGraphDataModule):
 
     def eval_sampler(self, data: HeteroData) -> Optional[Sampler]:
         return None
-
-    @property
-    def train_on_full_data(self):
-        return True
-
-

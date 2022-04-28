@@ -188,3 +188,11 @@ class NIWPrior:
                 - (nus_post / 2.0) * torch.logdet(psis_post).reshape(-1, 1)
                 + (self.D / 2.0) * (torch.log(self.params.kappa) - torch.log(kappas_post))
         )
+
+    def to(self, device):
+        self.params = NIWParams(
+            self.params.nu.to(device),
+            self.params.kappa.to(device),
+            self.params.mu.to(device),
+            self.params.psi.to(device),
+        )

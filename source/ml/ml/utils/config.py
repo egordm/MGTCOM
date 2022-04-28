@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional, Type, Dict
+from typing import Type, Dict
 
 import pytorch_lightning as pl
 from simple_parsing import Serializable, choice
 
-from datasets.utils.base import DATASET_REGISTRY
+from datasets.utils.graph_dataset import DATASET_REGISTRY
 
 
 class HParams(Serializable):

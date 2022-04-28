@@ -68,6 +68,11 @@ class MGCOME2EModel(HeteroFeatureModel):
     def forward(self, *args, **kwargs) -> Any:
         return self.combi_model.forward(*args, **kwargs)
 
+    def on_train_start(self) -> None:
+        super().on_train_start()
+        self.combi_model.on_train_start()
+        self.clustering_model.on_train_start()
+
     def training_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         if self.stage == Stage.Feature:
             return self.combi_model.training_step(batch, batch_idx)
