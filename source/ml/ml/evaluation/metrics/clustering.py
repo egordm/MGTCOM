@@ -1,6 +1,9 @@
+from typing import Dict
+
 import numpy as np
 import torch
 from sklearn import metrics, utils, preprocessing
+from torch import Tensor
 
 from ml.utils import Metric, pairwise_dotp_dist
 from ml.utils.tensor import ensure_numpy
@@ -71,3 +74,10 @@ def davies_bouldin_score(X, labels, metric=Metric.L2):
     combined_intra_dists = intra_dists[:, None] + intra_dists
     scores = np.max(combined_intra_dists / centroid_distances, axis=1)
     return np.mean(scores)
+
+
+def clustering_metrics(X: Tensor, z: Tensor, metric: Metric) -> Dict[str, float]:
+    return {
+        'silhouette_score': silhouette_score(X, z, metric=metric),
+        'davies_bouldin_score': davies_bouldin_score(X, z, metric=metric),
+    }

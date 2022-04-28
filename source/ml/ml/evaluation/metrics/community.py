@@ -1,10 +1,7 @@
-from collections import defaultdict
 from typing import Dict
 
 import torch
 from torch import Tensor
-from torch_geometric.data import HeteroData
-from torch_geometric.typing import NodeType
 
 from ml.utils import EPS
 
@@ -116,3 +113,10 @@ def conductance(
     con_c = outer_edges / ((2 * inner_edges) + outer_edges + EPS)
 
     return con_c.mean()
+
+
+def community_metrics(z: Tensor, edge_index: Tensor) -> Dict[str, float]:
+    return {
+        'modularity': newman_girvan_modularity(edge_index, z),
+        'conductance': conductance(edge_index, z),
+    }
