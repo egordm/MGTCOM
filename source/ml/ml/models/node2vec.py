@@ -3,6 +3,7 @@ from typing import Any, Optional, Union
 
 import torch
 from torch import Tensor
+from torch_geometric.data import Data
 
 from datasets import GraphDataset
 from ml.models.base.feature_model import FeatureModel
@@ -85,11 +86,11 @@ class Node2VecDataModule(HomogenousGraphDataModule):
         hdata = to_homogeneous(self.data)
         self.train_data, self.val_data, self.test_data = hdata, hdata, hdata  # Since induction doesnt work on node2vec
 
-    def train_sampler(self) -> Optional[Sampler]:
+    def train_sampler(self, data: Data) -> Optional[Sampler]:
         return Node2VecSampler(
-            self.train_data.edge_index, self.train_data.num_nodes,
+            data.edge_index, data.num_nodes,
             hparams=self.hparams.n2v_params
         )
 
-    def eval_sampler(self) -> Optional[Sampler]:
+    def eval_sampler(self, data: Data) -> Optional[Sampler]:
         return None

@@ -1,29 +1,37 @@
 from dataclasses import dataclass
-from dataclasses import dataclass
-from typing import Any, NamedTuple, Callable
+from enum import Enum
+from typing import Callable, Any, Optional, Tuple
 
+import igraph
+import numpy as np
 import torch
 from torch import Tensor
 from torch_geometric.utils.num_nodes import maybe_num_nodes
 from torch_sparse import SparseTensor
 
+from datasets.utils.temporal import TemporalNodeIndex
 from ml.data.samplers.base import Sampler
+from ml.data.samplers.node2vec_sampler import Node2VecBatch
 from ml.utils import HParams
 
 try:
-    import torch_cluster  # noqa
+    import tch_geometric.tch_geometric as tch_native
 
-    random_walk = torch.ops.torch_cluster.random_walk
+    biased_tempo_random_walk = tch_native.biased_tempo_random_walk
 except ImportError:
-    random_walk = None
+    biased_tempo_random_walk = None
 
-Node2VecBatch = NamedTuple('Node2VecBatch', [("pos_walks", Tensor), ("neg_walks", Tensor), ("node_meta", Any)])
+
+class BiasType(Enum):
+    Uniform = "uniform"
+    Linear = "linear"
+    Exponential = "exponential"
 
 
 @dataclass
-class Node2VecSamplerParams(HParams):
+class CTDNESamplerParams(HParams):
     walk_length: int = 20
-    """Length of the random walk."""
+    """Length of the temporal random walk."""
     context_size: int = 10
     """The actual context size which is considered for positive samples. This parameter increases the effective 
     sampling rate by reusing samples across different source nodes.."""
@@ -31,19 +39,22 @@ class Node2VecSamplerParams(HParams):
     """Number of random walks to start at each node."""
     num_neg_samples: int = 1
     """The number of negative samples to use for each positive sample."""
-    p: float = 1
-    """Likelihood of immediately revisiting a node in the walk."""
-    q: float = 0.5
-    """Control parameter to interpolate between breadth-first strategy (structural equivalence) 
-    and depth-first strategy (community detection). A larger value prefers BFS."""
+    walk_bias: BiasType = BiasType.Uniform
+    """Distribution to use when choosing a random neighbour to walk through. 
+    If set to 'Uniform', The initial edge is picked from a uniform distribution. 
+    If set to 'Exponential' decaying probability, resulting in a bias towards shorter time gaps.
+    """
+    forward: bool = True
+    """Whether to walk forward or backward in time."""
+    retry_count: int = 10
+    """Number of times to retry a random walk if it fails."""
 
 
-class Node2VecSampler(Sampler):
+class CTDNESampler(Sampler):
     def __init__(
             self,
-            edge_index: Tensor,
-            num_nodes=None,
-            hparams: Node2VecSamplerParams = None,
+            node_timestamps: Tensor, edge_index: Tensor, edge_timestamps: Tensor,
+            hparams: CTDNESamplerParams = None,
             transform_meta: Callable[[Tensor], Any] = None,
     ) -> None:
         """
@@ -57,19 +68,20 @@ class Node2VecSampler(Sampler):
         """
         super().__init__()
 
-        if random_walk is None:
-            raise ImportError('`Node2Vec` requires `torch-cluster`.')
+        if biased_tempo_random_walk is None:
+            raise ImportError('`BallroomSampler` requires `tch_geometric`.')
 
-        self.hparams = hparams or Node2VecSamplerParams()
+        self.hparams = hparams or CTDNESamplerParams()
         assert self.hparams.walk_length >= self.hparams.context_size
         self.transform_meta = transform_meta
 
-        self.num_nodes = maybe_num_nodes(edge_index, num_nodes)
         self.walk_length = self.hparams.walk_length - 1
 
-        row, col = edge_index
-        self.adj = SparseTensor(row=row, col=col, sparse_sizes=(self.num_nodes, self.num_nodes)).to('cpu')
-        u = 0
+        self.temporal_index = TemporalNodeIndex().fit(node_timestamps, edge_index, edge_timestamps)
+        self.num_nodes = len(node_timestamps)
+        self.row_ptrs, self.col_indices, self.perm = tch_native.to_csr(edge_index, self.num_nodes)
+        self.node_timestamps = node_timestamps
+        self.edge_timestamps = edge_timestamps[self.perm]
 
     def sample(self, node_ids: Tensor) -> Node2VecBatch:
         pos_walks, neg_walks = self._pos_sample(node_ids), self._neg_sample(node_ids)
@@ -84,8 +96,13 @@ class Node2VecSampler(Sampler):
 
     def _pos_sample(self, node_ids: Tensor) -> Tensor:
         batch = node_ids.repeat(self.hparams.walks_per_node)
-        rowptr, col, _ = self.adj.csr()
-        rw = random_walk(rowptr, col, batch, self.walk_length, self.hparams.p, self.hparams.q)
+
+        node_timestamps = self.node_timestamps[batch]
+        rw = biased_tempo_random_walk(
+            self.row_ptrs, self.col_indices, self.node_timestamps, self.edge_timestamps,
+            batch, node_timestamps, self.hparams.walk_length,
+            self.hparams.walk_bias.value, self.hparams.forward, self.hparams.retry_count
+        )
         if not isinstance(rw, Tensor):
             rw = rw[0]
 
@@ -98,11 +115,11 @@ class Node2VecSampler(Sampler):
     def _neg_sample(self, node_ids: Tensor) -> Tensor:
         batch = node_ids.repeat(self.hparams.walks_per_node * self.hparams.num_neg_samples)
 
-        rw = torch.randint(self.adj.sparse_size(0), (batch.size(0), self.walk_length))
+        rw = torch.randint(self.num_nodes, (batch.size(0), self.walk_length - 1))
         rw = torch.cat([batch.view(-1, 1), rw], dim=-1)
 
         walks = []
-        num_walks_per_rw = 1 + self.walk_length + 1 - self.hparams.context_size
+        num_walks_per_rw = 1 + self.walk_length - self.hparams.context_size
         for j in range(num_walks_per_rw):
             walks.append(rw[:, j:j + self.hparams.context_size])
         return torch.cat(walks, dim=0)

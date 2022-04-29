@@ -4,12 +4,7 @@ from typing import Type, List
 from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
-from datasets.utils.base import DATASET_REGISTRY
-from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallback
-from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
-from ml.callbacks.lp_eval_callback import LPEvalCallback
-from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
-from ml.callbacks.save_graph_callback import SaveGraphCallback
+from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.layers.embedding import HeteroNodeEmbedding
 from ml.models.het2vec import Het2VecModel, Het2VecDataModule, Het2VecDataModuleParams

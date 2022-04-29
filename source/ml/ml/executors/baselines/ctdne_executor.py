@@ -1,3 +1,4 @@
+
 from dataclasses import dataclass
 from typing import Type
 
@@ -8,7 +9,7 @@ from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutorArgs
 from ml.executors.baselines.node2vec_executor import Node2VecExecutor
 from ml.layers.embedding import NodeEmbedding
-from ml.models.ballroom2vec import Ballroom2VecDataModuleParams, Ballroom2VecDataModule, Ballroom2VecModel
+from ml.models.ctdne import CTDNEDataModule, CTDNEModel, CTDNEDataModuleParams
 from ml.utils import dataset_choices, Metric, OptimizerParams
 
 
@@ -18,12 +19,12 @@ class Args(BaseExecutorArgs):
     metric: Metric = Metric.DOTP
     repr_dim: int = 128
     optimizer_params = OptimizerParams()
-    data_params: Ballroom2VecDataModuleParams = Ballroom2VecDataModuleParams()
+    data_params: CTDNEDataModuleParams = CTDNEDataModuleParams()
 
 
-class Ballroom2VecExecutor(Node2VecExecutor):
+class CTDNEExecutor(Node2VecExecutor):
     args: Args
-    datamodule: Ballroom2VecDataModule
+    datamodule: CTDNEDataModule
 
     TASK_NAME = 'embedding_tempo'
 
@@ -35,7 +36,7 @@ class Ballroom2VecExecutor(Node2VecExecutor):
             self.datamodule.train_data.num_nodes,
             self.args.repr_dim,
         )
-        return Ballroom2VecModel(
+        return CTDNEModel(
             embedder=embedder,
             metric=self.args.metric,
             optimizer_params=self.args.optimizer_params,
@@ -43,7 +44,7 @@ class Ballroom2VecExecutor(Node2VecExecutor):
 
     def datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
-        return Ballroom2VecDataModule(
+        return CTDNEDataModule(
             dataset=dataset,
             hparams=self.args.data_params,
             loader_params=self.args.loader_params,
@@ -51,4 +52,4 @@ class Ballroom2VecExecutor(Node2VecExecutor):
 
 
 if __name__ == '__main__':
-    Ballroom2VecExecutor().cli()
+    CTDNEExecutor().cli()

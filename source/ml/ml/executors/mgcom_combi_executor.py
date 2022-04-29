@@ -4,7 +4,7 @@ from typing import Type, List
 from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
-from datasets.utils.base import DATASET_REGISTRY
+from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.models.mgcom_combi import MGCOMCombiModelParams, MGCOMCombiDataModuleParams, MGCOMCombiDataModule, \
     MGCOMCombiModel
