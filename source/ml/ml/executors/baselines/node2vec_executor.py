@@ -9,15 +9,16 @@ from ml.callbacks.lp_eval_callback import LPEvalCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.layers.embedding import NodeEmbedding
-from ml.models.node2vec import Node2VecDataModule, Node2VecDataModuleParams, Node2VecModel
+from ml.models.node2vec import Node2VecDataModule, Node2VecDataModuleParams, Node2VecModel, UnsupervisedLoss, \
+    Node2VecWrapperModelParams
 from ml.utils import dataset_choices, Metric, OptimizerParams
 
 
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
-    metric: Metric = Metric.DOTP
-    repr_dim: int = 128
+    """Graph Dataset to use for training."""
+    hparams: Node2VecWrapperModelParams = Node2VecWrapperModelParams()
     optimizer_params = OptimizerParams()
     data_params: Node2VecDataModuleParams = Node2VecDataModuleParams()
 
@@ -42,11 +43,11 @@ class Node2VecExecutor(BaseExecutor):
     def model(self):
         embedder = NodeEmbedding(
             self.datamodule.train_data.num_nodes,
-            self.args.repr_dim,
+            self.args.hparams.repr_dim,
         )
         return Node2VecModel(
             embedder=embedder,
-            metric=self.args.metric,
+            hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
 

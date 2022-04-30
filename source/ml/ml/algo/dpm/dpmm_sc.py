@@ -28,7 +28,7 @@ class DPMMSCModelParams(HParams):
     init_k: int = 2
     subcluster: bool = True
     mutate: bool = True
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
 
     burnin_patience: int = 3
     early_stopping_patience: int = 5

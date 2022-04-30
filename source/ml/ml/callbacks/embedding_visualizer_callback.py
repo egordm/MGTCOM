@@ -30,7 +30,7 @@ class EmbeddingVisualizerCallbackParams(HParams):
     """Maximum number of points to visualize."""
     ev_interval: int = 3
     """Interval between embedding visualization."""
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
 
 

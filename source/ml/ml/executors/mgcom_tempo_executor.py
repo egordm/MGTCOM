@@ -9,12 +9,14 @@ from ml.executors.base import BaseExecutorArgs
 from ml.executors.mgcom_topo_executor import MGCOMTopoExecutor
 from ml.models.mgcom_feat import MGCOMFeatModelParams
 from ml.models.mgcom_feat import MGCOMTempoDataModuleParams, MGCOMTempoDataModule
+from ml.models.node2vec import UnsupervisedLoss
 from ml.utils import dataset_choices
 
 
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
+    """Graph Dataset to use for training."""
     hparams: MGCOMFeatModelParams = MGCOMFeatModelParams()
     data_params: MGCOMTempoDataModuleParams = MGCOMTempoDataModuleParams()
 

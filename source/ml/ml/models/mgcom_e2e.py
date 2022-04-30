@@ -10,6 +10,7 @@ from ml.data.loaders.nodes_loader import HeteroNodesLoader
 from ml.models.base.feature_model import HeteroFeatureModel
 from ml.models.mgcom_combi import MGCOMCombiModel, MGCOMCombiModelParams, MGCOMCombiDataModule
 from ml.models.mgcom_comdet import MGCOMComDetModel, MGCOMComDetModelParams, Stage as StageDPMM
+from ml.models.node2vec import UnsupervisedLoss
 from ml.utils import HParams, OptimizerParams
 
 
@@ -20,7 +21,7 @@ class Stage(Enum):
 
 @dataclass
 class MGCOME2EModelParams(HParams):
-    combi_params: MGCOMCombiModelParams = MGCOMCombiModelParams(use_cluster=True)
+    combi_params: MGCOMCombiModelParams = MGCOMCombiModelParams(use_cluster=True, loss=UnsupervisedLoss.HINGE)
     cluster_params: MGCOMComDetModelParams = MGCOMComDetModelParams()
 
     pretrain_epochs: int = 20
@@ -101,7 +102,6 @@ class MGCOME2EModel(HeteroFeatureModel):
         if self.clustering_model.is_done:
             self.set_stage(Stage.Feature)
 
-        # TODO: alternate between feature and clustering
         self.epoch_counter += 1
         if self.stage == Stage.Feature \
                 and self.epoch_counter >= self.hparams.feat_epochs \

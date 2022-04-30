@@ -9,14 +9,15 @@ from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.layers.embedding import HeteroNodeEmbedding
 from ml.models.het2vec import Het2VecModel, Het2VecDataModule, Het2VecDataModuleParams
 from ml.models.mgcom_feat import MGCOMTopoDataModule
+from ml.models.node2vec import UnsupervisedLoss, Node2VecWrapperModelParams
 from ml.utils import dataset_choices, Metric, OptimizerParams
 
 
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
-    metric: Metric = Metric.DOTP
-    repr_dim: int = 128
+    """Graph Dataset to use for training."""
+    hparams: Node2VecWrapperModelParams = Node2VecWrapperModelParams()
     optimizer_params = OptimizerParams()
     data_params: Het2VecDataModuleParams = Het2VecDataModuleParams()
 
@@ -41,12 +42,12 @@ class Het2VecExecutor(BaseExecutor):
     def model(self):
         embedder = HeteroNodeEmbedding(
             self.datamodule.data.num_nodes_dict,
-            self.args.repr_dim,
+            self.args.hparams.repr_dim,
         )
 
         return Het2VecModel(
             embedder=embedder,
-            metric=self.args.metric,
+            hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
 

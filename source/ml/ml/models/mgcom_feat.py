@@ -21,6 +21,7 @@ from ml.layers.conv.hybrid_conv_net import HybridConvNet
 from ml.layers.conv.sage_conv_net import SAGEConvNet
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.models.het2vec import Het2VecModel, Het2VecDataModule
+from ml.models.node2vec import UnsupervisedLoss, Node2VecModelParams
 from ml.utils import HParams, DataLoaderParams, Metric, OptimizerParams
 from shared import get_logger
 
@@ -34,18 +35,21 @@ class ConvMethod(Enum):
 
 
 @dataclass
-class MGCOMFeatModelParams(HParams):
+class MGCOMFeatModelParams(Node2VecModelParams):
     embed_node_types: List[NodeType] = field(default_factory=list)
     """List of node types to embed instead of using features for."""
-    metric: Metric = Metric.DOTP
-    """Metric to use for distance/similarity calculation."""
 
     repr_dim: int = 32
+    """Dimension of the representation vectors."""
 
     conv_method: ConvMethod = ConvMethod.HGT
+    """Convolution method to use."""
     conv_hidden_dim: Optional[int] = None
+    """Hidden dimension of the convolution layers. If None, use repr_dim."""
     conv_num_layers: int = 2
+    """Number of convolution layers."""
     conv_num_heads: int = 2
+    """Number of attention heads per convolution layer. Used only if conv_method is HGT."""
 
 
 class MGCOMFeatModel(Het2VecModel):
@@ -90,7 +94,7 @@ class MGCOMFeatModel(Het2VecModel):
             conv=conv,
         )
 
-        super().__init__(embedder, self.hparams.metric, optimizer_params)
+        super().__init__(embedder, self.hparams, optimizer_params)
 
 
 @dataclass

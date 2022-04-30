@@ -9,6 +9,7 @@ from ml.utils import HParams
 @dataclass
 class FCNetParams(HParams):
     repr_dim: int = 32
+    """Dimension of the representation vectors."""
     hidden_dim: Optional[List[int]] = field(default_factory=list)
 
 

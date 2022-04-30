@@ -26,7 +26,7 @@ logger = get_logger(Path(__file__).stem)
 class ClusteringEvalCallbackParams(HParams):
     ce_interval: int = 1
     """Interval between clustering evalutations."""
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
 
 

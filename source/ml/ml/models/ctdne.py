@@ -16,6 +16,7 @@ from ml.utils import DataLoaderParams
 class CTDNEModel(Node2VecModel):
     pass
 
+
 @dataclass
 class CTDNEDataModuleParams(GraphDataModuleParams):
     ctdne_params: CTDNESamplerParams = CTDNESamplerParams()

@@ -25,7 +25,7 @@ class DimensionReductionTransform:
             self,
             n_components=2,
             mode: DimensionReductionMode = DimensionReductionMode.TSNE,
-            metric: Metric = Metric.DOTP
+            metric: Metric = Metric.L2
     ) -> None:
         super().__init__()
         self.n_components = n_components

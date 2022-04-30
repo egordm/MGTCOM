@@ -16,6 +16,7 @@ from ml.utils import dataset_choices
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
+    """Graph Dataset to use for training."""
     hparams: MGCOME2EModelParams = MGCOME2EModelParams()
     data_params: MGCOMCombiDataModuleParams = MGCOMCombiDataModuleParams()
 

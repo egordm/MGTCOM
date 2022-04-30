@@ -1,7 +1,5 @@
-from enum import IntEnum
-
-import torch
 from dataclasses import dataclass
+from enum import IntEnum
 from typing import Union, List, Optional, Any
 
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EPOCH_OUTPUT
@@ -9,12 +7,10 @@ from torch import Tensor
 from torch.utils.data import Dataset
 
 from datasets import GraphDataset
-from ml.algo.dpm import eps_norm
 from ml.algo.dpm.dpmm_sc import DPMMSCModelParams, DPMMSCModel
 from ml.models.base.base_model import BaseModel
 from ml.models.base.clustering_datamodule import ClusteringDataModule
 from ml.utils import HParams, DataLoaderParams, OptimizerParams
-from ml.utils.outputs import OutputExtractor
 
 
 class Stage(IntEnum):

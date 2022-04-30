@@ -69,7 +69,6 @@ class Node2VecSampler(Sampler):
 
         row, col = edge_index
         self.adj = SparseTensor(row=row, col=col, sparse_sizes=(self.num_nodes, self.num_nodes)).to('cpu')
-        u = 0
 
     def sample(self, node_ids: Tensor) -> Node2VecBatch:
         pos_walks, neg_walks = self._pos_sample(node_ids), self._neg_sample(node_ids)

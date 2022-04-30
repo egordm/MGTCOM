@@ -17,7 +17,7 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class ClassificationEvalCallbackParams(HParams):
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
     cl_max_pairs: int = 5000
     """Maximum number of pairs to use for classification."""
@@ -53,7 +53,7 @@ class ClassificationEvalCallback(IntermittentCallback):
         Z = self.val_subsample.transform(Z)
 
         for label_name, labels in self.val_labels.items():
-            acc, metrics = prediction_measure(Z, labels, max_iter=200)
+            acc, metrics = prediction_measure(Z, labels, max_iter=1000)
             pl_module.log_dict(prefix_keys(metrics, f'eval/val/cl/{label_name}/'), on_epoch=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
@@ -69,5 +69,5 @@ class ClassificationEvalCallback(IntermittentCallback):
         Z = self.test_subsample.transform(Z)
 
         for label_name, labels in self.test_labels.items():
-            acc, metrics = prediction_measure(Z, labels, max_iter=200)
+            acc, metrics = prediction_measure(Z, labels, max_iter=1000)
             pl_module.log_dict(prefix_keys(metrics, f'eval/val/cl/{label_name}/'), on_epoch=True)

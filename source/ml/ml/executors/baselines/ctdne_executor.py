@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import Type
 
@@ -10,14 +9,15 @@ from ml.executors.base import BaseExecutorArgs
 from ml.executors.baselines.node2vec_executor import Node2VecExecutor
 from ml.layers.embedding import NodeEmbedding
 from ml.models.ctdne import CTDNEDataModule, CTDNEModel, CTDNEDataModuleParams
+from ml.models.node2vec import UnsupervisedLoss, Node2VecWrapperModelParams
 from ml.utils import dataset_choices, Metric, OptimizerParams
 
 
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
-    metric: Metric = Metric.DOTP
-    repr_dim: int = 128
+    """Graph Dataset to use for training."""
+    hparams: Node2VecWrapperModelParams = Node2VecWrapperModelParams(loss=UnsupervisedLoss.SKIPGRAM, metric=Metric.DOTP)
     optimizer_params = OptimizerParams()
     data_params: CTDNEDataModuleParams = CTDNEDataModuleParams()
 
@@ -34,11 +34,11 @@ class CTDNEExecutor(Node2VecExecutor):
     def model(self):
         embedder = NodeEmbedding(
             self.datamodule.train_data.num_nodes,
-            self.args.repr_dim,
+            self.args.hparams.repr_dim,
         )
         return CTDNEModel(
             embedder=embedder,
-            metric=self.args.metric,
+            hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
 

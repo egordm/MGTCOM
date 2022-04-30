@@ -30,7 +30,7 @@ class ClusteringVisualizerCallbackParams(HParams):
     """Maximum number of points to visualize."""
     cv_interval: int = 1
     """Interval between clustering visualization."""
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
 
 

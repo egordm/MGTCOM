@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Type, Optional
 
 from pytorch_lightning import LightningDataModule, Callback, Trainer
@@ -20,9 +21,8 @@ from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.callbacks.save_graph_callback import SaveGraphCallbackParams, SaveGraphCallback
 from ml.callbacks.save_modelsummary_callback import SaveModelSummaryCallback
 from ml.models.base.graph_datamodule import GraphDataModule
-from ml.utils import DataLoaderParams, OptimizerParams, TrainerParams
+from ml.utils import DataLoaderParams, OptimizerParams, TrainerParams, Metric, recursively_override_attr
 from shared import parse_args, get_logger, RESULTS_PATH
-
 
 @dataclass
 class CallbackArgs(Serializable):
@@ -42,6 +42,7 @@ class BaseExecutorArgs(Serializable):
     show_config: bool = False
     debug: bool = False
     offline: bool = False
+    metric: Optional[Metric] = None
 
     loader_params: DataLoaderParams = DataLoaderParams()
     optimizer_params: OptimizerParams = OptimizerParams()
@@ -70,6 +71,10 @@ class BaseExecutor:
 
     def cli(self):
         self.args = parse_args(self.params_cls())[0]
+        if self.args.metric is not None:
+            self.logger.info(f'Using metric {self.args.metric} globally')
+            recursively_override_attr(self.args, 'metric', self.args.metric)
+
         self.datamodule = self.datamodule()
         self.RUN_NAME = self.run_name()
 

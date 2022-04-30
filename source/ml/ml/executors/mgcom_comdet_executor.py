@@ -30,6 +30,7 @@ logger = get_logger(EXECUTOR_NAME)
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
+    """Graph Dataset to use for visualization and evaluation."""
     pretrained_path: Optional[str] = None
     hparams: MGCOMComDetModelParams = MGCOMComDetModelParams()
     data_params: MGCOMComDetDataModuleParams = MGCOMComDetDataModuleParams()

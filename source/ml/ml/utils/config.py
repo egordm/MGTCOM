@@ -41,3 +41,15 @@ class DataLoaderParams(HParams):
 
 def dataset_choices():
     return choice(*DATASET_REGISTRY.names, default="StarWars")
+
+
+def recursively_override_attr(obj, attr_name, value):
+    if isinstance(obj, dict):
+        if attr_name in obj:
+            obj[attr_name] = value
+    elif isinstance(obj, Serializable):
+        if hasattr(obj, attr_name):
+            setattr(obj, attr_name, value)
+
+        for child in obj.__dict__.values():
+            recursively_override_attr(child, attr_name, value)

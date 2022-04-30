@@ -18,7 +18,7 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class SaveGraphCallbackParams(HParams):
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     """Metric to use for kmeans clustering."""
 
 

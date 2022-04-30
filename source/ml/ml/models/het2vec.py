@@ -14,15 +14,15 @@ from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams, Node2VecSam
 from ml.models.base.feature_model import HeteroFeatureModel
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.models.base.hgraph_datamodule import HeteroGraphDataModule
-from ml.models.node2vec import Node2VecModel
-from ml.utils import DataLoaderParams, OptimizerParams, Metric
+from ml.models.node2vec import Node2VecModel, Node2VecModelParams
+from ml.utils import DataLoaderParams, OptimizerParams
 
 
 class Het2VecModel(HeteroFeatureModel):
     def __init__(
             self,
             embedder: torch.nn.Module,
-            metric: Metric = Metric.DOTP,
+            hparams: Node2VecModelParams,
             optimizer_params: Optional[OptimizerParams] = None
     ) -> None:
         super().__init__(optimizer_params)
@@ -30,7 +30,7 @@ class Het2VecModel(HeteroFeatureModel):
         self.embedder = embedder
         self.n2v = Node2VecModel(
             None,
-            metric=metric,
+            hparams,
             optimizer_params=optimizer_params
         )
 

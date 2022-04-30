@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, Optional, Union
 
 import torch
@@ -6,6 +7,8 @@ from torch import Tensor
 from torch_geometric.data import Data
 
 from datasets import GraphDataset
+from ml.layers.loss.hinge_loss import HingeLoss
+from ml.layers.loss.skipgram_loss import SkipgramLoss
 from ml.models.base.feature_model import FeatureModel
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.data.samplers.base import Sampler
@@ -13,25 +16,47 @@ from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams, Node2VecSam
 from datasets.transforms.to_homogeneous import to_homogeneous
 
 from ml.models.base.hgraph_datamodule import HomogenousGraphDataModule
-from ml.utils import Metric, OptimizerParams, DataLoaderParams
+from ml.utils import Metric, OptimizerParams, DataLoaderParams, HParams
 
 EPS = 1e-15
 
 
+class UnsupervisedLoss(Enum):
+    HINGE = 'hinge'
+    SKIPGRAM = 'skipgram'
+
+
+@dataclass
+class Node2VecModelParams(HParams):
+    metric: Metric = Metric.L2
+    """Metric to use for distance/similarity calculation. (for loss)"""
+    loss: UnsupervisedLoss = UnsupervisedLoss.HINGE
+    """Unsupervised loss function to use."""
+
+
+@dataclass
+class Node2VecWrapperModelParams(Node2VecModelParams):
+    repr_dim: int = 32
+    """Dimension of the representation vectors."""
+
+
 class Node2VecModel(FeatureModel):
+    hparams: Union[Node2VecModelParams, OptimizerParams]
+
     def __init__(
             self,
             embedder: torch.nn.Module,
-            metric: Metric = Metric.DOTP,
-            hparams: Any = None,
+            hparams: Node2VecModelParams,
             optimizer_params: Optional[OptimizerParams] = None
     ) -> None:
         super().__init__(optimizer_params)
         self.save_hyperparameters(hparams)
 
         self.embedder = embedder
-        self.metric = metric
-        self.sim_fn = metric.pairwise_sim_fn
+        if self.hparams.loss == UnsupervisedLoss.HINGE:
+            self.loss_fn = HingeLoss(self.hparams.metric)
+        elif self.hparams.loss == UnsupervisedLoss.SKIPGRAM:
+            self.loss_fn = SkipgramLoss(self.hparams.metric)
 
     @property
     def repr_dim(self):
@@ -42,23 +67,7 @@ class Node2VecModel(FeatureModel):
         return self.embedder(node_meta)
 
     def loss(self, pos_walks: Tensor, neg_walks: Tensor, Z: Tensor):
-        pos_walks_Z = Z[pos_walks.view(-1)].view(*pos_walks.shape, Z.shape[-1])
-        p_head, p_rest = pos_walks_Z[:, 0].unsqueeze(dim=1), pos_walks_Z[:, 1:]
-        p_sim = self.sim_fn(p_head, p_rest).view(-1)
-        # p_head_, p_rest_ = F.normalize(p_head, p=2, dim=2), F.normalize(p_rest, p=2, dim=2)
-        # p_sim = (p_head_ * p_rest_).sum(dim=-1).view(-1)  # Always use dot product
-        # p_sim = -1 * (p_head - p_rest).pow(2).sum(dim=-1).view(-1)  # L2
-        pos_loss = -torch.log(torch.sigmoid(p_sim) + EPS).mean()
-
-        neg_walks_Z = Z[neg_walks.view(-1)].view(*neg_walks.shape, Z.shape[-1])
-        n_head, n_rest = neg_walks_Z[:, 0].unsqueeze(dim=1), neg_walks_Z[:, 1:]
-        n_sim = self.sim_fn(n_head, n_rest).view(-1)
-        # n_head_, n_rest_ = F.normalize(n_head, p=2, dim=2), F.normalize(n_rest, p=2, dim=2)
-        # n_sim = (n_head_ * n_rest_).sum(dim=-1).view(-1)  # Always use dot product
-        # n_sim = -1 * (n_head - n_rest).pow(2).sum(dim=-1).view(-1)  # L2
-        neg_loss = -torch.log(1 - torch.sigmoid(n_sim) + EPS).mean()
-
-        return pos_loss + neg_loss
+        return self.loss_fn(Z, pos_walks, neg_walks)
 
     def training_step(self, batch, batch_idx):
         pos_walks, neg_walks, node_meta = batch

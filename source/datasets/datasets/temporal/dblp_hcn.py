@@ -59,7 +59,7 @@ class DBLPHCN(GraphDataset):
         ))
         multilabel.view(-1)[cids] = True
         store.ground_truth = multilabel
-        store.y = multilabel.argmax(dim=-1)
+        store.y = multilabel.float().argmax(dim=-1)
 
         if store._key == 'Paper':
             from sentence_transformers import SentenceTransformer
@@ -89,4 +89,4 @@ class DBLPHCN(GraphDataset):
 
     @staticmethod
     def labels() -> List[str]:
-        return ['ground_truth', 'y', 'louvain', 'label_snapshot_7']
+        return ['y', 'louvain', 'label_snapshot_7']

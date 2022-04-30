@@ -7,12 +7,14 @@ from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule
+from ml.models.node2vec import UnsupervisedLoss
 from ml.utils import dataset_choices
 
 
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
+    """Graph Dataset to use for training."""
     hparams: MGCOMFeatModelParams = MGCOMFeatModelParams()
     data_params: MGCOMTopoDataModuleParams = MGCOMTopoDataModuleParams()
 

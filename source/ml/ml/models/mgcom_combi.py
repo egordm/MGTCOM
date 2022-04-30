@@ -30,10 +30,12 @@ class MGCOMCombiModelParams(MGCOMFeatModelParams):
     use_cluster: bool = False
 
     topo_repr_dim: int = 32
+    """Dimension of the topology feature representation vectors."""
     topo_hidden_dim: List[int] = field(default_factory=lambda: [32])
     topo_weight: float = 1.0
 
     tempo_repr_dim: int = 32
+    """Dimension of the temporal feature representation vectors."""
     tempo_hidden_dim: List[int] = field(default_factory=lambda: [32])
     tempo_weight: float = 1.0
 

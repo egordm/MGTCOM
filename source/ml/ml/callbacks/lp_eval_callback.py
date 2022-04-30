@@ -15,7 +15,7 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class LPEvalCallbackParams(HParams):
-    metric: Metric = Metric.DOTP
+    metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
     lp_max_pairs: int = 5000
     """Maximum number of pairs to use for link prediction."""
@@ -42,7 +42,7 @@ class LPEvalCallback(IntermittentCallback):
         else:
             Z = pl_module.val_outputs.extract_cat('Z', cache=True, device='cpu')
 
-        acc, metrics = link_prediction_measure(Z, *self.val_pairs, metric=self.hparams.metric)
+        acc, metrics = link_prediction_measure(Z, *self.val_pairs, metric=self.hparams.metric, max_iter=1000)
 
         pl_module.log_dict({
             f'val/lp/acc': acc
@@ -57,6 +57,6 @@ class LPEvalCallback(IntermittentCallback):
         else:
             Z = pl_module.test_outputs.extract_cat('Z', cache=True, device='cpu')
 
-        _, metrics = link_prediction_measure(Z, *self.test_pairs, metric=self.hparams.metric)
+        _, metrics = link_prediction_measure(Z, *self.test_pairs, metric=self.hparams.metric, max_iter=1000)
 
         pl_module.log_dict(prefix_keys(metrics, 'eval/test/lp/'), on_epoch=True)
