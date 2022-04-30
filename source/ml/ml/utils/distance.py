@@ -12,6 +12,14 @@ def pairwise_dotp_dist(x, y):
     return -torch.einsum('...i,...i->...', x, y)
 
 
+def pairwise_l1(x, y):
+    return torch.pairwise_distance(x, y, p=1)
+
+
+def pairwise_l1_sim(x, y):
+    return -torch.pairwise_distance(x, y, p=1)
+
+
 def pairwise_l2(x, y):
     return torch.pairwise_distance(x, y, p=2)
 
@@ -29,13 +37,16 @@ def pairwise_cosine_dist(x, y):
 
 
 class Metric(Enum):
+    L1 = 'l1'
     L2 = 'l2'
     COSINE = 'cosine'
     DOTP = 'dotp'
 
     @property
     def pairwise_sim_fn(self):
-        if self == Metric.L2:
+        if self == Metric.L1:
+            return pairwise_l1_sim
+        elif self == Metric.L2:
             return pairwise_l2_sim
         elif self == Metric.COSINE:
             return pairwise_cosine
@@ -46,7 +57,9 @@ class Metric(Enum):
 
     @property
     def pairwise_dist_fn(self):
-        if self == Metric.L2:
+        if self == Metric.L1:
+            return pairwise_l1
+        elif self == Metric.L2:
             return pairwise_l2
         elif self == Metric.COSINE:
             return pairwise_cosine_dist
@@ -54,7 +67,9 @@ class Metric(Enum):
             return pairwise_dotp_dist
 
     def faiss_metric(self):
-        if self == Metric.L2:
+        if self == Metric.L1:
+            return faiss.METRIC_L1
+        elif self == Metric.L2:
             return faiss.METRIC_L2
         elif self == Metric.COSINE:
             return faiss.METRIC_INNER_PRODUCT
@@ -62,31 +77,11 @@ class Metric(Enum):
             return faiss.METRIC_INNER_PRODUCT
 
     def sk_metric(self) -> str:
-        if self == Metric.L2:
+        if self == Metric.L1:
+            return 'manhattan'
+        elif self == Metric.L2:
             return 'euclidean'
         elif self == Metric.COSINE:
             return 'cosine'
         elif self == Metric.DOTP:
             return 'cosine'
-
-
-def pairwise_sim_fn(sim='dotp'):
-    if sim == 'dotp':
-        return pairwise_dotp
-    elif sim == 'cosine':
-        return pairwise_cosine
-    elif sim == 'euclidean':
-        return pairwise_l2_sim
-    else:
-        raise ValueError(f'Unknown similarity function {sim}')
-
-
-def pairwise_dist_fn(sim='dotp'):
-    if sim == 'dotp':
-        return pairwise_dotp_dist
-    elif sim == 'cosine':
-        return pairwise_cosine_dist
-    elif sim == 'euclidean':
-        return pairwise_l2
-    else:
-        raise ValueError(f'Unknown distance function {sim}')
