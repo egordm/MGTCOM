@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-import torch
 from pytorch_lightning import Trainer
 
 from ml.algo.transforms import SubsampleTransform
@@ -9,7 +8,8 @@ from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from ml.evaluation import prediction_measure
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
-from ml.utils import HParams, Metric, prefix_keys, dict_catv, dict_mapv
+from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
+from ml.utils import HParams, Metric, prefix_keys, dict_mapv
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -42,6 +42,9 @@ class ClassificationEvalCallback(IntermittentCallback):
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if len(self.val_labels) == 0:
+            return
+
+        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != StageE2E.Feature:
             return
 
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")

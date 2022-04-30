@@ -60,11 +60,16 @@ class DimensionReductionTransform:
     def transform(self, X: Tensor) -> Tensor:
         if self.mode == DimensionReductionMode.TSNE:
             return torch.from_numpy(self.mapper.fit_transform(X))
+        if self.mode == DimensionReductionMode.Identity:
+            return self.mapper.transform(X)
         else:
             return torch.from_numpy(self.mapper.transform(X))
 
     def inverse_transform(self, X_t: Tensor) -> Tensor:
-        return torch.from_numpy(self.mapper.inverse_transform(X_t))
+        if self.mode == DimensionReductionMode.Identity:
+            return self.mapper.inverse_transform(X_t)
+        else:
+            return torch.from_numpy(self.mapper.inverse_transform(X_t))
 
 
 class IdentityTransform:

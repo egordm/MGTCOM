@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
 
-import torch
 from pytorch_lightning import Trainer
-from torch import Tensor
 
 from ml.algo.transforms import SubsampleTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback
-from ml.evaluation import silhouette_score, davies_bouldin_score, clustering_metrics
+from ml.evaluation import clustering_metrics
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E

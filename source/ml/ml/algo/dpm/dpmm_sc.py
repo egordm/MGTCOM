@@ -30,7 +30,7 @@ class DPMMSCModelParams(HParams):
     mutate: bool = True
     metric: Metric = Metric.L2
 
-    burnin_patience: int = 3
+    burnin_patience: int = 5
     early_stopping_patience: int = 5
 
     prior_alpha: float = 10
@@ -108,6 +108,8 @@ class DPMMSCModel(torch.nn.Module):
         return self.clusters.estimate_assignment(X)
 
     def reinitialize(self, X: Tensor, incremental=True, z: Optional[Tensor] = None) -> None:
+        self.mhmc.mu_cov_prior.update(X, self.hparams.prior_sigma_scale)
+
         if not self.clusters.is_initialized or not incremental:
             logger.info(f'Initializing clusters with {self.hparams.cluster_init_mode}')
             self.clusters.reinitialize(X, self.hparams.cluster_init_mode, z=z)
@@ -116,8 +118,6 @@ class DPMMSCModel(torch.nn.Module):
             logger.info(f'Initializing subclusters with {self.hparams.subcluster_init_mode}')
             r = self.clusters.estimate_assignment(X)
             self.subclusters.reinitialize(X, r, self.hparams.subcluster_init_mode, incremental=incremental)
-
-        self.mhmc.mu_cov_prior.update(X, self.hparams.prior_sigma_scale)
 
     def step_e(self, X: Tensor):
         assert self.clusters.is_initialized, "Cluster model is not initialized"
