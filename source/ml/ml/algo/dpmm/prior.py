@@ -84,12 +84,20 @@ class NWPrior:
     """Inverse of the scale matrix of the Wishart distribution. (covariance matrix)"""
 
     @staticmethod
-    def from_params(kappa: float, nu: float, mu: Tensor, cov: Tensor, prior_cov_scale: float = 1.0) -> Self:
-        assert kappa > 0, 'kappa must be positive'
-        assert nu >= mu.shape[0] + 1, 'nu must be larger or equal to D + 1'
+    def from_data(X: Tensor, kappa: float, nu: float, prior_cov_scale: float = 1.0) -> Self:
         assert prior_cov_scale > 0, 'prior_cov_scale must be positive'
 
-        return NWPrior(mu, torch.tensor(kappa), torch.tensor(nu), cov * prior_cov_scale)
+        mu, cov = torch.mean(X, dim=0), torch.diag(torch.std(X, dim=0))  # torch.cov(X.T)
+        return NWPrior.from_params(
+            kappa, nu, mu, cov * prior_cov_scale
+        )
+
+    @staticmethod
+    def from_params(kappa: float, nu: float, mu: Tensor, cov: Tensor) -> Self:
+        assert kappa > 0, 'kappa must be positive'
+        assert nu >= mu.shape[0] + 1, 'nu must be larger or equal to D + 1'
+
+        return NWPrior(mu, torch.tensor(kappa), torch.tensor(nu), cov)
 
     @staticmethod
     def log_norm(nu: Tensor, W: Tensor, D: int) -> Tensor:
@@ -100,6 +108,7 @@ class NWPrior:
         )
 
     def estimate_post(self, Ns: Tensor, mus: Tensor, covs: Tensor) -> NWParams:
+        _, D = mus.shape
         kappas_k = self.kappa + Ns
         nus_k = self.nu + Ns
         mus_k = (self.kappa * self.mu_0 + Ns[:, None] * mus) / kappas_k[:, None]
@@ -110,7 +119,7 @@ class NWPrior:
                      + Ns[:, None, None] * covs
                      + ((self.kappa * Ns) / kappas_k)[:, None, None]
                      * batchwise_outer(diff, diff)
-                 ) / nus_k[:, None, None]
+                 ) / (nus_k[:, None, None] + D + 2) # TODO: check whether D + 2 is fine
         Ws_k = covs_to_prec(covs_k)
 
         return NWParams(mus_k, kappas_k, nus_k, Ws_k, covs_k)
@@ -138,7 +147,7 @@ class NWPrior:
             + mvlgamma(nus_post / 2.0, D)
             - mvlgamma(self.nu / 2.0, D)
             + self.W_inv.logdet() * (self.nu / 2.0)
-            - (covs_post * Ns[:, None, None]).logdet() * (nus_post / 2.0) # TODO: shouldn't we use Ws instead?
+            - (covs_post * (nus_post[:, None, None] + D + 2)).logdet() * (nus_post / 2.0) # TODO: shouldn't we use Ws instead?
             + (torch.log(self.kappa) - torch.log(kappas_post)) * (D / 2.0)
         )
 

@@ -45,13 +45,13 @@ def plot_results(ax, X, z, mus, covs, colors, sup, plot_params=True):
 # X_dict = torch.load(
 #     '/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220430_222415-3ftcu5qf/files/embeddings_hetero.pt')
 # dataset = StarWars()
-X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/run-20220501_235544-ptk0stcg/files/embeddings_hetero.pt')
-dataset = Cora()
-X = torch.cat(list(X_dict.values()), dim=0)
+# X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/run-20220501_235544-ptk0stcg/files/embeddings_hetero.pt')
+# dataset = Cora()
+# X = torch.cat(list(X_dict.values()), dim=0)
 
 
-# dataset = SyntheticGMMDataset()
-# X = dataset[torch.arange(len(dataset))]
+dataset = SyntheticGMMDataset()
+X = dataset[torch.arange(len(dataset))]
 
 
 class PlotCallback(EMCallback):
@@ -75,7 +75,7 @@ class PlotCallback(EMCallback):
 
     def on_after_step(self, model: DirichletProcessMixtureSC, lower_bound: Tensor) -> None:
         print(f'Step {self.step}')
-        if self.step % 20 != 0:
+        if self.step % 5 != 0:
             self.step += 1
             return
 
@@ -129,12 +129,12 @@ class PlotCallback(EMCallback):
 
 # Fit a Dirichlet process Gaussian mixture using five components
 dpmm = DirichletProcessMixtureSC(DPMixtureSCParams(
-    init_k=50,
+    init_k=2,
     init_mode=InitMode.KMEANS,
-    prior_alpha=10,
-    prior_sigma_scale=0.001,
+    prior_alpha=1e2,
+    prior_sigma_scale=0.1,
     # prior_nu=100,
-    prior_kappa=0.1,
+    prior_kappa=1,
     # prior_sigma_scale=0.01,
     mutate=True,
 ))
@@ -156,8 +156,8 @@ def extract_edge_index(data):
         return None
 
 
-z = dpmm.predict(X)
-edge_index = extract_edge_index(dataset.data)
-metrics = community_metrics(z, edge_index)
-print(metrics)
-print(dpmm.n_components)
+# z = dpmm.predict(X)
+# edge_index = extract_edge_index(dataset.data)
+# metrics = community_metrics(z, edge_index)
+# print(metrics)
+# print(dpmm.n_components)

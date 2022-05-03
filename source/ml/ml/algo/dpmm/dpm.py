@@ -46,9 +46,8 @@ class DirichletProcessMixture(BaseMixture[DPMMParams]):
             logger.warning(f"nu must be at least D + 1. Setting nu to {D + 1}")
             self.hparams.prior_nu = D + 1
 
-        mu, cov = torch.mean(X, dim=0), torch.cov(X.T)
-        self.prior_nw = NWPrior.from_params(
-            self.hparams.prior_kappa, self.hparams.prior_nu, mu, cov, self.hparams.prior_sigma_scale
+        self.prior_nw = NWPrior.from_data(
+            X, self.hparams.prior_kappa, self.hparams.prior_nu, self.hparams.prior_sigma_scale
         )
 
     def _init_params(self, X: Tensor) -> None:
