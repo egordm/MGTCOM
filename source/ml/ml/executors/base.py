@@ -194,10 +194,10 @@ class BaseExecutor:
                 self.datamodule,
                 hparams=self.args.callback_params.lp_eval,
             ),
-            ClassificationEvalCallback(
-                self.datamodule,
-                hparams=self.args.callback_params.classification_eval,
-            ),
+            # ClassificationEvalCallback(
+            #     self.datamodule,
+            #     hparams=self.args.callback_params.classification_eval,
+            # ),
             SaveGraphCallback(
                 self.datamodule.dataset,
                 hparams=self.args.callback_params.save_graph

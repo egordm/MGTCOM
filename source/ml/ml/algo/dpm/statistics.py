@@ -145,6 +145,7 @@ def merge_params(Ns: Tensor, mus: Tensor, covs: Tensor) -> DPMMObs:
                 - mus_c.unsqueeze(2) @ mus_c.unsqueeze(1)
         )
     else:
+        print('Warning: No data in cluster; merge params')
         mus_c = mus.mean(dim=0, keepdim=True)
         covs_c = covs.mean(dim=0, keepdim=True)
 

@@ -29,7 +29,7 @@ class ClusteringDataModule(LightningDataModule):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return EmbeddingsLoader(
             [self.dataset],
-            shuffle=True,
+            shuffle=False,
             **self.loader_params.to_dict(),
         )
 

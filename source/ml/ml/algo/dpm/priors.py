@@ -14,7 +14,7 @@ logger = get_logger(Path(__file__).stem)
 
 Float = Union[float, Tensor]
 
-DirichletParams = NamedTuple('DirichletParams', [('alpha', Float)])
+DirichletParams = NamedTuple('DirParams', [('alpha', Float)])
 
 
 @dataclass
@@ -24,11 +24,11 @@ class DirichletPrior:
     @staticmethod
     def from_params(alpha: float = 1.0) -> Self:
         """
-        `from_params` takes a single float as an argument and returns a `DirichletPrior` object
+        `from_params` takes a single float as an argument and returns a `DirPrior` object
 
         :param alpha: The concentration parameter for the Dirichlet distribution
         :type alpha: float
-        :return: A DirichletPrior object with a DirichletParams object as its attribute.
+        :return: A DirPrior object with a DirParams object as its attribute.
         """
         return DirichletPrior(DirichletParams(torch.tensor(alpha)))
 

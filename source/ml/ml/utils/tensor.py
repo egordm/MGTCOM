@@ -59,3 +59,7 @@ def mask_from_idx(idx: Tensor, n: int) -> Tensor:
 
 def dict_catv(d: Dict[str, Tensor], dim=0) -> Tensor:
     return torch.cat(list(d.values()), dim=dim)
+
+
+def batchwise_outer(x: Tensor, y: Tensor) -> Tensor:
+    return torch.einsum('bi,bj->bij', (x, y))

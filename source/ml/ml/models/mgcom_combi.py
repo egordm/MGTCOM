@@ -132,7 +132,7 @@ class MGCOMCombiModel(HeteroFeatureModel):
         Z_feat = dict_mapv(Z_emb, self.combi_feat_net)
         return Z_feat
 
-    def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
+    def training_step(self, batch, batch_idx, r=None) -> STEP_OUTPUT:
         (
             (topo_pos_walks, topo_neg_walks, topo_node_meta),
             (tempo_pos_walks, tempo_neg_walks, tempo_node_meta),
@@ -161,16 +161,20 @@ class MGCOMCombiModel(HeteroFeatureModel):
         else:
             Z_tempo = None
 
-        if self.use_cluster_loss:
+        if self.use_cluster_loss and self.cluster_module.k > 1 and r is not None:
             if self.hparams.use_topo and self.hparams.use_tempo:
                 Z_combi = self.embedding_combine_fn([Z_topo, Z_tempo])
+                idx = topo_pos_walks[:, 0]
             else:
                 Z_combi = Z_topo if self.hparams.use_topo else Z_tempo
+                idx = topo_pos_walks[:, 0] if self.hparams.use_topo else tempo_pos_walks[:, 0]
 
-            r = self.cluster_module.estimate_assignment(Z_combi)
+            Z_combi_i = Z_combi[idx, :]
+            r_i = r[idx, :]
             mus = self.cluster_module.mus
-            loss_cluster = self.cluster_loss_fn(Z_combi, r, mus)
+            loss_cluster = self.cluster_loss_fn(Z_combi_i, r_i, mus)
             loss += self.hparams.cluster_weight * loss_cluster
+            # loss = self.hparams.cluster_weight * loss_cluster
             out["loss_cluster"] = loss_cluster.detach()
 
         return {

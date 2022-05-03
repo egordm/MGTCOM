@@ -12,10 +12,17 @@ from datasets.transforms.normalize_timestamps import NormalizeTimestamps
 from datasets.transforms.sort_edges import SortEdges
 from datasets.transforms.undirected import ToUndirected
 from datasets.utils.graph_dataset import DATASET_REGISTRY, GraphDataset
-from ml.utils import flat_iter
 from shared.paths import DatasetPath
 
 NUM_CLASSES = 14
+
+
+def flat_iter(l):
+    for el in l:
+        if isinstance(el, list):
+            yield from flat_iter(el)
+        else:
+            yield el
 
 
 @DATASET_REGISTRY

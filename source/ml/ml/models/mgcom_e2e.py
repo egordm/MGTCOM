@@ -24,7 +24,8 @@ class MGCOME2EModelParams(HParams):
     combi_params: MGCOMCombiModelParams = MGCOMCombiModelParams(use_cluster=True, loss=UnsupervisedLoss.HINGE)
     cluster_params: MGCOMComDetModelParams = MGCOMComDetModelParams()
 
-    pretrain_epochs: int = 20
+    # pretrain_epochs: int = 20
+    pretrain_epochs: int = 10
     feat_epochs: int = 10
     cluster_epochs: int = 20
 
@@ -56,6 +57,7 @@ class MGCOME2EModel(HeteroFeatureModel):
 
         self.stage = Stage.Feature
         self.epoch_counter = 0
+        self.r_prev = None
 
     def setup(self, stage: Optional[str] = None) -> None:
         super().setup(stage)
@@ -76,7 +78,7 @@ class MGCOME2EModel(HeteroFeatureModel):
 
     def training_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
         if self.stage == Stage.Feature:
-            return self.combi_model.training_step(batch, batch_idx)
+            return self.combi_model.training_step(batch, batch_idx, r=self.r_prev)
         elif self.stage == Stage.Clustering:
             _, node_perm_dict = batch
             Z_dict = self.combi_model(batch)
@@ -94,6 +96,9 @@ class MGCOME2EModel(HeteroFeatureModel):
             self.combi_model.training_epoch_end(outputs)
         elif self.stage == Stage.Clustering:
             self.clustering_model.training_epoch_end(outputs)
+            if self.clustering_model.stage != StageDPMM.GatherSamples:
+                X = self.clustering_model.train_outputs.extract_cat('X', cache=True)
+                self.r_prev = self.clustering_model.estimate_assignment(X).detach()
 
         if self.current_epoch == self.hparams.pretrain_epochs:
             self.combi_model.pretraining = False

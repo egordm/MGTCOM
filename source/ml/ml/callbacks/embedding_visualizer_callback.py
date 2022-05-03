@@ -23,12 +23,12 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class EmbeddingVisualizerCallbackParams(HParams):
-    dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.UMAP
     # dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.TSNE
+    dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.UMAP
     """Dimension reduction mode for embedding visualization."""
     ev_max_points: int = 1000
     """Maximum number of points to visualize."""
-    ev_interval: int = 3
+    ev_interval: int = 1
     """Interval between embedding visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
@@ -65,7 +65,11 @@ class EmbeddingVisualizerCallback(IntermittentCallback):
         self.mapper.fit(Z)
         Z = self.mapper.transform(Z)
 
-        for label_name, labels in self.val_labels.items():
+        labels = {**self.val_labels}
+        if isinstance(pl_module, MGCOME2EModel) and pl_module.r_prev is not None:
+            labels['mgtcom'] = pl_module.r_prev.argmax(dim=1).detach().cpu()
+
+        for label_name, labels in labels.items():
             fig = self.visualize_embeddings(
                 Z, labels,
                 f'Epoch {trainer.current_epoch} - Embedding Visualization ({label_name})'

@@ -47,7 +47,9 @@ class ClusteringVisualizerCallback(IntermittentCallback):
 
         self.subsample = SubsampleTransform(self.hparams.cv_max_points)
         self.remap = DimensionReductionTransform(
-            n_components=2, mode=self.hparams.dim_reduction_mode, metric=self.hparams.metric
+            n_components=2,
+            mode=self.hparams.dim_reduction_mode,
+            metric=self.hparams.metric
         )
 
     def _transform_params(self, params: DPMMParams) -> DPMMParams:
@@ -175,7 +177,7 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             ax, X[:, 0], X[:, 1],
             facecolors=colors[z], alpha=0.6,
             # markers=['+', 'x'], marker_idx=zi,
-            linewidth=2, s=MARKER_SIZE * 4, zorder=3
+            linewidth=2, s=MARKER_SIZE * 4, zorder=1
         )
 
         # Draw clusters
@@ -186,7 +188,7 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             s=MARKER_SIZE * 8, linewidth=2,
             alpha=0.6, zorder=3
         )
-        draw_ellipses(ax, cluster_params.mus, cluster_params.covs, colors, alpha=0.2, zorder=1)
+        draw_ellipses(ax, cluster_params.mus, cluster_params.covs, colors, alpha=0.2, zorder=2)
 
         ax.set_title("Net Clusters and Covariances")
 
@@ -196,7 +198,7 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             ax, X[:, 0], X[:, 1],
             facecolors=colors[z], alpha=0.6,
             markers=['+', 'x'], marker_idx=zi,
-            linewidth=2, s=MARKER_SIZE * 4, zorder=3
+            linewidth=2, s=MARKER_SIZE * 4, zorder=1
         )
 
         indices = (torch.arange(len(subcluster_params.mus)) / 2).floor().long()
@@ -209,7 +211,7 @@ class ClusteringVisualizerCallback(IntermittentCallback):
             markers=['<', '>'], marker_idx=(torch.arange(len(subcluster_params.mus)) % 2),
             linewidth=2, s=MARKER_SIZE * 5, zorder=3
         )
-        draw_ellipses(ax, subcluster_params.mus, subcluster_params.covs, colors[indices], alpha=0.2, zorder=1)
+        draw_ellipses(ax, subcluster_params.mus, subcluster_params.covs, colors[indices], alpha=0.2, zorder=2)
 
         ax.set_title("Net SubClusters and Covariances")
 

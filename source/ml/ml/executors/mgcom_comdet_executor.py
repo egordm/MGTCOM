@@ -86,7 +86,7 @@ class MGCOMComDetExecutor(BaseExecutor):
         )
 
     def callbacks(self) -> List[Callback]:
-        return [
+        ret = [
             ClusteringVisualizerCallback(
                 hparams=self.args.callback_params.clustering_visualizer
             ),
@@ -95,12 +95,18 @@ class MGCOMComDetExecutor(BaseExecutor):
                 hparams=self.args.callback_params.clustering_eval
             ),
             SaveEmbeddingsCallback(),
-            SaveGraphCallback(
-                self.datamodule.graph_dataset,
-                hparams=self.args.callback_params.save_graph,
-                clustering=True,
-            ) if self.datamodule.graph_dataset is not None else None,
         ]
+
+        if self.datamodule.graph_dataset is not None:
+            ret.append(
+                SaveGraphCallback(
+                    self.datamodule.graph_dataset,
+                    hparams=self.args.callback_params.save_graph,
+                    clustering=False,
+                )
+            )
+
+        return ret
 
     def run_name(self):
         return self.args.dataset

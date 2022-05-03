@@ -50,6 +50,10 @@ class DimensionReductionTransform:
         self.is_fitted = False
 
     def fit(self, X: Tensor):
+        if self.n_components == X.shape[1]:
+            self.mode = DimensionReductionMode.Identity
+            self.mapper = IdentityTransform()
+
         if self.mode == DimensionReductionMode.TSNE:
             pass
         else:
