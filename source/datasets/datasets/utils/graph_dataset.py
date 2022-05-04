@@ -9,8 +9,10 @@ from pytorch_lightning.utilities.cli import _Registry
 from torch import Tensor
 from torch_geometric.data import InMemoryDataset as THGInMemoryDataset, HeteroData
 from torch_geometric.data.storage import NodeStorage, EdgeStorage, BaseStorage
+from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.typing import Metadata
 
+from datasets.transforms.random_edge_split import RandomEdgeSplit
 from datasets.transforms.random_node_split import RandomNodeSplit
 from datasets.utils.labels import extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
 from datasets.utils.types import Snapshots
@@ -153,6 +155,13 @@ class GraphDataset(BaseGraphDataset):
             num_val=self.num_val,
             num_test=self.num_test,
             key=None,
+        )(data)
+
+        data = RandomEdgeSplit(
+            num_val=self.num_val,
+            num_test=self.num_test,
+            key_prefix='lp_',
+            inplace=True,
         )(data)
 
         if self.pre_transform is not None:

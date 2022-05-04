@@ -12,7 +12,7 @@ from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.ballroom_sampler import BallroomSampler, BallroomSamplerParams, TemporalNodeIndex
 from ml.data.samplers.hgt_sampler import HGTSampler, HGTSamplerParams
 from ml.data.samplers.hybrid_sampler import HybridSampler
-from ml.data.transforms.eval_split import EvalNodeSplitTransform
+from datasets.transforms.eval_split import EvalNodeSplitTransform
 from ml.layers.fc_net import FCNet, FCNetParams
 from ml.layers.conv.hybrid_conv_net import HybridConvNet, HybridConvNetParams
 from ml.models.node2vec import Node2VecModel

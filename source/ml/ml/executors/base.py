@@ -1,10 +1,12 @@
+import shutil
 from abc import abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Type, Optional
 
+import wandb
 from pytorch_lightning import LightningDataModule, Callback, Trainer
-from pytorch_lightning.callbacks import LearningRateMonitor
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from simple_parsing import Serializable
 from transformers.models.longformer.convert_longformer_original_pytorch_lightning_to_pytorch import LightningModel
@@ -24,6 +26,7 @@ from ml.models.base.graph_datamodule import GraphDataModule
 from ml.utils import DataLoaderParams, OptimizerParams, TrainerParams, Metric, recursively_override_attr
 from shared import parse_args, get_logger, RESULTS_PATH
 
+
 @dataclass
 class CallbackArgs(Serializable):
     clustering_visualizer: ClusteringVisualizerCallbackParams = ClusteringVisualizerCallbackParams()
@@ -38,6 +41,7 @@ class CallbackArgs(Serializable):
 @dataclass
 class BaseExecutorArgs(Serializable):
     wandb_project_name: str = "ThesisExperiments"
+    experiment_name: Optional[str] = None
     run_name: Optional[str] = None
     show_config: bool = False
     debug: bool = False
@@ -121,6 +125,7 @@ class BaseExecutor:
 
         wandb_logger = WandbLogger(
             project=self.args.wandb_project_name,
+            group=self.args.experiment_name,
             save_dir=str(root_dir),
             config=wandb_config,
             tags=self.tags(),
@@ -129,21 +134,36 @@ class BaseExecutor:
             **wandb_args
         )
 
+        checkpoint_callback = ModelCheckpoint(
+            save_top_k=2,
+            monitor=self._metric_monitor(),
+            mode='max',
+        )
+
         trainer_args = self.args.trainer_params.to_dict()
         trainer_args.pop('cpu', None)
         trainer = Trainer(
             **trainer_args,
             default_root_dir=str(root_dir),
-            callbacks=self.callbacks,
+            callbacks=[
+                *self.callbacks,
+                checkpoint_callback
+            ],
             logger=wandb_logger,
             gpus=1 if not self.args.trainer_params.cpu else None,
             auto_lr_find=True,
-            enable_model_summary=False
+            enable_model_summary=False,
         )
         self.before_training(trainer)
 
         self.logger.info(f'Training {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         trainer.fit(self.model, self.datamodule)
+
+        self.logger.info(f'Saving best model {Path(checkpoint_callback.best_model_path).name}')
+        shutil.copyfile(
+            src=checkpoint_callback.best_model_path,
+            dst=Path(wandb.run.dir) / 'best_model.ckpt'
+        )
 
         self.logger.info(f'Testing {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         trainer.test(self.model, self.datamodule)
@@ -194,13 +214,16 @@ class BaseExecutor:
                 self.datamodule,
                 hparams=self.args.callback_params.lp_eval,
             ),
-            # ClassificationEvalCallback(
-            #     self.datamodule,
-            #     hparams=self.args.callback_params.classification_eval,
-            # ),
+            ClassificationEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.classification_eval,
+            ),
             SaveGraphCallback(
                 self.datamodule.dataset,
                 hparams=self.args.callback_params.save_graph
             ),
             SaveEmbeddingsCallback(),
         ]
+
+    def _metric_monitor(self) -> str:
+        return 'val/lp/acc'

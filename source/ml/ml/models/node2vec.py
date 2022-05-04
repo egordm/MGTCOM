@@ -50,7 +50,7 @@ class Node2VecModel(FeatureModel):
             optimizer_params: Optional[OptimizerParams] = None
     ) -> None:
         super().__init__(optimizer_params)
-        self.save_hyperparameters(hparams)
+        self.save_hyperparameters(hparams.to_dict())
 
         self.embedder = embedder
         if self.hparams.loss == UnsupervisedLoss.HINGE:

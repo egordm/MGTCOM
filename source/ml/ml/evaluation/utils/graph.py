@@ -7,12 +7,14 @@ from torch_geometric.typing import NodeType
 from torch_geometric.utils import negative_sampling
 
 
+EdgePredictionBatch = Tuple[Tensor, Tensor]
+
 def extract_edge_prediction_pairs(
         edge_index: Tensor,
         num_nodes: int,
         mask: Tensor = None,
         max_samples: int = 5000
-) -> Tuple[Tensor, Tensor]:
+) -> EdgePredictionBatch:
     """
     It takes an edge index and a mask, and returns a list of positive and negative pairs, along with a list of labels
 

@@ -4,6 +4,7 @@ from typing import Optional, Callable, List
 from torch_geometric.data import HeteroData
 from torch_geometric.datasets import Planetoid
 
+from datasets.transforms.random_edge_split import RandomEdgeSplit
 from datasets.transforms.random_node_split import RandomNodeSplit
 from datasets.utils.graph_dataset import DATASET_REGISTRY, BaseGraphDataset
 from datasets.utils.labels import extract_louvain_labels
@@ -35,6 +36,13 @@ class Cora(Planetoid, BaseGraphDataset):
                 num_val=num_val,
                 num_test=num_test,
                 key=None,
+            )(data)
+
+            data = RandomEdgeSplit(
+                num_val=num_val,
+                num_test=num_test,
+                key_prefix='lp_',
+                inplace=True,
             )(data)
 
             return data if pre_transform is None else pre_transform(data)

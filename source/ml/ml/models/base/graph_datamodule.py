@@ -1,5 +1,5 @@
-import time
 from dataclasses import dataclass
+from enum import Enum
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional, Dict, Union, Tuple
@@ -11,19 +11,21 @@ from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
 from datasets.transforms.ensure_timestamps import EnsureTimestampsTransform
+from datasets.transforms.eval_edge_split import EvalEdgeSplitTransform
+from datasets.transforms.eval_node_split import EvalNodeSplitTransform
 from datasets.utils.labels import LabelDict
 from datasets.utils.types import Snapshots
-from ml.data.transforms.eval_split import EvalNodeSplitTransform
 from datasets.transforms.to_homogeneous import to_homogeneous
-from ml.evaluation import extract_edge_prediction_pairs
+from ml.evaluation import extract_edge_prediction_pairs, EdgePredictionBatch
 from ml.utils import HParams, DataLoaderParams, dict_catv
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
-
 @dataclass
 class GraphDataModuleParams(HParams):
+    eval_inference: bool = False
+
     lp_max_pairs: int = 5000
     """Maximum number of pairs to use for link prediction."""
     train_on_full_data: bool = False
@@ -64,11 +66,19 @@ class GraphDataModule(pl.LightningDataModule):
             logger.warning("Using full dataset for training. There is no validation or test set.")
             self.train_data, self.val_data, self.test_data = self.data, self.data, self.data
         else:
-            self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform(
-                force_resplit=self.hparams.split_force,
-                num_val=self.hparams.split_num_val,
-                num_test=self.hparams.split_num_test,
-            )(self.data)
+            if self.hparams.eval_inference:
+                self.train_data, self.val_data, self.test_data = EvalNodeSplitTransform(
+                    force_resplit=self.hparams.split_force,
+                    num_val=self.hparams.split_num_val,
+                    num_test=self.hparams.split_num_test,
+                )(self.data)
+            else:
+                self.train_data, self.val_data, self.test_data = EvalEdgeSplitTransform(
+                    force_resplit=self.hparams.split_force,
+                    num_val=self.hparams.split_num_val,
+                    num_test=self.hparams.split_num_test,
+                    key_prefix='lp_'
+                )(self.data)
 
         logger.info('=' * 80)
         logger.info(f'Using dataset {self.dataset.name}')
@@ -89,8 +99,9 @@ class GraphDataModule(pl.LightningDataModule):
             return self.dataset.snapshots
         return None
 
-    def _edge_prediction_pairs(self, data: Union[HeteroData, Data], mask_name: str = 'train_mask') -> Tuple[
-        Tensor, Tensor]:
+    def _edge_prediction_pairs(
+        self, data: Union[HeteroData, Data], mask_name: str = 'train_mask'
+    ) -> EdgePredictionBatch:
         """
         It takes a heterogeneous graph and returns a tuple of two tensors, the edges and the edge labels.
 
@@ -102,25 +113,25 @@ class GraphDataModule(pl.LightningDataModule):
         if isinstance(data, HeteroData):
             hdata = to_homogeneous(
                 data,
-                node_attrs=[], edge_attrs=[mask_name],
+                node_attrs=[], edge_attrs=[f'lp_{mask_name}'],
                 add_node_type=False, add_edge_type=False
             )
         else:
             hdata = data
 
         return extract_edge_prediction_pairs(
-            hdata.edge_index, hdata.num_nodes, getattr(hdata, f'edge_{mask_name}'),
+            hdata.edge_index, hdata.num_nodes, getattr(hdata, f'edge_lp_{mask_name}'),
             max_samples=self.hparams.lp_max_pairs
         )
 
-    def train_prediction_pairs(self) -> Tuple[Tensor, Tensor]:
-        return self._edge_prediction_pairs(self.train_data, 'train_mask')
-
-    def val_prediction_pairs(self) -> Tuple[Tensor, Tensor]:
-        return self._edge_prediction_pairs(self.val_data, 'val_mask')
-
-    def test_prediction_pairs(self) -> Tuple[Tensor, Tensor]:
-        return self._edge_prediction_pairs(self.test_data, 'test_mask')
+    def link_prediction_pairs(self) -> Tuple[EdgePredictionBatch, EdgePredictionBatch, EdgePredictionBatch]:
+        # Note: that the edges are taken from the full dataset
+        # while subsets don't include these edges
+        return (
+            self._edge_prediction_pairs(self.data, 'train_mask'),
+            self._edge_prediction_pairs(self.data, 'val_mask'),
+            self._edge_prediction_pairs(self.data, 'test_mask')
+        )
 
     def _extract_labels(
             self, data: HeteroData

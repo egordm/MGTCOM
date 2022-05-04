@@ -15,6 +15,8 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class LPEvalCallbackParams(HParams):
+    enabled: bool = True
+    """Whether to enable classification evaluation."""
     metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
     lp_max_pairs: int = 5000
@@ -32,10 +34,15 @@ class LPEvalCallback(IntermittentCallback):
         self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 
-        self.val_pairs = datamodule.val_prediction_pairs()
-        self.test_pairs = datamodule.test_prediction_pairs()
+        if self.hparams.enabled:
+            _, self.val_pairs, self.test_pairs = datamodule.link_prediction_pairs()
+        else:
+            self.val_pairs, self.test_pairs = None, None
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseFeatureModel) -> None:
+        if not self.hparams.enabled:
+            return
+
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
         if pl_module.heterogeneous:
             Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
@@ -51,6 +58,9 @@ class LPEvalCallback(IntermittentCallback):
         pl_module.log_dict(prefix_keys(metrics, 'eval/val/lp/'), on_epoch=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseFeatureModel) -> None:
+        if not self.hparams.enabled:
+            return
+
         logger.info(f"Evaluating test embeddings")
         if pl_module.heterogeneous:
             Z = pl_module.test_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')

@@ -6,6 +6,7 @@ from torch import Tensor
 from torch_geometric.data import HeteroData, Data
 
 from datasets import StarWars, Cora
+from datasets.transforms.eval_edge_split import EvalEdgeSplitTransform
 from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.algo.dpmm.dpm import DirichletProcessMixture
 from ml.algo.dpmm.base import EMCallback
@@ -40,18 +41,20 @@ def plot_results(ax, X, z, mus, covs, colors, sup, plot_params=True):
     ax.set_yticks(())
 
 
-# X_dict = torch.load(
-#     '/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220501_232858-3kwsr7fr/files/embeddings_hetero.pt')
+X_dict = torch.load(
+    '/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220501_232858-3kwsr7fr/files/embeddings_hetero.pt')
 # X_dict = torch.load(
 #     '/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220430_222415-3ftcu5qf/files/embeddings_hetero.pt')
-# dataset = StarWars()
+dataset = StarWars()
 # X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/run-20220501_235544-ptk0stcg/files/embeddings_hetero.pt')
 # dataset = Cora()
-# X = torch.cat(list(X_dict.values()), dim=0)
+X = torch.cat(list(X_dict.values()), dim=0)
 
+tr, va, te = EvalEdgeSplitTransform(key_prefix='lp_')(dataset.data)
+u = 0
 
-dataset = SyntheticGMMDataset()
-X = dataset[torch.arange(len(dataset))]
+# dataset = SyntheticGMMDataset()
+# X = dataset[torch.arange(len(dataset))]
 
 
 class PlotCallback(EMCallback):

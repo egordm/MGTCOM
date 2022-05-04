@@ -70,7 +70,6 @@ class Het2VecDataModule(HeteroGraphDataModule):
     hparams: Union[Het2VecDataModuleParams, DataLoaderParams]
 
     def __init__(self, dataset: GraphDataset, hparams: GraphDataModuleParams, loader_params: DataLoaderParams) -> None:
-        hparams.train_on_full_data = True
         super().__init__(dataset, hparams, loader_params)
 
     def train_sampler(self, data: HeteroData) -> Optional[Sampler]:

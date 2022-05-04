@@ -17,6 +17,8 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class ClassificationEvalCallbackParams(HParams):
+    enabled: bool = True
+    """Whether to enable classification evaluation."""
     metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
     cl_max_pairs: int = 5000
@@ -41,7 +43,7 @@ class ClassificationEvalCallback(IntermittentCallback):
         self.test_labels = dict_mapv(datamodule.test_labels(), self.test_subsample.transform)
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if len(self.val_labels) == 0:
+        if not self.hparams.enabled or len(self.val_labels) == 0:
             return
 
         if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != StageE2E.Feature:
@@ -60,7 +62,7 @@ class ClassificationEvalCallback(IntermittentCallback):
             pl_module.log_dict(prefix_keys(metrics, f'eval/val/cl/{label_name}/'), on_epoch=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if len(self.test_labels) == 0:
+        if not self.hparams.enabled or len(self.test_labels) == 0:
             return
 
         logger.info(f"Evaluating test embeddings")
