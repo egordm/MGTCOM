@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Union, Optional
 
-from torch_geometric.data import Data
+from torch_geometric.data import Data, HeteroData
 
 from datasets import GraphDataset
 from datasets.transforms.to_homogeneous import to_homogeneous
@@ -25,27 +25,24 @@ class CTDNEDataModuleParams(GraphDataModuleParams):
 class CTDNEDataModule(HomogenousGraphDataModule):
     hparams: Union[CTDNEDataModuleParams, DataLoaderParams]
 
-    def __init__(
-            self,
-            dataset: GraphDataset,
-            hparams: CTDNEDataModuleParams,
-            loader_params: DataLoaderParams,
-    ) -> None:
-        super().__init__(dataset, hparams, loader_params)
-        hdata = to_homogeneous(
-            self.data,
-            node_attrs=['timestamp_from', 'train_mask', 'val_mask', 'test_mask'],
-            edge_attrs=['timestamp_from', 'train_mask', 'val_mask', 'test_mask'],
-        )
-        self.train_data, self.val_data, self.test_data = hdata, hdata, hdata  # Since induction doesnt work on node2vec
-
     def train_sampler(self, data: Data) -> Optional[Sampler]:
         return CTDNESampler(
-            self.train_data.node_timestamp_from,
-            self.train_data.edge_index,
-            self.train_data.edge_timestamp_from,
+            data.node_timestamp_from,
+            data.edge_index,
+            data.edge_timestamp_from,
             hparams=self.hparams.ctdne_params
         )
 
     def eval_sampler(self, data: Data) -> Optional[Sampler]:
         return None
+
+    def to_homogenous(self, data: HeteroData) -> Data:
+        if isinstance(data, Data):
+            return data
+        else:
+            return to_homogeneous(
+                data,
+                node_attrs=['timestamp_from', 'train_mask', 'val_mask', 'test_mask'],
+                edge_attrs=['timestamp_from', 'train_mask', 'val_mask', 'test_mask'],
+            )
+

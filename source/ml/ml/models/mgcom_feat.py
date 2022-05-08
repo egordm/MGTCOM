@@ -56,10 +56,10 @@ class MGCOMFeatModel(Het2VecModel):
     hparams: Union[MGCOMFeatModelParams, OptimizerParams]
 
     def __init__(
-            self,
-            metadata: Metadata, num_nodes_dict: Dict[NodeType, int],
-            hparams: MGCOMFeatModelParams,
-            optimizer_params: Optional[OptimizerParams] = None,
+        self,
+        metadata: Metadata, num_nodes_dict: Dict[NodeType, int],
+        hparams: MGCOMFeatModelParams,
+        optimizer_params: Optional[OptimizerParams] = None,
     ) -> None:
         self.save_hyperparameters(hparams.to_dict())
 
@@ -94,7 +94,15 @@ class MGCOMFeatModel(Het2VecModel):
             conv=conv,
         )
 
-        super().__init__(embedder, self.hparams, optimizer_params)
+        super().__init__(embedder, hparams, optimizer_params)
+
+
+class MGCOMFeatTempoModel(MGCOMFeatModel):
+    pass
+
+
+class MGCOMFeatTopoModel(MGCOMFeatModel):
+    pass
 
 
 @dataclass
@@ -172,10 +180,10 @@ class MGCOMTempoDataModule(MGCOMFeatDataModule):
     hparams: Union[MGCOMTempoDataModuleParams, DataLoaderParams]
 
     def __init__(
-            self,
-            dataset: GraphDataset,
-            hparams: MGCOMFeatDataModuleParams,
-            loader_params: DataLoaderParams
+        self,
+        dataset: GraphDataset,
+        hparams: MGCOMFeatDataModuleParams,
+        loader_params: DataLoaderParams
     ) -> None:
         if hparams.window is None:
             if isinstance(dataset, GraphDataset) and dataset.snapshots is not None:

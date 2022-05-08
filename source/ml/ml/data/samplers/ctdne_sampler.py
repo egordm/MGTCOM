@@ -106,6 +106,9 @@ class CTDNESampler(Sampler):
         if not isinstance(rw, Tensor):
             rw = rw[0]
 
+        # Fill "dead" reandom walks with root node
+        rw[rw == -1] = rw[:, 0][:, None].repeat(1, rw.shape[1])[rw == -1]
+
         walks = []
         num_walks_per_rw = 1 + self.walk_length + 1 - self.hparams.context_size
         for j in range(num_walks_per_rw):

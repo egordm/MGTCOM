@@ -5,7 +5,7 @@ import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData, Data
 
-from datasets import StarWars, Cora
+from datasets import StarWars, Cora, ICEWS0515
 from datasets.transforms.eval_edge_split import EvalEdgeSplitTransform
 from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.algo.dpmm.dpm import DirichletProcessMixture
@@ -17,7 +17,6 @@ from ml.data import SyntheticGMMDataset
 from ml.evaluation import community_metrics
 from ml.utils import Metric
 from ml.utils.plot import create_colormap, draw_ellipses, plot_scatter, MARKER_SIZE
-
 
 def plot_results(ax, X, z, mus, covs, colors, sup, plot_params=True):
     _min, _max = X.min(dim=0).values, X.max(dim=0).values
@@ -41,17 +40,14 @@ def plot_results(ax, X, z, mus, covs, colors, sup, plot_params=True):
     ax.set_yticks(())
 
 
-X_dict = torch.load(
-    '/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220501_232858-3kwsr7fr/files/embeddings_hetero.pt')
+# X_dict = torch.load(
+#     '/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220501_232858-3kwsr7fr/files/embeddings_hetero.pt')
 # X_dict = torch.load(
 #     '/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220430_222415-3ftcu5qf/files/embeddings_hetero.pt')
-dataset = StarWars()
-# X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/run-20220501_235544-ptk0stcg/files/embeddings_hetero.pt')
-# dataset = Cora()
+# dataset = StarWars()
+X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/run-20220501_235544-ptk0stcg/files/embeddings_hetero.pt')
+dataset = Cora()
 X = torch.cat(list(X_dict.values()), dim=0)
-
-tr, va, te = EvalEdgeSplitTransform(key_prefix='lp_')(dataset.data)
-u = 0
 
 # dataset = SyntheticGMMDataset()
 # X = dataset[torch.arange(len(dataset))]
@@ -134,7 +130,7 @@ class PlotCallback(EMCallback):
 dpmm = DirichletProcessMixtureSC(DPMixtureSCParams(
     init_k=2,
     init_mode=InitMode.KMEANS,
-    prior_alpha=1e2,
+    prior_alpha=1e1,
     prior_sigma_scale=0.1,
     # prior_nu=100,
     prior_kappa=1,
@@ -159,8 +155,8 @@ def extract_edge_index(data):
         return None
 
 
-# z = dpmm.predict(X)
-# edge_index = extract_edge_index(dataset.data)
-# metrics = community_metrics(z, edge_index)
-# print(metrics)
-# print(dpmm.n_components)
+z = dpmm.predict(X)
+edge_index = extract_edge_index(dataset.data)
+metrics = community_metrics(z, edge_index)
+print(metrics)
+print(dpmm.n_components)

@@ -1,3 +1,4 @@
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Any
@@ -37,6 +38,10 @@ class SaveGraphCallback(Callback):
     def on_predict_epoch_end(self, trainer: Trainer, pl_module: LightningModule, outputs: List[Any]) -> None:
         outputs = OutputExtractor(outputs)
         data = self.dataset.data
+
+        if data.num_nodes > 20000 or data.num_edges > 100000:
+            logger.info('Graph has too many nodes. Not saving')
+            return
 
         if self.clustering:
             Z = outputs.extract_cat('X', device='cpu')

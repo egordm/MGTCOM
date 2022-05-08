@@ -85,16 +85,6 @@ class Node2VecDataModuleParams(GraphDataModuleParams):
 class Node2VecDataModule(HomogenousGraphDataModule):
     hparams: Union[Node2VecDataModuleParams, DataLoaderParams]
 
-    def __init__(
-            self,
-            dataset: GraphDataset,
-            hparams: Node2VecDataModuleParams,
-            loader_params: DataLoaderParams,
-    ) -> None:
-        super().__init__(dataset, hparams, loader_params)
-        hdata = to_homogeneous(self.data)
-        self.train_data, self.val_data, self.test_data = hdata, hdata, hdata  # Since induction doesnt work on node2vec
-
     def train_sampler(self, data: Data) -> Optional[Sampler]:
         return Node2VecSampler(
             data.edge_index, data.num_nodes,

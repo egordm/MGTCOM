@@ -40,8 +40,8 @@ class CallbackArgs(Serializable):
 
 @dataclass
 class BaseExecutorArgs(Serializable):
-    wandb_project_name: str = "ThesisExperiments"
-    experiment_name: Optional[str] = None
+    project: str = "ThesisExperiments"
+    experiment: Optional[str] = None
     run_name: Optional[str] = None
     show_config: bool = False
     debug: bool = False
@@ -124,8 +124,8 @@ class BaseExecutor:
             wandb_args['name'] = self.args.run_name
 
         wandb_logger = WandbLogger(
-            project=self.args.wandb_project_name,
-            group=self.args.experiment_name,
+            project=self.args.project,
+            group=self.args.experiment,
             save_dir=str(root_dir),
             config=wandb_config,
             tags=self.tags(),

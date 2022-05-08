@@ -28,7 +28,7 @@ class EmbeddingVisualizerCallbackParams(HParams):
     """Dimension reduction mode for embedding visualization."""
     ev_max_points: int = 1000
     """Maximum number of points to visualize."""
-    ev_interval: int = 1
+    ev_interval: int = 4
     """Interval between embedding visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""

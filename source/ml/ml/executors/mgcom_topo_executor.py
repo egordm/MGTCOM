@@ -6,7 +6,8 @@ from pytorch_lightning import Callback, LightningDataModule
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
-from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule
+from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule, \
+    MGCOMFeatTopoModel
 from ml.models.node2vec import UnsupervisedLoss
 from ml.utils import dataset_choices
 
@@ -37,7 +38,7 @@ class MGCOMTopoExecutor(BaseExecutor):
         )
 
     def model(self):
-        return MGCOMFeatModel(
+        return MGCOMFeatTopoModel(
             self.datamodule.metadata, self.datamodule.num_nodes_dict,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,

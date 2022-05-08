@@ -7,7 +7,7 @@ from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutorArgs
 from ml.executors.mgcom_topo_executor import MGCOMTopoExecutor
-from ml.models.mgcom_feat import MGCOMFeatModelParams
+from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMFeatTempoModel
 from ml.models.mgcom_feat import MGCOMTempoDataModuleParams, MGCOMTempoDataModule
 from ml.models.node2vec import UnsupervisedLoss
 from ml.utils import dataset_choices
@@ -29,6 +29,13 @@ class MGCOMTempoExecutor(MGCOMTopoExecutor):
 
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
+
+    def model(self):
+        return MGCOMFeatTempoModel(
+            self.datamodule.metadata, self.datamodule.num_nodes_dict,
+            hparams=self.args.hparams,
+            optimizer_params=self.args.optimizer_params,
+        )
 
     def datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
