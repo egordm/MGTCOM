@@ -5,7 +5,7 @@ from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
-from ml.executors.base import BaseExecutor, BaseExecutorArgs
+from ml.executors.base import BaseExecutor, BaseExecutorArgs, T
 from ml.layers.embedding import HeteroNodeEmbedding
 from ml.models.het2vec import Het2VecModel, Het2VecDataModule, Het2VecDataModuleParams
 from ml.models.mgcom_feat import MGCOMTopoDataModule
@@ -22,7 +22,7 @@ class Args(BaseExecutorArgs):
     data_params: Het2VecDataModuleParams = Het2VecDataModuleParams()
 
 
-class Het2VecExecutor(BaseExecutor):
+class Het2VecExecutor(BaseExecutor[Het2VecModel]):
     args: Args
     datamodule: MGCOMTopoDataModule
 
@@ -39,17 +39,21 @@ class Het2VecExecutor(BaseExecutor):
             loader_params=self.args.loader_params,
         )
 
-    def model(self):
+    def model_args(self, cls):
         embedder = HeteroNodeEmbedding(
             self.datamodule.data.num_nodes_dict,
             self.args.hparams.repr_dim,
         )
 
-        return Het2VecModel(
+        return cls(
             embedder=embedder,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
+
+    @property
+    def model_cls(self) -> Type[Het2VecModel]:
+        return Het2VecModel
 
     def callbacks(self) -> List[Callback]:
         return self._embedding_task_callbacks()

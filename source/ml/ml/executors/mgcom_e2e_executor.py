@@ -21,7 +21,7 @@ class Args(BaseExecutorArgs):
     data_params: MGCOMCombiDataModuleParams = MGCOMCombiDataModuleParams()
 
 
-class MGCOME2EExecutor(BaseExecutor):
+class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
     args: Args
     datamodule: MGCOMCombiDataModule
 
@@ -38,15 +38,20 @@ class MGCOME2EExecutor(BaseExecutor):
             loader_params=self.args.loader_params,
         )
 
-    def model(self):
+    def model_args(self, cls):
         self.args.hparams.combi_params.use_topo = self.args.data_params.use_topo
         self.args.hparams.combi_params.use_tempo = self.args.data_params.use_tempo
 
-        return MGCOME2EModel(
-            self.datamodule.metadata, self.datamodule.num_nodes_dict,
+        return cls(
+            metadata=self.datamodule.metadata,
+            num_nodes_dict=self.datamodule.num_nodes_dict,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
+
+    @property
+    def model_cls(self) -> Type[MGCOME2EModel]:
+        return MGCOME2EModel
 
     def callbacks(self) -> List[Callback]:
         return [

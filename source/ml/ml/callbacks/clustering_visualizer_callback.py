@@ -12,7 +12,7 @@ from torch import Tensor
 
 from ml.algo.dpm import DPMMParams
 from ml.algo.transforms import DimensionReductionMode, SubsampleTransform, DimensionReductionTransform
-from ml.callbacks.base.intermittent_callback import IntermittentCallback
+from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
 from ml.models.mgcom_comdet import MGCOMComDetModel, Stage
 from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
 from ml.utils import HParams, Metric
@@ -23,23 +23,21 @@ logger = get_logger(Path(__file__).stem)
 
 
 @dataclass
-class ClusteringVisualizerCallbackParams(HParams):
+class ClusteringVisualizerCallbackParams(IntermittentCallbackParams):
+    interval: int = 3
     dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.PCA
     """Dimension reduction mode for embedding visualization."""
     cv_max_points: int = 10000
     """Maximum number of points to visualize."""
-    cv_interval: int = 3
-    """Interval between clustering visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
 
 
-class ClusteringVisualizerCallback(IntermittentCallback):
+class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCallbackParams]):
     sample_space_version: int = -1
 
-    def __init__(self, hparams: ClusteringVisualizerCallbackParams = None) -> None:
-        self.hparams = hparams or ClusteringVisualizerCallbackParams()
-        super().__init__(self.hparams.cv_interval)
+    def __init__(self, hparams: ClusteringVisualizerCallbackParams) -> None:
+        super().__init__(hparams)
 
         if self.hparams.dim_reduction_mode == DimensionReductionMode.TSNE:
             logger.warning(f'Using PCA for visualization because TSNE does not support transfrom function.')

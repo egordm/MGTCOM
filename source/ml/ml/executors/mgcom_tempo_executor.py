@@ -21,7 +21,7 @@ class Args(BaseExecutorArgs):
     data_params: MGCOMTempoDataModuleParams = MGCOMTempoDataModuleParams()
 
 
-class MGCOMTempoExecutor(MGCOMTopoExecutor):
+class MGCOMTempoExecutor(MGCOMTopoExecutor[MGCOMFeatTempoModel]):
     args: Args
     datamodule: MGCOMTempoDataModule
 
@@ -30,12 +30,9 @@ class MGCOMTempoExecutor(MGCOMTopoExecutor):
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
 
-    def model(self):
-        return MGCOMFeatTempoModel(
-            self.datamodule.metadata, self.datamodule.num_nodes_dict,
-            hparams=self.args.hparams,
-            optimizer_params=self.args.optimizer_params,
-        )
+    @property
+    def model_cls(self) -> Type[MGCOMFeatTempoModel]:
+        return MGCOMFeatTempoModel
 
     def datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()

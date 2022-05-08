@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pytorch_lightning import Trainer
 
-from ml.callbacks.base.intermittent_callback import IntermittentCallback
+from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
 from ml.evaluation import link_prediction_measure
 from ml.models.base.feature_model import BaseFeatureModel
 from ml.models.base.graph_datamodule import GraphDataModule
@@ -14,7 +14,7 @@ logger = get_logger(Path(__file__).stem)
 
 
 @dataclass
-class LPEvalCallbackParams(HParams):
+class LPEvalCallbackParams(IntermittentCallbackParams):
     enabled: bool = True
     """Whether to enable classification evaluation."""
     metric: Metric = Metric.L2
@@ -23,14 +23,13 @@ class LPEvalCallbackParams(HParams):
     """Maximum number of pairs to use for link prediction."""
 
 
-class LPEvalCallback(IntermittentCallback):
+class LPEvalCallback(IntermittentCallback[LPEvalCallbackParams]):
     def __init__(
             self,
             datamodule: GraphDataModule,
-            hparams: LPEvalCallbackParams = None
+            hparams: LPEvalCallbackParams
     ) -> None:
-        self.hparams = hparams or LPEvalCallbackParams()
-        super().__init__(1)
+        super().__init__(hparams)
         self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 

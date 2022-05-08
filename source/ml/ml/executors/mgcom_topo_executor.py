@@ -5,7 +5,7 @@ from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
-from ml.executors.base import BaseExecutor, BaseExecutorArgs
+from ml.executors.base import BaseExecutor, BaseExecutorArgs, T
 from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule, \
     MGCOMFeatTopoModel
 from ml.models.node2vec import UnsupervisedLoss
@@ -20,7 +20,7 @@ class Args(BaseExecutorArgs):
     data_params: MGCOMTopoDataModuleParams = MGCOMTopoDataModuleParams()
 
 
-class MGCOMTopoExecutor(BaseExecutor):
+class MGCOMTopoExecutor(BaseExecutor[MGCOMFeatTopoModel]):
     args: Args
     datamodule: MGCOMTopoDataModule
 
@@ -37,12 +37,17 @@ class MGCOMTopoExecutor(BaseExecutor):
             loader_params=self.args.loader_params,
         )
 
-    def model(self):
-        return MGCOMFeatTopoModel(
-            self.datamodule.metadata, self.datamodule.num_nodes_dict,
+    def model_args(self, cls):
+        return cls(
+            metadata=self.datamodule.metadata,
+            num_nodes_dict=self.datamodule.num_nodes_dict,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
+
+    @property
+    def model_cls(self) -> Type[MGCOMFeatTopoModel]:
+        return MGCOMFeatTopoModel
 
     def callbacks(self) -> List[Callback]:
         return self._embedding_task_callbacks()

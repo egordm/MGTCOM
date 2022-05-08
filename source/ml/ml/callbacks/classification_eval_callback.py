@@ -4,19 +4,19 @@ from pathlib import Path
 from pytorch_lightning import Trainer
 
 from ml.algo.transforms import SubsampleTransform
-from ml.callbacks.base.intermittent_callback import IntermittentCallback
+from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
 from ml.evaluation import prediction_measure
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
-from ml.utils import HParams, Metric, prefix_keys, dict_mapv
+from ml.utils import Metric, prefix_keys, dict_mapv
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
 
 @dataclass
-class ClassificationEvalCallbackParams(HParams):
+class ClassificationEvalCallbackParams(IntermittentCallbackParams):
     enabled: bool = True
     """Whether to enable classification evaluation."""
     metric: Metric = Metric.L2
@@ -25,14 +25,13 @@ class ClassificationEvalCallbackParams(HParams):
     """Maximum number of pairs to use for classification."""
 
 
-class ClassificationEvalCallback(IntermittentCallback):
+class ClassificationEvalCallback(IntermittentCallback[ClassificationEvalCallbackParams]):
     def __init__(
             self,
             datamodule: GraphDataModule,
-            hparams: ClassificationEvalCallbackParams = None
+            hparams: ClassificationEvalCallbackParams
     ) -> None:
-        self.hparams = hparams or ClassificationEvalCallbackParams()
-        super().__init__(1)
+        super().__init__(hparams)
         self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 

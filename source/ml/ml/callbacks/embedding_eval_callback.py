@@ -4,7 +4,7 @@ from pathlib import Path
 from pytorch_lightning import Trainer
 
 from ml.algo.transforms import SubsampleTransform
-from ml.callbacks.base.intermittent_callback import IntermittentCallback
+from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
 from ml.evaluation import clustering_metrics
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
@@ -16,9 +16,7 @@ logger = get_logger(Path(__file__).stem)
 
 
 @dataclass
-class EmbeddingEvalCallbackParams(HParams):
-    ee_interval: int = 1
-    """Interval between embedding evalutations."""
+class EmbeddingEvalCallbackParams(IntermittentCallbackParams):
     metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
     lp_max_pairs: int = 5000
@@ -26,14 +24,13 @@ class EmbeddingEvalCallbackParams(HParams):
     met_max_points: int = 5000
 
 
-class EmbeddingEvalCallback(IntermittentCallback):
+class EmbeddingEvalCallback(IntermittentCallback[EmbeddingEvalCallbackParams]):
     def __init__(
             self,
             datamodule: GraphDataModule,
-            hparams: EmbeddingEvalCallbackParams = None
+            hparams: EmbeddingEvalCallbackParams
     ) -> None:
-        self.hparams = hparams or EmbeddingEvalCallbackParams()
-        super().__init__(self.hparams.ee_interval)
+        super().__init__(hparams)
         self.datamodule = datamodule
 
         self.val_subsample = SubsampleTransform(self.hparams.met_max_points)

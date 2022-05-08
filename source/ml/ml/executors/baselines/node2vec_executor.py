@@ -9,7 +9,7 @@ from ml.callbacks.classification_eval_callback import ClassificationEvalCallback
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallback
 from ml.callbacks.lp_eval_callback import LPEvalCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
-from ml.executors.base import BaseExecutor, BaseExecutorArgs
+from ml.executors.base import BaseExecutor, BaseExecutorArgs, T
 from ml.layers.embedding import NodeEmbedding
 from ml.models.node2vec import Node2VecDataModule, Node2VecDataModuleParams, Node2VecModel, UnsupervisedLoss, \
     Node2VecWrapperModelParams
@@ -25,7 +25,7 @@ class Args(BaseExecutorArgs):
     data_params: Node2VecDataModuleParams = Node2VecDataModuleParams()
 
 
-class Node2VecExecutor(BaseExecutor):
+class Node2VecExecutor(BaseExecutor[Node2VecModel]):
     args: Args
     datamodule: Node2VecDataModule
 
@@ -42,16 +42,20 @@ class Node2VecExecutor(BaseExecutor):
             loader_params=self.args.loader_params,
         )
 
-    def model(self):
+    def model_args(self, cls):
         embedder = NodeEmbedding(
             self.datamodule.train_data.num_nodes,
             self.args.hparams.repr_dim,
         )
-        return Node2VecModel(
+        return cls(
             embedder=embedder,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
+
+    @property
+    def model_cls(self) -> Type[Node2VecModel]:
+        return Node2VecModel
 
     def callbacks(self) -> List[Callback]:
         return [

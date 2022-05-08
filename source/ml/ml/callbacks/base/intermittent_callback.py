@@ -1,13 +1,28 @@
 from abc import abstractmethod
+from dataclasses import dataclass
+from typing import TypeVar, Generic
 
 from pytorch_lightning import Callback, Trainer, LightningModule
 from pytorch_lightning.trainer.states import RunningStage
 
+from ml.utils import HParams
 
-class IntermittentCallback(Callback):
-    def __init__(self, interval: int = 3) -> None:
+
+@dataclass
+class IntermittentCallbackParams(HParams):
+    interval: int = 1
+    """Interval between callbacks."""
+
+
+T = TypeVar("T", bound=IntermittentCallbackParams)
+
+
+class IntermittentCallback(Callback, Generic[T]):
+    hparams: T
+
+    def __init__(self, hparams: T) -> None:
         super().__init__()
-        self.interval = interval
+        self.hparams = hparams
 
     def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         super().on_validation_epoch_end(trainer, pl_module)
@@ -15,7 +30,7 @@ class IntermittentCallback(Callback):
         if trainer.state.stage != RunningStage.VALIDATING:
             return
 
-        if trainer.current_epoch % self.interval != 0 and trainer.current_epoch != trainer.max_epochs:
+        if trainer.current_epoch % self.hparams.interval != 0 and trainer.current_epoch != trainer.max_epochs:
             return
 
         self.on_validation_epoch_end_run(trainer, pl_module)

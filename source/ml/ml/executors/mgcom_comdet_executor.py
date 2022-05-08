@@ -15,7 +15,7 @@ from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCall
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.callbacks.save_graph_callback import SaveGraphCallback
 from ml.data import PretrainedEmbeddingsDataset, SyntheticGMMDataset
-from ml.executors.base import BaseExecutorArgs, BaseExecutor
+from ml.executors.base import BaseExecutorArgs, BaseExecutor, T
 from ml.models.mgcom_comdet import MGCOMComDetDataModuleParams, MGCOMComDetDataModule, MGCOMComDetModel, \
     MGCOMComDetModelParams
 from ml.utils import dataset_choices, DataLoaderParams, TrainerParams
@@ -38,7 +38,7 @@ class Args(BaseExecutorArgs):
     trainer_params: TrainerParams = TrainerParams(max_epochs=200)
 
 
-class MGCOMComDetExecutor(BaseExecutor):
+class MGCOMComDetExecutor(BaseExecutor[MGCOMComDetModel]):
     args: Args
     datamodule: MGCOMComDetDataModule
     dataset: Dataset
@@ -68,7 +68,7 @@ class MGCOMComDetExecutor(BaseExecutor):
             loader_params=self.args.loader_params,
         )
 
-    def model(self):
+    def model_args(self, cls):
         if self.datamodule.graph_dataset is not None and self.args.hparams.cluster_init_mode == InitMode.HardAssignment:
             logger.info('Initializing clustering model using Louvain labels')
             G, _, _, _ = igraph_from_hetero(self.datamodule.graph_dataset.data)
@@ -78,12 +78,16 @@ class MGCOMComDetExecutor(BaseExecutor):
         else:
             z = None
 
-        return MGCOMComDetModel(
-            self.dataset.repr_dim,
+        return cls(
+            repr_dim=self.dataset.repr_dim,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
             init_z=z,
         )
+
+    @property
+    def model_cls(self) -> Type[MGCOMComDetModel]:
+        return MGCOMComDetModel
 
     def callbacks(self) -> List[Callback]:
         ret = [

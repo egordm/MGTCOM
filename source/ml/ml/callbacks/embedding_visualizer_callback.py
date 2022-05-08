@@ -10,7 +10,7 @@ from torch import Tensor
 
 from datasets.utils.labels import LabelDict
 from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransform, SubsampleTransform
-from ml.callbacks.base.intermittent_callback import IntermittentCallback
+from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
@@ -22,26 +22,24 @@ logger = get_logger(Path(__file__).stem)
 
 
 @dataclass
-class EmbeddingVisualizerCallbackParams(HParams):
+class EmbeddingVisualizerCallbackParams(IntermittentCallbackParams):
+    interval: int = 4
     # dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.TSNE
     dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.UMAP
     """Dimension reduction mode for embedding visualization."""
     ev_max_points: int = 1000
     """Maximum number of points to visualize."""
-    ev_interval: int = 4
-    """Interval between embedding visualization."""
     metric: Metric = Metric.L2
     """Metric to use for embedding visualization."""
 
 
-class EmbeddingVisualizerCallback(IntermittentCallback):
+class EmbeddingVisualizerCallback(IntermittentCallback[EmbeddingVisualizerCallbackParams]):
     def __init__(
             self,
             datamodule: GraphDataModule,
-            hparams: EmbeddingVisualizerCallbackParams = None
+            hparams: EmbeddingVisualizerCallbackParams
     ) -> None:
-        self.hparams = hparams or EmbeddingVisualizerCallbackParams()
-        super().__init__(interval=self.hparams.ev_interval)
+        super().__init__(hparams)
 
         self.val_subsample = SubsampleTransform(self.hparams.ev_max_points)
         self.mapper = DimensionReductionTransform(

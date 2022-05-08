@@ -1,31 +1,27 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Union, Optional
+from typing import Union, Optional
 
 from pytorch_lightning import Trainer, LightningModule
-from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score
 from torch import Tensor
 from torch_geometric.data import HeteroData, Data
 
-from ml.callbacks.base.intermittent_callback import IntermittentCallback
 from datasets.transforms.to_homogeneous import to_homogeneous
-from ml.evaluation import silhouette_score, davies_bouldin_score, newman_girvan_modularity, clustering_metrics, \
+from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
+from ml.evaluation import clustering_metrics, \
     community_gt_metrics
-from ml.evaluation.metrics.community import conductance, community_metrics
+from ml.evaluation.metrics.community import community_metrics
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
 from ml.models.mgcom_comdet import MGCOMComDetDataModule
-from ml.models.mgcom_e2e import MGCOME2EDataModule
-from ml.utils import HParams, Metric, prefix_keys
+from ml.utils import Metric, prefix_keys
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
 
 
 @dataclass
-class ClusteringEvalCallbackParams(HParams):
-    ce_interval: int = 1
-    """Interval between clustering evalutations."""
+class ClusteringEvalCallbackParams(IntermittentCallbackParams):
     metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
 
@@ -44,14 +40,13 @@ def extract_edge_index(data) -> Optional[Tensor]:
         return None
 
 
-class ClusteringEvalCallback(IntermittentCallback):
+class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams]):
     def __init__(
             self,
             datamodule: Union[MGCOMComDetDataModule, GraphDataModule],
-            hparams: ClusteringEvalCallbackParams = None
+            hparams: ClusteringEvalCallbackParams
     ) -> None:
-        self.hparams = hparams or ClusteringEvalCallbackParams()
-        super().__init__(self.hparams.ce_interval)
+        super().__init__(hparams)
         self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 

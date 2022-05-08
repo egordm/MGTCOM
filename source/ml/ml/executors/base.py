@@ -2,7 +2,7 @@ import shutil
 from abc import abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Type, Optional
+from typing import List, Type, Optional, TypeVar, Generic
 
 import wandb
 from pytorch_lightning import LightningDataModule, Callback, Trainer
@@ -54,10 +54,13 @@ class BaseExecutorArgs(Serializable):
     callback_params: CallbackArgs = CallbackArgs()
 
 
-class BaseExecutor:
+T = TypeVar("T", bound=LightningModel)
+
+
+class BaseExecutor(Generic[T]):
     args: BaseExecutorArgs
     datamodule: LightningDataModule
-    model: LightningModel
+    model: T
     callbacks: List[Callback]
 
     TASK_NAME = 'base'
@@ -102,7 +105,7 @@ class BaseExecutor:
             *self.callbacks()
         ]
 
-        self.model = self.model()
+        self.model = self.model_args(self.model_cls)
 
         # Initialize wandb logger
         run_config = self.args.to_dict()
@@ -165,6 +168,10 @@ class BaseExecutor:
             dst=Path(wandb.run.dir) / 'best_model.ckpt'
         )
 
+        self.logger.info(f'Loading best model: {Path(checkpoint_callback.best_model_path).name}')
+        model_args, model_kwargs = self.model_args(lambda *args, **kwargs: (args, kwargs))
+        self.model = self.model.load_from_checkpoint(checkpoint_callback.best_model_path, *model_args, **model_kwargs)
+
         self.logger.info(f'Testing {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         trainer.test(self.model, self.datamodule)
 
@@ -176,11 +183,16 @@ class BaseExecutor:
         raise NotImplementedError
 
     @abstractmethod
-    def model(self) -> LightningModel:
+    def model_args(self, cls: Type[T]) -> T:
         raise NotImplementedError
 
     @abstractmethod
     def callbacks(self) -> List[Callback]:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def model_cls(self) -> Type[T]:
         raise NotImplementedError
 
     def before_training(self, trainer: Trainer):

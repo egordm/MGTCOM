@@ -6,6 +6,7 @@ from pytorch_lightning import Callback, LightningDataModule
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
+from ml.executors.mgcom_topo_executor import MGCOMTopoExecutor
 from ml.models.mgcom_combi import MGCOMCombiModelParams, MGCOMCombiDataModuleParams, MGCOMCombiDataModule, \
     MGCOMCombiModel
 from ml.models.node2vec import UnsupervisedLoss
@@ -20,7 +21,7 @@ class Args(BaseExecutorArgs):
     data_params: MGCOMCombiDataModuleParams = MGCOMCombiDataModuleParams()
 
 
-class MGCOMCombiExecutor(BaseExecutor):
+class MGCOMCombiExecutor(MGCOMTopoExecutor[MGCOMCombiModel]):
     args: Args
     datamodule: MGCOMCombiDataModule
 
@@ -29,6 +30,10 @@ class MGCOMCombiExecutor(BaseExecutor):
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
 
+    @property
+    def model_cls(self) -> Type[MGCOMCombiModel]:
+        return MGCOMCombiModel
+
     def datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return MGCOMCombiDataModule(
@@ -36,19 +41,6 @@ class MGCOMCombiExecutor(BaseExecutor):
             hparams=self.args.data_params,
             loader_params=self.args.loader_params,
         )
-
-    def model(self):
-        return MGCOMCombiModel(
-            self.datamodule.metadata, self.datamodule.num_nodes_dict,
-            hparams=self.args.hparams,
-            optimizer_params=self.args.optimizer_params,
-        )
-
-    def callbacks(self) -> List[Callback]:
-        return self._embedding_task_callbacks()
-
-    def run_name(self):
-        return self.args.dataset
 
 
 if __name__ == '__main__':
