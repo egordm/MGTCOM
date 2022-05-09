@@ -32,6 +32,9 @@ class TemporalNodeIndex:
             edge_timestamps,
         ])
 
+        if not (node_timestamp_index != NAN_TIMESTAMP).any():
+            raise ValueError('No valid timestamps found in the dataset')
+
         # Filter away all the nodes with no timestamp
         node_perm_index = node_perm_index[node_timestamp_index != NAN_TIMESTAMP]
         node_timestamp_index = node_timestamp_index[node_timestamp_index != NAN_TIMESTAMP]

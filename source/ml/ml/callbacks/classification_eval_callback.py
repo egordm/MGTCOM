@@ -48,7 +48,7 @@ class ClassificationEvalCallback(IntermittentCallback[ClassificationEvalCallback
         if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != StageE2E.Feature:
             return
 
-        logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
+        logger.info(f"Evaluating validation classification at epoch {trainer.current_epoch}")
         if pl_module.heterogeneous:
             Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
         else:
@@ -74,4 +74,4 @@ class ClassificationEvalCallback(IntermittentCallback[ClassificationEvalCallback
 
         for label_name, labels in self.test_labels.items():
             acc, metrics = prediction_measure(Z, labels, max_iter=1000)
-            pl_module.log_dict(prefix_keys(metrics, f'eval/val/cl/{label_name}/'), on_epoch=True)
+            pl_module.log_dict(prefix_keys(metrics, f'eval/test/cl/{label_name}/'), on_epoch=True)

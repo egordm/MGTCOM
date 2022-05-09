@@ -21,7 +21,7 @@ class Args(BaseExecutorArgs):
     data_params: MGCOMTempoDataModuleParams = MGCOMTempoDataModuleParams()
 
 
-class MGCOMTempoExecutor(MGCOMTopoExecutor[MGCOMFeatTempoModel]):
+class MGCOMTempoExecutor(MGCOMTopoExecutor):
     args: Args
     datamodule: MGCOMTempoDataModule
 

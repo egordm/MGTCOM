@@ -21,7 +21,7 @@ class Args(BaseExecutorArgs):
     data_params: MGCOMCombiDataModuleParams = MGCOMCombiDataModuleParams()
 
 
-class MGCOMCombiExecutor(MGCOMTopoExecutor[MGCOMCombiModel]):
+class MGCOMCombiExecutor(MGCOMTopoExecutor):
     args: Args
     datamodule: MGCOMCombiDataModule
 

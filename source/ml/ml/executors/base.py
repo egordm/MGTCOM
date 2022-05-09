@@ -44,6 +44,7 @@ class BaseExecutorArgs(Serializable):
     experiment: Optional[str] = None
     run_name: Optional[str] = None
     show_config: bool = False
+    dry_run: bool = False
     debug: bool = False
     offline: bool = False
     metric: Optional[Metric] = None
@@ -160,23 +161,28 @@ class BaseExecutor(Generic[T]):
         self.before_training(trainer)
 
         self.logger.info(f'Training {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
-        trainer.fit(self.model, self.datamodule)
+        if not self.args.dry_run:
+            trainer.fit(self.model, self.datamodule)
 
-        self.logger.info(f'Saving best model {Path(checkpoint_callback.best_model_path).name}')
-        shutil.copyfile(
-            src=checkpoint_callback.best_model_path,
-            dst=Path(wandb.run.dir) / 'best_model.ckpt'
-        )
+        if not self.args.dry_run:
+            self.logger.info(f'Saving best model {Path(checkpoint_callback.best_model_path).name}')
+            shutil.copyfile(
+                src=checkpoint_callback.best_model_path,
+                dst=Path(wandb.run.dir) / 'best_model.ckpt'
+            )
 
-        self.logger.info(f'Loading best model: {Path(checkpoint_callback.best_model_path).name}')
-        model_args, model_kwargs = self.model_args(lambda *args, **kwargs: (args, kwargs))
-        self.model = self.model.load_from_checkpoint(checkpoint_callback.best_model_path, *model_args, **model_kwargs)
+        if not self.args.dry_run:
+            self.logger.info(f'Loading best model: {Path(checkpoint_callback.best_model_path).name}')
+            model_args, model_kwargs = self.model_args(lambda *args, **kwargs: (args, kwargs))
+            self.model = self.model.load_from_checkpoint(checkpoint_callback.best_model_path, *model_args, **model_kwargs)
 
         self.logger.info(f'Testing {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
-        trainer.test(self.model, self.datamodule)
+        if not self.args.dry_run:
+            trainer.test(self.model, self.datamodule)
 
         self.logger.info(f'Predicting {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
-        trainer.predict(self.model, self.datamodule)
+        if not self.args.dry_run:
+            trainer.predict(self.model, self.datamodule)
 
     @abstractmethod
     def datamodule(self) -> LightningDataModule:
