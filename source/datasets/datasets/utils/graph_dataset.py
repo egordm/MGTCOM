@@ -12,8 +12,11 @@ from torch_geometric.data.storage import NodeStorage, EdgeStorage, BaseStorage
 from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.typing import Metadata
 
+from datasets.transforms.normalize_timestamps import NormalizeTimestamps
 from datasets.transforms.random_edge_split import RandomEdgeSplit
 from datasets.transforms.random_node_split import RandomNodeSplit
+from datasets.transforms.sort_edges import SortEdges
+from datasets.transforms.undirected import ToUndirected
 from datasets.utils.labels import extract_louvain_labels, extract_timestamp_labels, extract_snapshot_labels
 from datasets.utils.types import Snapshots
 from shared import get_logger
@@ -124,9 +127,9 @@ class GraphDataset(BaseGraphDataset):
 
         return data
 
-    @abstractmethod
-    def _preprocess(self):
-        pass
+    def _construct_graph(self):
+        data = self._process_graph(self.raw_paths)
+        return data
 
     def _extract_labels(self, data: HeteroData):
         logger.info('Extracting Louvain labels')
@@ -146,9 +149,16 @@ class GraphDataset(BaseGraphDataset):
         return data
 
     def process(self):
-        data = self._preprocess()
+        data = self._construct_graph()
+        data = self._preprocess(data)
         data = self._extract_labels(data)
 
+        if self.pre_transform is not None:
+            data = self.pre_transform(data)
+
+        torch.save(self.collate([data]), self.processed_paths[0])
+
+    def _preprocess(self, data: HeteroData):
         data = RandomNodeSplit(
             split="train_rest",
             num_splits=1,
@@ -164,7 +174,8 @@ class GraphDataset(BaseGraphDataset):
             inplace=True,
         )(data)
 
-        if self.pre_transform is not None:
-            data = self.pre_transform(data)
+        data = ToUndirected(reduce=None)(data)
+        data = SortEdges()(data)
+        data = NormalizeTimestamps()(data)
 
-        torch.save(self.collate([data]), self.processed_paths[0])
+        return data

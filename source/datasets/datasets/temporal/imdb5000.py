@@ -2,6 +2,7 @@ import shutil
 from typing import List
 
 import torch
+from torch_geometric.data import HeteroData
 
 from datasets.transforms.define_snapshots import DefineSnapshots
 from datasets.transforms.normalize_timestamps import NormalizeTimestamps
@@ -42,18 +43,13 @@ class IMDB5000(GraphDataset):
             'snapshots.pt'
         ]
 
-    def _preprocess(self):
-        data = self._process_graph(self.raw_paths)
-
-        data = ToUndirected(reduce=None)(data)
-        data = SortEdges()(data)
-        data = NormalizeTimestamps()(data)
+    def _preprocess(self, data: HeteroData):
+        data = super()._preprocess(data)
 
         self.snapshots = {
             n: DefineSnapshots(n)(data)
             for n in [5, 7]
         }
-
         torch.save(self.snapshots, self.processed_paths[1])
 
         return data

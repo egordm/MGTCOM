@@ -13,13 +13,21 @@ EMBED_DBLP_FULL="--embed_node_types Venue Author Paper"
 EMBED_IMDB="--embed_node_types Genre Person"
 EMBED_IMDB_FULL="--embed_node_types Genre Person Movie"
 
-#ARGS_DS="$ARGS_CORA"
-#EMBED_DS="$EMBED_CORA"
-#EMBED_FULL_DS="$EMBED_CORA"
+ARGS_DS="$ARGS_CORA"
+EMBED_DS="$EMBED_CORA"
+EMBED_FULL_DS="$EMBED_CORA"
 
-ARGS_DS="$ARGS_DBLP"
-EMBED_DS="$EMBED_DBLP"
-EMBED_FULL_DS="$EMBED_DBLP"
+#ARGS_DS="$ARGS_DBLP"
+#EMBED_DS="$EMBED_DBLP"
+#EMBED_FULL_DS="$EMBED_DBLP"
+
+#ARGS_DS="$ARGS_IMDB"
+#EMBED_DS="$EMBED_IMDB"
+#EMBED_FULL_DS="EMBED_IMDB_FULL"
+
+#ARGS_DS="$ARGS_ICEWS"
+#EMBED_DS=""
+#EMBED_FULL_DS=""
 
 # Tune Repr dim
 EXPERIMENT="$ARGS_CMD/mgcom_topo_executor.py --experiment=mgtcom_tune_reprdim $ARGS_BASE $ARGS_DS"

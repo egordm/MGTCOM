@@ -60,19 +60,15 @@ class SocialDistancingStudents(GraphDataset):
                 emb = model.encode(df['name'].values, show_progress_bar=True, convert_to_tensor=True).cpu()
             store.x = emb
 
-    def _preprocess(self):
-        data = self._process_graph(self.raw_paths)
-
-        data = ToUndirected(reduce=None)(data)
-        data = SortEdges()(data)
-        data = NormalizeTimestamps()(data)
+    def _preprocess(self, data: HeteroData):
+        data = super()._preprocess(data)
 
         self.snapshots = {
             n: DefineSnapshots(n)(data)
             for n in [5, 10]
         }
-
         torch.save(self.snapshots, self.processed_paths[1])
+
         return data
 
     def process(self):

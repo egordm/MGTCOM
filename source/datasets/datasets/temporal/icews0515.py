@@ -72,18 +72,13 @@ class ICEWS0515(GraphDataset):
             store.valid = torch.tensor(df['valid'].values.astype(bool), dtype=torch.bool)
             store.test = torch.tensor(df['test'].values.astype(bool), dtype=torch.bool)
 
-    def _preprocess(self):
-        data = self._process_graph(self.raw_paths)
-
-        data = ToUndirected(reduce=None)(data)
-        data = SortEdges()(data)
-        data = NormalizeTimestamps()(data)
+    def _preprocess(self, data: HeteroData):
+        data = super()._preprocess(data)
 
         self.snapshots = {
             n: DefineSnapshots(n)(data)
             for n in [10, 20]
         }
-
         torch.save(self.snapshots, self.processed_paths[1])
 
         return data

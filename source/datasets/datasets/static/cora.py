@@ -48,7 +48,6 @@ class Cora(Planetoid, BaseGraphDataset):
             return data if pre_transform is None else pre_transform(data)
 
         super().__init__(root, "Cora", split, num_train_per_class, num_val, num_test, transform, pre_transform_)
-        u = 0
 
     def _extract_labels(self, data: HeteroData):
         logger.info('Extracting Louvain labels')

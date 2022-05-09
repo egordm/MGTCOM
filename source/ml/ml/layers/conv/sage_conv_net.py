@@ -29,14 +29,14 @@ class SAGEConvNet(HeteroConvLayer):
     ) -> None:
         super().__init__()
         self.repr_dim = repr_dim
-        self.hidden_dim = self.hparams.hidden_dim or repr_dim
+        self.hidden_dim = hidden_dim or repr_dim
         node_types, edge_types = metadata
 
         self.convs = torch.nn.ModuleList([
             HeteroConv({
                 edge_type: SAGEConv(
                     (-1, -1),
-                    out_channels=hidden_dim if i < num_layers - 1 else self.repr_dim
+                    out_channels=self.hidden_dim if i < num_layers - 1 else self.repr_dim
                 )
                 for edge_type in edge_types
             })
