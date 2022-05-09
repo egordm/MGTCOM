@@ -32,6 +32,8 @@ class Node2VecModelParams(HParams):
     """Metric to use for distance/similarity calculation. (for loss)"""
     loss: UnsupervisedLoss = UnsupervisedLoss.HINGE
     """Unsupervised loss function to use."""
+    hinge_margin: float = 1.0
+    """Margin for hinge loss."""
 
 
 @dataclass
@@ -54,7 +56,7 @@ class Node2VecModel(FeatureModel):
 
         self.embedder = embedder
         if self.hparams.loss == UnsupervisedLoss.HINGE:
-            self.loss_fn = HingeLoss(self.hparams.metric)
+            self.loss_fn = HingeLoss(self.hparams.metric, margin=self.hparams.hinge_margin)
         elif self.hparams.loss == UnsupervisedLoss.SKIPGRAM:
             self.loss_fn = SkipgramLoss(self.hparams.metric)
 
