@@ -92,6 +92,7 @@ class MGCOMFeatModel(Het2VecModel):
                 for node_type, num_nodes in num_nodes_dict.items() if node_type in self.hparams.embed_node_types
             },
             conv=conv,
+            hidden_dim=self.hparams.conv_hidden_dim,
         )
 
         super().__init__(embedder, hparams, optimizer_params)
