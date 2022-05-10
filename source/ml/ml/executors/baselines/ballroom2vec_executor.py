@@ -35,7 +35,7 @@ class Ballroom2VecExecutor(Node2VecExecutor):
     def model_cls(self) -> Type[Node2VecModel]:
         return Ballroom2VecModel
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return Ballroom2VecDataModule(
             dataset=dataset,

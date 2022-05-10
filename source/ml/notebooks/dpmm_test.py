@@ -58,7 +58,7 @@ dataset = Cora()
 
 X = torch.cat(list(X_dict.values()), dim=0).numpy()
 
-# Fit a Dirichlet process Gaussian mixture using five components
+# Fit a Dirichlet process Gaussian cluster_model using five components
 dpgmm: BayesianGaussianMixture = mixture.BayesianGaussianMixture(
     weight_concentration_prior=10,
     covariance_prior=0.001 * np.eye(X.shape[1]),

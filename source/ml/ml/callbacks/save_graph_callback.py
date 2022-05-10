@@ -10,6 +10,7 @@ from pytorch_lightning import Callback, Trainer, LightningModule
 from datasets import GraphDataset
 from datasets.utils.conversion import igraph_from_hetero, extract_attribute_dict
 from ml.algo.clustering import KMeans
+from ml.models.mgcom_comdet import MGCOMComDetModel
 from ml.utils import Metric, HParams
 from ml.utils.outputs import OutputExtractor
 from shared import get_logger
@@ -20,7 +21,7 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class SaveGraphCallbackParams(HParams):
     metric: Metric = Metric.L2
-    """Metric to use for kmeans clustering."""
+    """Metric to use for kmeans cluster_model."""
 
 
 class SaveGraphCallback(Callback):
@@ -43,8 +44,8 @@ class SaveGraphCallback(Callback):
             logger.info('Graph has too many nodes. Not saving')
             return
 
-        if self.clustering:
-            Z = outputs.extract_cat('X', device='cpu')
+        if isinstance(pl_module, MGCOMComDetModel):
+            Z = outputs.extract_first('X', device='cpu')
         else:
             Z = outputs.extract_cat_kv('Z_dict', device='cpu')
 
@@ -75,9 +76,9 @@ class SaveGraphCallback(Callback):
         I = KMeans(-1, k, metric=self.hparams.metric).fit(Z).assign(Z)
         G.vs['precluster_km'] = I.numpy() # argument 'input' (position 1) must be Tensor, not dict
 
-        if self.clustering and 'z' in outputs:
-            logger.info('Saving resulting clustering')
-            z = outputs.extract_cat('z')
+        if isinstance(pl_module, MGCOMComDetModel):
+            logger.info('Saving resulting cluster_model')
+            z = outputs.extract_first('z')
             G.vs['mgtcom'] = z.numpy()
 
         save_dir = Path(wandb.run.dir) / 'graph.graphml'

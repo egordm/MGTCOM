@@ -9,9 +9,10 @@ from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.nodes_loader import HeteroNodesLoader
 from ml.models.base.feature_model import HeteroFeatureModel
 from ml.models.mgcom_combi import MGCOMCombiModel, MGCOMCombiModelParams, MGCOMCombiDataModule
-from ml.models.mgcom_comdet import MGCOMComDetModel, MGCOMComDetModelParams, Stage as StageDPMM
+from ml.models.mgcom_comdet import MGCOMComDetModel, MGCOMComDetModelParams
 from ml.models.node2vec import UnsupervisedLoss
 from ml.utils import HParams, OptimizerParams
+from ml.utils.training import ClusteringStage
 
 
 class Stage(Enum):
@@ -96,7 +97,7 @@ class MGCOME2EModel(HeteroFeatureModel):
             self.combi_model.training_epoch_end(outputs)
         elif self.stage == Stage.Clustering:
             self.clustering_model.training_epoch_end(outputs)
-            if self.clustering_model.stage != StageDPMM.GatherSamples:
+            if self.clustering_model.stage != ClusteringStage.GatherSamples:
                 X = self.clustering_model.train_outputs.extract_cat('X', cache=True)
                 self.r_prev = self.clustering_model.estimate_assignment(X).detach()
 
@@ -112,9 +113,9 @@ class MGCOME2EModel(HeteroFeatureModel):
                 and self.epoch_counter >= self.hparams.feat_epochs \
                 and self.current_epoch >= self.hparams.pretrain_epochs:
             self.set_stage(Stage.Clustering) # TODO: Update prior here somewhere?
-            self.clustering_model.stage = StageDPMM.GatherSamples
+            self.clustering_model.stage = ClusteringStage.GatherSamples
             # Z = self.train_outputs.extract_cat('Z', cache=True)
-            # self.clustering_model.dpmm_model.reinitialize(Z, incremental=True)
+            # self.clustering_model.cluster_model.reinitialize(Z, incremental=True)
 
         if self.stage == Stage.Clustering \
                 and self.epoch_counter >= self.hparams.cluster_epochs \
@@ -156,7 +157,7 @@ class MGCOME2EModel(HeteroFeatureModel):
             self.automatic_optimization = True
         elif self.stage == Stage.Clustering:
             self.automatic_optimization = False
-            self.clustering_model.dpmm_model.burnin_monitor.reset()
+            self.clustering_model.cluster_model.burnin_monitor.reset()
 
         if self.trainer is not None:
             self.trainer.datamodule.set_stage(stage)

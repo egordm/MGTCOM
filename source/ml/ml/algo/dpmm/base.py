@@ -5,7 +5,7 @@ from typing import Any, Tuple, TypeVar, Generic, List
 import torch
 from torch import Tensor
 
-from ml.algo.dpmm.statistics import InitMode
+from ml.algo.dpmm.statistics import InitMode, GaussianParams
 from ml.utils import Metric, HParams
 
 
@@ -71,6 +71,7 @@ class BaseMixture(Generic[P]):
         super().__init__()
         self.hparams = hparams
         self.n_components = hparams.init_k
+        self.is_fitted = False
 
     @property
     def inited(self):
@@ -81,7 +82,7 @@ class BaseMixture(Generic[P]):
         pass
 
     @abstractmethod
-    def _init_params(self, X: Tensor) -> None:
+    def _init_params(self, X: Tensor, z_init: Tensor = None) -> None:
         pass
 
     def fit(
@@ -90,6 +91,7 @@ class BaseMixture(Generic[P]):
         n_init: int = 1, max_iter: int = 100,
         incremental: bool = False,
         callbacks: List[EMCallback] = None,
+        z_init: Tensor = None,
     ) -> None:
         assert not incremental or self.params is not None, "Incremental fit requires initialized params"
         callback = EMAggCallback(callbacks or [])
@@ -106,7 +108,7 @@ class BaseMixture(Generic[P]):
             if incremental:
                 self._set_params(initial_params)
             else:
-                self._init_params(X)
+                self._init_params(X, z_init=z_init)
             callback.on_after_init_params(self)
 
             lower_bound = -torch.inf
@@ -132,7 +134,8 @@ class BaseMixture(Generic[P]):
 
             callback.on_done(self, self._get_params(), j)
 
-        # self._set_params(best_params) # TODO: subcluster params shouldnt count here
+        self._set_params(best_params)  # TODO: subcluster params shouldnt count here
+        self.is_fitted = True
 
     def predict(self, X: Tensor) -> Tensor:
         return self._estimate_weighted_log_prob(X).argmax(dim=1)
@@ -165,6 +168,10 @@ class BaseMixture(Generic[P]):
         log_resp = weighted_log_prob - log_prob_norm[:, None]
         return log_prob_norm, log_resp
 
+    def estimate_log_resp(self, X: Tensor) -> Tensor:
+        log_prob_norm, log_resp = self._estimate_log_prob_resp(X)
+        return log_resp
+
     @abstractmethod
     def _compute_lower_bound(self, X: Tensor, log_r: Tensor) -> Tensor:
         pass
@@ -177,10 +184,5 @@ class BaseMixture(Generic[P]):
 
     @property
     @abstractmethod
-    def mus(self) -> Tensor:
-        return self.params.nw.mus
-
-    @property
-    @abstractmethod
-    def covs(self) -> Tensor:
-        return self.params.nw.covs
+    def cluster_params(self) -> GaussianParams:
+        pass

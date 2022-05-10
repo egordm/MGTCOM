@@ -9,7 +9,7 @@ class HingeLoss(SkipgramLoss):
     def __init__(
             self,
             metric: Metric = Metric.L2,
-            margin: float = 1,
+            margin: float = 0.1,
             adaptive: bool = False,
     ) -> None:
         super().__init__(metric)

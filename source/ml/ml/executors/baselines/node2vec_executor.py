@@ -34,7 +34,7 @@ class Node2VecExecutor(BaseExecutor[Node2VecModel]):
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return Node2VecDataModule(
             dataset=dataset,
@@ -57,18 +57,18 @@ class Node2VecExecutor(BaseExecutor[Node2VecModel]):
     def model_cls(self) -> Type[Node2VecModel]:
         return Node2VecModel
 
-    def callbacks(self) -> List[Callback]:
+    def _callbacks(self) -> List[Callback]:
         return [
             EmbeddingEvalCallback(
-                self.datamodule,
+                self._datamodule,
                 hparams=self.args.callback_params.embedding_eval
             ),
             ClassificationEvalCallback(
-                self.datamodule,
+                self._datamodule,
                 hparams=self.args.callback_params.classification_eval,
             ),
             LPEvalCallback(
-                self.datamodule,
+                self._datamodule,
                 hparams=self.args.callback_params.lp_eval,
             ),
             SaveEmbeddingsCallback(),

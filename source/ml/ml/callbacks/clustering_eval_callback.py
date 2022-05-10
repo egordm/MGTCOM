@@ -69,13 +69,12 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
             self.test_labels = None
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if 'X' not in pl_module.val_outputs or 'r' not in pl_module.val_outputs:
+        if 'X' not in pl_module.val_outputs or 'z' not in pl_module.val_outputs:
             return
 
         logger.info(f"Evaluating validation clustering at epoch {trainer.current_epoch}")
-        X = pl_module.val_outputs.extract_cat('X', cache=True, device='cpu')
-        r = pl_module.val_outputs.extract_cat('r', cache=True, device='cpu')
-        z = r.argmax(dim=-1)
+        X = pl_module.val_outputs.extract_first('X', cache=True, device='cpu')
+        z = pl_module.val_outputs.extract_first('z', cache=True, device='cpu')
 
         pl_module.log_dict(prefix_keys(
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/val/clu/'
@@ -95,10 +94,9 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         if 'X' not in pl_module.val_outputs:
             return
 
-        logger.info(f"Evaluating validation clustering at epoch {trainer.current_epoch}")
-        X = pl_module.val_outputs.extract_cat('X', cache=True, device='cpu')
-        r = pl_module.val_outputs.extract_cat('r', cache=True, device='cpu')
-        z = r.argmax(dim=-1)
+        logger.info(f"Evaluating validation clustering at epoch {pl_module.current_epoch}")
+        X = pl_module.val_outputs.extract_first('X', cache=True, device='cpu')
+        z = pl_module.val_outputs.extract_first('z', cache=True, device='cpu')
 
         pl_module.log_dict(prefix_keys(
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/test/clu/'

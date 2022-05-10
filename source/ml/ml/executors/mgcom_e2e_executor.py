@@ -30,7 +30,7 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return MGCOME2EDataModule(
             dataset=dataset,
@@ -53,14 +53,14 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
     def model_cls(self) -> Type[MGCOME2EModel]:
         return MGCOME2EModel
 
-    def callbacks(self) -> List[Callback]:
+    def _callbacks(self) -> List[Callback]:
         return [
             *self._embedding_task_callbacks(),
             ClusteringVisualizerCallback(
                 hparams=self.args.callback_params.clustering_visualizer
             ),
             ClusteringEvalCallback(
-                self.datamodule,
+                self._datamodule,
                 hparams=self.args.callback_params.clustering_eval
             ),
         ]

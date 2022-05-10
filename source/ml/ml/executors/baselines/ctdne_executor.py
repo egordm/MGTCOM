@@ -35,7 +35,7 @@ class CTDNEExecutor(Node2VecExecutor):
     def model_cls(self) -> Type[Node2VecModel]:
         return CTDNEModel
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return CTDNEDataModule(
             dataset=dataset,

@@ -32,7 +32,7 @@ class Node2VecModelParams(HParams):
     """Metric to use for distance/similarity calculation. (for loss)"""
     loss: UnsupervisedLoss = UnsupervisedLoss.HINGE
     """Unsupervised loss function to use."""
-    hinge_margin: float = 1.0
+    hinge_margin: float = 0.1
     """Margin for hinge loss."""
 
 

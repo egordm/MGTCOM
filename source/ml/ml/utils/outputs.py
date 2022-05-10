@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict, Any, Callable, Union
+from typing import List, Dict, Any, Callable, Union, Optional
 
 import torch
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
@@ -20,8 +20,11 @@ class OutputExtractor:
     outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]
     outputs_cache: Dict[str, Any] = field(default_factory=dict)
 
-    def extract(self, key, cache=False, device=None) -> List[Tensor]:
+    def extract(self, key, cache=False, device=None) -> Union[List[Tensor], Tensor]:
         return self.check_cache(key, lambda: dicts_extract(flat_iter(self.outputs), key), cache, device=device)
+
+    def extract_first(self, key, cache=False, device=None) -> Union[List[Tensor], Tensor]:
+        return self.check_cache(key, lambda: dicts_extract(flat_iter(self.outputs), key), cache, device=device)[0]
 
     def extract_cat(self, key, cache=False, device=None) -> Tensor:
         return self.check_cache(key, lambda: torch.cat(self.extract(key), dim=0), cache, device=device)

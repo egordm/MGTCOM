@@ -10,7 +10,7 @@ from datasets.transforms.eval_edge_split import EvalEdgeSplitTransform
 from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.algo.dpmm.dpm import DirichletProcessMixture
 from ml.algo.dpmm.base import EMCallback
-from ml.algo.dpmm.dpm_sc import DirichletProcessMixtureSC, DPMixtureSCParams
+from ml.algo.dpmm.dpmsc import DPMSC, DPMSCParams
 from ml.algo.dpmm.statistics import InitMode
 from ml.algo.transforms import DimensionReductionTransform, DimensionReductionMode
 from ml.data import SyntheticGMMDataset
@@ -67,12 +67,12 @@ class PlotCallback(EMCallback):
         if X.shape[1] != 2:
             self.remap.fit(X)
 
-    def on_after_init_params(self, model: DirichletProcessMixtureSC) -> None:
+    def on_after_init_params(self, model: DPMSC) -> None:
         super().on_after_init_params(model)
         self.run += 1
         self.step = 0
 
-    def on_after_step(self, model: DirichletProcessMixtureSC, lower_bound: Tensor) -> None:
+    def on_after_step(self, model: DPMSC, lower_bound: Tensor) -> None:
         print(f'Step {self.step}')
         if self.step % 5 != 0:
             self.step += 1
@@ -121,13 +121,13 @@ class PlotCallback(EMCallback):
 
         self.step += 1
 
-    def on_done(self, model: DirichletProcessMixtureSC, params: Any, i) -> None:
+    def on_done(self, model: DPMSC, params: Any, i) -> None:
         super().on_done(model, params, i)
         print(f'Done in {i} iterations')
 
 
-# Fit a Dirichlet process Gaussian mixture using five components
-dpmm = DirichletProcessMixtureSC(DPMixtureSCParams(
+# Fit a Dirichlet process Gaussian cluster_model using five components
+dpmm = DPMSC(DPMSCParams(
     init_k=2,
     init_mode=InitMode.KMEANS,
     prior_alpha=1e1,

@@ -65,7 +65,7 @@ class PlotCallback(EMCallback):
         self.step += 1
 
 
-# Fit a Dirichlet process Gaussian mixture using five components
+# Fit a Dirichlet process Gaussian cluster_model using five components
 dpmm = DirichletProcessMixture(
     n_components=10,
     init_mode=InitMode.KMEANS,

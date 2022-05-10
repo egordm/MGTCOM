@@ -34,7 +34,7 @@ class MGCOMTempoExecutor(MGCOMTopoExecutor):
     def model_cls(self) -> Type[MGCOMFeatTempoModel]:
         return MGCOMFeatTempoModel
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return MGCOMTempoDataModule(
             dataset=dataset,

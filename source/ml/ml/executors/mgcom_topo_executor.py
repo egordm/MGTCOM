@@ -29,7 +29,7 @@ class MGCOMTopoExecutor(BaseExecutor[MGCOMFeatTopoModel]):
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return MGCOMTopoDataModule(
             dataset=dataset,
@@ -49,7 +49,7 @@ class MGCOMTopoExecutor(BaseExecutor[MGCOMFeatTopoModel]):
     def model_cls(self) -> Type[MGCOMFeatTopoModel]:
         return MGCOMFeatTopoModel
 
-    def callbacks(self) -> List[Callback]:
+    def _callbacks(self) -> List[Callback]:
         return self._embedding_task_callbacks()
 
     def run_name(self):

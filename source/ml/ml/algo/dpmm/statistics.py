@@ -45,12 +45,16 @@ class InitMode(Enum):
     RANDOM = 'random'
     KMEANS = 'kmeans'
     KMEANS1D = 'kmeans1d'
+    HARD = 'hard'
 
 
-def initial_assignment(X: Tensor, k: int, mode: InitMode, metric: Metric) -> Tensor:
+def initial_assignment(X: Tensor, k: int, mode: InitMode, metric: Metric, z_init: Tensor = None) -> Tensor:
     N, D = X.shape
 
-    if mode == InitMode.KMEANS:
+    if z_init is not None:
+        r = torch.zeros(N, k)
+        r[torch.arange(N), z_init] = 1
+    elif mode == InitMode.KMEANS:
         z = KMeans(D, k, metric).fit(X).assign(X)
         r = torch.zeros(N, k)
         r[torch.arange(N), z] = 1
@@ -64,6 +68,12 @@ def initial_assignment(X: Tensor, k: int, mode: InitMode, metric: Metric) -> Ten
 
     return r
 
+
+def to_hard_assignment(log_r: Tensor) -> Tensor:
+    z = log_r.argmax(dim=1)
+    r = torch.zeros_like(log_r)
+    r[torch.arange(len(log_r)), z] = 1
+    return r
 
 def merge_params(Ns: Tensor, mus: Tensor, covs: Tensor) -> GaussianParams:
     mus = mus[Ns > 0]

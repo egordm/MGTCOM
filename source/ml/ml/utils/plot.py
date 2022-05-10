@@ -73,7 +73,7 @@ def plot_decision_regions(ax, X, z, colors, cluster_fn: Callable[[Tensor], Tenso
 
     # horizontal stack vectors to create x1,x2 input for the model
     grid_t = np.hstack((r1, r2))
-    yhat = cluster_fn(torch.from_numpy(grid_t))
+    yhat = cluster_fn(torch.from_numpy(grid_t).float())
     yhat_maxed = yhat.max(dim=1).values.cpu()
 
     cont = ax.contourf(xx, yy, yhat_maxed.reshape(xx.shape), alpha=0.5, cmap="jet")

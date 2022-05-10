@@ -7,7 +7,7 @@ from datasets import StarWars
 from datasets.transforms.to_homogeneous import to_homogeneous
 from ml.algo.dpmm.dpm import DirichletProcessMixture
 from ml.algo.dpmm.base import EMCallback
-from ml.algo.dpmm.dpm_sc import DirichletProcessMixtureSC, DPMixtureSCParams
+from ml.algo.dpmm.dpmsc import DPMSC, DPMSCParams
 from ml.algo.dpmm.statistics import InitMode
 from ml.evaluation import community_metrics
 from ml.utils.plot import create_colormap, draw_ellipses, plot_scatter
@@ -48,12 +48,12 @@ class PlotCallback(EMCallback):
     run: int = -1
     step: int = 0
 
-    def on_after_init_params(self, model: DirichletProcessMixtureSC) -> None:
+    def on_after_init_params(self, model: DPMSC) -> None:
         super().on_after_init_params(model)
         self.run += 1
         self.step = 0
 
-    def on_after_step(self, model: DirichletProcessMixtureSC, lower_bound: Tensor) -> None:
+    def on_after_step(self, model: DPMSC, lower_bound: Tensor) -> None:
         fig, (ax_sup, ax_sub) = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
         fig.tight_layout(rect=[0, 0, 1, 0.95])
         fig.suptitle(f'Run {self.run}, step {self.step}')
@@ -82,8 +82,8 @@ class PlotCallback(EMCallback):
         self.step += 1
 
 
-# Fit a Dirichlet process Gaussian mixture using five components
-dpmm = DirichletProcessMixtureSC(DPMixtureSCParams(
+# Fit a Dirichlet process Gaussian cluster_model using five components
+dpmm = DPMSC(DPMSCParams(
     init_k=3,
     init_mode=InitMode.KMEANS,
     prior_alpha=10,

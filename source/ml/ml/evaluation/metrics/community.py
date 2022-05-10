@@ -12,7 +12,7 @@ def newman_girvan_modularity(
         num_clusters: int = None,
 ) -> float:
     """
-    It calculates the modularity of a graph given a clustering.
+    It calculates the modularity of a graph given a cluster_model.
 
     Difference the fraction of intra community edges of a partition with the expected number of such edges if
     distributed according to a null model.
@@ -21,7 +21,7 @@ def newman_girvan_modularity(
 
     :param edge_index: The edge list of the graph
     :type edge_index: Tensor
-    :param clustering: The clustering of the graph
+    :param clustering: The cluster_model of the graph
     :type clustering: Tensor
     :param num_clusters: The number of clusters in the graph
     :type num_clusters: int
@@ -40,7 +40,7 @@ def newman_girvan_modularity(
         raise ValueError("A graph without link has an undefined modularity")
 
     num_nodes = len(clustering)
-    assert num_nodes >= edge_index.max().item() + 1, "Edge index contains more nodes than clustering"
+    assert num_nodes >= edge_index.max().item() + 1, "Edge index contains more nodes than cluster_model"
 
     if not num_clusters:
         num_clusters = clustering.max().item() + 1
@@ -73,14 +73,14 @@ def conductance(
         num_clusters: int = None,
 ) -> float:
     """
-    It calculates the conductance of a graph given its edge index and clustering.
+    It calculates the conductance of a graph given its edge index and cluster_model.
 
     Conductance: Fraction of total edge volume that points outside the community.
     Generally lower is better.
 
     :param edge_index: The edge index of the graph
     :type edge_index: Tensor
-    :param clustering: The clustering of the graph
+    :param clustering: The cluster_model of the graph
     :type clustering: Tensor
     :param num_clusters: The number of clusters to use
     :type num_clusters: int
@@ -93,7 +93,7 @@ def conductance(
         raise ValueError("A graph without link has an undefined conductance")
 
     num_nodes = len(clustering)
-    assert num_nodes >= edge_index.max().item() + 1, "Edge index contains more nodes than clustering"
+    assert num_nodes >= edge_index.max().item() + 1, "Edge index contains more nodes than cluster_model"
 
     if not num_clusters:
         num_clusters = clustering.max().item() + 1

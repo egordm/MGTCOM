@@ -5,11 +5,10 @@ from pathlib import Path
 from typing import List, Type, Optional, TypeVar, Generic
 
 import wandb
-from pytorch_lightning import LightningDataModule, Callback, Trainer
+from pytorch_lightning import LightningDataModule, Callback, Trainer, LightningModule
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from simple_parsing import Serializable
-from transformers.models.longformer.convert_longformer_original_pytorch_lightning_to_pytorch import LightningModel
 
 from ml.callbacks.classification_eval_callback import ClassificationEvalCallback, ClassificationEvalCallbackParams
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallbackParams
@@ -55,7 +54,7 @@ class BaseExecutorArgs(Serializable):
     callback_params: CallbackArgs = CallbackArgs()
 
 
-T = TypeVar("T", bound=LightningModel)
+T = TypeVar("T", bound=LightningModule)
 
 
 class BaseExecutor(Generic[T]):
@@ -63,6 +62,10 @@ class BaseExecutor(Generic[T]):
     datamodule: LightningDataModule
     model: T
     callbacks: List[Callback]
+    wandb_logger: WandbLogger
+    trainer: Trainer
+    checkpoint_callback: ModelCheckpoint
+    root_dir: Path
 
     TASK_NAME = 'base'
     EXECUTOR_NAME: str
@@ -83,7 +86,7 @@ class BaseExecutor(Generic[T]):
             self.logger.info(f'Using metric {self.args.metric} globally')
             recursively_override_attr(self.args, 'metric', self.args.metric)
 
-        self.datamodule = self.datamodule()
+        self.datamodule = self._datamodule()
         self.RUN_NAME = self.run_name()
 
         if self.args.show_config:
@@ -95,97 +98,58 @@ class BaseExecutor(Generic[T]):
             self.args.trainer_params.cpu = True
             self.args.loader_params.num_workers = 0
 
-        root_dir = RESULTS_PATH / self.TASK_NAME / self.EXECUTOR_NAME / self.RUN_NAME
-        root_dir.mkdir(exist_ok=True, parents=True)
+        self.root_dir = RESULTS_PATH / self.TASK_NAME / self.EXECUTOR_NAME / self.RUN_NAME
+        self.root_dir.mkdir(exist_ok=True, parents=True)
 
         self.callbacks = [
             CustomProgressBar(),
             LearningRateMonitor(logging_interval='step'),
             SaveConfigCallback(self.args),
             SaveModelSummaryCallback(),
-            *self.callbacks()
+            *self._callbacks()
         ]
-
         self.model = self.model_args(self.model_cls)
-
-        # Initialize wandb logger
-        run_config = self.args.to_dict()
-        run_config.pop('wandb_project_name', None)
-        run_config.pop('run_name', None)
-        run_config.pop('show_config', None)
-        run_config.pop('offline', None)
-
-        model_name = self.model.__class__.__name__
-        wandb_config = {
-            'args': run_config,
-            'model': model_name,
-        }
-        if hasattr(self.args, 'dataset'):
-            wandb_config['dataset'] = self.args.dataset
-
-        wandb_args = {}
-        if self.args.run_name is not None:
-            wandb_args['name'] = self.args.run_name
-
-        wandb_logger = WandbLogger(
-            project=self.args.project,
-            group=self.args.experiment,
-            save_dir=str(root_dir),
-            config=wandb_config,
-            tags=self.tags(),
-            job_type=self.TASK_NAME,
-            offline=self.args.offline,
-            **wandb_args
-        )
-
-        checkpoint_callback = ModelCheckpoint(
+        self.wandb_logger = self._logger()
+        self.checkpoint_callback = ModelCheckpoint(
             save_top_k=2,
             monitor=self._metric_monitor(),
             mode='max',
         )
+        self.trainer = self._trainer(callbacks=[
+            *self.callbacks,
+            self.checkpoint_callback
+        ])
 
-        trainer_args = self.args.trainer_params.to_dict()
-        trainer_args.pop('cpu', None)
-        trainer = Trainer(
-            **trainer_args,
-            default_root_dir=str(root_dir),
-            callbacks=[
-                *self.callbacks,
-                checkpoint_callback
-            ],
-            logger=wandb_logger,
-            gpus=1 if not self.args.trainer_params.cpu else None,
-            auto_lr_find=True,
-            enable_model_summary=False,
-        )
-        self.before_training(trainer)
+        self._fit()
 
+    def _fit(self):
         self.logger.info(f'Training {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         if not self.args.dry_run:
-            trainer.fit(self.model, self.datamodule)
+            self.trainer.fit(self.model, self.datamodule)
 
-        if not self.args.dry_run:
-            self.logger.info(f'Saving best model {Path(checkpoint_callback.best_model_path).name}')
+        if not self.args.dry_run and self.checkpoint_callback.best_model_path:
+            self.logger.info(f'Saving best model {Path(self.checkpoint_callback.best_model_path).name}')
             shutil.copyfile(
-                src=checkpoint_callback.best_model_path,
+                src=self.checkpoint_callback.best_model_path,
                 dst=Path(wandb.run.dir) / 'best_model.ckpt'
             )
 
-        if not self.args.dry_run:
-            self.logger.info(f'Loading best model: {Path(checkpoint_callback.best_model_path).name}')
+        if not self.args.dry_run and self.checkpoint_callback.best_model_path:
+            self.logger.info(f'Loading best model: {Path(self.checkpoint_callback.best_model_path).name}')
             model_args, model_kwargs = self.model_args(lambda *args, **kwargs: (args, kwargs))
-            self.model = self.model.load_from_checkpoint(checkpoint_callback.best_model_path, *model_args, **model_kwargs)
+            self.model = self.model.load_from_checkpoint(self.checkpoint_callback.best_model_path, *model_args,
+                **model_kwargs)
 
         self.logger.info(f'Testing {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         if not self.args.dry_run:
-            trainer.test(self.model, self.datamodule)
+            self.trainer.test(self.model, self.datamodule)
 
         self.logger.info(f'Predicting {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         if not self.args.dry_run:
-            trainer.predict(self.model, self.datamodule)
+            self.trainer.predict(self.model, self.datamodule)
 
     @abstractmethod
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         raise NotImplementedError
 
     @abstractmethod
@@ -193,7 +157,7 @@ class BaseExecutor(Generic[T]):
         raise NotImplementedError
 
     @abstractmethod
-    def callbacks(self) -> List[Callback]:
+    def _callbacks(self) -> List[Callback]:
         raise NotImplementedError
 
     @property
@@ -214,6 +178,51 @@ class BaseExecutor(Generic[T]):
             tags.append(str(self.args.dataset))
 
         return tags
+
+    def _trainer(self, **kwargs) -> Trainer:
+        trainer_args = self.args.trainer_params.to_dict()
+        trainer_args.pop('cpu', None)
+        trainer = Trainer(
+            **trainer_args,
+            default_root_dir=str(self.root_dir),
+            logger=self.wandb_logger,
+            gpus=1 if not self.args.trainer_params.cpu else None,
+            auto_lr_find=True,
+            enable_model_summary=False,
+            **kwargs,
+        )
+        return trainer
+
+    def _logger(self, **kwargs) -> WandbLogger:
+        run_config = self.args.to_dict()
+        run_config.pop('wandb_project_name', None)
+        run_config.pop('run_name', None)
+        run_config.pop('show_config', None)
+        run_config.pop('offline', None)
+
+        model_name = self.model.__class__.__name__
+        wandb_config = {
+            'args': run_config,
+            'model': model_name,
+        }
+        if hasattr(self.args, 'dataset'):
+            wandb_config['dataset'] = self.args.dataset
+
+        wandb_args = {}
+        if self.args.run_name is not None:
+            wandb_args['name'] = self.args.run_name
+
+        return WandbLogger(
+            project=self.args.project,
+            group=self.args.experiment,
+            save_dir=str(self.root_dir),
+            config=wandb_config,
+            tags=self.tags(),
+            job_type=self.TASK_NAME,
+            offline=self.args.offline,
+            **wandb_args,
+            **kwargs
+        )
 
     def _embedding_task_callbacks(self) -> List[Callback]:
         if not isinstance(self.datamodule, GraphDataModule):

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
+from typing import Union, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,13 +10,16 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor
 
-from ml.algo.dpm import DPMMParams
+from ml.algo.dpmm.dpm import DPMMParams
+from ml.algo.dpmm.dpmsc import DPMSC
+from ml.algo.dpmm.statistics import GaussianParams
 from ml.algo.transforms import DimensionReductionMode, SubsampleTransform, DimensionReductionTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
-from ml.models.mgcom_comdet import MGCOMComDetModel, Stage
+from ml.models.mgcom_comdet import MGCOMComDetModel
 from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
 from ml.utils import HParams, Metric
 from ml.utils.plot import create_colormap, plot_scatter, draw_ellipses, MARKER_SIZE, plot_decision_regions
+from ml.utils.training import ClusteringStage
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -24,7 +27,7 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class ClusteringVisualizerCallbackParams(IntermittentCallbackParams):
-    interval: int = 3
+    interval: int = 6
     dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.PCA
     """Dimension reduction mode for embedding visualization."""
     cv_max_points: int = 10000
@@ -50,39 +53,25 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
             metric=self.hparams.metric
         )
 
-    def _transform_params(self, params: DPMMParams) -> DPMMParams:
-        mus = self.remap.transform(params.mus)
-        sigmas = torch.stack([
-            torch.eye(2) * self.remap.transform(cov.diag().reshape(1, -1))
-            for cov in params.covs
-        ])
-        return DPMMParams(params.pis, mus, sigmas)
-
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: Union[MGCOMComDetModel, MGCOME2EModel]) -> None:
-        if isinstance(pl_module, MGCOME2EModel):
-            if pl_module.stage == StageE2E.Feature or pl_module.val_outputs is None:
-                return
-
-            pl_module = pl_module.clustering_model
-
-        if pl_module.stage == Stage.GatherSamples:
+        self.trainer = trainer
+        if pl_module.stage != ClusteringStage.Clustering:
             return
 
+        cluster_model: DPMSC = None
+        if isinstance(pl_module, MGCOME2EModel):
+            pl_module = pl_module.clustering_model
+            # cluster_model = pl_module.cluster_model
+        elif isinstance(pl_module, MGCOMComDetModel):
+            cluster_model = pl_module.cluster_model
+
         logger.info(f"Visualizing clustering at epoch {trainer.current_epoch}")
-        visualize_subclusters = pl_module.hparams.subcluster
 
         # Collect sample data
-        k = pl_module.dpmm_model.k
-        X = self.subsample.transform(pl_module.val_outputs.extract_cat('X', cache=True, device='cpu'))
-
-        r = self.subsample.transform(pl_module.val_outputs.extract_cat('r', cache=True, device='cpu'))
-        z = r.argmax(dim=-1)
-
-        if visualize_subclusters:
-            ri = self.subsample.transform(pl_module.val_outputs.extract_cat('ri', cache=True, device='cpu'))
-            zi = ri.argmax(dim=-1)
-        else:
-            ri, zi = None, None
+        k = cluster_model.n_components
+        X = self.subsample.transform(pl_module.val_outputs.extract_first('X', cache=True, device='cpu'))
+        z = self.subsample.transform(pl_module.val_outputs.extract_first('z', cache=True, device='cpu'))
+        zi = self.subsample.transform(pl_module.val_outputs.extract_first('zi', cache=True, device='cpu'))
 
         # Transform sample data
         if not self.remap.is_fitted or pl_module.sample_space_version != self.sample_space_version:
@@ -93,16 +82,18 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
         X = self.remap.transform(X)
 
         # Collect cluster params
-        cluster_params = self._transform_params(pl_module.dpmm_model.cluster_params.to('cpu'))
-        if visualize_subclusters:
-            subcluster_params = self._transform_params(pl_module.dpmm_model.subcluster_params.to('cpu'))
-        else:
-            subcluster_params = None
+        params_c = self._transform_params(cluster_model.cluster_params)
+        params_sc = list(map(self._transform_params, cluster_model.subcluster_params))
+        params_sc = GaussianParams(
+            Ns=torch.cat([params.Ns for params in params_sc]),
+            mus=torch.cat([params.mus for params in params_sc]),
+            covs=torch.cat([params.covs for params in params_sc])
+        )
 
         fig = self.visualize_clusters(
             X, z, zi,
-            k, cluster_params, subcluster_params,
-            pl_module,
+            k, params_c, params_sc,
+            lambda x: cluster_model.estimate_log_resp(x).exp(),
             title=f'Epoch {trainer.current_epoch}'
         )
 
@@ -119,7 +110,7 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
         if not wandb.run.offline:
             fig = self.visualize_distributions(
                 trainer, k,
-                cluster_params.pis, subcluster_params.pis if visualize_subclusters else None,
+                params_c.Ns, params_sc.Ns,
             )
             # noinspection PyTypeChecker
             log_data.update({
@@ -130,28 +121,35 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
 
         trainer.logger.log_metrics(log_data)
 
+    def _transform_params(self, params: GaussianParams) -> GaussianParams:
+        mus = self.remap.transform(params.mus)
+        sigmas = torch.stack([
+            torch.eye(2) * self.remap.transform(cov.diag().reshape(1, -1))
+            for cov in params.covs
+        ])
+        return GaussianParams(params.Ns, mus, sigmas)
+
     def visualize_clusters(
-            self, X: Tensor, z: Tensor, zi: Tensor,
-            k, cluster_params: DPMMParams, subcluster_params: DPMMParams,
-            pl_module: MGCOMComDetModel, title: str = ''
+        self, X: Tensor, z: Tensor, zi: Tensor,
+        k, params_c: GaussianParams, params_sc: GaussianParams,
+        r_assign_fn: Callable[[Tensor], Tensor], title: str = ''
     ):
         colors = create_colormap(k)
 
         # Figure frame
         _min, _max = X.min(dim=0).values, X.max(dim=0).values
-        fig, axes = plt.subplots(nrows=1, ncols=3 if subcluster_params is not None else 2, sharey=True, figsize=(10, 6))
+        fig, axes = plt.subplots(nrows=1, ncols=3 if params_sc is not None else 2, sharey=True, figsize=(10, 6))
         fig.tight_layout(rect=[0, -0.02, 1, 0.95])
         (*ax_clusters, ax_boundaries) = axes
 
         # Plot both clusters and subclusters
-        self.plot_clusters(ax_clusters[-1], X, z, cluster_params, colors)
-        if subcluster_params is not None:
-            self.plot_subclusters(ax_clusters[0], X, z, zi, subcluster_params, colors)
+        self.plot_clusters(ax_clusters[-1], X, z, params_c, colors)
+        self.plot_subclusters(ax_clusters[0], X, z, zi, params_sc, colors)
 
         # Plot boundaries
         cont = plot_decision_regions(
             ax_boundaries, X, z, colors,
-            lambda x: pl_module.dpmm_model.estimate_assignment(self.remap.inverse_transform(x).to(pl_module.device)).cpu()
+            lambda x: r_assign_fn(self.remap.inverse_transform(x))
         )
         cbar = fig.colorbar(cont, ax=axes.ravel().tolist(), shrink=0.95)
         cbar.set_label("Max network response", rotation=270, labelpad=10, y=0.45)
@@ -166,10 +164,7 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
         fig.suptitle(title)
         return fig
 
-    def plot_clusters(
-            self, ax, X: Tensor, z: Tensor,
-            cluster_params: DPMMParams, colors
-    ):
+    def plot_clusters(self, ax, X: Tensor, z: Tensor, params_c: GaussianParams, colors):
         # Draw points
         plot_scatter(
             ax, X[:, 0], X[:, 1],
@@ -180,17 +175,16 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
 
         # Draw clusters
         plot_scatter(
-            ax, cluster_params.mus[:, 0], cluster_params.mus[:, 1],
+            ax, params_c.mus[:, 0], params_c.mus[:, 1],
             marker="o", facecolor="k", edgecolors=colors,
             label="Net Centers",
             s=MARKER_SIZE * 8, linewidth=2,
             alpha=0.6, zorder=3
         )
-        draw_ellipses(ax, cluster_params.mus, cluster_params.covs, colors, alpha=0.2, zorder=2)
-
+        draw_ellipses(ax, params_c.mus, params_c.covs, colors, alpha=0.2, zorder=2)
         ax.set_title("Net Clusters and Covariances")
 
-    def plot_subclusters(self, ax, X: Tensor, z: Tensor, zi: Tensor, subcluster_params: DPMMParams, colors):
+    def plot_subclusters(self, ax, X: Tensor, z: Tensor, zi: Tensor, params_sc: GaussianParams, colors):
         # Draw points
         plot_scatter(
             ax, X[:, 0], X[:, 1],
@@ -199,18 +193,17 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
             linewidth=2, s=MARKER_SIZE * 4, zorder=1
         )
 
-        indices = (torch.arange(len(subcluster_params.mus)) / 2).floor().long()
+        indices = (torch.arange(len(params_sc.mus)) / 2).floor().long()
 
         # Draw subclusters
         plot_scatter(
-            ax, subcluster_params.mus[:, 0], subcluster_params.mus[:, 1],
+            ax, params_sc.mus[:, 0], params_sc.mus[:, 1],
             edgecolor="k", facecolors=colors[indices],
             label="Net Centers",
-            markers=['<', '>'], marker_idx=(torch.arange(len(subcluster_params.mus)) % 2),
+            markers=['<', '>'], marker_idx=(torch.arange(len(params_sc.mus)) % 2),
             linewidth=2, s=MARKER_SIZE * 5, zorder=3
         )
-        draw_ellipses(ax, subcluster_params.mus, subcluster_params.covs, colors[indices], alpha=0.2, zorder=2)
-
+        draw_ellipses(ax, params_sc.mus, params_sc.covs, colors[indices], alpha=0.2, zorder=2)
         ax.set_title("Net SubClusters and Covariances")
 
     def visualize_distributions(self, trainer: Trainer, k: int, pis: Tensor, pis_sub: Tensor = None):

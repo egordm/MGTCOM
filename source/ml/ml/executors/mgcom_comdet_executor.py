@@ -1,15 +1,19 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Type, List
+from typing import Optional, Type, List, Any
 
 import torch
-from pytorch_lightning import LightningDataModule, Callback
+from pytorch_lightning import LightningDataModule, Callback, Trainer
+from pytorch_lightning.loops import FitLoop, EvaluationLoop
+from pytorch_lightning.trainer.states import RunningStage, TrainerFn
+from torch import Tensor
 from torch.utils.data import Dataset
 
 from datasets import GraphDataset
 from datasets.utils.conversion import igraph_from_hetero
 from datasets.utils.graph_dataset import DATASET_REGISTRY
-from ml.algo.dpm import InitMode
+from ml.algo.dpmm.base import EMCallback, BaseMixture
+from ml.algo.dpmm.statistics import InitMode
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
@@ -19,6 +23,9 @@ from ml.executors.base import BaseExecutorArgs, BaseExecutor, T
 from ml.models.mgcom_comdet import MGCOMComDetDataModuleParams, MGCOMComDetDataModule, MGCOMComDetModel, \
     MGCOMComDetModelParams
 from ml.utils import dataset_choices, DataLoaderParams, TrainerParams
+from ml.utils.loops.TrainlessFitLoop import TrainlessFitLoop
+from ml.utils.outputs import OutputExtractor
+from ml.utils.training import override_trainer_state
 from shared import get_logger
 
 EXECUTOR_NAME = Path(__file__).stem
@@ -48,7 +55,7 @@ class MGCOMComDetExecutor(BaseExecutor[MGCOMComDetModel]):
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         graph_dataset: Optional[GraphDataset] = DATASET_REGISTRY[self.args.dataset]()
 
         if self.args.pretrained_path:
@@ -69,27 +76,49 @@ class MGCOMComDetExecutor(BaseExecutor[MGCOMComDetModel]):
         )
 
     def model_args(self, cls):
-        if self.datamodule.graph_dataset is not None and self.args.hparams.cluster_init_mode == InitMode.HardAssignment:
-            logger.info('Initializing clustering model using Louvain labels')
-            G, _, _, _ = igraph_from_hetero(self.datamodule.graph_dataset.data)
-            com = G.community_multilevel()
-            z = torch.tensor(com.membership, dtype=torch.long)
-            self.args.hparams.init_k = len(com)
-        else:
-            z = None
-
         return cls(
-            repr_dim=self.dataset.repr_dim,
-            hparams=self.args.hparams,
-            optimizer_params=self.args.optimizer_params,
-            init_z=z,
+            hparams=self.args.hparams
         )
+
+    def _fit(self):
+        self.logger.info('Training model')
+        model, trainer = self.model, self.trainer
+        self.model.trainer = self.trainer
+        self.trainer.strategy.model = self.model
+
+        loader = self.datamodule.predict_dataloader()
+        X = torch.cat([batch for batch in loader], dim=0)
+        # z_init = torch.cat(list(self.datamodule.graph_dataset.data.louvain_dict.values()), dim=0)
+        z_init = None
+
+        class MyLoop(TrainlessFitLoop, EMCallback):
+            def do_advance_loop(self):
+                self._restarting = False
+                self.on_advance_start()
+                model.cluster_model.fit(X, callbacks=[self], z_init=z_init)
+                self.on_advance_end()
+
+            def on_after_step(self, _model: BaseMixture, lower_bound: Tensor) -> None:
+                self.advance()
+                z, zi = model.cluster_model.predict_full(X)
+                model.val_outputs = OutputExtractor([{'X': X, 'z': z, 'zi': zi}])
+
+                self.on_advance_end()
+                self.on_advance_start()
+
+        trainer.fit_loop = MyLoop()
+        trainer.fit(model, self.datamodule)
+
+        override_trainer_state(self.model, RunningStage.TESTING, 'on_test_epoch_end')
+        self.model.test_outputs = self.model.val_outputs
+        trainer._call_callback_hooks('on_test_epoch_end')
+        trainer._call_callback_hooks('on_predict_epoch_end', self.model.test_outputs.outputs)
 
     @property
     def model_cls(self) -> Type[MGCOMComDetModel]:
         return MGCOMComDetModel
 
-    def callbacks(self) -> List[Callback]:
+    def _callbacks(self) -> List[Callback]:
         ret = [
             ClusteringVisualizerCallback(
                 hparams=self.args.callback_params.clustering_visualizer

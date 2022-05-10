@@ -27,7 +27,7 @@ class IntermittentCallback(Callback, Generic[T]):
     def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         super().on_validation_epoch_end(trainer, pl_module)
 
-        if trainer.state.stage != RunningStage.VALIDATING:
+        if trainer.state.stage != RunningStage.VALIDATING and trainer.state.stage != RunningStage.TRAINING:
             return
 
         if trainer.current_epoch % self.hparams.interval != 0 and trainer.current_epoch != trainer.max_epochs:

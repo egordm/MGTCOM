@@ -34,7 +34,7 @@ class MGCOMCombiExecutor(MGCOMTopoExecutor):
     def model_cls(self) -> Type[MGCOMCombiModel]:
         return MGCOMCombiModel
 
-    def datamodule(self) -> LightningDataModule:
+    def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return MGCOMCombiDataModule(
             dataset=dataset,

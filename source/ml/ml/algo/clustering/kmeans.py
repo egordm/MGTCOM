@@ -43,7 +43,7 @@ class KMeans:
         if init_centroids is not None:
             init_centroids = ensure_numpy(init_centroids)
 
-        # Initialize clustering
+        # Initialize cluster_model
         self.repr_dim = x.shape[1]
         self.clus = faiss.Clustering(self.repr_dim, self.k, self.params)
         if init_centroids is not None:
