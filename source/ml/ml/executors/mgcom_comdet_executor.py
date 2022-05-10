@@ -82,9 +82,9 @@ class MGCOMComDetExecutor(BaseExecutor[MGCOMComDetModel]):
 
     def _fit(self):
         self.logger.info('Training model')
-        model, trainer = self.model, self.trainer
-        self.model.trainer = self.trainer
-        self.trainer.strategy.model = self.model
+        args, model, trainer = self.args, self.model, self.trainer
+        # self.model.trainer = self.trainer
+        # self.trainer.strategy.model = self.model
 
         loader = self.datamodule.predict_dataloader()
         X = torch.cat([batch for batch in loader], dim=0)
@@ -95,7 +95,11 @@ class MGCOMComDetExecutor(BaseExecutor[MGCOMComDetModel]):
             def do_advance_loop(self):
                 self._restarting = False
                 self.on_advance_start()
-                model.cluster_model.fit(X, callbacks=[self], z_init=z_init)
+                model.cluster_model.fit(
+                    X, callbacks=[self], z_init=z_init,
+                    max_iter=args.trainer_params.max_epochs,
+                    n_init=args.hparams.n_restart,
+                )
                 self.on_advance_end()
 
             def on_after_step(self, _model: BaseMixture, lower_bound: Tensor) -> None:

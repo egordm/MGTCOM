@@ -44,7 +44,6 @@ class MGCOME2EModel(HeteroFeatureModel):
         self.save_hyperparameters(hparams.to_dict())
 
         self.clustering_model = MGCOMComDetModel(
-            MGCOMCombiModel.compute_repr_dim(hparams.combi_params),
             hparams=hparams.cluster_params,
             optimizer_params=optimizer_params,
         )

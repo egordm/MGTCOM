@@ -68,6 +68,10 @@ class SaveGraphCallback(Callback):
         if 'name' in node_attrs:
             node_attrs['label'] = node_attrs['name']
 
+        if 'y' in node_attrs:
+            node_attrs['ground_truth_y'] = node_attrs['y']
+            del node_attrs['y']
+
         G, _, _, _ = igraph_from_hetero(data, node_attrs=node_attrs, edge_attrs=edge_attrs)
 
         logger.info('Running K-means before saving graph')
