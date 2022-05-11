@@ -2,7 +2,7 @@ import shutil
 from abc import abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Type, Optional, TypeVar, Generic
+from typing import List, Type, Optional, TypeVar, Generic, Tuple
 
 import wandb
 from pytorch_lightning import LightningDataModule, Callback, Trainer, LightningModule
@@ -110,10 +110,11 @@ class BaseExecutor(Generic[T]):
         ]
         self.model = self.model_args(self.model_cls)
         self.wandb_logger = self._logger()
+        metric, matric_mode = self._metric_monitor()
         self.checkpoint_callback = ModelCheckpoint(
             save_top_k=2,
-            monitor=self._metric_monitor(),
-            mode='max',
+            monitor=metric,
+            mode=matric_mode,
         )
         self.trainer = self._trainer(callbacks=[
             *self.callbacks,
@@ -252,5 +253,5 @@ class BaseExecutor(Generic[T]):
             SaveEmbeddingsCallback(),
         ]
 
-    def _metric_monitor(self) -> str:
-        return 'val/lp/acc'
+    def _metric_monitor(self) -> Tuple[str, str]:
+        return 'val/lp/acc', 'max'

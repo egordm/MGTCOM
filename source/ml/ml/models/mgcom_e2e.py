@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Union
+from typing import Dict, Union, Optional, overload, Any
 
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
 from torch import Tensor
@@ -43,6 +43,7 @@ class MGCOME2EModel(MGCOMCombiModel):
 
         self.stage = ClusteringStage.Feature
         self.r_prev = None
+        self.sample_space_version =1
 
     def forward_homogenous(self, batch):
         _, node_perm_dict = batch
@@ -94,12 +95,42 @@ class MGCOME2EModel(MGCOMCombiModel):
         out['loss'] = loss
         return out
 
+    def test_step(self, batch, batch_idx) -> Optional[STEP_OUTPUT]:
+        out = super().test_step(batch, batch_idx)
+
+        if self.cluster_model.is_fitted:
+            _, node_perm_dict = batch
+            X_dict = out['Z_dict']
+            X = ToHeteroMappingTransform.inverse_transform_values(
+                X_dict, node_perm_dict, shape=[self.repr_dim], device=self.device
+            )
+            z = self.cluster_model.predict(X)
+
+            out.update({
+                'X': X,
+                'z': z,
+            })
+
+        return out
+
     def get_progress_bar_dict(self) -> Dict[str, Union[int, str]]:
         return {
             **super().get_progress_bar_dict(),
             'stage': 'feat' if self.stage == ClusteringStage.Feature else 'clus',
             'k': self.cluster_model.n_components,
         }
+
+    def get_extra_state(self) -> Any:
+        return {
+            'cluster_params': self.cluster_model._get_params(),
+            'cluster_prior': self.cluster_model._get_params_prior(),
+        }
+
+    def set_extra_state(self, state: Any):
+        self.cluster_model._set_params(state['cluster_params'])
+        self.cluster_model._set_params_prior(state['cluster_prior'])
+        if self.cluster_model.clusters.params is not None:
+            self.cluster_model.is_fitted = True
 
 
 class MGCOME2EDataModule(MGCOMCombiDataModule):

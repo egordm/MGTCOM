@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, Tuple
 
 import numpy as np
 import torch
@@ -56,6 +56,9 @@ class DirPrior:
             digamma_a - digamma_sum +
             torch.hstack((torch.tensor(0.0), torch.cumsum(digamma_b - digamma_sum, dim=0)[:-1]))
         )
+
+    def get_params(self) -> Tuple[float]:
+        return (float(self.alpha),)
 
 
 class NWParams(NamedTuple):
@@ -119,7 +122,7 @@ class NWPrior:
                      + Ns[:, None, None] * covs
                      + ((self.kappa * Ns) / kappas_k)[:, None, None]
                      * batchwise_outer(diff, diff)
-                 ) / (nus_k[:, None, None] + D + 2) # TODO: check whether D + 2 is fine
+                 ) / (nus_k[:, None, None] + D + 2)  # TODO: check whether D + 2 is fine
         Ws_k = covs_to_prec(covs_k)
 
         return NWParams(mus_k, kappas_k, nus_k, Ws_k, covs_k)
@@ -147,9 +150,13 @@ class NWPrior:
             + mvlgamma(nus_post / 2.0, D)
             - mvlgamma(self.nu / 2.0, D)
             + self.W_inv.logdet() * (self.nu / 2.0)
-            - (covs_post * (nus_post[:, None, None] + D + 2)).logdet() * (nus_post / 2.0) # TODO: shouldn't we use Ws instead?
+            - (covs_post * (nus_post[:, None, None] + D + 2)).logdet() * (
+                    nus_post / 2.0)  # TODO: shouldn't we use Ws instead?
             + (torch.log(self.kappa) - torch.log(kappas_post)) * (D / 2.0)
         )
+
+    def get_params(self) -> Tuple[float, float, Tensor, Tensor]:
+        return (float(self.kappa), float(self.nu), self.mu_0, self.W_inv)
 
 # class NIWPrior:
 #     """

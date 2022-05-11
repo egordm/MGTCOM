@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type, List
+from typing import Type, List, Tuple
 
 from pytorch_lightning import Callback, LightningDataModule, Trainer
 
@@ -79,6 +79,9 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
 
     def run_name(self):
         return self.args.dataset
+
+    def _metric_monitor(self) -> Tuple[str, str]:
+        return 'eval/val/clu/modularity', 'max'
 
 
 if __name__ == '__main__':

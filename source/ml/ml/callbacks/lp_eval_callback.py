@@ -7,7 +7,9 @@ from ml.callbacks.base.intermittent_callback import IntermittentCallback, Interm
 from ml.evaluation import link_prediction_measure
 from ml.models.base.feature_model import BaseFeatureModel
 from ml.models.base.graph_datamodule import GraphDataModule
+from ml.models.mgcom_e2e import MGCOME2EModel
 from ml.utils import HParams, Metric, prefix_keys
+from ml.utils.training import ClusteringStage
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -40,6 +42,9 @@ class LPEvalCallback(IntermittentCallback[LPEvalCallbackParams]):
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseFeatureModel) -> None:
         if not self.hparams.enabled:
+            return
+
+        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != ClusteringStage.Feature:
             return
 
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")

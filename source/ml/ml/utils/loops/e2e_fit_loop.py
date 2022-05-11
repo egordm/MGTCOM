@@ -33,6 +33,7 @@ class E2EFitLoop(FitLoop, EMCallback):
         self.n_cluster_epochs = n_cluster_epochs
 
         self.cluster_embed_loop = PredictionEpochLoop()
+        self.sample_space_version = 0
         self.pretraining = True
         self.X = None
 
@@ -61,6 +62,9 @@ class E2EFitLoop(FitLoop, EMCallback):
     def run_feat(self) -> None:
         self.model.stage = ClusteringStage.Feature
         for i in range(self.n_pretrain_epochs if self.pretraining else self.n_feat_epochs):
+            if self.done:
+                break
+
             self.epoch_feat_progress.increment_ready()
             self.epoch_feat_progress.increment_started()
             self.on_advance_start()
@@ -68,8 +72,12 @@ class E2EFitLoop(FitLoop, EMCallback):
             self.epoch_feat_progress.increment_processed()
             self.epoch_feat_progress.increment_completed()
             self.on_advance_end()
+            self.model.sample_space_version += 1
 
     def run_cluster(self) -> None:
+        if self.done:
+            return
+
         self.model.stage = ClusteringStage.GatherSamples
         dataloader = self.datamodule.cluster_dataloader()
         dataloader = self.trainer.strategy.process_dataloader(dataloader)
@@ -101,7 +109,12 @@ class E2EFitLoop(FitLoop, EMCallback):
 
         self.epoch_feat_progress.increment_processed()
         self.epoch_feat_progress.increment_completed()
+        self.epoch_loop.batch_loop.optimizer_loop.optim_progress.optimizer.step.increment_completed()
         self.on_advance_end()
+        self.trainer._call_callback_hooks("on_validation_epoch_end")
+        self.trainer._call_callback_hooks("on_validation_end")
+        self.model.pretraining = False
+        self.pretraining = False
 
     @property
     def model(self) -> MGCOME2EModel:

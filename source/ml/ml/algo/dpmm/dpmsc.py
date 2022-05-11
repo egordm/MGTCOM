@@ -2,7 +2,7 @@ from copy import copy
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import NamedTuple, List, Tuple
+from typing import NamedTuple, List, Tuple, Any
 
 import torch
 from torch import Tensor
@@ -10,7 +10,7 @@ from torch import Tensor
 from ml.algo.dpmm.base import BaseMixture
 from ml.algo.dpmm.dpm import DPMMParams, DirichletProcessMixture, DirichletProcessMixtureParams
 from ml.algo.dpmm.mh import MetropolisHastings, MHParams
-from ml.algo.dpmm.prior import DirPrior
+from ml.algo.dpmm.prior import DirPrior, NWPrior
 from ml.algo.dpmm.statistics import InitMode, estimate_gaussian_parameters, GaussianParams
 from ml.models.base.base_model import BaseModel
 from ml.utils import unique_count, mask_from_idx
@@ -323,3 +323,12 @@ class DPMSC(BaseMixture[DPMSCParams]):
             subcluster._set_params(params.subcluster[i])
         super()._set_params(params)
         self.n_components = self.clusters.n_components
+
+    def _get_params_prior(self) -> Any:
+        return self.clusters._get_params_prior()
+
+    def _set_params_prior(self, params: Any) -> None:
+        self.clusters._set_params_prior(params)
+        for subcluster in self.subclusters:
+            subcluster.prior_dir = DirPrior.from_params(1.0 / 2.0)
+            subcluster.prior_nw = self.clusters.prior_nw

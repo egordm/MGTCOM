@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, Any
 
 import torch
 from torch import Tensor
@@ -94,9 +94,20 @@ class DirichletProcessMixture(BaseMixture[DPMMParams]):
 
     def _set_params(self, params: DPMMParams) -> None:
         super()._set_params(params)
-        self.n_components = len(params.nw.mus)
+        if params is not None:
+            self.n_components = len(params.nw.mus)
 
     @property
     def cluster_params(self) -> GaussianParams:
         return GaussianParams(self.params.dir.a - 1, self.params.nw.mus, self.params.nw.covs)
 
+    def _get_params_prior(self) -> Any:
+        return (
+            self.prior_dir.get_params() if self.prior_dir is not None else None,
+            self.prior_nw.get_params() if self.prior_nw is not None else None,
+        )
+
+    def _set_params_prior(self, params: Any) -> None:
+        dir_params, nw_params = params
+        self.prior_dir = DirPrior.from_params(*dir_params)
+        self.prior_nw = NWPrior.from_params(*nw_params)

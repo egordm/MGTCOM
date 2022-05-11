@@ -68,6 +68,10 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
             self.val_labels = None
             self.test_labels = None
 
+    def on_train_start(self, trainer: Trainer, pl_module: BaseModel) -> None:
+        super().on_train_start(trainer, pl_module)
+        pl_module.log('eval/val/clu/modularity', 0.0, on_epoch=True)
+
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if 'X' not in pl_module.val_outputs or 'z' not in pl_module.val_outputs:
             return
@@ -90,13 +94,13 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
                 metrics = community_gt_metrics(z, labels)
                 pl_module.log_dict(prefix_keys(metrics, f'eval/val/clu/{label_name}/'), on_epoch=True)
 
-    def on_test_epoch_end_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
-        if 'X' not in pl_module.val_outputs:
+    def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
+        if 'X' not in pl_module.test_outputs:
             return
 
         logger.info(f"Evaluating validation clustering at epoch {pl_module.current_epoch}")
-        X = pl_module.val_outputs.extract_first('X', cache=True, device='cpu')
-        z = pl_module.val_outputs.extract_first('z', cache=True, device='cpu')
+        X = pl_module.test_outputs.extract_cat('X', cache=True, device='cpu')
+        z = pl_module.test_outputs.extract_cat('z', cache=True, device='cpu')
 
         pl_module.log_dict(prefix_keys(
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/test/clu/'
@@ -110,4 +114,4 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         if self.test_labels is not None:
             for label_name, labels in self.test_labels.items():
                 metrics = community_gt_metrics(z, labels)
-                pl_module.log_dict(prefix_keys(metrics, f'eval/val/clu/{label_name}/'), on_epoch=True)
+                pl_module.log_dict(prefix_keys(metrics, f'eval/test/clu/{label_name}/'), on_epoch=True)
