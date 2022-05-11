@@ -13,9 +13,10 @@ from ml.algo.transforms import DimensionReductionMode, DimensionReductionTransfo
 from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
-from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
+from ml.models.mgcom_e2e import MGCOME2EModel
 from ml.utils import HParams, Metric, dict_mapv
 from ml.utils.plot import plot_scatter, create_colormap, MARKER_SIZE
+from ml.utils.training import ClusteringStage
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -52,7 +53,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback[EmbeddingVisualizerCallba
         if trainer.current_epoch == 0:
             return
 
-        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage == StageE2E.Clustering:
+        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage == ClusteringStage.Clustering:
             return
 
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")

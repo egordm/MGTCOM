@@ -16,6 +16,9 @@ class EMCallback:
     def on_after_init_params(self, model: 'BaseMixture') -> None:
         pass
 
+    def on_before_step(self, model: 'BaseMixture') -> None:
+        pass
+
     def on_after_step(self, model: 'BaseMixture', lower_bound: Tensor) -> None:
         pass
 
@@ -38,6 +41,10 @@ class EMAggCallback(EMCallback):
     def on_after_init_params(self, model: 'BaseMixture') -> None:
         for callback in self.callbacks:
             callback.on_after_init_params(model)
+
+    def on_before_step(self, model: 'BaseMixture') -> None:
+        for callback in self.callbacks:
+            callback.on_before_step(model)
 
     def on_after_step(self, model: 'BaseMixture', lower_bound: Tensor) -> None:
         for callback in self.callbacks:
@@ -116,6 +123,7 @@ class BaseMixture(Generic[P]):
             for j in range(1, max_iter + 1):
                 prev_lower_bound = lower_bound
 
+                callback.on_before_step(self)
                 _, log_r = self._e_step(X)
                 self._m_step(X, log_r)
                 lower_bound = self._compute_lower_bound(X, log_r)

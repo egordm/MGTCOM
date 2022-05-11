@@ -7,17 +7,15 @@ import numpy as np
 import torch
 import wandb
 from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import WandbLogger
 from torch import Tensor
 
-from ml.algo.dpmm.dpm import DPMMParams
 from ml.algo.dpmm.dpmsc import DPMSC
 from ml.algo.dpmm.statistics import GaussianParams
 from ml.algo.transforms import DimensionReductionMode, SubsampleTransform, DimensionReductionTransform
 from ml.callbacks.base.intermittent_callback import IntermittentCallback, IntermittentCallbackParams
 from ml.models.mgcom_comdet import MGCOMComDetModel
-from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
-from ml.utils import HParams, Metric
+from ml.models.mgcom_e2e import MGCOME2EModel
+from ml.utils import Metric
 from ml.utils.plot import create_colormap, plot_scatter, draw_ellipses, MARKER_SIZE, plot_decision_regions
 from ml.utils.training import ClusteringStage
 from shared import get_logger

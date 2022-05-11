@@ -23,7 +23,7 @@ from ml.executors.base import BaseExecutorArgs, BaseExecutor, T
 from ml.models.mgcom_comdet import MGCOMComDetDataModuleParams, MGCOMComDetDataModule, MGCOMComDetModel, \
     MGCOMComDetModelParams
 from ml.utils import dataset_choices, DataLoaderParams, TrainerParams
-from ml.utils.loops.TrainlessFitLoop import TrainlessFitLoop
+from ml.utils.loops.trainless_fit_loop import TrainlessFitLoop
 from ml.utils.outputs import OutputExtractor
 from ml.utils.training import override_trainer_state
 from shared import get_logger

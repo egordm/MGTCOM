@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Type, List
 
-from pytorch_lightning import Callback, LightningDataModule
+from pytorch_lightning import Callback, LightningDataModule, Trainer
 
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
@@ -11,6 +11,7 @@ from ml.executors.base import BaseExecutor, BaseExecutorArgs
 from ml.models.mgcom_combi import MGCOMCombiDataModuleParams, MGCOMCombiDataModule
 from ml.models.mgcom_e2e import MGCOME2EDataModule, MGCOME2EModel, MGCOME2EModelParams
 from ml.utils import dataset_choices
+from ml.utils.loops.e2e_fit_loop import E2EFitLoop
 
 
 @dataclass
@@ -39,8 +40,8 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
         )
 
     def model_args(self, cls):
-        self.args.hparams.combi_params.use_topo = self.args.data_params.use_topo
-        self.args.hparams.combi_params.use_tempo = self.args.data_params.use_tempo
+        self.args.data_params.use_topo_loader = self.args.hparams.use_topo
+        self.args.data_params.use_tempo_loader = self.args.hparams.use_tempo
 
         return cls(
             metadata=self.datamodule.metadata,
@@ -60,10 +61,21 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
                 hparams=self.args.callback_params.clustering_visualizer
             ),
             ClusteringEvalCallback(
-                self._datamodule,
+                self.datamodule,
                 hparams=self.args.callback_params.clustering_eval
             ),
         ]
+
+    def _trainer(self, **kwargs) -> Trainer:
+        trainer = super()._trainer(**kwargs)
+        trainer.fit_loop = E2EFitLoop(
+            max_epochs=self.args.trainer_params.max_epochs,
+            n_pretrain_epochs=self.args.hparams.n_pretrain_epochs,
+            n_cluster_epochs=self.args.hparams.n_cluster_epochs,
+            n_feat_epochs=self.args.hparams.n_feat_epochs,
+        )
+
+        return trainer
 
     def run_name(self):
         return self.args.dataset

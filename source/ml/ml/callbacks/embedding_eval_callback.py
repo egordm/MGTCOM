@@ -8,8 +8,9 @@ from ml.callbacks.base.intermittent_callback import IntermittentCallback, Interm
 from ml.evaluation import clustering_metrics
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
-from ml.models.mgcom_e2e import MGCOME2EModel, Stage as StageE2E
-from ml.utils import HParams, Metric, prefix_keys, dict_mapv
+from ml.models.mgcom_e2e import MGCOME2EModel
+from ml.utils import Metric, prefix_keys, dict_mapv
+from ml.utils.training import ClusteringStage
 from shared import get_logger
 
 logger = get_logger(Path(__file__).stem)
@@ -40,7 +41,7 @@ class EmbeddingEvalCallback(IntermittentCallback[EmbeddingEvalCallbackParams]):
         self.test_labels = dict_mapv(datamodule.test_labels(), self.test_subsample.transform)
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != StageE2E.Feature:
+        if isinstance(pl_module, MGCOME2EModel) and pl_module.stage != ClusteringStage.Feature:
             return
 
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")

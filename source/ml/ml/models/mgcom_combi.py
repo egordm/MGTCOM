@@ -1,9 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Dict, List, Union, Tuple
 
-import torch.nn
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EPOCH_OUTPUT
+from simple_parsing import field
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
@@ -13,7 +13,6 @@ from ml.data.samplers.ballroom_sampler import BallroomSamplerParams
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams
 from ml.layers.fc_net import FCNet, FCNetParams
-from ml.layers.loss.isometric_loss import IsometricLoss
 from ml.models.base.feature_model import FeatureCombineMode, HeteroFeatureModel
 from ml.models.mgcom_feat import MGCOMFeatDataModuleParams, MGCOMFeatModel, MGCOMTempoDataModule, MGCOMTopoDataModule, \
     MGCOMFeatModelParams
@@ -27,7 +26,6 @@ logger = get_logger(Path(__file__).stem)
 class MGCOMCombiModelParams(MGCOMFeatModelParams):
     use_topo: bool = True
     use_tempo: bool = True
-    use_cluster: bool = False
 
     topo_repr_dim: int = 32
     """Dimension of the topology feature representation vectors."""
@@ -39,9 +37,6 @@ class MGCOMCombiModelParams(MGCOMFeatModelParams):
     tempo_hidden_dim: List[int] = field(default_factory=lambda: [32])
     tempo_weight: float = 1.0
 
-    # cluster_weight: float = 0.2
-    cluster_weight: float = 0.1
-
     emb_combine_mode: FeatureCombineMode = FeatureCombineMode.CONCAT
 
 
@@ -50,12 +45,11 @@ class MGCOMCombiModel(HeteroFeatureModel):
     pretraining: bool = True
 
     def __init__(
-            self,
-            metadata: Metadata,
-            num_nodes_dict: Dict[NodeType, int],
-            hparams: MGCOMCombiModelParams,
-            optimizer_params: OptimizerParams,
-            cluster_module: Optional[torch.nn.Module] = None,
+        self,
+        metadata: Metadata,
+        num_nodes_dict: Dict[NodeType, int],
+        hparams: MGCOMCombiModelParams,
+        optimizer_params: OptimizerParams,
     ) -> None:
         super().__init__(optimizer_params)
         self.save_hyperparameters(hparams.to_dict())
@@ -96,10 +90,6 @@ class MGCOMCombiModel(HeteroFeatureModel):
                 )
             )
 
-        if self.hparams.use_cluster:
-            self.cluster_module = cluster_module
-            self.cluster_loss_fn = IsometricLoss(self.hparams.metric)
-
         # Combine the embeddings
         if self.hparams.use_topo and self.hparams.use_tempo:
             self.combi_feat_net = lambda z_emb: self.embedding_combine_fn([
@@ -111,8 +101,6 @@ class MGCOMCombiModel(HeteroFeatureModel):
         elif self.hparams.use_tempo:
             self.combi_feat_net = self.tempo_net
 
-        self.pretraining = True
-
     @property
     def repr_dim(self):
         return self.repr_dim_
@@ -121,8 +109,8 @@ class MGCOMCombiModel(HeteroFeatureModel):
     def compute_repr_dim(hparams: MGCOMCombiModelParams) -> int:
         if hparams.emb_combine_mode.CONCAT:
             return (
-                    hparams.topo_repr_dim * int(hparams.use_topo)
-                    + hparams.topo_repr_dim * int(hparams.use_tempo)
+                hparams.topo_repr_dim * int(hparams.use_topo)
+                + hparams.topo_repr_dim * int(hparams.use_tempo)
             )
         else:
             return hparams.topo_repr_dim if hparams.use_topo else hparams.tempo_repr_dim
@@ -132,34 +120,43 @@ class MGCOMCombiModel(HeteroFeatureModel):
         Z_feat = dict_mapv(Z_emb, self.combi_feat_net)
         return Z_feat
 
+    def training_step_topo(self, batch):
+        if not self.hparams.use_topo:
+            return None, None
+
+        (pos_walks, neg_walks, node_meta) = batch
+
+        Z_emb = self.feat_net.forward_emb_flat(node_meta)
+        Z = self.topo_net(Z_emb)
+        loss = self.feat_net.n2v.loss(pos_walks, neg_walks, Z)
+
+        return loss, Z
+
+    def training_step_tempo(self, batch):
+        if not self.hparams.use_tempo:
+            return None, None
+
+        (pos_walks, neg_walks, node_meta) = batch
+
+        Z_emb = self.feat_net.forward_emb_flat(node_meta)
+        Z = self.tempo_net(Z_emb)
+        loss = self.feat_net.n2v.loss(pos_walks, neg_walks, Z)
+
+        return loss, Z
+
     def training_step(self, batch, batch_idx, r=None) -> STEP_OUTPUT:
-        (
-            (topo_pos_walks, topo_neg_walks, topo_node_meta),
-            (tempo_pos_walks, tempo_neg_walks, tempo_node_meta),
-        ) = batch
+        (topo_walks, tempo_walks) = batch
 
-        out = {}
-        loss = 0.0
+        loss_topo, Z_topo = self.training_step_topo(topo_walks)
+        loss_tempo, Z_tempo = self.training_step_tempo(tempo_walks)
 
-        if self.hparams.use_topo:
-            Z_emb_topo = self.feat_net.forward_emb_flat(topo_node_meta)
-            Z_topo = self.topo_net(Z_emb_topo)
-            loss_topo = self.feat_net.n2v.loss(topo_pos_walks, topo_neg_walks, Z_topo)
-
+        loss, out = 0.0, {}
+        if loss_topo is not None:
             loss += self.hparams.topo_weight * loss_topo
-            out["loss_topo"] = loss_topo.detach()
-        else:
-            Z_topo = None
-
-        if self.hparams.use_tempo:
-            Z_emb_tempo = self.feat_net.forward_emb_flat(tempo_node_meta)
-            Z_tempo = self.tempo_net(Z_emb_tempo)
-            loss_tempo = self.feat_net.n2v.loss(tempo_pos_walks, tempo_neg_walks, Z_tempo)
-
+            out['loss_topo'] = loss_topo.detach()
+        if loss_tempo is not None:
             loss += self.hparams.tempo_weight * loss_tempo
-            out["loss_tempo"] = loss_tempo.detach()
-        else:
-            Z_tempo = None
+            out['loss_tempo'] = loss_tempo.detach()
 
         if self.use_cluster_loss and self.cluster_module.k > 1 and r is not None:
             if self.hparams.use_topo and self.hparams.use_tempo:
@@ -202,20 +199,20 @@ class MGCOMCombiDataModuleParams(MGCOMFeatDataModuleParams):
     n2v_params: Node2VecSamplerParams = Node2VecSamplerParams()
     window: Optional[Tuple[int, int]] = None
     ballroom_params: BallroomSamplerParams = BallroomSamplerParams()
-    use_tempo: bool = True
-    use_topo: bool = True
+    use_tempo_loader: bool = field(default=True, cmd=False)
+    use_topo_loader: bool = field(default=True, cmd=False)
 
 
 class MGCOMCombiDataModule(MGCOMTempoDataModule, MGCOMTopoDataModule):
     hparams: Union[MGCOMCombiDataModuleParams, DataLoaderParams]
 
     def __init__(
-            self,
-            dataset: GraphDataset,
-            hparams: MGCOMCombiDataModuleParams,
-            loader_params: DataLoaderParams
+        self,
+        dataset: GraphDataset,
+        hparams: MGCOMCombiDataModuleParams,
+        loader_params: DataLoaderParams
     ) -> None:
-        if hparams.use_tempo:
+        if hparams.use_tempo_loader:
             MGCOMTempoDataModule.__init__(self, dataset, hparams, loader_params)
         else:
             MGCOMTopoDataModule.__init__(self, dataset, hparams, loader_params)
@@ -230,14 +227,14 @@ class MGCOMCombiDataModule(MGCOMTempoDataModule, MGCOMTopoDataModule):
             return node_meta, node_perm_dict
 
         n2v_sampler = MGCOMTopoDataModule._build_n2v_sampler(self, data, transform_meta) \
-            if self.hparams.use_topo else None
+            if self.hparams.use_topo_loader else None
         ballroom_sampler = MGCOMTempoDataModule._build_n2v_sampler(self, data, transform_meta) \
-            if self.hparams.use_tempo else None
+            if self.hparams.use_tempo_loader else None
 
         def combined_sampler(node_ids):
             return (
-                n2v_sampler(node_ids) if self.hparams.use_topo else (None, None, None),
-                ballroom_sampler(node_ids) if self.hparams.use_tempo else (None, None, None),
+                n2v_sampler(node_ids) if self.hparams.use_topo_loader else (None, None, None),
+                ballroom_sampler(node_ids) if self.hparams.use_tempo_loader else (None, None, None),
             )
 
         # noinspection PyTypeChecker
