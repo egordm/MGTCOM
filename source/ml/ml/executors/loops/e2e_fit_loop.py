@@ -1,3 +1,4 @@
+from functools import partial
 from pathlib import Path
 
 import torch
@@ -52,6 +53,7 @@ class E2EFitLoop(FitLoop, EMCallback):
                 logger.info(f'Starting clustering stage: Epoch {self.trainer.current_epoch}')
                 self.run_cluster()
                 self._restarting = False
+                break
             except StopIteration:
                 break
         self._restarting = False
@@ -78,12 +80,15 @@ class E2EFitLoop(FitLoop, EMCallback):
         self.model.stage = ClusteringStage.GatherSamples
         dataloader = self.datamodule.cluster_dataloader()
         dataloader = self.trainer.strategy.process_dataloader(dataloader)
+        self._data_fetcher.setup(
+            dataloader, batch_to_device=partial(self.trainer._call_strategy_hook, "batch_to_device", dataloader_idx=0)
+        )
         with torch.no_grad():
             X = []
-            for batch_idx, batch in enumerate(dataloader):
+            for batch_idx, batch in enumerate(self._data_fetcher):
                 X.append(self.model.forward_homogenous(batch))
 
-        self.X = torch.cat(X, dim=0)
+        self.X = torch.cat(X, dim=0).cpu()
 
         self.model.stage = ClusteringStage.Clustering
         self.model.cluster_model.fit(
@@ -93,7 +98,7 @@ class E2EFitLoop(FitLoop, EMCallback):
             incremental=self.model.cluster_model.is_fitted,
             callbacks=[self],
         )
-        self.model.r_prev = self.model.cluster_model.estimate_log_resp(self.X).exp()
+        self.model.r_prev = self.model.cluster_model.estimate_log_resp(self.X).exp().to(self.model.device)
         self.X = None
 
     def on_before_step(self, model: 'BaseMixture') -> None:

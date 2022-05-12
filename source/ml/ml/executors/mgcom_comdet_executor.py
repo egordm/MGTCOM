@@ -1,29 +1,26 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Type, List, Any
+from typing import Optional, Type, List
 
 import torch
-from pytorch_lightning import LightningDataModule, Callback, Trainer
-from pytorch_lightning.loops import FitLoop, EvaluationLoop
-from pytorch_lightning.trainer.states import RunningStage, TrainerFn
+from pytorch_lightning import LightningDataModule, Callback
+from pytorch_lightning.trainer.states import RunningStage
 from torch import Tensor
 from torch.utils.data import Dataset
 
 from datasets import GraphDataset
-from datasets.utils.conversion import igraph_from_hetero
 from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.algo.dpmm.base import EMCallback, BaseMixture
-from ml.algo.dpmm.statistics import InitMode
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.callbacks.save_graph_callback import SaveGraphCallback
 from ml.data import PretrainedEmbeddingsDataset, SyntheticGMMDataset
-from ml.executors.base import BaseExecutorArgs, BaseExecutor, T
+from ml.executors.base import BaseExecutorArgs, BaseExecutor
+from ml.executors.loops.trainless_fit_loop import TrainlessFitLoop
 from ml.models.mgcom_comdet import MGCOMComDetDataModuleParams, MGCOMComDetDataModule, MGCOMComDetModel, \
     MGCOMComDetModelParams
 from ml.utils import dataset_choices, DataLoaderParams, TrainerParams
-from ml.utils.loops.trainless_fit_loop import TrainlessFitLoop
 from ml.utils.outputs import OutputExtractor
 from ml.utils.training import override_trainer_state
 from shared import get_logger

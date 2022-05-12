@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Union, Optional, overload, Any
 
+import torch
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
 from torch import Tensor
 from torch_geometric.typing import Metadata, NodeType
@@ -65,13 +66,33 @@ class MGCOME2EModel(MGCOMCombiModel):
             Z_combi = Z_topo if self.hparams.use_topo else Z_tempo
             idx = topo_pos_walks[:, 0] if self.hparams.use_topo else tempo_pos_walks[:, 0]
 
-        Z_combi_i = Z_combi[idx, :]
-        r_i = self.r_prev[idx, :]
+        log_r = self.cluster_model.estimate_log_resp(Z_combi)
+        log_rk = log_r[idx, :]
+        z_k = self.r_prev[idx, :].argmax(dim=-1)
+
         mus = self.cluster_model.cluster_params.mus
-        # r = self.cluster_model.estimate_log_resp(Z_combi_i)
-        loss_cluster = self.cluster_loss_fn(Z_combi_i, r_i, mus)
+        loss_cluster = self.cluster_loss_fn(Z_combi[idx, :], self.r_prev[idx, :], mus )
+
+
+        # m = 8
+        # log_r = (log_rk / m) - torch.logsumexp(log_rk / m, dim=-1, keepdim=True)
+        # r = torch.exp(log_r)
+        #
+        # r_mask = torch.zeros_like(r, dtype=torch.bool, device=self.device)
+        # r_mask[torch.arange(r.shape[0]), z_k] = 1
+        #
+        # r_pos, r_neg = r[r_mask][:, None], r[~r_mask].view(r.shape[0], -1)
+        # diff = torch.relu(0.5 + r_neg - r_pos)
+        # loss_cluster = diff.sum(dim=-1).mean()
+
+        # loss_cluster =torch.kl_div(log_r[idx, :], self.r_prev[idx, :])
+        # loss_cluster = torch.nn.KLDivLoss(reduction='batchmean')(log_r[idx, :], self.r_prev[idx, :])
 
         return loss_cluster
+        # return r_pos.sum() * -1
+
+        # return loss_cluster
+        return 0
 
     def training_step(self, batch, batch_idx, r=None) -> STEP_OUTPUT:
         (topo_walks, tempo_walks) = batch

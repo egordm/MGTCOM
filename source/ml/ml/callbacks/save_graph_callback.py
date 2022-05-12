@@ -87,8 +87,11 @@ class SaveGraphCallback(Callback):
             G.vs['mgtcom'] = z.numpy()
         elif isinstance(pl_module, MGCOME2EModel):
             logger.info('Saving resulting cluster_model')
-            z = pl_module.cluster_model.predict(Z)
-            G.vs['mgtcom'] = z.numpy()
+            if pl_module.cluster_model.is_fitted:
+                z = pl_module.cluster_model.predict(Z)
+                G.vs['mgtcom'] = z.numpy()
+            else:
+                logger.info('Cluster model is not fitted. Not saving')
 
         save_dir = Path(wandb.run.dir) / 'graph.graphml'
         logger.info(f"Saving graph to {save_dir}")

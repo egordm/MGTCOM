@@ -101,6 +101,9 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         logger.info(f"Evaluating validation clustering at epoch {pl_module.current_epoch}")
         X = pl_module.test_outputs.extract_cat('X', cache=True, device='cpu')
         z = pl_module.test_outputs.extract_cat('z', cache=True, device='cpu')
+        if isinstance(X, list):
+            X, z = X[0], z[0]
+
 
         pl_module.log_dict(prefix_keys(
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/test/clu/'

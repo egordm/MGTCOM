@@ -8,10 +8,10 @@ from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
 from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs
+from ml.executors.loops.e2e_fit_loop import E2EFitLoop
 from ml.models.mgcom_combi import MGCOMCombiDataModuleParams, MGCOMCombiDataModule
 from ml.models.mgcom_e2e import MGCOME2EDataModule, MGCOME2EModel, MGCOME2EModelParams
 from ml.utils import dataset_choices
-from ml.utils.loops.e2e_fit_loop import E2EFitLoop
 
 
 @dataclass
@@ -57,13 +57,13 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
     def _callbacks(self) -> List[Callback]:
         return [
             *self._embedding_task_callbacks(),
-            ClusteringVisualizerCallback(
-                hparams=self.args.callback_params.clustering_visualizer
-            ),
-            ClusteringEvalCallback(
-                self.datamodule,
-                hparams=self.args.callback_params.clustering_eval
-            ),
+            # ClusteringVisualizerCallback(
+            #     hparams=self.args.callback_params.clustering_visualizer
+            # ),
+            # ClusteringEvalCallback(
+            #     self.datamodule,
+            #     hparams=self.args.callback_params.clustering_eval
+            # ),
         ]
 
     def _trainer(self, **kwargs) -> Trainer:
@@ -81,7 +81,8 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
         return self.args.dataset
 
     def _metric_monitor(self) -> Tuple[str, str]:
-        return 'eval/val/clu/modularity', 'max'
+        # return 'eval/val/clu/modularity', 'max'
+        return 'val/lp/acc', 'max'
 
 
 if __name__ == '__main__':

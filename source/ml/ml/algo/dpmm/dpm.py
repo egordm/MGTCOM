@@ -109,5 +109,8 @@ class DirichletProcessMixture(BaseMixture[DPMMParams]):
 
     def _set_params_prior(self, params: Any) -> None:
         dir_params, nw_params = params
-        self.prior_dir = DirPrior.from_params(*dir_params)
-        self.prior_nw = NWPrior.from_params(*nw_params)
+        if dir_params is not None:
+            self.prior_dir = DirPrior.from_params(*dir_params)
+            self.prior_nw = NWPrior.from_params(*nw_params)
+        else:
+            self.is_fitted = False

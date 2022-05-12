@@ -21,6 +21,9 @@ def plot_results(X, Y_, means, covariances, index, title, colors):
     _min, _max = X.min(axis=0), X.max(axis=0)
 
     for i, (mean, covar, color) in enumerate(zip(means, covariances, colors)):
+        if len(covar.shape) < 2:
+            covar = torch.eye(32) * covar + 1e-5
+
         v, w = linalg.eigh(covar)
         v = 2.0 * np.sqrt(2.0) * np.sqrt(v)
         u = w[0] / linalg.norm(w[0])
@@ -53,7 +56,8 @@ n_samples = 500
 # X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220501_232858-3kwsr7fr/files/embeddings_hetero.pt')
 # X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/StarWars/wandb/offline-run-20220430_222415-3ftcu5qf/files/embeddings_hetero.pt')
 # dataset = StarWars()
-X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/run-20220501_235544-ptk0stcg/files/embeddings_hetero.pt')
+# X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/run-20220501_235544-ptk0stcg/files/embeddings_hetero.pt')
+X_dict = torch.load('/data/pella/projects/University/Thesis/Thesis/source/storage/results/embedding_topo/MGCOMTopoExecutor/Cora/wandb/offline-run-20220512_191026-2gvz0k5o/files/embeddings_hetero.pt')
 dataset = Cora()
 
 X = torch.cat(list(X_dict.values()), dim=0).numpy()
@@ -61,10 +65,13 @@ X = torch.cat(list(X_dict.values()), dim=0).numpy()
 # Fit a Dirichlet process Gaussian cluster_model using five components
 dpgmm: BayesianGaussianMixture = mixture.BayesianGaussianMixture(
     weight_concentration_prior=10,
-    covariance_prior=0.001 * np.eye(X.shape[1]),
+    # covariance_prior=0.001 * np.eye(X.shape[1]),
     weight_concentration_prior_type="dirichlet_process",
-    n_components=17,
+    n_components=9,
     covariance_type='full',
+    # covariance_type='diag',
+    # covariance_type='spherical',
+    # covariance_type='tied',
     init_params="kmeans",
     max_iter=15000,
 ).fit(X)
