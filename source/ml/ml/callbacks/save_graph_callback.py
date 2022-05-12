@@ -11,6 +11,7 @@ from datasets import GraphDataset
 from datasets.utils.conversion import igraph_from_hetero, extract_attribute_dict
 from ml.algo.clustering import KMeans
 from ml.models.mgcom_comdet import MGCOMComDetModel
+from ml.models.mgcom_e2e import MGCOME2EModel
 from ml.utils import Metric, HParams
 from ml.utils.outputs import OutputExtractor
 from shared import get_logger
@@ -83,6 +84,10 @@ class SaveGraphCallback(Callback):
         if isinstance(pl_module, MGCOMComDetModel):
             logger.info('Saving resulting cluster_model')
             z = outputs.extract_first('z')
+            G.vs['mgtcom'] = z.numpy()
+        elif isinstance(pl_module, MGCOME2EModel):
+            logger.info('Saving resulting cluster_model')
+            z = pl_module.cluster_model.predict(Z)
             G.vs['mgtcom'] = z.numpy()
 
         save_dir = Path(wandb.run.dir) / 'graph.graphml'

@@ -32,6 +32,9 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
         return Args
 
     def _datamodule(self) -> LightningDataModule:
+        self.args.data_params.use_topo_loader = self.args.hparams.use_topo
+        self.args.data_params.use_tempo_loader = self.args.hparams.use_tempo
+
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return MGCOME2EDataModule(
             dataset=dataset,
@@ -40,9 +43,6 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
         )
 
     def model_args(self, cls):
-        self.args.data_params.use_topo_loader = self.args.hparams.use_topo
-        self.args.data_params.use_tempo_loader = self.args.hparams.use_tempo
-
         return cls(
             metadata=self.datamodule.metadata,
             num_nodes_dict=self.datamodule.num_nodes_dict,

@@ -75,9 +75,6 @@ class E2EFitLoop(FitLoop, EMCallback):
             self.model.sample_space_version += 1
 
     def run_cluster(self) -> None:
-        if self.done:
-            return
-
         self.model.stage = ClusteringStage.GatherSamples
         dataloader = self.datamodule.cluster_dataloader()
         dataloader = self.trainer.strategy.process_dataloader(dataloader)
@@ -96,6 +93,7 @@ class E2EFitLoop(FitLoop, EMCallback):
             incremental=self.model.cluster_model.is_fitted,
             callbacks=[self],
         )
+        self.model.r_prev = self.model.cluster_model.estimate_log_resp(self.X).exp()
         self.X = None
 
     def on_before_step(self, model: 'BaseMixture') -> None:

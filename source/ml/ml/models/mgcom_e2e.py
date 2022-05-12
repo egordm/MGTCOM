@@ -21,7 +21,7 @@ class MGCOME2EModelParams(MGCOMCombiModelParams):
     cluster_params: DPMSCHParams = DPMSCHParams()
     cluster_weight: float = 0.1
 
-    n_pretrain_epochs: int = 3
+    n_pretrain_epochs: int = 50
     n_feat_epochs: int = 20
     n_cluster_epochs: int = 100
 
@@ -67,7 +67,8 @@ class MGCOME2EModel(MGCOMCombiModel):
 
         Z_combi_i = Z_combi[idx, :]
         r_i = self.r_prev[idx, :]
-        mus = self.cluster_module.mus
+        mus = self.cluster_model.cluster_params.mus
+        # r = self.cluster_model.estimate_log_resp(Z_combi_i)
         loss_cluster = self.cluster_loss_fn(Z_combi_i, r_i, mus)
 
         return loss_cluster

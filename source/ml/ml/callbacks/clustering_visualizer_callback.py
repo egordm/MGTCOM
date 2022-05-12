@@ -25,7 +25,7 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class ClusteringVisualizerCallbackParams(IntermittentCallbackParams):
-    interval: int = 1
+    interval: int = 4
     dim_reduction_mode: DimensionReductionMode = DimensionReductionMode.PCA
     """Dimension reduction mode for embedding visualization."""
     cv_max_points: int = 10000
@@ -59,8 +59,6 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
         cluster_model: DPMSC = None
         if isinstance(pl_module, (MGCOME2EModel, MGCOMComDetModel)):
             cluster_model = pl_module.cluster_model
-        # elif isinstance(pl_module, MGCOMComDetModel):
-        #     cluster_model = pl_module.cluster_model
 
         logger.info(f"Visualizing clustering at epoch {trainer.current_epoch}")
 

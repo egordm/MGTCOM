@@ -66,7 +66,7 @@ class EmbeddingVisualizerCallback(IntermittentCallback[EmbeddingVisualizerCallba
 
         labels = {**self.val_labels}
         if isinstance(pl_module, MGCOME2EModel) and pl_module.r_prev is not None:
-            labels['mgtcom'] = pl_module.r_prev.argmax(dim=1).detach().cpu()
+            labels['mgtcom'] = self.val_subsample.transform(pl_module.r_prev.argmax(dim=1).detach().cpu())
 
         for label_name, labels in labels.items():
             fig = self.visualize_embeddings(
