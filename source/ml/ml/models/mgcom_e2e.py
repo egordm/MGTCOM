@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict, Union, Optional, overload, Any
+from typing import Dict, Union, Optional, overload, Any, List
 
 import torch
-from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
+from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT, EPOCH_OUTPUT
 from torch import Tensor
 from torch_geometric.typing import Metadata, NodeType
 
@@ -66,13 +66,12 @@ class MGCOME2EModel(MGCOMCombiModel):
             Z_combi = Z_topo if self.hparams.use_topo else Z_tempo
             idx = topo_pos_walks[:, 0] if self.hparams.use_topo else tempo_pos_walks[:, 0]
 
-        log_r = self.cluster_model.estimate_log_resp(Z_combi)
+        log_r = self.cluster_model.estimate_log_resp(Z_combi.cpu()).to(self.device) # TODO: should clustering happen on gpu?
         log_rk = log_r[idx, :]
-        z_k = self.r_prev[idx, :].argmax(dim=-1)
+        z_k = self.r_prev[idx, :].argmax(dim=-1).to(self.device)
 
-        mus = self.cluster_model.cluster_params.mus
+        mus = self.cluster_model.cluster_params.mus.to(self.device)
         loss_cluster = self.cluster_loss_fn(Z_combi[idx, :], self.r_prev[idx, :], mus )
-
 
         # m = 8
         # log_r = (log_rk / m) - torch.logsumexp(log_rk / m, dim=-1, keepdim=True)
@@ -147,6 +146,12 @@ class MGCOME2EModel(MGCOMCombiModel):
             'cluster_params': self.cluster_model._get_params(),
             'cluster_prior': self.cluster_model._get_params_prior(),
         }
+
+    def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+        super().training_epoch_end(outputs)
+
+        if self.cluster_model.is_fitted:
+            self.log('epoch_loss_cluster', self.train_outputs.extract_mean('loss_cluster'), prog_bar=True)
 
     def set_extra_state(self, state: Any):
         self.cluster_model._set_params(state['cluster_params'])

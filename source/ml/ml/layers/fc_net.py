@@ -19,9 +19,10 @@ class FCNet(torch.nn.Module):
         self.in_dim = in_dim
 
         layers = []
+        layers.append(torch.nn.GELU())
         for hidden_dim in hparams.hidden_dim:
             layers.append(torch.nn.Linear(in_dim, hidden_dim))
-            layers.append(torch.nn.ReLU())
+            layers.append(torch.nn.GELU())
             in_dim = hidden_dim
 
         layers.append(torch.nn.Linear(in_dim, hparams.repr_dim))

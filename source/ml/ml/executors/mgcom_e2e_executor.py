@@ -57,13 +57,13 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
     def _callbacks(self) -> List[Callback]:
         return [
             *self._embedding_task_callbacks(),
-            # ClusteringVisualizerCallback(
-            #     hparams=self.args.callback_params.clustering_visualizer
-            # ),
-            # ClusteringEvalCallback(
-            #     self.datamodule,
-            #     hparams=self.args.callback_params.clustering_eval
-            # ),
+            ClusteringVisualizerCallback(
+                hparams=self.args.callback_params.clustering_visualizer
+            ),
+            ClusteringEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.clustering_eval
+            ),
         ]
 
     def _trainer(self, **kwargs) -> Trainer:

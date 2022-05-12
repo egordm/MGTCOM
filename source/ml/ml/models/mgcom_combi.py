@@ -26,6 +26,7 @@ logger = get_logger(Path(__file__).stem)
 class MGCOMCombiModelParams(MGCOMFeatModelParams):
     use_topo: bool = True
     use_tempo: bool = True
+    no_head: bool = False
 
     topo_repr_dim: int = 32
     """Dimension of the topology feature representation vectors."""
@@ -90,11 +91,18 @@ class MGCOMCombiModel(HeteroFeatureModel):
                 )
             )
 
+        if self.hparams.no_head:
+            assert self.hparams.repr_dim == self.hparams.tempo_repr_dim \
+                and self.hparams.repr_dim == self.hparams.topo_repr_dim, \
+                f"If no_head is True, repr_dim, tempo_repr_dim, and topo_repr_dim must be equal."
+            self.topo_net = lambda x: x
+            self.tempo_net = lambda x: x
+
         # Combine the embeddings
         if self.hparams.use_topo and self.hparams.use_tempo:
             self.combi_feat_net = lambda z_emb: self.embedding_combine_fn([
-                self.tempo_net(z_emb),
                 self.topo_net(z_emb),
+                self.tempo_net(z_emb),
             ])
         elif self.hparams.use_topo:
             self.combi_feat_net = self.topo_net
@@ -158,30 +166,10 @@ class MGCOMCombiModel(HeteroFeatureModel):
             loss += self.hparams.tempo_weight * loss_tempo
             out['loss_tempo'] = loss_tempo.detach()
 
-        if self.use_cluster_loss and self.cluster_module.k > 1 and r is not None:
-            if self.hparams.use_topo and self.hparams.use_tempo:
-                Z_combi = self.embedding_combine_fn([Z_topo, Z_tempo])
-                idx = topo_pos_walks[:, 0]
-            else:
-                Z_combi = Z_topo if self.hparams.use_topo else Z_tempo
-                idx = topo_pos_walks[:, 0] if self.hparams.use_topo else tempo_pos_walks[:, 0]
-
-            Z_combi_i = Z_combi[idx, :]
-            r_i = r[idx, :]
-            mus = self.cluster_module.mus
-            loss_cluster = self.cluster_loss_fn(Z_combi_i, r_i, mus)
-            loss += self.hparams.cluster_weight * loss_cluster
-            # loss = self.hparams.cluster_weight * loss_cluster
-            out["loss_cluster"] = loss_cluster.detach()
-
         return {
             "loss": loss,
             **out,
         }
-
-    @property
-    def use_cluster_loss(self):
-        return self.hparams.use_cluster and not self.pretraining
 
     def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         super().training_epoch_end(outputs)
@@ -190,8 +178,6 @@ class MGCOMCombiModel(HeteroFeatureModel):
             self.log('epoch_loss_topo', self.train_outputs.extract_mean('loss_topo'), prog_bar=True)
         if self.hparams.use_tempo:
             self.log('epoch_loss_tempo', self.train_outputs.extract_mean('loss_tempo'), prog_bar=True)
-        if self.use_cluster_loss:
-            self.log('epoch_loss_cluster', self.train_outputs.extract_mean('loss_cluster'), prog_bar=True)
 
 
 @dataclass

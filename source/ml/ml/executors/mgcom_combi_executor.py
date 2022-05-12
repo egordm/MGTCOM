@@ -17,7 +17,7 @@ from ml.utils import dataset_choices
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
     """Graph Dataset to use for training."""
-    hparams: MGCOMCombiModelParams = MGCOMCombiModelParams(use_cluster=False)
+    hparams: MGCOMCombiModelParams = MGCOMCombiModelParams()
     data_params: MGCOMCombiDataModuleParams = MGCOMCombiDataModuleParams()
 
 
@@ -35,6 +35,9 @@ class MGCOMCombiExecutor(MGCOMTopoExecutor):
         return MGCOMCombiModel
 
     def _datamodule(self) -> LightningDataModule:
+        self.args.data_params.use_topo_loader = self.args.hparams.use_topo
+        self.args.data_params.use_tempo_loader = self.args.hparams.use_tempo
+
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
         return MGCOMCombiDataModule(
             dataset=dataset,

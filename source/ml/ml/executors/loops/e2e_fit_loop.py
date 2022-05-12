@@ -53,7 +53,6 @@ class E2EFitLoop(FitLoop, EMCallback):
                 logger.info(f'Starting clustering stage: Epoch {self.trainer.current_epoch}')
                 self.run_cluster()
                 self._restarting = False
-                break
             except StopIteration:
                 break
         self._restarting = False

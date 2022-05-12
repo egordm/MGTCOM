@@ -30,10 +30,14 @@ class IntermittentCallback(Callback, Generic[T]):
         if trainer.state.stage != RunningStage.VALIDATING and trainer.state.stage != RunningStage.TRAINING:
             return
 
-        if trainer.current_epoch % self.hparams.interval != 0 and trainer.current_epoch != trainer.max_epochs:
+        if (trainer.current_epoch + 1) % self.hparams.interval != 0 and trainer.current_epoch != trainer.max_epochs:
             return
 
         self.on_validation_epoch_end_run(trainer, pl_module)
+
+    def validation_can_run(self, trainer: Trainer, pl_module: LightningModule) -> bool:
+        return (trainer.current_epoch + 1) % self.hparams.interval != 0 \
+               and trainer.current_epoch != trainer.max_epochs
 
     @abstractmethod
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: LightningModule) -> None:
