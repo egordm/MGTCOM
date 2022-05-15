@@ -13,12 +13,12 @@ class IsometricLoss(torch.nn.Module):
 
     def forward(self, X: Tensor, r: Tensor, mus: Tensor):
         # return self.alt_loss(X, r, mus)
-
-        z = r.argmax(dim=1)
-        mu_i = mus[z]
-        diff = self.dist_fn(X, mu_i)
-        loss = diff.mean()
-        return loss
+        #
+        # z = r.argmax(dim=1)
+        # mu_i = mus[z]
+        # diff = self.dist_fn(X, mu_i)
+        # loss = diff.mean()
+        # return loss
 
         N = len(X)
         X_tag = X.repeat_interleave(len(mus), dim=0)
@@ -29,8 +29,8 @@ class IsometricLoss(torch.nn.Module):
         sim_tagz = -torch.log(torch.sigmoid(sim_tag) + EPS)
 
         loss = (r_tag * sim_tagz).sum() / N
-        return self.alt_loss(X, r, mus)
-        # return loss
+        # return self.alt_loss(X, r, mus)
+        return loss
 
     def alt_loss(self, X: Tensor, r: Tensor, mus: Tensor):
         N = len(X)

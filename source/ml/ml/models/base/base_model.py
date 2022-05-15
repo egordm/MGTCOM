@@ -3,6 +3,7 @@ from typing import Optional, Union, List
 import torch
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from ml.utils import OptimizerParams
 from ml.utils.outputs import OutputExtractor
@@ -42,4 +43,13 @@ class BaseModel(LightningModule):
         self.test_outputs = OutputExtractor(outputs)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.lr)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        scheduler = {
+            'scheduler': ReduceLROnPlateau(
+                optimizer, mode='min', patience=3, min_lr=1e-6, verbose=True, factor=0.5,
+            ),
+            'interval': 'epoch',
+            'monitor': 'epoch_loss',
+        }
+
+        return [optimizer], [scheduler]
