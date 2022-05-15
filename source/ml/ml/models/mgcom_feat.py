@@ -160,7 +160,7 @@ class MGCOMTopoDataModule(MGCOMFeatDataModule):
     hparams: Union[MGCOMTopoDataModuleParams, DataLoaderParams]
 
     def _build_n2v_sampler(self, data: HeteroData, transform_meta=None) -> Union[Node2VecSampler, BallroomSampler]:
-        hdata = self.train_data.to_homogeneous(
+        hdata = data.to_homogeneous(
             node_attrs=[], edge_attrs=[],
             add_node_type=False, add_edge_type=False
         )

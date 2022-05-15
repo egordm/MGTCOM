@@ -50,4 +50,4 @@ class SAGEConvNet(HeteroConvLayer):
             Z_dict = conv(Z_dict, data.edge_index_dict)
             Z_dict = dict_mapv(Z_dict, lambda z: F.leaky_relu(z))
 
-        return self._process_batch(data, Z_dict)
+        return Z_dict

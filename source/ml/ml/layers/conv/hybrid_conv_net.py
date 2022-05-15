@@ -19,11 +19,13 @@ class HybridConvNet(HeteroConvLayer):
             conv: Optional[HeteroConvLayer],
             hidden_dim: Optional[int] = None,
             repr_dim: Optional[int] = None,
+            use_dropout: bool = True,
     ) -> None:
         super().__init__()
         self.node_types, self.edge_types = metadata
         self.repr_dim = repr_dim or conv.repr_dim
         self.hidden_dim = hidden_dim or self.repr_dim
+        self.use_dropout = use_dropout
 
         self.node_types_embed = set(embed_num_nodes.keys())
         self.embedding = HeteroNodeEmbedding(embed_num_nodes, self.hidden_dim)
@@ -48,7 +50,8 @@ class HybridConvNet(HeteroConvLayer):
             for node_type, idx in data.node_idx_dict.items() if node_type in self.node_types_embed
         }
         X_embed = self.embedding(embed_idx_dict)
-        X_embed = dict_mapv(X_embed, lambda x: self.dropout(x))
+        if self.use_dropout:
+            X_embed = dict_mapv(X_embed, lambda x: self.dropout(x))
 
         # Combine features and embedded features
         X_dict = {
@@ -57,9 +60,9 @@ class HybridConvNet(HeteroConvLayer):
         }
 
         # Convolve if applicable
-        if self.conv:
-            Z_dict = self.conv(data, X_dict)
+        if self.conv is not None:
+            Z_dict = self.conv(data, X_dict, return_raw=True)
         else:
-            Z_dict = self._process_batch(data, X_dict)
+            Z_dict = X_dict
 
         return Z_dict

@@ -17,10 +17,12 @@ class HGTConvNet(HeteroConvLayer):
             num_layers: int = 2,
             heads: int = 2,
             hidden_dim: Optional[int] = None,
+            input_dim: Optional[int] = None,
             group: str = 'mean',
     ) -> None:
         super().__init__()
         self.repr_dim = repr_dim
+        self.input_dim = input_dim or hidden_dim or repr_dim
         self.hidden_dim = hidden_dim or repr_dim
         self.num_layers = num_layers
         self.heads = heads
@@ -29,7 +31,7 @@ class HGTConvNet(HeteroConvLayer):
         self.convs = torch.nn.ModuleList([
             HGTConv(
                 metadata=metadata,
-                in_channels=self.hidden_dim,
+                in_channels=self.input_dim if i == 0 else self.hidden_dim,
                 out_channels=self.hidden_dim if i < self.num_layers - 1 else self.repr_dim,
                 heads=heads,
                 group=group
@@ -43,4 +45,4 @@ class HGTConvNet(HeteroConvLayer):
         for conv in self.convs:
             Z_dict = conv(Z_dict, data.edge_index_dict)
 
-        return self._process_batch(data, Z_dict)
+        return Z_dict

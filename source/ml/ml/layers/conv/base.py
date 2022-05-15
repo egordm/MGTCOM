@@ -10,15 +10,27 @@ from torch_geometric.typing import NodeType
 class HeteroConvLayer(torch.nn.Module):
     repr_dim: int
 
-    def forward(self, data: HeteroData, X_dict: Dict[NodeType, Tensor] = None) -> Dict[NodeType, Tensor]:
-        return self.convolve(data, X_dict or data.x_dict)
+    def forward(
+        self,
+        data: HeteroData,
+        X_dict: Dict[NodeType, Tensor] = None,
+        return_raw=False,
+        *args,
+        **kwargs
+    ) -> Dict[NodeType, Tensor]:
+        Z_dict = self.convolve(data, X_dict or data.x_dict, *args, **kwargs)
+
+        if return_raw:
+            return Z_dict
+        else:
+            return self.process_batch(data, Z_dict)
 
     @abstractmethod
-    def convolve(self, data: HeteroData, X_dict: Dict[NodeType, Tensor]) -> Dict[NodeType, Tensor]:
+    def convolve(self, data: HeteroData, X_dict: Dict[NodeType, Tensor], *args, **kwargs) -> Dict[NodeType, Tensor]:
         raise NotImplementedError
 
     @staticmethod
-    def _process_batch(data: HeteroData, Z_dict: Dict[NodeType, Tensor]) -> Dict[NodeType, Tensor]:
+    def process_batch(data: HeteroData, Z_dict: Dict[NodeType, Tensor]) -> Dict[NodeType, Tensor]:
         # Return node represenations
         batch_size_dict = data.batch_size_dict
         return {
