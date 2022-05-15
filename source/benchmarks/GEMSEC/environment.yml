@@ -1,0 +1,6 @@
+channel_priority: true
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - anaconda::tensorflow-gpu=1.12.0
