@@ -9,8 +9,13 @@ storage/results/*
 storage/cache/*
 !storage/cache/.gitkeep
 storage/tmp
+storage/exports/*
+!storage/exports/.gitkeep
+storage/outputs/*
+!storage/outputs/.gitkeep
 tmp
 wandb
 ext
 /ext
-/benchmarks
+/benchmarks/*
+!/benchmarks/GEMSEC

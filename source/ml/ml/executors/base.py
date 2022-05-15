@@ -201,7 +201,7 @@ class BaseExecutor(Generic[T]):
         run_config.pop('show_config', None)
         run_config.pop('offline', None)
 
-        model_name = self.model.__class__.__name__
+        model_name = self.model_cls if isinstance(self.model_cls, str) else self.model_cls.__name__
         wandb_config = {
             'args': run_config,
             'model': model_name,

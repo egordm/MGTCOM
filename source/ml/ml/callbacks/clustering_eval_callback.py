@@ -104,7 +104,6 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         if isinstance(X, list):
             X, z = X[0], z[0]
 
-
         pl_module.log_dict(prefix_keys(
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/test/clu/'
         ), on_epoch=True)

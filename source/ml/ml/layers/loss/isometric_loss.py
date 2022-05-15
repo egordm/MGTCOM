@@ -18,7 +18,7 @@ class IsometricLoss(torch.nn.Module):
         # mu_i = mus[z]
         # diff = self.dist_fn(X, mu_i)
         # loss = diff.mean()
-        # return loss
+        # return loss #TODO: which will we use?
 
         N = len(X)
         X_tag = X.repeat_interleave(len(mus), dim=0)

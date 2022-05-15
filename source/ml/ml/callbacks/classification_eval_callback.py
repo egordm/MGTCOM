@@ -22,7 +22,7 @@ class ClassificationEvalCallbackParams(IntermittentCallbackParams):
     """Whether to enable classification evaluation."""
     metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
-    cl_max_pairs: int = 5000
+    cf_max_pairs: int = 5000
     """Maximum number of pairs to use for classification."""
 
 
@@ -36,8 +36,8 @@ class ClassificationEvalCallback(IntermittentCallback[ClassificationEvalCallback
         self.datamodule = datamodule
         self.pairwise_dist_fn = self.hparams.metric.pairwise_dist_fn
 
-        self.val_subsample = SubsampleTransform(self.hparams.cl_max_pairs)
-        self.test_subsample = SubsampleTransform(self.hparams.cl_max_pairs)
+        self.val_subsample = SubsampleTransform(self.hparams.cf_max_pairs)
+        self.test_subsample = SubsampleTransform(self.hparams.cf_max_pairs)
 
         self.val_labels = dict_mapv(datamodule.val_labels(), self.val_subsample.transform)
         self.test_labels = dict_mapv(datamodule.test_labels(), self.test_subsample.transform)
@@ -59,7 +59,7 @@ class ClassificationEvalCallback(IntermittentCallback[ClassificationEvalCallback
 
         for label_name, labels in self.val_labels.items():
             acc, metrics = prediction_measure(Z, labels, max_iter=1000)
-            pl_module.log_dict(prefix_keys(metrics, f'eval/val/cl/{label_name}/'), on_epoch=True)
+            pl_module.log_dict(prefix_keys(metrics, f'eval/val/cf/{label_name}/'), on_epoch=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if not self.hparams.enabled or len(self.test_labels) == 0:
@@ -75,4 +75,4 @@ class ClassificationEvalCallback(IntermittentCallback[ClassificationEvalCallback
 
         for label_name, labels in self.test_labels.items():
             acc, metrics = prediction_measure(Z, labels, max_iter=1000)
-            pl_module.log_dict(prefix_keys(metrics, f'eval/test/cl/{label_name}/'), on_epoch=True)
+            pl_module.log_dict(prefix_keys(metrics, f'eval/test/cf/{label_name}/'), on_epoch=True)
