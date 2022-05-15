@@ -1,5 +1,5 @@
-from dataclasses import dataclass, field
-from typing import Callable, Any, List, Tuple
+from dataclasses import dataclass
+from typing import Callable, Any, Tuple
 
 import torch
 from torch import Tensor
