@@ -34,6 +34,8 @@ class Node2VecModelParams(HParams):
     """Unsupervised loss function to use."""
     hinge_margin: float = 0.1
     """Margin for hinge loss."""
+    hinge_adaptive: bool = False
+    """Whether to use adaptive hinge loss."""
 
 
 @dataclass
@@ -56,7 +58,8 @@ class Node2VecModel(FeatureModel):
 
         self.embedder = embedder
         if self.hparams.loss == UnsupervisedLoss.HINGE:
-            self.loss_fn = HingeLoss(self.hparams.metric, margin=self.hparams.hinge_margin)
+            self.loss_fn = HingeLoss(self.hparams.metric,
+                margin=self.hparams.hinge_margin, adaptive=self.hparams.hinge_adaptive)
         elif self.hparams.loss == UnsupervisedLoss.SKIPGRAM:
             self.loss_fn = SkipgramLoss(self.hparams.metric)
 

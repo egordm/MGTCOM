@@ -34,6 +34,7 @@ class SkipgramLoss(torch.nn.Module):
 
         neg_walks_Z = Z[neg_walks.view(-1)].view(*neg_walks.shape, Z.shape[-1])
         n_aff = self.affinity(neg_walks_Z).view(-1)
-        n_loss = -torch.log(1 - torch.sigmoid(n_aff) + EPS).mean()
+        # n_loss = -torch.log(1 - torch.sigmoid(n_aff) + EPS).mean()
+        n_loss = -torch.log(torch.sigmoid(-n_aff) + EPS).mean()
 
         return p_loss + n_loss

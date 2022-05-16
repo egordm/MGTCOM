@@ -96,6 +96,11 @@ $(echo $EXPERIMENT) --walks_per_node=20 --context_size=10 --run_name="c10w20"
 $(echo $EXPERIMENT) --walks_per_node=5  --context_size=10 --run_name="c10w5"
 $(echo $EXPERIMENT) --num_neg_samples=1 --context_size=10 --run_name="c10nns1"
 $(echo $EXPERIMENT) --num_neg_samples=2 --context_size=10 --run_name="c10nns2"
+$(echo $EXPERIMENT) --num_neg_samples=5 --context_size=10 --run_name="c10nns2"
+$(echo $EXPERIMENT) --walk_length=80 --context_size=10 --run_name="c10wl80"
+$(echo $EXPERIMENT) --walk_length=40 --context_size=10 --run_name="c10wl40"
+$(echo $EXPERIMENT) --walk_length=20 --context_size=10 --run_name="c10wl20"
+$(echo $EXPERIMENT) --walk_length=10 --context_size=10 --run_name="c10wl10"
 
 # Tune CTDNE Repr Dim
 EXPERIMENT="$ARGS_CMD/baselines/ctdne_executor.py --experiment=ctdne_tune_repr $ARGS_BASE $ARGS_DS"

@@ -46,7 +46,7 @@ class BaseModel(LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         scheduler = {
             'scheduler': ReduceLROnPlateau(
-                optimizer, mode='min', patience=3, min_lr=1e-6, verbose=True, factor=0.5,
+                optimizer, mode='min', patience=3, min_lr=1e-6, verbose=True, factor=0.2,
             ),
             'interval': 'epoch',
             'monitor': 'epoch_loss',
