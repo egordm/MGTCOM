@@ -21,9 +21,13 @@ class DPMMParams(NamedTuple):
 @dataclass
 class DirichletProcessMixtureParams(MixtureParams):
     prior_alpha: Optional[float] = None
+    """The concentration parameter for the Dirichlet distribution"""
     prior_kappa: float = 1.0
+    """The concentration parameter for the Wishart distribution"""
     prior_nu: Optional[float] = None
+    """The degrees of freedom parameter for the Wishart distribution"""
     prior_sigma_scale: float = 1.0
+    """The scale parameter for the Wishart distribution"""
     update_hard: bool = True
 
 

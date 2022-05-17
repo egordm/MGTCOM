@@ -39,7 +39,7 @@ class MGCOMCombiModelParams(MGCOMFeatModelParams):
     tempo_weight: float = 1.0
 
     init_combine: bool = True
-    init_combine_mode: FeatureCombineMode = FeatureCombineMode.MULT
+    init_combine_mode: FeatureCombineMode = FeatureCombineMode.ADD
     emb_combine_mode: FeatureCombineMode = FeatureCombineMode.CONCAT
 
 

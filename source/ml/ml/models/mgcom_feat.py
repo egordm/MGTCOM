@@ -50,6 +50,8 @@ class MGCOMFeatModelParams(Node2VecModelParams):
     """Number of convolution layers."""
     conv_num_heads: int = 2
     """Number of attention heads per convolution layer. Used only if conv_method is HGT."""
+    conv_use_gru: bool = False
+    """Whether to use GRU to keep oversmoothing at bay."""
 
 
 class MGCOMFeatModel(Het2VecModel):
@@ -79,6 +81,7 @@ class MGCOMFeatModel(Het2VecModel):
                 hidden_dim=self.hparams.conv_hidden_dim,
                 num_layers=self.hparams.conv_num_layers,
                 heads=self.hparams.conv_num_heads,
+                use_gru=self.hparams.conv_use_gru,
             )
         elif self.hparams.conv_method == ConvMethod.NONE:
             conv = None

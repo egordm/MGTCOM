@@ -27,18 +27,6 @@ from ml.utils import OptimizerParams, DataLoaderParams, Metric
 
 
 class CPGNNConvNet(HGTConvNet):
-    def __init__(
-        self, metadata: Metadata, repr_dim: int, num_layers: int = 2, heads: int = 2,
-        hidden_dim: Optional[int] = None, input_dim: Optional[int] = None,
-        group: str = 'mean',
-        use_gru: bool = True,
-    ) -> None:
-        super().__init__(metadata, repr_dim, num_layers, heads, hidden_dim, input_dim, group)
-        self.use_gru = use_gru
-
-        if self.use_gru:
-            self.gru_gate = torch.nn.GRUCell(self.repr_dim, self.repr_dim)
-
     def convolve(self, data: HeteroData, X_dict: Dict[NodeType, Tensor] = None, k: int = None) -> Dict[
         NodeType, Tensor]:
         # Apply convolutions
