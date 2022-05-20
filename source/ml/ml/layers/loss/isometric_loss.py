@@ -14,6 +14,6 @@ class IsometricLoss(torch.nn.Module):
     def forward(self, X: Tensor, r: Tensor, mus: Tensor):
         z = r.argmax(dim=1)
         mu_i = mus[z]
-        diff = self.dist_fn(X, mu_i).square()
+        diff = self.dist_fn(X, mu_i) #.square()
         loss = diff.mean()
         return loss

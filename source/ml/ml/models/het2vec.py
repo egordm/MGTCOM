@@ -1,29 +1,31 @@
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 import torch
-from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT
+from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, STEP_OUTPUT, EPOCH_OUTPUT
 from torch import Tensor
 from torch_geometric.data import HeteroData
 
 from datasets import GraphDataset
+from ml.algo.clustering import KMeans
 from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.nodes_loader import NodesLoader
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams, Node2VecSampler
+from ml.models.base.clustering_mixin import ClusteringMixin, ClusteringMixinParams
 from ml.models.base.feature_model import HeteroFeatureModel
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.models.base.hgraph_datamodule import HeteroGraphDataModule
-from ml.models.node2vec import Node2VecModel, Node2VecModelParams
-from ml.utils import DataLoaderParams, OptimizerParams
+from ml.models.node2vec import Node2VecModel, Node2VecModelParams, Node2VecWrapperModelParams
+from ml.utils import DataLoaderParams, OptimizerParams, dict_mapv
 
 
 class Het2VecModel(HeteroFeatureModel):
     def __init__(
-            self,
-            embedder: torch.nn.Module,
-            hparams: Node2VecModelParams,
-            optimizer_params: Optional[OptimizerParams] = None
+        self,
+        embedder: torch.nn.Module,
+        hparams: Node2VecModelParams,
+        optimizer_params: Optional[OptimizerParams] = None
     ) -> None:
         super().__init__(optimizer_params)
 
@@ -58,7 +60,37 @@ class Het2VecModel(HeteroFeatureModel):
         Z_emb = self.forward_emb_flat(node_meta)
 
         loss = self.n2v.loss(pos_walks, neg_walks, Z_emb)
-        return loss
+        return {
+            'loss': loss,
+            'Z': Z_emb.detach()
+        }
+
+
+@dataclass
+class Het2VecClusModelParams(Node2VecWrapperModelParams, ClusteringMixinParams):
+    pass
+
+
+class Het2VecClusModel(ClusteringMixin, Het2VecModel):
+    def __init__(
+        self,
+        embedder: torch.nn.Module,
+        hparams: Node2VecModelParams,
+        optimizer_params: Optional[OptimizerParams] = None
+    ) -> None:
+        super().__init__(embedder, hparams, optimizer_params)
+        self.save_hyperparameters(hparams.to_dict())
+
+    def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
+        pos_walks, neg_walks, node_meta = batch
+
+        Z_emb = self.forward_emb_flat(node_meta)
+
+        loss = self.n2v.loss(pos_walks, neg_walks, Z_emb)
+        return {
+            'loss': loss,
+            'Z': Z_emb.detach(),
+        }
 
 
 @dataclass

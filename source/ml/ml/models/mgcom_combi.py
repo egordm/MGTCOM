@@ -13,6 +13,7 @@ from ml.data.samplers.ballroom_sampler import BallroomSamplerParams
 from ml.data.samplers.base import Sampler
 from ml.data.samplers.node2vec_sampler import Node2VecSamplerParams
 from ml.layers.fc_net import FCNet, FCNetParams
+from ml.models.base.clustering_mixin import ClusteringMixin, ClusteringMixinParams
 from ml.models.base.feature_model import FeatureCombineMode, HeteroFeatureModel
 from ml.models.mgcom_feat import MGCOMFeatDataModuleParams, MGCOMFeatModel, MGCOMTempoDataModule, MGCOMTopoDataModule, \
     MGCOMFeatModelParams
@@ -23,7 +24,7 @@ logger = get_logger(Path(__file__).stem)
 
 
 @dataclass
-class MGCOMCombiModelParams(MGCOMFeatModelParams):
+class MGCOMCombiModelParams(MGCOMFeatModelParams, ClusteringMixinParams):
     use_topo: bool = True
     use_tempo: bool = True
     no_head: bool = False
@@ -43,7 +44,7 @@ class MGCOMCombiModelParams(MGCOMFeatModelParams):
     emb_combine_mode: FeatureCombineMode = FeatureCombineMode.CONCAT
 
 
-class MGCOMCombiModel(HeteroFeatureModel):
+class MGCOMCombiModel(ClusteringMixin, HeteroFeatureModel):
     hparams: Union[MGCOMCombiModelParams, OptimizerParams]
     pretraining: bool = True
 
@@ -138,7 +139,7 @@ class MGCOMCombiModel(HeteroFeatureModel):
 
     def training_step_topo(self, batch):
         if not self.hparams.use_topo:
-            return None, None
+            return None, None, None
 
         (pos_walks, neg_walks, node_meta) = batch
 
@@ -149,11 +150,11 @@ class MGCOMCombiModel(HeteroFeatureModel):
 
         loss = self.feat_net.n2v.loss(pos_walks, neg_walks, Z)
 
-        return loss, Z
+        return loss, Z, Z_emb
 
     def training_step_tempo(self, batch):
         if not self.hparams.use_tempo:
-            return None, None
+            return None, None, None
 
         (pos_walks, neg_walks, node_meta) = batch
 
@@ -164,13 +165,13 @@ class MGCOMCombiModel(HeteroFeatureModel):
 
         loss = self.feat_net.n2v.loss(pos_walks, neg_walks, Z)
 
-        return loss, Z
+        return loss, Z, Z_emb
 
     def training_step(self, batch, batch_idx, r=None) -> STEP_OUTPUT:
         (topo_walks, tempo_walks) = batch
 
-        loss_topo, Z_topo = self.training_step_topo(topo_walks)
-        loss_tempo, Z_tempo = self.training_step_tempo(tempo_walks)
+        loss_topo, Z_topo, Z_emb1 = self.training_step_topo(topo_walks)
+        loss_tempo, Z_tempo, Z_emb2 = self.training_step_tempo(tempo_walks)
 
         loss, out = 0.0, {}
         if loss_topo is not None:
@@ -180,9 +181,12 @@ class MGCOMCombiModel(HeteroFeatureModel):
             loss += self.hparams.tempo_weight * loss_tempo
             out['loss_tempo'] = loss_tempo.detach()
 
+        Z_emb = Z_emb1 if self.hparams.use_topo else Z_emb2
+
         return {
             "loss": loss,
             **out,
+            "Z": Z_emb,
         }
 
     def training_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
@@ -201,6 +205,7 @@ class MGCOMCombiDataModuleParams(MGCOMFeatDataModuleParams):
     ballroom_params: BallroomSamplerParams = BallroomSamplerParams()
     use_tempo_loader: bool = field(default=True, cmd=False)
     use_topo_loader: bool = field(default=True, cmd=False)
+    use_unbiased: bool = False
 
 
 class MGCOMCombiDataModule(MGCOMTempoDataModule, MGCOMTopoDataModule):

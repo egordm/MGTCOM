@@ -53,6 +53,9 @@ class ClusteringVisualizerCallback(IntermittentCallback[ClusteringVisualizerCall
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: Union[MGCOMComDetModel, MGCOME2EModel]) -> None:
         self.trainer = trainer
+        if not isinstance(pl_module, (MGCOME2EModel, MGCOMComDetModel)):
+            return
+
         if pl_module.stage != ClusteringStage.Clustering:
             return
 

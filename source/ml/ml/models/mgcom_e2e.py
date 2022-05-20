@@ -11,7 +11,7 @@ from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.nodes_loader import HeteroNodesLoader
 from ml.layers.loss.isometric_loss import IsometricLoss
 from ml.models.mgcom_combi import MGCOMCombiModel, MGCOMCombiModelParams, MGCOMCombiDataModule
-from ml.utils import OptimizerParams
+from ml.utils import OptimizerParams, dict_mapv
 from ml.utils.training import ClusteringStage
 
 
@@ -22,8 +22,9 @@ class MGCOME2EModelParams(MGCOMCombiModelParams):
     cluster_params: DPMSCHParams = DPMSCHParams()
     cluster_weight: float = 0.1
 
+    n_cycles: Optional[int] = None
     n_pretrain_epochs: int = 50
-    n_feat_epochs: int = 20
+    n_feat_epochs: int = 1
     n_cluster_epochs: int = 100
 
 
@@ -54,17 +55,20 @@ class MGCOME2EModel(MGCOMCombiModel):
         )
         return X
 
-    def training_step_cluster(self, batch, Z_topo: Tensor, Z_tempo: Tensor):
+    def training_step_cluster(self, batch, Z_emb, Z_topo: Tensor, Z_tempo: Tensor):
         if self.cluster_model.n_components <= 1 or self.r_prev is None:
             return None
 
         (topo_pos_walks, _, _), (tempo_pos_walks, _, _) = batch
-        if self.hparams.use_topo and self.hparams.use_tempo:
-            Z_combi = self.embedding_combine_fn([Z_topo, Z_tempo])
-            idx = topo_pos_walks[:, 0]
+        if self.hparams.init_combine:
+            Z_combi = Z_emb
         else:
-            Z_combi = Z_topo if self.hparams.use_topo else Z_tempo
-            idx = topo_pos_walks[:, 0] if self.hparams.use_topo else tempo_pos_walks[:, 0]
+            if self.hparams.use_topo and self.hparams.use_tempo:
+                Z_combi = self.embedding_combine_fn([Z_topo, Z_tempo])
+                idx = topo_pos_walks[:, 0]
+            else:
+                Z_combi = Z_topo if self.hparams.use_topo else Z_tempo
+                idx = topo_pos_walks[:, 0] if self.hparams.use_topo else tempo_pos_walks[:, 0]
 
         mus = self.cluster_model.cluster_params.mus.to(self.device)
         loss_cluster = self.cluster_loss_fn(Z_combi[idx, :], self.r_prev[idx, :], mus )
@@ -74,8 +78,9 @@ class MGCOME2EModel(MGCOMCombiModel):
     def training_step(self, batch, batch_idx, r=None) -> STEP_OUTPUT:
         (topo_walks, tempo_walks) = batch
 
-        loss_topo, Z_topo = self.training_step_topo(topo_walks)
-        loss_tempo, Z_tempo = self.training_step_tempo(tempo_walks)
+        loss_topo, Z_topo, Z_emb1 = self.training_step_topo(topo_walks)
+        loss_tempo, Z_tempo, Z_emb2 = self.training_step_tempo(tempo_walks)
+        Z_emb = Z_emb1 if self.hparams.use_topo else Z_emb2
 
         loss, out = 0.0, {}
         if loss_topo is not None:
@@ -86,7 +91,7 @@ class MGCOME2EModel(MGCOMCombiModel):
             out['loss_tempo'] = loss_tempo.detach()
 
         if self.hparams.use_cluster:
-            loss_cluster = self.training_step_cluster(batch, Z_topo, Z_tempo)
+            loss_cluster = self.training_step_cluster(batch, Z_emb, Z_topo, Z_tempo)
             if loss_cluster is not None:
                 loss += self.hparams.cluster_weight * loss_cluster
                 out['loss_cluster'] = loss_cluster.detach()
@@ -99,15 +104,15 @@ class MGCOME2EModel(MGCOMCombiModel):
 
         if self.cluster_model.is_fitted:
             _, node_perm_dict = batch
-            X_dict = out['Z_dict']
+            X_dict = dict_mapv(out['Z_dict'], lambda v: v.to(self.device))
             X = ToHeteroMappingTransform.inverse_transform_values(
                 X_dict, node_perm_dict, shape=[self.repr_dim], device=self.device
             )
             z = self.cluster_model.predict(X)
 
             out.update({
-                'X': X,
-                'z': z,
+                'X': X.detach(),
+                'z': z.detach(),
             })
 
         return out

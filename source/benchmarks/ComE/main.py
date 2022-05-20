@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument('--run_name', type=str, default=random_string())
     # parser.add_argument('--ground_truth', type=str, default='/input/ground_truth.txt', help='input ground truth co')
     parser.add_argument('--number_walks', type=int, default=10, help='number of walks')
-    parser.add_argument('--walk_length', type=int, default=20, help='length of each walk')
+    parser.add_argument('--walk_length', type=int, default=80, help='length of each walk')
     parser.add_argument('--representation_size', type=int, default=128, help='size of the embedding')
     parser.add_argument('--num_workers', type=int, default=10, help='number of thread')
     parser.add_argument('--num_iter', type=int, default=1, help='number of overall iteration')
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     log.info('using alpha:{}\tbeta:{}\titer_com:{}\titer_node: {}'.format(args.alpha, args.beta, iter_com, iter_node))
     start_time = timeit.default_timer()
 
-    com_learner.fit(model, reg_covar=args.reg_covar, n_init=10)
+    com_learner.fit(model, reg_covar=args.reg_covar, n_init=1)
     node_learner.train(model,
         edges=edges,
         iter=iter_node,

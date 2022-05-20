@@ -16,9 +16,11 @@ from ml.data.samplers.base import Sampler
 from ml.data.samplers.hgt_sampler import HGTSamplerParams, HGTSampler
 from ml.data.samplers.node2vec_sampler import Node2VecSampler, Node2VecSamplerParams
 from ml.data.samplers.sage_sampler import SAGESamplerParams, SAGESampler
+from ml.data.samplers.tempo_sampler import TemporalSampler
 from ml.layers.conv.hgt_cov_net import HGTConvNet
 from ml.layers.conv.hybrid_conv_net import HybridConvNet
 from ml.layers.conv.sage_conv_net import SAGEConvNet
+from ml.models.base.clustering_mixin import ClusteringMixin, ClusteringMixinParams
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.models.het2vec import Het2VecModel, Het2VecDataModule
 from ml.models.node2vec import Node2VecModelParams
@@ -35,7 +37,7 @@ class ConvMethod(Enum):
 
 
 @dataclass
-class MGCOMFeatModelParams(Node2VecModelParams):
+class MGCOMFeatModelParams(Node2VecModelParams, ClusteringMixinParams):
     embed_node_types: List[NodeType] = field(default_factory=list)
     """List of node types to embed instead of using features for."""
 
@@ -101,11 +103,11 @@ class MGCOMFeatModel(Het2VecModel):
         super().__init__(embedder, hparams, optimizer_params)
 
 
-class MGCOMFeatTempoModel(MGCOMFeatModel):
+class MGCOMFeatTempoModel(ClusteringMixin, MGCOMFeatModel):
     pass
 
 
-class MGCOMFeatTopoModel(MGCOMFeatModel):
+class MGCOMFeatTopoModel(ClusteringMixin, MGCOMFeatModel):
     pass
 
 
@@ -178,6 +180,7 @@ class MGCOMTopoDataModule(MGCOMFeatDataModule):
 class MGCOMTempoDataModuleParams(MGCOMFeatDataModuleParams):
     window: Optional[Tuple[int, int]] = None
     ballroom_params: BallroomSamplerParams = BallroomSamplerParams()
+    use_unbiased: bool = True
 
 
 class MGCOMTempoDataModule(MGCOMFeatDataModule):
@@ -209,12 +212,22 @@ class MGCOMTempoDataModule(MGCOMFeatDataModule):
             node_attrs=['timestamp_from'], edge_attrs=['timestamp_from'],
             add_node_type=False, add_edge_type=False
         )
-        ballroom_sampler = BallroomSampler(
-            hdata.node_timestamp_from,
-            hdata.edge_index,
-            hdata.edge_timestamp_from,
-            tuple(self.hparams.window),
-            hparams=self.hparams.ballroom_params,
-            transform_meta=transform_meta
-        )
+        if self.hparams.use_unbiased:
+            ballroom_sampler = TemporalSampler(
+                hdata.node_timestamp_from,
+                hdata.edge_index,
+                hdata.edge_timestamp_from,
+                tuple(self.hparams.window),
+                hparams=self.hparams.ballroom_params,
+                transform_meta=transform_meta
+            )
+        else:
+            ballroom_sampler = BallroomSampler(
+                hdata.node_timestamp_from,
+                hdata.edge_index,
+                hdata.edge_timestamp_from,
+                tuple(self.hparams.window),
+                hparams=self.hparams.ballroom_params,
+                transform_meta=transform_meta
+            )
         return ballroom_sampler

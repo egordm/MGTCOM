@@ -28,12 +28,15 @@ class Args(BaseExecutorArgs):
     run_name: str = None
     dataset: str = dataset_choices()
     dataset_version: str = 'base'
+    k: int = -1
+    repr_dim: int = -1
+    baseline: bool = True
 
 
 class EvaluateExecutor(BaseExecutor):
     args: Args
 
-    TASK_NAME = 'benchmark'
+    TASK_NAME = 'baseline'
 
     def params_cls(self) -> Type[BaseExecutorArgs]:
         return Args
@@ -108,6 +111,13 @@ class EvaluateExecutor(BaseExecutor):
         mock_evaluation_epoch(self.trainer, self.model, OutputExtractor([outputs]), mode=EvaluationMode.TEST)
 
         # TODO: Mock prediction?
+
+    def tags(self):
+        tags = super().tags()
+        if self.args.baseline:
+            tags.append('baseline')
+
+        return tags
 
 
 if __name__ == '__main__':

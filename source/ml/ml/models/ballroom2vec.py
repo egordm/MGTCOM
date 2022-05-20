@@ -7,6 +7,7 @@ from torch_geometric.data import Data
 from datasets import GraphDataset
 from datasets.transforms.define_snapshots import DefineSnapshots
 from datasets.transforms.to_homogeneous import to_homogeneous
+from ml.data.samplers.tempo_sampler import TemporalSampler
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.data.samplers.ballroom_sampler import BallroomSamplerParams, BallroomSampler
 from ml.data.samplers.base import Sampler
@@ -27,6 +28,7 @@ class Ballroom2VecModel(Node2VecModel):
 class Ballroom2VecDataModuleParams(GraphDataModuleParams):
     window: Optional[Tuple[int, int]] = None
     ballroom_params: BallroomSamplerParams = BallroomSamplerParams()
+    use_temposampler: bool = True
 
 
 class Ballroom2VecDataModule(Node2VecDataModule):
@@ -59,13 +61,22 @@ class Ballroom2VecDataModule(Node2VecDataModule):
         self.train_data, self.val_data, self.test_data = hdata, hdata, hdata  # Since induction doesnt work on node2vec
 
     def train_sampler(self, data: Data) -> Optional[Sampler]:
-        return BallroomSampler(
-            data.node_timestamp_from,
-            data.edge_index,
-            data.edge_timestamp_from,
-            tuple(self.hparams.window),
-            hparams=self.hparams.ballroom_params
-        )
+        if self.hparams.use_temposampler:
+            return TemporalSampler(
+                data.node_timestamp_from,
+                data.edge_index,
+                data.edge_timestamp_from,
+                tuple(self.hparams.window),
+                hparams=self.hparams.ballroom_params
+            )
+        else:
+            return BallroomSampler(
+                data.node_timestamp_from,
+                data.edge_index,
+                data.edge_timestamp_from,
+                tuple(self.hparams.window),
+                hparams=self.hparams.ballroom_params
+            )
 
     def eval_sampler(self, data: Data) -> Optional[Sampler]:
         return None

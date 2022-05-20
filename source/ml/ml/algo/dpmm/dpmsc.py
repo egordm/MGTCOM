@@ -318,17 +318,19 @@ class DPMSC(BaseMixture[DPMSCParams]):
         )
 
     def _set_params(self, params: DPMSCParams) -> None:
-        self.clusters._set_params(params.cluster)
-        for i, subcluster in enumerate(self.subclusters):
-            subcluster._set_params(params.subcluster[i])
-        super()._set_params(params)
-        self.n_components = self.clusters.n_components
+        if params.cluster is not None:
+            self.clusters._set_params(params.cluster)
+            for i, subcluster in enumerate(self.subclusters):
+                subcluster._set_params(params.subcluster[i])
+            super()._set_params(params)
+            self.n_components = self.clusters.n_components
 
     def _get_params_prior(self) -> Any:
         return self.clusters._get_params_prior()
 
     def _set_params_prior(self, params: Any) -> None:
-        self.clusters._set_params_prior(params)
-        for subcluster in self.subclusters:
-            subcluster.prior_dir = DirPrior.from_params(1.0 / 2.0)
-            subcluster.prior_nw = self.clusters.prior_nw
+        if params is not None:
+            self.clusters._set_params_prior(params)
+            for subcluster in self.subclusters:
+                subcluster.prior_dir = DirPrior.from_params(1.0 / 2.0)
+                subcluster.prior_nw = self.clusters.prior_nw

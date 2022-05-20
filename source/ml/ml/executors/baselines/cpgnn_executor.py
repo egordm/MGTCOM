@@ -5,6 +5,8 @@ from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
+from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
+from ml.callbacks.clustering_visualizer_callback import ClusteringVisualizerCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs, T
 from ml.models.cpgnn import CPGNNDataModuleParams, CPGNNModelParams, CPGNNDataModule, CPGNNModel
 from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule, \
@@ -57,7 +59,13 @@ class MGCOMTopoExecutor(BaseExecutor[MGCOMFeatTopoModel]):
         return CPGNNModel
 
     def _callbacks(self) -> List[Callback]:
-        return self._embedding_task_callbacks()
+        return [
+            *self._embedding_task_callbacks(),
+            ClusteringEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.clustering_eval
+            ),
+        ]
 
     def run_name(self):
         return self.args.dataset

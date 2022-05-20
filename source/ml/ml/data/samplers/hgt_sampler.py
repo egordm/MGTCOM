@@ -16,7 +16,8 @@ from ml.utils.graph import graph_clean_keys
 @dataclass
 class HGTSamplerParams(HParams):
     # num_samples: Union[List[int], Dict[NodeType, List[int]]] = field(default_factory=lambda: [3, 2])
-    num_samples: List[int] = field(default_factory=lambda: [3, 2])
+    # num_samples: List[int] = field(default_factory=lambda: [3, 2])
+    num_samples: List[int] = field(default_factory=lambda: [8, 4])
     """The number of nodes to sample in each iteration and for each node type."""
 
 

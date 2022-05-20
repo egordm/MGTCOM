@@ -73,6 +73,9 @@ class MGCOME2EExecutor(BaseExecutor[MGCOME2EModel]):
             n_pretrain_epochs=self.args.hparams.n_pretrain_epochs,
             n_cluster_epochs=self.args.hparams.n_cluster_epochs,
             n_feat_epochs=self.args.hparams.n_feat_epochs,
+            num_cycles=self.args.hparams.n_cycles,
+            checkpoint_callback=self.checkpoint_callback,
+            skip_pretraining=bool(self.args.load_path)
         )
 
         return trainer

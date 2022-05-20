@@ -46,7 +46,7 @@ class EmbeddingEvalCallback(IntermittentCallback[EmbeddingEvalCallbackParams]):
 
         logger.info(f"Evaluating validation embeddings at epoch {trainer.current_epoch}")
         if pl_module.heterogeneous:
-            Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
+                Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
         else:
             Z = pl_module.val_outputs.extract_cat('Z', cache=True, device='cpu')
 

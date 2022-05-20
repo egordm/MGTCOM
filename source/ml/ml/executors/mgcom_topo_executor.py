@@ -5,10 +5,10 @@ from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
-from ml.executors.base import BaseExecutor, BaseExecutorArgs, T
-from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMFeatModel, MGCOMTopoDataModule, \
+from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
+from ml.executors.base import BaseExecutor, BaseExecutorArgs
+from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMTopoDataModule, \
     MGCOMFeatTopoModel
-from ml.models.node2vec import UnsupervisedLoss
 from ml.utils import dataset_choices
 
 
@@ -50,7 +50,13 @@ class MGCOMTopoExecutor(BaseExecutor[MGCOMFeatTopoModel]):
         return MGCOMFeatTopoModel
 
     def _callbacks(self) -> List[Callback]:
-        return self._embedding_task_callbacks()
+        return [
+            *self._embedding_task_callbacks(),
+            ClusteringEvalCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.clustering_eval
+            ),
+        ]
 
     def run_name(self):
         return self.args.dataset

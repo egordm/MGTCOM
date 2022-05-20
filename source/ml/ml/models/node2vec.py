@@ -9,6 +9,7 @@ from torch_geometric.data import Data
 from datasets import GraphDataset
 from ml.layers.loss.hinge_loss import HingeLoss
 from ml.layers.loss.skipgram_loss import SkipgramLoss
+from ml.models.base.clustering_mixin import ClusteringMixin, ClusteringMixinParams
 from ml.models.base.feature_model import FeatureModel
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.data.samplers.base import Sampler
@@ -98,3 +99,21 @@ class Node2VecDataModule(HomogenousGraphDataModule):
 
     def eval_sampler(self, data: Data) -> Optional[Sampler]:
         return None
+
+
+@dataclass
+class Node2VecClusModelParams(Node2VecWrapperModelParams, ClusteringMixinParams):
+    pass
+
+
+class Node2VecClusModel(ClusteringMixin, Node2VecModel):
+    def training_step(self, batch, batch_idx):
+        pos_walks, neg_walks, node_meta = batch
+        Z = self.embedder(node_meta)
+
+        loss = self.loss(pos_walks, neg_walks, Z)
+        return {
+            'loss': loss,
+            'Z': Z.detach(),
+        }
+

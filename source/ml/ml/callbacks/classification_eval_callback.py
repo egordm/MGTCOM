@@ -18,6 +18,7 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class ClassificationEvalCallbackParams(IntermittentCallbackParams):
+    interval: int = 10
     enabled: bool = True
     """Whether to enable classification evaluation."""
     metric: Metric = Metric.L2
@@ -58,7 +59,8 @@ class ClassificationEvalCallback(IntermittentCallback[ClassificationEvalCallback
         Z = self.val_subsample.transform(Z)
 
         for label_name, labels in self.val_labels.items():
-            acc, metrics = prediction_measure(Z, labels, max_iter=1000)
+            acc, metrics = prediction_measure(Z, labels, max_iter=1000, n_fits=3)
+            print(f'eval/val/cf/{label_name}/ = {acc:.4f}')
             pl_module.log_dict(prefix_keys(metrics, f'eval/val/cf/{label_name}/'), on_epoch=True)
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type
+from typing import Type, Tuple
 
 from pytorch_lightning import LightningDataModule
 
@@ -44,6 +44,9 @@ class MGCOMTempoExecutor(MGCOMTopoExecutor):
 
     def run_name(self):
         return self.args.dataset
+
+    def _metric_monitor(self) -> Tuple[str, str]:
+        return 'epoch_loss', 'min'
 
 
 if __name__ == '__main__':

@@ -48,6 +48,9 @@ class BaseExecutorArgs(Serializable):
     offline: bool = False
     metric: Optional[Metric] = None
 
+    load_path: Optional[Path] = None
+    monitor: Optional[str] = None
+
     loader_params: DataLoaderParams = DataLoaderParams()
     optimizer_params: OptimizerParams = OptimizerParams()
     trainer_params: TrainerParams = TrainerParams()
@@ -108,9 +111,20 @@ class BaseExecutor(Generic[T]):
             SaveModelSummaryCallback(),
             *self._callbacks()
         ]
-        self.model = self.model_args(self.model_cls)
+
+        if self.args.load_path:
+            self.logger.info(f'Loading model: {self.args.load_path.name}')
+            model_args, model_kwargs = self.model_args(lambda *args, **kwargs: (args, kwargs))
+            self.model = self.model_cls.load_from_checkpoint(
+                str(self.args.load_path), *model_args,  **model_kwargs)
+        else:
+            self.model = self.model_args(self.model_cls)
+
         self.wandb_logger = self._logger()
         metric, matric_mode = self._metric_monitor()
+        if self.args.monitor is not None:
+            metric, matric_mode = self.args.monitor.split(':')
+
         self.checkpoint_callback = ModelCheckpoint(
             save_top_k=2,
             monitor=metric,
@@ -138,8 +152,8 @@ class BaseExecutor(Generic[T]):
         if not self.args.dry_run and self.checkpoint_callback.best_model_path:
             self.logger.info(f'Loading best model: {Path(self.checkpoint_callback.best_model_path).name}')
             model_args, model_kwargs = self.model_args(lambda *args, **kwargs: (args, kwargs))
-            self.model = self.model.load_from_checkpoint(self.checkpoint_callback.best_model_path, *model_args,
-                **model_kwargs)
+            self.model = self.model.load_from_checkpoint(
+                self.checkpoint_callback.best_model_path, *model_args,  **model_kwargs)
 
         self.logger.info(f'Testing {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')
         if not self.args.dry_run:

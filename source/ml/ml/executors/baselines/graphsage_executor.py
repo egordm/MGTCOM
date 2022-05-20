@@ -1,31 +1,30 @@
 from dataclasses import dataclass
-from typing import Type, List
+from typing import Type, List, Tuple
 
 from pytorch_lightning import Callback, LightningDataModule
 
 from datasets import GraphDataset
 from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.callbacks.clustering_eval_callback import ClusteringEvalCallback
-from ml.executors.base import BaseExecutor, BaseExecutorArgs, T
-from ml.layers.embedding import HeteroNodeEmbedding
-from ml.models.het2vec import Het2VecModel, Het2VecDataModule, Het2VecDataModuleParams, Het2VecClusModelParams, \
-    Het2VecClusModel
-from ml.models.mgcom_feat import MGCOMTopoDataModule
-from ml.utils import dataset_choices, Metric, OptimizerParams
+from ml.executors.base import BaseExecutor, BaseExecutorArgs
+from ml.models.graphsage import GraphSAGEDataModuleParams, GraphSAGEDataModule, \
+    GraphSAGEModel, GraphSAGEModelParams
+from ml.models.mgcom_feat import MGCOMFeatModelParams, MGCOMTopoDataModuleParams, MGCOMTopoDataModule, \
+    MGCOMFeatTopoModel
+from ml.utils import dataset_choices
 
 
 @dataclass
 class Args(BaseExecutorArgs):
     dataset: str = dataset_choices()
     """Graph Dataset to use for training."""
-    hparams: Het2VecClusModelParams = Het2VecClusModelParams()
-    optimizer_params = OptimizerParams()
-    data_params: Het2VecDataModuleParams = Het2VecDataModuleParams()
+    hparams: GraphSAGEModelParams = GraphSAGEModelParams()
+    data_params: GraphSAGEDataModuleParams = GraphSAGEDataModuleParams()
 
 
-class Het2VecExecutor(BaseExecutor[Het2VecModel]):
+class GraphSAGEExecutor(BaseExecutor[MGCOMFeatTopoModel]):
     args: Args
-    datamodule: MGCOMTopoDataModule
+    datamodule: GraphSAGEDataModule
 
     TASK_NAME = 'embedding_topo'
 
@@ -34,27 +33,23 @@ class Het2VecExecutor(BaseExecutor[Het2VecModel]):
 
     def _datamodule(self) -> LightningDataModule:
         dataset: GraphDataset = DATASET_REGISTRY[self.args.dataset]()
-        return Het2VecDataModule(
+        return GraphSAGEDataModule(
             dataset=dataset,
             hparams=self.args.data_params,
             loader_params=self.args.loader_params,
         )
 
     def model_args(self, cls):
-        embedder = HeteroNodeEmbedding(
-            self.datamodule.data.num_nodes_dict,
-            self.args.hparams.repr_dim,
-        )
-
         return cls(
-            embedder=embedder,
+            metadata=self.datamodule.metadata,
+            num_nodes_dict=self.datamodule.num_nodes_dict,
             hparams=self.args.hparams,
             optimizer_params=self.args.optimizer_params,
         )
 
     @property
-    def model_cls(self) -> Type[Het2VecModel]:
-        return Het2VecClusModel
+    def model_cls(self) -> Type[MGCOMFeatTopoModel]:
+        return GraphSAGEModel
 
     def _callbacks(self) -> List[Callback]:
         return [
@@ -68,6 +63,9 @@ class Het2VecExecutor(BaseExecutor[Het2VecModel]):
     def run_name(self):
         return self.args.dataset
 
+    def _metric_monitor(self) -> Tuple[str, str]:
+        return 'epoch_loss', 'min'
+
 
 if __name__ == '__main__':
-    Het2VecExecutor().cli()
+    GraphSAGEExecutor().cli()

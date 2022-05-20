@@ -4,12 +4,13 @@ from typing import Optional, Union, Dict, List
 import torch
 import torch.nn.functional as F
 from pytorch_lightning.trainer.states import RunningStage
-from pytorch_lightning.utilities.types import STEP_OUTPUT
+from pytorch_lightning.utilities.types import STEP_OUTPUT, EPOCH_OUTPUT
 from simple_parsing import field
 from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
+from ml.algo.clustering import KMeans
 from ml.algo.transforms import ToHeteroMappingTransform
 from ml.data.loaders.chained_loader import ChainedDataLoader
 from ml.data.loaders.nodes_loader import NodesLoader
@@ -20,10 +21,10 @@ from ml.layers.conv.hgt_cov_net import HGTConvNet
 from ml.layers.conv.hybrid_conv_net import HybridConvNet
 from ml.layers.conv.sage_conv_net import SAGEConvNet
 from ml.models.base.graph_datamodule import GraphDataModuleParams
-from ml.models.het2vec import Het2VecModel
+from ml.models.het2vec import Het2VecModel, Het2VecClusModel
 from ml.models.mgcom_feat import MGCOMFeatDataModule
 from ml.models.node2vec import Node2VecModelParams
-from ml.utils import OptimizerParams, DataLoaderParams, Metric
+from ml.utils import OptimizerParams, DataLoaderParams, Metric, dict_mapv
 
 
 class CPGNNConvNet(HGTConvNet):
@@ -59,8 +60,11 @@ class CPGNNModelParams(Node2VecModelParams):
     """Hidden dimension of the convolution layers. If None, use repr_dim."""
     use_gru: bool = True
 
+    k: int = 10
+    """Number of clusters to use for clustering."""
 
-class CPGNNModel(Het2VecModel):
+
+class CPGNNModel(Het2VecClusModel):
     hparams: Union[CPGNNModelParams, OptimizerParams]
 
     def __init__(
@@ -99,6 +103,8 @@ class CPGNNModel(Het2VecModel):
 
         self.sim_fn = self.hparams.metric.pairwise_sim_fn
 
+        self.mus = None
+
     def forward(self, batch):
         data, node_perm_dict = batch
 
@@ -131,7 +137,10 @@ class CPGNNModel(Het2VecModel):
         )
 
         loss = self.loss(k, pos_walks, neg_walks, Zp, Cp)
-        return loss
+        return {
+            'loss': loss,
+            'Z_dict': dict_mapv(Zp_dict, lambda x: x.detach()),
+        }
 
     def _context_score(self, pairs: Tensor, Zp: Tensor, Cp: Tensor) -> Tensor:
         src, dst = pairs[:, 0], pairs[:, 1]

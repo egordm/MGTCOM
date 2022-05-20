@@ -9,11 +9,11 @@ from ml.data.samplers.base import Sampler
 from ml.data.samplers.ctdne_sampler import CTDNESampler, CTDNESamplerParams
 from ml.models.base.graph_datamodule import GraphDataModuleParams
 from ml.models.base.hgraph_datamodule import HomogenousGraphDataModule
-from ml.models.node2vec import Node2VecModel
+from ml.models.node2vec import Node2VecModel, Node2VecClusModel
 from ml.utils import DataLoaderParams
 
 
-class CTDNEModel(Node2VecModel):
+class CTDNEModel(Node2VecClusModel):
     pass
 
 
@@ -45,4 +45,3 @@ class CTDNEDataModule(HomogenousGraphDataModule):
                 node_attrs=['timestamp_from', 'train_mask', 'val_mask', 'test_mask'],
                 edge_attrs=['timestamp_from', 'train_mask', 'val_mask', 'test_mask'],
             )
-

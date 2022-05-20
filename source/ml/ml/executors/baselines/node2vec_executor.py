@@ -60,15 +60,15 @@ class Node2VecExecutor(BaseExecutor[Node2VecModel]):
     def _callbacks(self) -> List[Callback]:
         return [
             EmbeddingEvalCallback(
-                self._datamodule,
+                self.datamodule,
                 hparams=self.args.callback_params.embedding_eval
             ),
             ClassificationEvalCallback(
-                self._datamodule,
+                self.datamodule,
                 hparams=self.args.callback_params.classification_eval,
             ),
             LPEvalCallback(
-                self._datamodule,
+                self.datamodule,
                 hparams=self.args.callback_params.lp_eval,
             ),
             SaveEmbeddingsCallback(),

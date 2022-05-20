@@ -2,6 +2,8 @@ from functools import partial
 from pathlib import Path
 
 import torch
+import wandb
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loops import FitLoop, PredictionEpochLoop
 from pytorch_lightning.trainer.progress import Progress
 from torch import Tensor
@@ -21,22 +23,37 @@ class E2EFitLoop(FitLoop, EMCallback):
         self,
         min_epochs: int = 0,
         max_epochs: int = 1000,
+        num_cycles: int = None,
         n_pretrain_epochs: int = 20,
         n_feat_epochs: int = 20,
         n_cluster_epochs: int = 100,
+        checkpoint_callback: ModelCheckpoint = None,
+        skip_pretraining: bool = False,
     ) -> None:
         super().__init__(min_epochs, max_epochs)
+        self.epoch_cycle_progress = Progress()
         self.epoch_feat_progress = Progress()
         self.epoch_cluster_progress = Progress()
+        self.num_cycles = num_cycles
 
         self.n_pretrain_epochs = n_pretrain_epochs
         self.n_feat_epochs = n_feat_epochs
         self.n_cluster_epochs = n_cluster_epochs
 
+        self.checkpoint_callback = checkpoint_callback
+
         self.cluster_embed_loop = PredictionEpochLoop()
         self.sample_space_version = 0
         self.pretraining = True
+        self.skip_pretraining = skip_pretraining
         self.X = None
+
+    @property
+    def done(self) -> bool:
+        if self.num_cycles is not None:
+            return self.epoch_cycle_progress.total.completed >= self.num_cycles
+        else:
+            return super().done
 
     def run(self):
         if self.skip:
@@ -48,11 +65,24 @@ class E2EFitLoop(FitLoop, EMCallback):
 
         while not self.done:
             try:
-                logger.info(f'Starting feature stage: Epoch {self.trainer.current_epoch}')
-                self.run_feat()
+                self.epoch_cycle_progress.increment_ready()
+                self.epoch_cycle_progress.increment_started()
+
+                if not self.pretraining or not self.skip_pretraining:
+                    logger.info(f'Starting feature stage: Epoch {self.trainer.current_epoch}')
+                    self.run_feat()
+
+                if self.pretraining and self.checkpoint_callback is not None:
+                    save_path = Path(wandb.run.dir) / 'pretrain.ckpt'
+                    logger.info(f'Saving pretrain checkpoint to {save_path}')
+                    self.checkpoint_callback._save_checkpoint(self.trainer, str(save_path))
+
                 logger.info(f'Starting clustering stage: Epoch {self.trainer.current_epoch}')
                 self.run_cluster()
                 self._restarting = False
+
+                self.epoch_cycle_progress.increment_processed()
+                self.epoch_cycle_progress.increment_completed()
             except StopIteration:
                 break
         self._restarting = False
