@@ -15,6 +15,7 @@ dependencies:
   - conda-forge::python-igraph
   - conda-forge::umap-learn
   - conda-forge::torchinfo
+  - egordm::tch_geometric=0.1.0=py39_torch_1.11.0_cu113
   - numpy
   - scipy
   - pandas
