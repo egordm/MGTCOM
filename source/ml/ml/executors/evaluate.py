@@ -106,6 +106,10 @@ class EvaluateExecutor(BaseExecutor):
         progress_bar = next(c for c in self.trainer.callbacks if isinstance(c, ProgressBarBase))
         progress_bar._trainer = self.trainer
 
+        for callback in self.trainer.callbacks:
+            if hasattr(callback, 'hparams') and hasattr(callback.hparams, 'interval'):
+                callback.hparams.interval = 1
+
         # Mock test
         mock_evaluation_epoch(self.trainer, self.model, OutputExtractor([outputs]), mode=EvaluationMode.VALIDATION)
         mock_evaluation_epoch(self.trainer, self.model, OutputExtractor([outputs]), mode=EvaluationMode.TEST)

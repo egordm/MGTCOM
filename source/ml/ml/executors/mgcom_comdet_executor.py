@@ -103,6 +103,10 @@ class MGCOMComDetExecutor(BaseExecutor[MGCOMComDetModel]):
                 self.advance()
                 z, zi = model.cluster_model.predict_full(X)
                 model.val_outputs = OutputExtractor([{'X': X, 'z': z, 'zi': zi}])
+                trainer.logger.log_metrics({
+                    'k': _model.n_components,
+                    'epoch': self.epoch_progress.total.completed,
+                })
 
                 self.on_advance_end()
                 self.on_advance_start()

@@ -13,7 +13,7 @@ from ml.evaluation import clustering_metrics, \
 from ml.evaluation.metrics.community import community_metrics
 from ml.models.base.base_model import BaseModel
 from ml.models.base.graph_datamodule import GraphDataModule
-from ml.models.mgcom_comdet import MGCOMComDetDataModule
+from ml.models.mgcom_comdet import MGCOMComDetDataModule, MGCOMComDetModel
 from ml.utils import Metric, prefix_keys
 from shared import get_logger
 
@@ -84,7 +84,7 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/val/clu/'
         ), on_epoch=True)
 
-        if self.val_edge_index is not None:
+        if self.val_edge_index is not None and not isinstance(pl_module, MGCOMComDetModel):
             metrics = community_metrics(z, self.val_edge_index)
             pl_module.log_dict(prefix_keys(metrics, 'eval/val/clu/'), on_epoch=True)
             pl_module.log('modularity', metrics['modularity'], logger=False, prog_bar=True)
@@ -108,7 +108,7 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/test/clu/'
         ), on_epoch=True)
 
-        if self.test_edge_index is not None:
+        if self.test_edge_index is not None and not isinstance(pl_module, MGCOMComDetModel):
             pl_module.log_dict(prefix_keys(
                 community_metrics(z, self.test_edge_index), 'eval/test/clu/'
             ), on_epoch=True)

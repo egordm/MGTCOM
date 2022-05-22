@@ -50,14 +50,14 @@ class EmbeddingVisualizerCallback(IntermittentCallback[EmbeddingVisualizerCallba
         self.val_labels = dict_mapv(datamodule.val_labels(), self.val_subsample.transform)
 
     def on_validation_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
-        if trainer.current_epoch == 0:
-            return
-
         if isinstance(pl_module, MGCOME2EModel) and pl_module.stage == ClusteringStage.Clustering:
             return
 
         logger.info(f"Visualizing embeddings at epoch {trainer.current_epoch}")
-        Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
+        if pl_module.heterogeneous:
+            Z = pl_module.val_outputs.extract_cat_kv('Z_dict', cache=True, device='cpu')
+        else:
+            Z = pl_module.val_outputs.extract_cat('Z', cache=True, device='cpu')
         Z = self.val_subsample.transform(Z)
 
         logger.info(f'Transforming embeddings using {self.hparams.dim_reduction_mode}...')

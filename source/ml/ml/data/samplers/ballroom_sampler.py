@@ -3,7 +3,6 @@ from typing import Tuple, Callable, Any
 
 import torch
 from torch import Tensor
-from typing_extensions import Self
 
 from datasets.utils.temporal import TemporalNodeIndex
 from ml.data.samplers.base import Sampler

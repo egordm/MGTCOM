@@ -5,7 +5,7 @@ ARGS_BASE="--project=MGTCOM"
 ARGS_SW="--batch_size=16  --max_epochs=200 --dataset=StarWars --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --lp_eval.interval=5 --classification_eval.interval=15"
 ARGS_CORA="--batch_size=128 --max_epochs=50 --dataset=Cora --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --lp_eval.interval=5 --classification_eval.interval=15"
 ARGS_DBLP="--batch_size=128 --max_epochs=50 --dataset=DBLPHCN --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --lp_eval.interval=5 --classification_eval.interval=15"
-ARGS_IMDB="--batch_size=128 --max_epochs=50 --dataset=IMDB5000 --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10  --lp_eval.interval=5--classification_eval.interval=15"
+ARGS_IMDB="--batch_size=128 --max_epochs=30 --dataset=IMDB5000 --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10  --lp_eval.interval=5 --classification_eval.interval=15"
 ARGS_ICEWS="--batch_size=128 --max_epochs=50 --dataset=ICEWS0515 --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --lp_eval.interval=5 --classification_eval.interval=15"
 ARGS_SDS="--batch_size=1024 --max_epochs=20 --dataset=SocialDistancingStudents --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --lp_eval.interval=5 --classification_eval.interval=15"
 

@@ -8,6 +8,7 @@ from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.callbacks.classification_eval_callback import ClassificationEvalCallback
 from ml.callbacks.embedding_eval_callback import EmbeddingEvalCallback
 from ml.callbacks.lp_eval_callback import LPEvalCallback
+from ml.callbacks.embedding_visualizer_callback import EmbeddingVisualizerCallback
 from ml.callbacks.save_embeddings_callback import SaveEmbeddingsCallback
 from ml.executors.base import BaseExecutor, BaseExecutorArgs, T
 from ml.layers.embedding import NodeEmbedding
@@ -62,6 +63,10 @@ class Node2VecExecutor(BaseExecutor[Node2VecModel]):
             EmbeddingEvalCallback(
                 self.datamodule,
                 hparams=self.args.callback_params.embedding_eval
+            ),
+            EmbeddingVisualizerCallback(
+                self.datamodule,
+                hparams=self.args.callback_params.embedding_visualizer
             ),
             ClassificationEvalCallback(
                 self.datamodule,

@@ -6,7 +6,7 @@ ARGS_SW="--batch_size=16  --max_epochs=200 --dataset=StarWars --embedding_visual
 ARGS_CORA="--batch_size=128 --max_epochs=50 --dataset=Cora --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --classification_eval.interval=10"
 ARGS_DBLP="--batch_size=128 --max_epochs=50 --dataset=DBLPHCN --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --classification_eval.interval=10"
 ARGS_IMDB="--batch_size=128 --max_epochs=50 --dataset=IMDB5000 --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --classification_eval.interval=10"
-ARGS_ICEWS="--batch_size=128 --max_epochs=50 --dataset=ICEWS0515 --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --classification_eval.interval=10"
+ARGS_ICEWS="--batch_size=128 --max_epochs=40 --dataset=ICEWS0515 --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --classification_eval.interval=10"
 ARGS_SDS="--batch_size=2048 --max_epochs=40 --dataset=SocialDistancingStudents --embedding_visualizer.dim_reduction_mode=TSNE --embedding_visualizer.interval=10 --classification_eval.interval=10"
 
 # Embeddings
@@ -25,7 +25,7 @@ EMBED_SDS_FULL="--embed_node_types Hashtag User Tweet"
 EMBED_ICEWS="--embed_node_types Entity"
 
 #EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.005 --num_workers=3 --metric=DOTP"
-EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.02 --repr_dim=32 --num_workers=3 --metric=DOTP"
+EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.02 --repr_dim=32 --num_workers=4 --metric=DOTP"
 #EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.005 --repr_dim=64 --num_workers=3 --metric=DOTP"
 
 ####ARGS_DS="$ARGS_CORA"
@@ -54,5 +54,5 @@ $(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
 
 ARGS_DS="$ARGS_SDS"
 EMBED_DS="$EMBED_SDS"
-$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
-#$(echo $EXPERIMENT) --run_name="embed" $(echo "$ARGS_DS $EMBED_DS")
+#$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
+$(echo $EXPERIMENT) --run_name="embed" $(echo "$ARGS_DS $EMBED_DS")

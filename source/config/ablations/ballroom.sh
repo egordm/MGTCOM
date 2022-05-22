@@ -24,8 +24,8 @@ EMBED_SDS_FULL="--embed_node_types Hashtag User Tweet"
 
 EMBED_ICEWS="--embed_node_types Entity"
 
-EXPERIMENT="$ARGS_CMD/mgcom_tempo_executor.py --experiment=ablation_ballroom $ARGS_BASE --lr=0.02 --repr_dim=32 --num_workers=3 --metric=DOTP --cpu"
-#EXPERIMENT="$ARGS_CMD/mgcom_tempo_executor.py --experiment=benchmark_mgtcom_tempo $ARGS_BASE --lr=0.0005 --repr_dim=64 --num_workers=3 --metric=DOTP"
+#EXPERIMENT="$ARGS_CMD/mgcom_tempo_executor.py --experiment=ablation_ballroom $ARGS_BASE --lr=0.02 --repr_dim=32 --num_workers=3 --metric=DOTP"
+EXPERIMENT="$ARGS_CMD/mgcom_tempo_executor.py --experiment=ablation_ballroom $ARGS_BASE --lr=0.0005 --repr_dim=64 --num_workers=3 --metric=DOTP"
 
 
 ARGS_DS="$ARGS_DBLP"
