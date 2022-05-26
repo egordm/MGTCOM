@@ -20,3 +20,4 @@ ext
 /benchmarks/*
 !/benchmarks/GEMSEC
 !/benchmarks/ComE
+!/benchmarks/CP-GNN

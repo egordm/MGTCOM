@@ -7,6 +7,7 @@ from torch_geometric.data import HeteroData
 
 from datasets import StarWars, GraphDataset
 from datasets.transforms.eval_edge_split import EvalEdgeSplitTransform
+from datasets.transforms.homogenify import homogenify
 from datasets.utils.graph_dataset import DATASET_REGISTRY
 from ml.utils import HParams, dataset_choices
 from shared import parse_args, EXPORTS_PATH, get_logger
@@ -25,10 +26,11 @@ class Args(HParams):
     """Fraction of the dataset to use for validation."""
     split_num_test: float = 0.1
     """Fraction of the dataset to use for testing."""
+    homogeneous: bool = False
 
 
 def run():
-    args = parse_args(Args)[0]
+    args: Args = parse_args(Args)[0]
 
     dataset: GraphDataset = DATASET_REGISTRY[args.dataset]()
     data = dataset.data
@@ -39,6 +41,11 @@ def run():
         num_test=args.split_num_test,
         key_prefix='lp_'
     )(data)
+
+    if args.homogeneous:
+        train_data = homogenify(train_data)
+        val_data = homogenify(val_data)
+        test_data = homogenify(test_data)
 
     train_G = data_to_nx(train_data)
     val_G = data_to_nx(val_data)

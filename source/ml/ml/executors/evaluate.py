@@ -82,21 +82,36 @@ class EvaluateExecutor(BaseExecutor):
         outputs = {}
 
         # Embeddings
-        Z = torch.from_numpy(np.load(output_path / 'embeddings.npy')).float()
-        outputs['Z'] = Z
-        outputs['X'] = Z
+        Z_raw = np.load(output_path / 'embeddings.npy', allow_pickle=True)
+        if Z_raw.dtype == np.object:
+            Z_dict = {
+                k: torch.from_numpy(v).float()
+                for k, v in Z_raw.item().items()
+            }
+            outputs['Z'] = torch.cat(list(Z_dict.values()), dim=0)
+            outputs['X'] = outputs['Z']
+        else:
+            outputs['Z'] = torch.from_numpy(Z_raw).float()
+            outputs['X'] = outputs['Z']
 
         if (output_path / 'means.npy').exists():
-            mus = torch.from_numpy(np.load(output_path / 'means.npy')).float()
+            mus = torch.from_numpy(np.load(output_path / 'means.npy', allow_pickle=True)).float()
         else:
             mus = None
         outputs['mus'] = mus
 
         if (output_path / 'assignments.npy').exists():
-            z = torch.from_numpy(np.load(output_path / 'assignments.npy')).long()
+            z_raw = np.load(output_path / 'assignments.npy', allow_pickle=True)
+            if z_raw.dtype == np.object:
+                z_dict = {
+                    k: torch.from_numpy(v).long()
+                    for k, v in z_raw.item().items()
+                }
+                outputs['z'] = torch.cat(list(z_dict.values()), dim=0)
+            else:
+                outputs['z'] = torch.from_numpy(z_raw).long()
         else:
-            z = None
-        outputs['z'] = z
+            outputs['z'] = None
 
         # Mock model
         self.model.trainer = self.trainer

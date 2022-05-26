@@ -66,7 +66,7 @@ class Evaluator(object):
         print('Macro f1: ', macro_f1)
 
     def evluate_LP(self, emb_feature):
-        features, src_train, src_test, dst_train, dst_test, labels_train, labels_test = self.LP_data
+        _, src_train, src_test, dst_train, dst_test, labels_train, labels_test = self.LP_data
         train_edges_feature = self._concat_edges_feture(emb_feature, src_train, dst_train)
         test_edges_feature = self._concat_edges_feture(emb_feature, src_test, dst_test)
         model = self.get_model()

@@ -55,8 +55,8 @@ def evaluate(p_emb, CF_data, LP_data, method, metric=['CF', 'LP', 'CL'], save_re
     #     evaluator.evluate_CF(p_emb)
     if 'LP' in metric:
         evaluator.evluate_LP(p_emb)
-    if 'CL' in metric:
-        evaluator.evluate_CL(p_emb)
+    # if 'CL' in metric:
+    #     evaluator.evluate_CL(p_emb)
     if save_result:
         return evaluator.dump_result(p_emb, metric)
     return None

@@ -93,3 +93,7 @@ class DBLPHCN(GraphDataset):
     @staticmethod
     def labels() -> List[str]:
         return ['y', 'louvain', 'label_snapshot_7']
+
+#
+# @DATASET_REGISTRY
+# class HomoDBLPHCN(DBLPHCN):

@@ -1,0 +1,16 @@
+name: CP-GNN
+prefix: ./env
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - pytorch::cudatoolkit=11.3
+  - pytorch::pytorch=1.11.0
+  - pyg::pyg=2.0.4
+  - dglteam::dgl=0.8.1
+  - scipy
+  - numpy
+  - scikit-learn
+  - matplotlib
+

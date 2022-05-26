@@ -79,6 +79,7 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         logger.info(f"Evaluating validation clustering at epoch {trainer.current_epoch}")
         X = pl_module.val_outputs.extract_first('X', cache=True, device='cpu')
         z = pl_module.val_outputs.extract_first('z', cache=True, device='cpu')
+        # TODO: check if we use all the nodes?
 
         pl_module.log_dict(prefix_keys(
             clustering_metrics(X, z, metric=self.hparams.metric), 'eval/val/clu/'
