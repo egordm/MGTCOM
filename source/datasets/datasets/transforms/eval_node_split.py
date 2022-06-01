@@ -4,8 +4,10 @@ import numpy as np
 import torch
 from torch import Tensor
 from torch_geometric.data import HeteroData
-from torch_geometric.transforms import RandomNodeSplit, BaseTransform
+from torch_geometric.transforms import BaseTransform
 from torch_geometric.typing import NodeType
+
+from datasets.transforms.random_node_split import RandomNodeSplit
 
 
 class EvalNodeSplitTransform(BaseTransform):

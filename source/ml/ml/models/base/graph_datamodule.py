@@ -110,28 +110,37 @@ class GraphDataModule(pl.LightningDataModule):
         :param mask_name: The name of the edge mask attribute, defaults to train_mask
         :type mask_name: str (optional)
         """
+        prefix = 'lp_' if not self.hparams.eval_inference else ''
+
         if isinstance(data, HeteroData):
             hdata = to_homogeneous(
                 data,
-                node_attrs=[], edge_attrs=[f'lp_{mask_name}'],
+                node_attrs=[], edge_attrs=[f'{prefix}{mask_name}'],
                 add_node_type=False, add_edge_type=False
             )
         else:
             hdata = data
 
         return extract_edge_prediction_pairs(
-            hdata.edge_index, hdata.num_nodes, getattr(hdata, f'edge_lp_{mask_name}'),
+            hdata.edge_index, hdata.num_nodes, getattr(hdata, f'edge_{prefix}{mask_name}'),
             max_samples=self.hparams.lp_max_pairs
         )
 
     def link_prediction_pairs(self) -> Tuple[EdgePredictionBatch, EdgePredictionBatch, EdgePredictionBatch]:
-        # Note: that the edges are taken from the full dataset
-        # while subsets don't include these edges
-        return (
-            self._edge_prediction_pairs(self.data, 'train_mask'),
-            self._edge_prediction_pairs(self.data, 'val_mask'),
-            self._edge_prediction_pairs(self.data, 'test_mask')
-        )
+        if self.hparams.eval_inference:
+            return (
+                self._edge_prediction_pairs(self.train_data, 'train_mask'),
+                self._edge_prediction_pairs(self.val_data, 'val_mask'),
+                self._edge_prediction_pairs(self.test_data, 'test_mask')
+            )
+        else:
+            # Note: that the edges are taken from the full dataset
+            # while subsets don't include these edges
+            return (
+                self._edge_prediction_pairs(self.data, 'train_mask'),
+                self._edge_prediction_pairs(self.data, 'val_mask'),
+                self._edge_prediction_pairs(self.data, 'test_mask')
+            )
 
     def _extract_labels(
             self, data: HeteroData
