@@ -24,8 +24,9 @@ EMBED_SDS_FULL="--embed_node_types Hashtag User Tweet"
 
 EMBED_ICEWS="--embed_node_types Entity"
 
+REPR_DIM=32
 #EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.005 --num_workers=3 --metric=DOTP"
-EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.02 --repr_dim=32 --num_workers=4 --metric=DOTP"
+EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.02  --lr=0.02 --topo_repr_dim=$REPR_DIM --tempo_repr_dim=$REPR_DIM --repr_dim=$REPR_DIM --num_workers=4 --metric=DOTP"
 #EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.005 --repr_dim=64 --num_workers=3 --metric=DOTP"
 
 ####ARGS_DS="$ARGS_CORA"
