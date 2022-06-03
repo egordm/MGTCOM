@@ -25,6 +25,8 @@ parser.add_argument('--run_name', type=str, default=random_string())
 parser.add_argument('--primary_type', type=str, default='Character')
 parser.add_argument('--repr_dim', type=int, default=64)
 parser.add_argument('--hid_dim', type=int, default=64)
+parser.add_argument('--batch_size', type=int, default=1024 * 80)
+parser.add_argument('--k', type=int, default=20)
 args = parser.parse_args()
 
 config_path = os.path.dirname(__file__)
@@ -70,11 +72,12 @@ train_config = {
     'l2': 0,
     'factor': 0.2,
     'total_epoch': 10000000,
-    'batch_size': 1024 * 20,
-    'pos_num_for_each_hop': [20, 20, 20, 20, 20, 20, 20, 20, 20],
+    # 'batch_size': 1024 * 20,
+    'batch_size': args.batch_size,
+    'pos_num_for_each_hop': [5, 5, 5, 5, 5, 5, 5, 5, 5],
     'neg_num_for_each_hop': [3, 3, 3, 3, 3, 3, 3, 3, 3],
     'sample_workers': 8,
-    'patience': 15,
+    'patience': 5,
     'checkpoint_path': os.path.join(config_path, 'checkpoint', data_config['dataset'])
 }
 

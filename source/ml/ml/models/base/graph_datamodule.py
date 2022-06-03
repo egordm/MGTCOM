@@ -10,6 +10,7 @@ from torch_geometric.data import HeteroData, Data
 from torch_geometric.typing import Metadata, NodeType
 
 from datasets import GraphDataset
+from datasets.transforms.homogenify import homogenify
 from datasets.transforms.ensure_timestamps import EnsureTimestampsTransform
 from datasets.transforms.eval_edge_split import EvalEdgeSplitTransform
 from datasets.transforms.eval_node_split import EvalNodeSplitTransform
@@ -37,6 +38,9 @@ class GraphDataModuleParams(HParams):
     """Fraction of the dataset to use for validation."""
     split_num_test: float = 0.1
     """Fraction of the dataset to use for testing."""
+
+    homogenify: bool = False
+    """Whether to convert the dataset to homogenous one before training."""
 
 
 class GraphDataModule(pl.LightningDataModule):
@@ -80,6 +84,14 @@ class GraphDataModule(pl.LightningDataModule):
                     key_prefix='lp_'
                 )(self.data)
 
+        if self.hparams.homogenify:
+            self.data, self.train_data, self.val_data, self.test_data = (
+                homogenify(self.data),
+                homogenify(self.train_data),
+                homogenify(self.val_data),
+                homogenify(self.test_data),
+            )
+
         logger.info('=' * 80)
         logger.info(f'Using dataset {self.dataset.name}')
         logger.info(str(self.data))
@@ -87,7 +99,7 @@ class GraphDataModule(pl.LightningDataModule):
 
     @property
     def metadata(self) -> Metadata:
-        return self.dataset.metadata
+        return self.data.metadata()
 
     @property
     def num_nodes_dict(self) -> Dict[NodeType, int]:
