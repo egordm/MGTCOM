@@ -4,6 +4,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Dict, List, Union, Tuple
 
+from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
@@ -40,6 +41,8 @@ class ConvMethod(Enum):
 class MGCOMFeatModelParams(Node2VecModelParams, ClusteringMixinParams):
     embed_node_types: List[NodeType] = field(default_factory=list)
     """List of node types to embed instead of using features for."""
+    embed_node_ratio: float = field(default=1.0)
+    """Ratio of embedding nodes to actually embed."""
 
     repr_dim: int = 32
     """Dimension of the representation vectors."""
@@ -61,9 +64,11 @@ class MGCOMFeatModel(Het2VecModel):
 
     def __init__(
         self,
-        metadata: Metadata, num_nodes_dict: Dict[NodeType, int],
+        metadata: Metadata,
+        num_nodes_dict: Dict[NodeType, int],
         hparams: MGCOMFeatModelParams,
         optimizer_params: Optional[OptimizerParams] = None,
+        embed_mask_dict: Optional[Dict[NodeType, Tensor]] = None,
     ) -> None:
         self.save_hyperparameters(hparams.to_dict())
 
@@ -96,6 +101,7 @@ class MGCOMFeatModel(Het2VecModel):
                 node_type: num_nodes
                 for node_type, num_nodes in num_nodes_dict.items() if node_type in self.hparams.embed_node_types
             },
+            embed_mask_dict=embed_mask_dict,
             conv=conv,
             hidden_dim=self.hparams.conv_hidden_dim,
         )
@@ -196,6 +202,7 @@ class MGCOMTempoDataModule(MGCOMFeatDataModule):
             if isinstance(dataset, GraphDataset) and dataset.snapshots is not None:
                 logger.warning("No temporal window specified, trying to infer it from dataset snapshots")
                 snapshot_key = max(dataset.snapshots.keys())
+                # snapshot_key = 7
                 snapshot = dataset.snapshots[snapshot_key]
             else:
                 logger.warning('Dataset does not have snapshots, trying to create snapshots from dataset')

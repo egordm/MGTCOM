@@ -16,6 +16,7 @@ class HybridConvNet(HeteroConvLayer):
             self,
             metadata: Metadata,
             embed_num_nodes: Dict[NodeType, int],
+            embed_mask_dict: Optional[Dict[NodeType, Tensor]],
             conv: Optional[HeteroConvLayer],
             hidden_dim: Optional[int] = None,
             repr_dim: Optional[int] = None,
@@ -28,7 +29,7 @@ class HybridConvNet(HeteroConvLayer):
         self.use_dropout = use_dropout
 
         self.node_types_embed = set(embed_num_nodes.keys())
-        self.embedding = HeteroNodeEmbedding(embed_num_nodes, self.hidden_dim)
+        self.embedding = HeteroNodeEmbedding(embed_num_nodes, self.hidden_dim, embed_mask_dict)
         self.dropout = torch.nn.Dropout(p=0.5)
 
         self.conv = conv

@@ -59,41 +59,6 @@ $(echo $EXPERIMENT) --run_name="embed0.1" $(echo "$ARGS_DS $EMBED_DS") --split_n
 
 
 
-EXPERIMENT="$ARGS_CMD/mgcom_tempo_executor.py --experiment=ablation_inference $ARGS_BASE --lr=0.02 --repr_dim=32 --num_workers=3 --metric=DOTP"
-
-ARGS_DS="$ARGS_DBLP"
-EMBED_DS="$EMBED_DBLP"
-#EMBED_FULL_DS="$EMBED_DBLP"
-$(echo $EXPERIMENT) --run_name="feat0.8" $(echo $ARGS_DS) --split_num_val=0.1 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.8" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.1 --split_num_test=0.1
-#$(echo $EXPERIMENT) --run_name="embed_full" $(echo "$ARGS_DS $EMBED_FULL_DS")
-
-$(echo $EXPERIMENT) --run_name="feat0.9" $(echo $ARGS_DS) --split_num_val=0.001 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.9" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.001 --split_num_test=0.1
-
-$(echo $EXPERIMENT) --run_name="feat0.7" $(echo $ARGS_DS) --split_num_val=0.2 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.7" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.2 --split_num_test=0.1
-
-$(echo $EXPERIMENT) --run_name="feat0.6" $(echo $ARGS_DS) --split_num_val=0.3 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.6" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.3 --split_num_test=0.1
-
-$(echo $EXPERIMENT) --run_name="feat0.5" $(echo $ARGS_DS) --split_num_val=0.4 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.5" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.4 --split_num_test=0.1
-
-$(echo $EXPERIMENT) --run_name="feat0.4" $(echo $ARGS_DS) --split_num_val=0.5 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.4" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.5 --split_num_test=0.1
-
-$(echo $EXPERIMENT) --run_name="feat0.3" $(echo $ARGS_DS) --split_num_val=0.6 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.3" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.6 --split_num_test=0.1
-
-$(echo $EXPERIMENT) --run_name="feat0.2" $(echo $ARGS_DS) --split_num_val=0.7 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.2" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.7 --split_num_test=0.1
-
-$(echo $EXPERIMENT) --run_name="feat0.1" $(echo $ARGS_DS) --split_num_val=0.8 --split_num_test=0.1
-$(echo $EXPERIMENT) --run_name="embed0.1" $(echo "$ARGS_DS $EMBED_DS") --split_num_val=0.8 --split_num_test=0.1
-
-
-
 EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=ablation_inference $ARGS_BASE --lr=0.02 --topo_repr_dim=32 --tempo_repr_dim=32 --repr_dim=32 --num_workers=3 --metric=DOTP"
 
 ARGS_DS="$ARGS_DBLP"
