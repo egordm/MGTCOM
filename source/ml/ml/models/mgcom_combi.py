@@ -4,6 +4,7 @@ from typing import Optional, Dict, List, Union, Tuple
 
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EPOCH_OUTPUT
 from simple_parsing import field
+from torch import Tensor
 from torch_geometric.data import HeteroData
 from torch_geometric.typing import Metadata, NodeType
 
@@ -54,6 +55,7 @@ class MGCOMCombiModel(ClusteringMixin, HeteroFeatureModel):
         num_nodes_dict: Dict[NodeType, int],
         hparams: MGCOMCombiModelParams,
         optimizer_params: OptimizerParams,
+        embed_mask_dict: Optional[Dict[NodeType, Tensor]] = None,
     ) -> None:
         super().__init__(optimizer_params)
         self.save_hyperparameters(hparams.to_dict())
@@ -75,6 +77,7 @@ class MGCOMCombiModel(ClusteringMixin, HeteroFeatureModel):
             metadata, num_nodes_dict,
             hparams=hparams,
             optimizer_params=None,
+            embed_mask_dict=embed_mask_dict,
         )
 
         if self.hparams.use_topo:

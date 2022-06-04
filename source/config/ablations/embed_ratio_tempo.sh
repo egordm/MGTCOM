@@ -32,6 +32,7 @@ EMBED_DS="$EMBED_DBLP"
 
 for i in `seq 1 3`; do
   $(echo $EXPERIMENT) --run_name="embed0.0" $(echo "$ARGS_DS $EMBED_DS") --embed_node_ratio=0.0
+  $(echo $EXPERIMENT) --run_name="embed0.05" $(echo "$ARGS_DS $EMBED_DS") --embed_node_ratio=0.05
   $(echo $EXPERIMENT) --run_name="embed0.1" $(echo "$ARGS_DS $EMBED_DS") --embed_node_ratio=0.1
   $(echo $EXPERIMENT) --run_name="embed0.2" $(echo "$ARGS_DS $EMBED_DS") --embed_node_ratio=0.2
   $(echo $EXPERIMENT) --run_name="embed0.3" $(echo "$ARGS_DS $EMBED_DS") --embed_node_ratio=0.3
