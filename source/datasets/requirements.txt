@@ -1,4 +1,4 @@
-wikitextparser==0.48.2
+wikitextparser==0.48.0
 python-Levenshtein==0.12.2
 lxml==4.8.0
 feature_engine==1.2.0

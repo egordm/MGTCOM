@@ -24,16 +24,16 @@ EMBED_SDS_FULL="--embed_node_types Hashtag User Tweet"
 
 EMBED_ICEWS="--embed_node_types Entity"
 
-REPR_DIM=32
+REPR_DIM=64
 #EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.005 --num_workers=3 --metric=DOTP"
 EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.02  --lr=0.02 --topo_repr_dim=$REPR_DIM --tempo_repr_dim=$REPR_DIM --repr_dim=$REPR_DIM --num_workers=4 --metric=DOTP"
 #EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.005 --repr_dim=64 --num_workers=3 --metric=DOTP"
 
 for i in `seq 1 3`; do
-  ####ARGS_DS="$ARGS_CORA"
-  ####EMBED_DS="$EMBED_CORA"
-  ####$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
-  ####$(echo $EXPERIMENT) --run_name="embed" $(echo "$ARGS_DS $EMBED_DS")
+  ARGS_DS="$ARGS_CORA"
+  EMBED_DS="$EMBED_CORA"
+#  $(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
+  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
 
   ARGS_DS="$ARGS_DBLP"
   EMBED_DS="$EMBED_DBLP"
@@ -42,20 +42,20 @@ for i in `seq 1 3`; do
   $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
   #$(echo $EXPERIMENT) --run_name="embed_full" $(echo "$ARGS_DS $EMBED_FULL_DS")
 
-#  ARGS_DS="$ARGS_IMDB"
-#  EMBED_DS="$EMBED_IMDB"
-#  EMBED_FULL_DS="$EMBED_IMDB_FULL"
-#  #$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
-#  $(echo $EXPERIMENT) --run_name="embed" $(echo "$ARGS_DS $EMBED_DS")
-#  #$(echo $EXPERIMENT) --run_name="embed_full" $(echo "$ARGS_DS $EMBED_FULL_DS")
-#
-#  ARGS_DS="$ARGS_ICEWS"
-#  EMBED_DS="$EMBED_ICEWS"
+  ARGS_DS="$ARGS_IMDB"
+  EMBED_DS="$EMBED_IMDB"
+  EMBED_FULL_DS="$EMBED_IMDB_FULL"
+  #$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
+  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
+  #$(echo $EXPERIMENT) --run_name="embed_full" $(echo "$ARGS_DS $EMBED_FULL_DS")
+
+  ARGS_DS="$ARGS_ICEWS"
+  EMBED_DS="$EMBED_ICEWS"
 #  $(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
-#  #$(echo $EXPERIMENT) --run_name="embed" $(echo "$ARGS_DS $EMBED_DS")
+  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
 
 #  ARGS_DS="$ARGS_SDS"
 #  EMBED_DS="$EMBED_SDS"
 #  #$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
-#  $(echo $EXPERIMENT) --run_name="embed" $(echo "$ARGS_DS $EMBED_DS")
+#  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
 done
