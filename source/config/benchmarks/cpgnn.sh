@@ -22,13 +22,13 @@ run_GEMSEC() {
   conda deactivate
 }
 
-REPR_DIM=32
+REPR_DIM=64
 
-#run_GEMSEC DBLPHCN $REPR_DIM Paper
-#run_GEMSEC IMDB5000 $REPR_DIM Movie
-#run_GEMSEC ICEWS0515 $REPR_DIM Entity
-#run_GEMSEC StarWars $REPR_DIM Character
-#run_GEMSEC Cora $REPR_DIM 0
-run_GEMSEC SocialDistancingStudents $REPR_DIM Tweet
+run_GEMSEC DBLPHCN $REPR_DIM Paper
+run_GEMSEC IMDB5000 $REPR_DIM Movie
+run_GEMSEC ICEWS0515 $REPR_DIM Entity
+run_GEMSEC StarWars $REPR_DIM Character
+run_GEMSEC Cora $REPR_DIM 0
+#run_GEMSEC SocialDistancingStudents $REPR_DIM Tweet
 
 

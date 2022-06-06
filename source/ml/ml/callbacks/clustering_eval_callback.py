@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Union, Optional
@@ -22,6 +23,7 @@ logger = get_logger(Path(__file__).stem)
 
 @dataclass
 class ClusteringEvalCallbackParams(IntermittentCallbackParams):
+    interval = 4
     metric: Metric = Metric.L2
     """Metric to use for embedding evaluation."""
 
@@ -63,6 +65,9 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         if isinstance(datamodule, GraphDataModule):
             self.val_labels = datamodule.val_labels()
             self.test_labels = datamodule.test_labels()
+        elif hasattr(datamodule, 'graph_dataset') and datamodule.graph_dataset is not None:
+            self.val_labels = datamodule.labels()
+            self.test_labels = datamodule.labels()
         else:
             # TODO: what else
             self.val_labels = None
@@ -77,15 +82,15 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
             return
 
         logger.info(f"Evaluating validation clustering at epoch {trainer.current_epoch}")
-        X = pl_module.val_outputs.extract_first('X', cache=True, device='cpu')
+        # X = pl_module.val_outputs.extract_first('X', cache=True, device='cpu')
         z = pl_module.val_outputs.extract_first('z', cache=True, device='cpu')
         # TODO: check if we use all the nodes?
 
-        pl_module.log_dict(prefix_keys(
-            clustering_metrics(X, z, metric=self.hparams.metric), 'eval/val/clu/'
-        ), on_epoch=True)
+        # pl_module.log_dict(prefix_keys( # Slowest part
+        #     clustering_metrics(X, z, metric=self.hparams.metric), 'eval/val/clu/'
+        # ), on_epoch=True)
 
-        if self.val_edge_index is not None and not isinstance(pl_module, MGCOMComDetModel):
+        if self.val_edge_index is not None:
             metrics = community_metrics(z, self.val_edge_index)
             pl_module.log_dict(prefix_keys(metrics, 'eval/val/clu/'), on_epoch=True)
             pl_module.log('modularity', metrics['modularity'], logger=False, prog_bar=True)
@@ -94,6 +99,7 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
             for label_name, labels in self.val_labels.items():
                 metrics = community_gt_metrics(z, labels)
                 pl_module.log_dict(prefix_keys(metrics, f'eval/val/clu/{label_name}/'), on_epoch=True)
+                # print(prefix_keys(metrics, f'eval/val/clu/{label_name}/'))
 
     def on_test_epoch_end_run(self, trainer: Trainer, pl_module: BaseModel) -> None:
         if 'X' not in pl_module.test_outputs:
@@ -103,11 +109,13 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         X = pl_module.test_outputs.extract_cat('X', cache=True, device='cpu')
         z = pl_module.test_outputs.extract_cat('z', cache=True, device='cpu')
         if isinstance(X, list):
-            X, z = X[0], z[0]
+            X = X[0]
+        if isinstance(z, list):
+            z = z[0]
 
-        pl_module.log_dict(prefix_keys(
-            clustering_metrics(X, z, metric=self.hparams.metric), 'eval/test/clu/'
-        ), on_epoch=True)
+        # pl_module.log_dict(prefix_keys(
+        #     clustering_metrics(X, z, metric=self.hparams.metric), 'eval/test/clu/'
+        # ), on_epoch=True)
 
         if self.test_edge_index is not None and not isinstance(pl_module, MGCOMComDetModel):
             pl_module.log_dict(prefix_keys(

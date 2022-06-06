@@ -77,7 +77,7 @@ train_config = {
     'pos_num_for_each_hop': [5, 5, 5, 5, 5, 5, 5, 5, 5],
     'neg_num_for_each_hop': [3, 3, 3, 3, 3, 3, 3, 3, 3],
     'sample_workers': 8,
-    'patience': 5,
+    'patience': 8,
     'checkpoint_path': os.path.join(config_path, 'checkpoint', data_config['dataset'])
 }
 

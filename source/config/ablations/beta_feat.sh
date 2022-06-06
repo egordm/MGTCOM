@@ -14,10 +14,12 @@ ARGS_DS="$ARGS_DBLP"
 EMBED_DS="$EMBED_DBLP"
 EMBED_FULL_DS="$EMBED_DBLP"
 
-$(echo $EXPERIMENT) --run_name="beta_r=0.5" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.5 --tempo_weight=0.5
-$(echo $EXPERIMENT) --run_name="beta_r=0.25" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.25 --tempo_weight=0.75
-$(echo $EXPERIMENT) --run_name="beta_r=0.75" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.75 --tempo_weight=0.25
-$(echo $EXPERIMENT) --run_name="beta_r=0.4" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.4 --tempo_weight=0.6
-$(echo $EXPERIMENT) --run_name="beta_r=0.6" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.6 --tempo_weight=0.4
-$(echo $EXPERIMENT) --run_name="beta_r=0.15" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.15 --tempo_weight=0.85
-$(echo $EXPERIMENT) --run_name="beta_r=0.85" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.85 --tempo_weight=0.15
+for i in `seq 1 3`; do
+  #$(echo $EXPERIMENT) --run_name="beta_r=0.5" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.5 --tempo_weight=0.5
+#  $(echo $EXPERIMENT) --run_name="beta_r=0.25" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.25 --tempo_weight=0.75
+  #$(echo $EXPERIMENT) --run_name="beta_r=0.75" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.75 --tempo_weight=0.25
+#  $(echo $EXPERIMENT) --run_name="beta_r=0.4" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.4 --tempo_weight=0.6
+  #$(echo $EXPERIMENT) --run_name="beta_r=0.6" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.6 --tempo_weight=0.4
+  $(echo $EXPERIMENT) --run_name="beta_r=0.15" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.15 --tempo_weight=0.85
+  #$(echo $EXPERIMENT) --run_name="beta_r=0.85" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.85 --tempo_weight=0.15
+done

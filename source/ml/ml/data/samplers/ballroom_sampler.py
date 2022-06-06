@@ -27,7 +27,7 @@ class BallroomSamplerParams(HParams):
     context_size: int = 10
     """The actual context size which is considered for positive samples. This parameter increases the effective 
     sampling rate by reusing samples across different source nodes.."""
-    walks_per_node: int = 10
+    walks_per_node: int = 30
     """Number of random walks to start at each node. (i.e. number of partners per node)"""
     num_neg_samples: int = 1
 

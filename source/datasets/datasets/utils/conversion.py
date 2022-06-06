@@ -124,9 +124,11 @@ def extract_attribute_dict(
             if warn:
                 logger.warning(f"{key} not in {entity_type} store")
 
+            num_items = store.num_nodes if isinstance(store, NodeStorage) else store.num_edges
+
             if is_numpy:
-                output[entity_type] = np.full([store.num_nodes], -1, dtype=dtype)
+                output[entity_type] = np.full([num_items], -1, dtype=dtype)
             else:
-                output[entity_type] = torch.full([store.num_nodes], -1, dtype=dtype)
+                output[entity_type] = torch.full([num_items], -1, dtype=dtype)
 
     return output
