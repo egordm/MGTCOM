@@ -78,7 +78,7 @@ def main():
         # acc = model.test(z[data.train_mask], data.y[data.train_mask],
         #                  z[data.test_mask], data.y[data.test_mask],
         #                  max_iter=150)
-        acc = link_prediction_measure(z.detach().cpu(), pairs, labels, metric=Metric.L2)
+        acc = link_prediction_measure(z.detach().cpu(), pairs, labels, metric=Metric.DOTP)
         return acc
 
     for epoch in range(1, epochs):

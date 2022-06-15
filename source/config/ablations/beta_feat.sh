@@ -20,6 +20,8 @@ for i in `seq 1 3`; do
   #$(echo $EXPERIMENT) --run_name="beta_r=0.75" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.75 --tempo_weight=0.25
 #  $(echo $EXPERIMENT) --run_name="beta_r=0.4" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.4 --tempo_weight=0.6
   #$(echo $EXPERIMENT) --run_name="beta_r=0.6" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.6 --tempo_weight=0.4
-  $(echo $EXPERIMENT) --run_name="beta_r=0.15" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.15 --tempo_weight=0.85
+  $(echo $EXPERIMENT) --run_name="beta_r=0.15" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.15 --tempo_weight=0.85 --ballroom_params.walks_per_node=5
+  $(echo $EXPERIMENT) --run_name="beta_r=0.15" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.15 --tempo_weight=0.85 --ballroom_params.walks_per_node=10
+  $(echo $EXPERIMENT) --run_name="beta_r=0.15" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.15 --tempo_weight=0.85 --ballroom_params.walks_per_node=20
   #$(echo $EXPERIMENT) --run_name="beta_r=0.85" $(echo "$ARGS_DS $EMBED_DS") --topo_weight=0.85 --tempo_weight=0.15
 done

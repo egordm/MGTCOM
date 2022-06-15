@@ -62,7 +62,7 @@ class PlotCallback(EMCallback):
         self.remap = DimensionReductionTransform(
             n_components=2,
             mode=DimensionReductionMode.UMAP,
-            metric=Metric.L2,
+            metric=Metric.DOTP,
         )
         if X.shape[1] != 2:
             self.remap.fit(X)

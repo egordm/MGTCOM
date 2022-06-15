@@ -25,7 +25,7 @@ test = next(iter(loader))
 
 model = Node2VecModel(
     embedder=NodeEmbedding(hdata.num_nodes, 2),
-    metric=Metric.L2,
+    metric=Metric.DOTP,
     hparams={'lr': 0.01}
 )
 

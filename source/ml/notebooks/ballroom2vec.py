@@ -74,7 +74,7 @@ class HetEmbed(torch.nn.Module):
 
 model = Node2VecModel(
     embedder=HetEmbed(),
-    metric=Metric.L2,
+    metric=Metric.DOTP,
     hparams={'lr': 0.01}
 )
 

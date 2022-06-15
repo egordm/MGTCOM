@@ -58,7 +58,7 @@ def main():
     outputs = OutputExtractor(outputs)
     Z = outputs.extract_cat('Z')
 
-    acc = link_prediction_measure(Z.detach().cpu(), pairs, labels, metric=Metric.L2)
+    acc = link_prediction_measure(Z.detach().cpu(), pairs, labels, metric=Metric.DOTP)
     print(acc)
 
     # loader = model.loader(batch_size=128, shuffle=True, num_workers=4)
@@ -99,7 +99,7 @@ def main():
         # acc = model.test(z[data.train_mask], data.y[data.train_mask],
         #                  z[data.test_mask], data.y[data.test_mask],
         #                  max_iter=150)
-        acc = link_prediction_measure(z.detach().cpu(), pairs, labels, metric=Metric.L2)
+        acc = link_prediction_measure(z.detach().cpu(), pairs, labels, metric=Metric.DOTP)
         return acc
 
     for epoch in range(1, epochs):

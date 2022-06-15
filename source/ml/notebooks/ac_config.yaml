@@ -1,0 +1,109 @@
+callback_params:
+  classification_eval:
+    cf_max_pairs: 5000
+    enabled: true
+    interval: 10
+    metric: DOTP
+  clustering_eval:
+    interval: 1
+    metric: DOTP
+  clustering_visualizer:
+    cv_max_points: 10000
+    dim_reduction_mode: PCA
+    interval: 4
+    metric: DOTP
+  embedding_eval:
+    interval: 1
+    lp_max_pairs: 5000
+    met_max_points: 5000
+    metric: DOTP
+  embedding_visualizer:
+    dim_reduction_mode: TSNE
+    ev_max_points: 1000
+    interval: 10
+    metric: DOTP
+  lp_eval:
+    enabled: true
+    interval: 1
+    lp_max_pairs: 5000
+    metric: DOTP
+  save_graph:
+    metric: DOTP
+data_params:
+  ballroom_params:
+    context_size: 10
+    num_neg_samples: 1
+    walk_length: 20
+    walks_per_node: 10
+  eval_inference: false
+  homogenify: false
+  lp_max_pairs: 5000
+  n2v_params:
+    context_size: 10
+    num_neg_samples: 1
+    p: 1
+    q: 0.5
+    walk_length: 20
+    walks_per_node: 10
+  num_samples:
+  - 3
+  - 2
+  sampler_method: HGT
+  split_force: false
+  split_num_test: 0.1
+  split_num_val: 0.1
+  train_on_full_data: false
+  use_tempo_loader: true
+  use_topo_loader: true
+  use_unbiased: false
+  window:
+  - 0
+  - 251669
+dataset: SocialDistancingStudents
+debug: true
+dry_run: false
+offline: true
+experiment: case_study
+hparams:
+  conv_hidden_dim: null
+  conv_method: HGT
+  conv_num_heads: 2
+  conv_num_layers: 2
+  conv_use_gru: false
+  emb_combine_mode: CONCAT
+  embed_node_ratio: 1.0
+  embed_node_types:
+  - Hashtag
+  - User
+  hinge_adaptive: false
+  hinge_margin: 0.1
+  infer_k: 20
+  init_combine: true
+  init_combine_mode: MULT
+  loss: HINGE
+  metric: DOTP
+  no_head: false
+  repr_dim: 32
+  tempo_hidden_dim:
+  - 32
+  tempo_repr_dim: 32
+  tempo_weight: 1.0
+  topo_hidden_dim:
+  - 32
+  topo_repr_dim: 32
+  topo_weight: 1.0
+  use_tempo: true
+  use_topo: true
+load_path: null
+loader_params:
+  batch_size: 1024
+  num_workers: 4
+metric: DOTP
+monitor: null
+optimizer_params:
+  lr: 0.02
+project: MGTCOM
+trainer_params:
+  cpu: false
+  max_epochs: 40
+  val_check_interval: 1.0

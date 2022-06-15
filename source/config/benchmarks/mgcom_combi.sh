@@ -30,11 +30,11 @@ EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_comb
 #EXPERIMENT="$ARGS_CMD/mgcom_combi_executor.py --experiment=benchmark_mgtcom_combi $ARGS_BASE --lr=0.005 --repr_dim=64 --num_workers=3 --metric=DOTP"
 
 for i in `seq 1 3`; do
-  ARGS_DS="$ARGS_DBLP"
-  EMBED_DS="$EMBED_DBLP"
-  EMBED_FULL_DS="$EMBED_DBLP"
+#  ARGS_DS="$ARGS_DBLP"
+#  EMBED_DS="$EMBED_DBLP"
+#  EMBED_FULL_DS="$EMBED_DBLP"
 #  #$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
-  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
+#  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
 #  #$(echo $EXPERIMENT) --run_name="embed_full" $(echo "$ARGS_DS $EMBED_FULL_DS")
 
 #  ARGS_DS="$ARGS_IMDB"
@@ -49,8 +49,8 @@ for i in `seq 1 3`; do
 #  $(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
 #  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
 
-#  ARGS_DS="$ARGS_SDS"
-#  EMBED_DS="$EMBED_SDS"
+  ARGS_DS="$ARGS_SDS"
+  EMBED_DS="$EMBED_SDS"
 #  #$(echo $EXPERIMENT) --run_name="feat" $(echo $ARGS_DS)
-#  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
+  $(echo $EXPERIMENT) --run_name="embed$REPR_DIM" $(echo "$ARGS_DS $EMBED_DS")
 done
