@@ -5,7 +5,7 @@ from ml.utils import Metric, EPS
 
 
 class IsometricLoss(torch.nn.Module):
-    def __init__(self, metric: Metric = Metric.L2) -> None:
+    def __init__(self, metric: Metric = Metric.DOTP) -> None:
         super().__init__()
         self.sim_fn = metric.pairwise_sim_fn
         self.dist_fn = metric.pairwise_dist_fn

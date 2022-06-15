@@ -21,7 +21,7 @@ class ClassificationEvalCallbackParams(IntermittentCallbackParams):
     interval: int = 10
     enabled: bool = True
     """Whether to enable classification evaluation."""
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for embedding evaluation."""
     cf_max_pairs: int = 5000
     """Maximum number of pairs to use for classification."""

@@ -19,7 +19,7 @@ logger = get_logger(Path(__file__).stem)
 class LPEvalCallbackParams(IntermittentCallbackParams):
     enabled: bool = True
     """Whether to enable classification evaluation."""
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for embedding evaluation."""
     lp_max_pairs: int = 5000
     """Maximum number of pairs to use for link prediction."""

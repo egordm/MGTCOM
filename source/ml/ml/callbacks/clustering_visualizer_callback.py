@@ -30,7 +30,7 @@ class ClusteringVisualizerCallbackParams(IntermittentCallbackParams):
     """Dimension reduction mode for embedding visualization."""
     cv_max_points: int = 10000
     """Maximum number of points to visualize."""
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for embedding visualization."""
 
 

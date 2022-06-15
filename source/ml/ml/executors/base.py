@@ -83,8 +83,12 @@ class BaseExecutor(Generic[T]):
     def params_cls(self) -> Type[BaseExecutorArgs]:
         raise NotImplementedError
 
-    def cli(self):
-        self.args = parse_args(self.params_cls())[0]
+    def cli(self, config=None, fit=True):
+        if config is not None:
+            self.args = self.params_cls().load_yaml(config)
+        else:
+            self.args = parse_args(self.params_cls())[0]
+
         if self.args.metric is not None:
             self.logger.info(f'Using metric {self.args.metric} globally')
             recursively_override_attr(self.args, 'metric', self.args.metric)
@@ -135,7 +139,8 @@ class BaseExecutor(Generic[T]):
             self.checkpoint_callback
         ])
 
-        self._fit()
+        if fit:
+            self._fit()
 
     def _fit(self):
         self.logger.info(f'Training {self.TASK_NAME}/{self.EXECUTOR_NAME}/{self.RUN_NAME}')

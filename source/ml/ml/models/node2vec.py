@@ -29,7 +29,7 @@ class UnsupervisedLoss(Enum):
 
 @dataclass
 class Node2VecModelParams(HParams):
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for distance/similarity calculation. (for loss)"""
     loss: UnsupervisedLoss = UnsupervisedLoss.HINGE
     """Unsupervised loss function to use."""

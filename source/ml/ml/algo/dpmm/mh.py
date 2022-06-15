@@ -18,7 +18,7 @@ class MHParams(HParams):
     ds_scale: float = 1.0
     min_split_points: int = 6
     n_merge_neighbors: int = 3
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
 
 
 @dataclass

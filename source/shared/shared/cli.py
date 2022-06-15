@@ -1,7 +1,7 @@
 from simple_parsing import ArgumentParser
 
 
-def parse_args(*arg_types):
+def parse_args(*arg_types, config=None):
     parser = ArgumentParser()
     for i, arg_type in enumerate(arg_types):
         parser.add_arguments(

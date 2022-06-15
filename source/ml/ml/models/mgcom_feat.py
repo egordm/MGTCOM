@@ -76,13 +76,13 @@ class MGCOMFeatModel(Het2VecModel):
             if node_type not in metadata[0]:
                 raise ValueError(f'Node type {node_type} not in metadata')
 
-        if self.hparams.conv_method == ConvMethod.SAGE:
+        if hparams.conv_method == ConvMethod.SAGE:
             conv = SAGEConvNet(
                 metadata, self.hparams.repr_dim,
                 hidden_dim=self.hparams.conv_hidden_dim,
                 num_layers=self.hparams.conv_num_layers,
             )
-        elif self.hparams.conv_method == ConvMethod.HGT:
+        elif hparams.conv_method == ConvMethod.HGT:
             conv = HGTConvNet(
                 metadata, self.hparams.repr_dim,
                 hidden_dim=self.hparams.conv_hidden_dim,
@@ -90,10 +90,10 @@ class MGCOMFeatModel(Het2VecModel):
                 heads=self.hparams.conv_num_heads,
                 use_gru=self.hparams.conv_use_gru,
             )
-        elif self.hparams.conv_method == ConvMethod.NONE:
+        elif hparams.conv_method == ConvMethod.NONE:
             conv = None
         else:
-            raise ValueError(f'Unknown conv method {self.hparams.conv_method}')
+            raise ValueError(f'Unknown conv method {hparams.conv_method}')
 
         embedder = HybridConvNet(
             metadata,
@@ -133,6 +133,9 @@ class MGCOMFeatDataModule(Het2VecDataModule):
         raise NotImplementedError
 
     def _build_conv_sampler(self, data: HeteroData) -> Union[HGTSampler, SAGESampler]:
+        if isinstance(self.hparams.sampler_method, str):
+            self.hparams.sampler_method = ConvMethod[self.hparams.sampler_method]
+
         if self.hparams.sampler_method == ConvMethod.HGT:
             sampler = HGTSampler(data, hparams=HGTSamplerParams(
                 num_samples=self.hparams.num_samples,
@@ -142,7 +145,7 @@ class MGCOMFeatDataModule(Het2VecDataModule):
                 num_samples=self.hparams.num_samples,
             ))
         else:
-            raise ValueError("No sampler params provided")
+            raise ValueError(f"No sampler params provided: {self.hparams.sampler_method}")
 
         return sampler
 

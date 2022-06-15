@@ -14,7 +14,7 @@ def link_prediction_measure(
         Z: Tensor,
         edge_index: Tensor,
         edge_labels: Tensor,
-        metric: Metric = Metric.L2,
+        metric: Metric = Metric.DOTP,
         max_iter: int = 100,
 ) -> Tuple[float, Dict[str, float]]:
     """

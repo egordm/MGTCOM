@@ -13,7 +13,7 @@ class KMeans1D:
     def __init__(
             self,
             repr_dim: int, k: int,
-            metric: Metric = Metric.L2,
+            metric: Metric = Metric.DOTP,
             niter: int = 10, nredo: int = 5,
             gpu: bool = False, verbose: bool = False,
     ) -> None:

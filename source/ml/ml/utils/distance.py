@@ -46,7 +46,7 @@ class Metric(Enum):
     def pairwise_sim_fn(self):
         if self == Metric.L1:
             return pairwise_l1_sim
-        elif self == Metric.L2:
+        elif self == Metric.DOTP:
             return pairwise_l2_sim
         elif self == Metric.COSINE:
             return pairwise_cosine
@@ -59,7 +59,7 @@ class Metric(Enum):
     def pairwise_dist_fn(self):
         if self == Metric.L1:
             return pairwise_l1
-        elif self == Metric.L2:
+        elif self == Metric.DOTP:
             return pairwise_l2
         elif self == Metric.COSINE:
             return pairwise_cosine_dist
@@ -69,7 +69,7 @@ class Metric(Enum):
     def faiss_metric(self):
         if self == Metric.L1:
             return faiss.METRIC_L1
-        elif self == Metric.L2:
+        elif self == Metric.DOTP:
             return faiss.METRIC_L2
         elif self == Metric.COSINE:
             return faiss.METRIC_INNER_PRODUCT
@@ -79,7 +79,7 @@ class Metric(Enum):
     def sk_metric(self) -> str:
         if self == Metric.L1:
             return 'manhattan'
-        elif self == Metric.L2:
+        elif self == Metric.DOTP:
             return 'euclidean'
         elif self == Metric.COSINE:
             return 'cosine'

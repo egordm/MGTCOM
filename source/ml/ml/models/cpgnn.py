@@ -49,7 +49,7 @@ class CPGNNConvNet(HGTConvNet):
 
 @dataclass
 class CPGNNModelParams(Node2VecModelParams):
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for distance/similarity calculation. (for loss)"""
     k_length: int = field(default=3, cmd=False)
     repr_dim: int = 32

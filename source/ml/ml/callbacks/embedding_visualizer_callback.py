@@ -30,7 +30,7 @@ class EmbeddingVisualizerCallbackParams(IntermittentCallbackParams):
     """Dimension reduction mode for embedding visualization."""
     ev_max_points: int = 1000
     """Maximum number of points to visualize."""
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for embedding visualization."""
 
 

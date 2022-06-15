@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Dict, List, Union, Tuple
 
+import torch
 from pytorch_lightning.utilities.types import STEP_OUTPUT, EPOCH_OUTPUT
 from simple_parsing import field
 from torch import Tensor
@@ -59,8 +60,8 @@ class MGCOMCombiModel(ClusteringMixin, HeteroFeatureModel):
     ) -> None:
         super().__init__(optimizer_params)
         self.save_hyperparameters(hparams.to_dict())
-        self.embedding_combine_fn = self.hparams.emb_combine_mode.combine_fn
-        self.init_combine_fn = self.hparams.init_combine_mode.combine_fn
+        self.embedding_combine_fn = hparams.emb_combine_mode.combine_fn
+        self.init_combine_fn = hparams.init_combine_mode.combine_fn
 
         if self.hparams.emb_combine_mode != FeatureCombineMode.CONCAT:
             assert self.hparams.topo_repr_dim == self.hparams.tempo_repr_dim, \
@@ -71,7 +72,7 @@ class MGCOMCombiModel(ClusteringMixin, HeteroFeatureModel):
         assert self.hparams.use_topo or self.hparams.use_tempo, \
             f"At least one of use_topo and use_tempo must be True."
 
-        self.repr_dim_ = self.compute_repr_dim(self.hparams)
+        self.repr_dim_ = self.compute_repr_dim(hparams)
 
         self.feat_net = MGCOMFeatModel(
             metadata, num_nodes_dict,
@@ -149,6 +150,9 @@ class MGCOMCombiModel(ClusteringMixin, HeteroFeatureModel):
         Z_emb = self.feat_net.forward_emb_flat(node_meta)
         Z = self.topo_net(Z_emb) # + Z_emb
         if self.hparams.init_combine:
+            if self.hparams.init_combine_mode == FeatureCombineMode.MULT:
+                Z = torch.sigmoid(Z)
+
             Z = self.init_combine_fn([Z, Z_emb])
 
         loss = self.feat_net.n2v.loss(pos_walks, neg_walks, Z)
@@ -164,6 +168,8 @@ class MGCOMCombiModel(ClusteringMixin, HeteroFeatureModel):
         Z_emb = self.feat_net.forward_emb_flat(node_meta)
         Z = self.tempo_net(Z_emb)
         if self.hparams.init_combine:
+            if self.hparams.init_combine_mode == FeatureCombineMode.MULT:
+                Z = torch.sigmoid(Z)
             Z = self.init_combine_fn([Z, Z_emb])
 
         loss = self.feat_net.n2v.loss(pos_walks, neg_walks, Z)

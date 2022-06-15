@@ -8,7 +8,7 @@ from ml.utils import Metric
 class HingeLoss(SkipgramLoss):
     def __init__(
             self,
-            metric: Metric = Metric.L2,
+            metric: Metric = Metric.DOTP,
             margin: float = 0.5,
             adaptive: bool = False,
     ) -> None:

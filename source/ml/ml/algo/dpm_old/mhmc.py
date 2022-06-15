@@ -26,7 +26,7 @@ class MHMC:
     ds_scale: float = 1.0
     min_split_points: int = 6
     n_merge_neighbors: int = 3
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
 
     def compute_log_h_split(self, obs_c: DPMMObs, obs_sc: DPMMObs) -> Tuple[Float, int]:
         """

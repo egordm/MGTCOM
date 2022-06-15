@@ -64,7 +64,7 @@ class MixtureParams(HParams):
     init_k: int = 2
     reg_cov: float = 1e-6
     init_mode: InitMode = InitMode.KMEANS
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     tol: float = 1e-4
 
 

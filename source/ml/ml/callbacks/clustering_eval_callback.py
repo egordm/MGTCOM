@@ -24,7 +24,7 @@ logger = get_logger(Path(__file__).stem)
 @dataclass
 class ClusteringEvalCallbackParams(IntermittentCallbackParams):
     interval = 4
-    metric: Metric = Metric.L2
+    metric: Metric = Metric.DOTP
     """Metric to use for embedding evaluation."""
 
 
@@ -86,9 +86,9 @@ class ClusteringEvalCallback(IntermittentCallback[ClusteringEvalCallbackParams])
         z = pl_module.val_outputs.extract_first('z', cache=True, device='cpu')
         # TODO: check if we use all the nodes?
 
-        pl_module.log_dict(prefix_keys( # Slowest part
-            clustering_metrics(X, z, metric=self.hparams.metric), 'eval/val/clu/'
-        ), on_epoch=True)
+        # pl_module.log_dict(prefix_keys( # Slowest part
+        #     clustering_metrics(X, z, metric=self.hparams.metric), 'eval/val/clu/'
+        # ), on_epoch=True)
 
         if self.val_edge_index is not None:
             metrics = community_metrics(z, self.val_edge_index)

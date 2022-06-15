@@ -9,7 +9,7 @@ from ml.utils import Metric, pairwise_dotp_dist
 from ml.utils.tensor import ensure_numpy
 
 
-def silhouette_score(X, labels, metric=Metric.L2, sample_size=None):
+def silhouette_score(X, labels, metric=Metric.DOTP, sample_size=None):
     if len(torch.unique(labels)) <= 1:
         return 0.0
 
@@ -37,7 +37,7 @@ def check_number_of_labels(n_labels, n_samples):
         )
 
 
-def davies_bouldin_score(X, labels, metric=Metric.L2):
+def davies_bouldin_score(X, labels, metric=Metric.DOTP):
     if len(torch.unique(labels)) <= 1:
         return 0.0
 
