@@ -21,3 +21,5 @@ ext
 !/benchmarks/GEMSEC
 !/benchmarks/ComE
 !/benchmarks/CP-GNN
+!/storage/cache/dataset/datasets.zip
+!storage/cache/dataset/datasets.zip
