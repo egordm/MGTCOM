@@ -41,8 +41,7 @@ class SaveGraphCallback(Callback):
         outputs = OutputExtractor(outputs)
         data = self.dataset.data
 
-        if data.num_nodes > 10 or data.num_edges > 100000:
-        # if data.num_nodes > 20000 or data.num_edges > 100000:
+        if data.num_nodes > 20000 or data.num_edges > 100000:
             logger.info('Graph has too many nodes. Not saving')
             return
 

@@ -58,11 +58,13 @@ class Node2VecModel(FeatureModel):
         self.save_hyperparameters(hparams.to_dict())
 
         self.embedder = embedder
-        if self.hparams.loss == UnsupervisedLoss.HINGE:
-            self.loss_fn = HingeLoss(self.hparams.metric,
+        if hparams.loss == UnsupervisedLoss.HINGE:
+            self.loss_fn = HingeLoss(hparams.metric,
                 margin=self.hparams.hinge_margin, adaptive=self.hparams.hinge_adaptive)
-        elif self.hparams.loss == UnsupervisedLoss.SKIPGRAM:
-            self.loss_fn = SkipgramLoss(self.hparams.metric)
+        elif hparams.loss == UnsupervisedLoss.SKIPGRAM:
+            self.loss_fn = SkipgramLoss(hparams.metric)
+        else:
+            raise ValueError(f'Unknown loss function: {hparams.loss}')
 
     @property
     def repr_dim(self):

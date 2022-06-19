@@ -5,7 +5,7 @@ import torch
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 
 from ml.algo.clustering import KMeans
-from ml.utils import HParams
+from ml.utils import HParams, Metric
 from ml.utils.outputs import OutputExtractor
 
 
@@ -32,7 +32,7 @@ class ClusteringMixin:
             else:
                 Z = self.train_outputs.extract_cat_kv('Z_dict', cache=False, device='cpu')
 
-            kmeans = KMeans(self.repr_dim, k=self.hparams.infer_k, metric=self.hparams.metric, niter=30)
+            kmeans = KMeans(self.repr_dim, k=self.hparams.infer_k, metric=Metric(self.hparams.metric), niter=30)
             kmeans.fit(Z)
             self.mus = torch.from_numpy(kmeans.centroids).float()
 
@@ -43,7 +43,7 @@ class ClusteringMixin:
             else:
                 X = self.val_outputs.extract_cat_kv('Z_dict', cache=False, device='cpu')
 
-            r = self.hparams.metric.pairwise_sim_fn(X.unsqueeze(1), self.mus.unsqueeze(0))
+            r = Metric(self.hparams.metric).pairwise_sim_fn(X.unsqueeze(1), self.mus.unsqueeze(0))
             z = r.argmax(dim=-1)
             self.val_outputs.outputs.append({
                 'z': z,
@@ -57,7 +57,7 @@ class ClusteringMixin:
             else:
                 X = self.test_outputs.extract_cat_kv('Z_dict', cache=False, device='cpu')
 
-            r = self.hparams.metric.pairwise_sim_fn(X.unsqueeze(1), self.mus.unsqueeze(0))
+            r = Metric(self.hparams.metric).pairwise_sim_fn(X.unsqueeze(1), self.mus.unsqueeze(0))
             z = r.argmax(dim=-1)
             self.test_outputs.outputs.append({
                 'z': z,

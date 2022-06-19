@@ -37,10 +37,10 @@ def pairwise_cosine_dist(x, y):
 
 
 class Metric(Enum):
-    L1 = 'l1'
-    L2 = 'l2'
-    COSINE = 'cosine'
-    DOTP = 'dotp'
+    L1 = 'L1'
+    L2 = 'L2'
+    COSINE = 'COSINE'
+    DOTP = 'DOTP'
 
     @property
     def pairwise_sim_fn(self):
