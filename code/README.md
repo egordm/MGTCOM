@@ -62,7 +62,8 @@ The framework learns temporally and topologically aware embeddings and detects c
   * For cpu only usage replace `pytorch::cudatoolkit=11.3` with `pytorch::cpuonly` in the environment.yml file.
 * Activate the environment: `source activate.sh`
 * Extract preprocessed datasets:
-  * `cp ./storage/datasets.zip ./storage/cache/dataset/datasets.zip`
+  * Download the preprocessed datasets from [Drive](https://drive.google.com/file/d/1zNVf4-1_xT84dzTH86kMN0sw7Mj0iV-z/view?usp=sharing)
+  * `cp ./datasets.zip ./storage/cache/dataset/datasets.zip`
   * `cd ./storage/cache/dataset && unzip datasets.zip`
 
 ## Examples
