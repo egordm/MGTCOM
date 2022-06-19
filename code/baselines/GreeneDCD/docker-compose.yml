@@ -1,7 +1,0 @@
-version: '3'
-services:
-  greenedcd:
-    build: .
-    volumes:
-      - ../../storage/datasets/versions/:/input
-      - ../../storage/results/:/output

@@ -1,2 +1,0 @@
-baseline,avg_odf,avg_odf_rank,conductance,conductance_rank,expansion,expansion_rank,internal_edge_density,internal_edge_density_rank,link_modularity,link_modularity_rank,modularity,modularity_overlap,modularity_overlap_rank,modularity_rank,name,runtime,z_modularity,z_modularity_rank,total,run_count
-Louvain,1.0899244722112933,1.0,0.2956250925407735,1.0,1.0899244722112933,1.0,0.557563007629273,1.0,0.09737875720363444,1.0,0.4304112191788914,0.28285030790084326,1.0,1.0,2022-02-01_10-23-28-Louvain-social-distancing-student:static,1960.0,1.0038852004600165,1.0,8,3

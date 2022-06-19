@@ -1,4 +1,0 @@
-yelp_new,10,default,SIGMOID,val,AUC,0.4436902763429752
-yelp_new,10,default,HAD,val,AUC,0.6677777419077136
-yelp_new,10,default,SIGMOID,test,AUC,0.4638650499059599
-yelp_new,10,default,HAD,test,AUC,0.6630057021166496

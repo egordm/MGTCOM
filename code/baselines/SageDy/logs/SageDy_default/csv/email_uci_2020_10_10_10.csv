@@ -1,8 +1,0 @@
-email_uci,10,default,SIGMOID,val,AUC,0.6145454545454545
-email_uci,10,default,HAD,val,AUC,0.7398347107438016
-email_uci,10,default,SIGMOID,test,AUC,0.5470794937071963
-email_uci,10,default,HAD,test,AUC,0.7779769801713937
-email_uci,10,default,SIGMOID,val,AUC,0.7395041322314049
-email_uci,10,default,HAD,val,AUC,0.7566942148760331
-email_uci,10,default,SIGMOID,test,AUC,0.6770411273261859
-email_uci,10,default,HAD,test,AUC,0.783821578400086

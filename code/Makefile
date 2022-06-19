@@ -1,7 +1,6 @@
 update:
 	@echo 'Updating dependencies'
-# 	conda env update --prefix=./env --f environment.yml --prune
-	mamba env update --prefix=./env --f environment.yml
+	mamba env update --prefix=./env --f environment.yml --prune
 
 lock:
 	@echo 'Locking dependencies'

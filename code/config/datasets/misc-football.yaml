@@ -1,8 +1,0 @@
-database: misc-football
-description: ''
-name: misc-football
-tags: [static]
-versions:
-  static:
-    parameters: { }
-    type: edgelist_static

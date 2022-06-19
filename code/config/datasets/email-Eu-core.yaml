@@ -1,8 +1,0 @@
-database: email-Eu-core
-description: ''
-name: email-Eu-core
-tags: [static, ground-truth]
-versions:
-  static:
-    parameters: {}
-    type: edgelist_static

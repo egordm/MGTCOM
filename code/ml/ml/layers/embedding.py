@@ -1,93 +1,52 @@
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
-import torch.nn
-from torch.nn import ReLU
-from torch_geometric.data import HeteroData
-from torch_geometric.nn import Sequential, Linear, to_hetero
-from torch_geometric.typing import Metadata, NodeType
-
-from ml.layers.hgt_conv import HGTConv
-from ml.layers.pinsage_conv import PinSAGEConv
+import torch
+from torch import Tensor
+from torch_geometric.typing import NodeType
 
 
-class HeteroEmbeddingModule(torch.nn.Module):
-    def __init__(self, metadata: Metadata, repr_dim: int) -> None:
+class NodeEmbedding(torch.nn.Module):
+    def __init__(self, num_nodes: int, repr_dim: int, mask: Optional[Tensor] = None) -> None:
         super().__init__()
-        self.metadata = metadata
         self.repr_dim = repr_dim
+        self.num_nodes = num_nodes
+
+        self.embedding = torch.nn.Embedding(num_embeddings=num_nodes, embedding_dim=repr_dim)
+        self.mask = mask
+
+    def forward(self, node_idx: Tensor) -> Tensor:
+        Z = torch.zeros(len(node_idx), self.repr_dim, device=node_idx.device)
+
+        existing_mask = (node_idx < self.num_nodes).nonzero()
+        if self.mask is not None: # Mask out nodes that should not be embedded. Used for ablations.
+            existing_mask = existing_mask[self.mask[node_idx[existing_mask]]]
+
+        Z[existing_mask] = self.embedding(node_idx[existing_mask])
+        return Z
 
 
-class PinSAGEModule(HeteroEmbeddingModule):
-    def __init__(self, metadata: Metadata, repr_dim: int = 32, normalize=True) -> None:
-        super().__init__(metadata, repr_dim)
-        self.repr_dim = repr_dim
-
-        module = Sequential('x, edge_index', [
-            (PinSAGEConv((-1, -1), repr_dim, normalize=normalize), 'x, edge_index -> x'),
-            ReLU(inplace=True),
-            (PinSAGEConv((-1, -1), repr_dim, normalize=normalize), 'x, edge_index -> x'),
-        ])
-        self.module = to_hetero(module, metadata, aggr='mean', debug=True)
-
-    def forward(self, data: HeteroData) -> torch.Tensor:
-        emb = self.module(data.x_dict, data.edge_index_dict)
-        for node_type in data.node_types:
-            batch_size = data[node_type].batch_size
-            emb[node_type] = emb[node_type][:batch_size, :]
-
-        return emb
-
-
-class HGTModule(HeteroEmbeddingModule):
+class HeteroNodeEmbedding(torch.nn.Module):
     def __init__(
             self,
-            metadata: Metadata,
-            repr_dim: int = 32,
-            out_channels: int = None, hidden_channels: int = None,
-            in_channels: Union[int, Dict[NodeType, int]] = None,
-            num_heads=2, num_layers=2, group='mean',
-            use_RTE=False, use_Lin=True
+            num_nodes_dict: Dict[NodeType, int],
+            repr_dim: Union[int, Dict[NodeType, int]],
+            mask: Optional[Dict[NodeType, Tensor]] = None,
     ):
-        super().__init__(metadata, out_channels)
-        self.in_channels = in_channels
-        self.out_channels = out_channels or repr_dim
-        self.hidden_channels = hidden_channels or self.out_channels
-        self.use_RTE = use_RTE
-        self.use_Lin = use_Lin
+        super().__init__()
+        self.num_nodes_dict = num_nodes_dict
+        self.repr_dim_dict = repr_dim if isinstance(repr_dim, dict) \
+            else {node_type: repr_dim for node_type in num_nodes_dict}
+        self.repr_dim = next(iter(self.repr_dim_dict.values()), 0)
 
-        if use_Lin:
-            self.lin_dict = torch.nn.ModuleDict()
-            for node_type in metadata[0]:
-                self.lin_dict[node_type] = Linear(-1, self.hidden_channels)
-        else:
-            assert in_channels is not None
+        self.embedding_dict = torch.nn.ModuleDict({
+            node_type: NodeEmbedding(
+                num_nodes, self.repr_dim_dict[node_type], mask[node_type] if mask is not None else None
+            )
+            for node_type, num_nodes in num_nodes_dict.items()
+        })
 
-        self.convs = torch.nn.ModuleList()
-        for i in range(num_layers):
-            l_in_channels = self.in_channels if i == 0 and not use_Lin else self.hidden_channels
-            l_out_channels = self.out_channels if i == num_layers - 1 else self.hidden_channels
-            conv = HGTConv(l_in_channels, l_out_channels, metadata, num_heads, group=group, use_RTE=use_RTE)
-            self.convs.append(conv)
-
-    def forward(self, data: HeteroData):
-        x_dict = data.x_dict
-        edge_index_dict = data.edge_index_dict
-
-        timedelta_dict = None
-        if self.use_RTE:
-            timedelta_dict = data.timedelta_dict
-
-        if self.use_Lin:
-            x_dict = {
-                node_type: self.lin_dict[node_type](x).relu_()
-                for node_type, x in x_dict.items()
-            }
-
-        for conv in self.convs:
-            x_dict = conv(x_dict, edge_index_dict, timedelta_dict)
-
-        for node_type in data.node_types:
-            batch_size = data[node_type].batch_size
-            x_dict[node_type] = x_dict[node_type][:batch_size, :]
-
-        return x_dict
+    def forward(self, node_idx_dict: Dict[NodeType, Tensor]) -> Dict[NodeType, Tensor]:
+        return {
+            node_type: self.embedding_dict[node_type](node_idx)
+            for node_type, node_idx in node_idx_dict.items()
+        }

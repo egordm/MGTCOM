@@ -1,4 +1,3 @@
-from .splitting import *
-from .loader import *
+from .datasets import *
+from .loaders import *
 from .transforms import *
-from .conversion import *

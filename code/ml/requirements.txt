@@ -1,1 +1,4 @@
-sentence_transformers
+simple_parsing==0.0.20
+typing-extensions==4.1.1
+plotly
+seaborn==0.11.2

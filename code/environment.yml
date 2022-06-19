@@ -1,29 +1,33 @@
 name: thesis
 prefix: ./env
 channels:
-  - pyg
-  - pytorch
-  - conda-forge
   - defaults
 dependencies:
   - python=3.9
   - pip
-  - cudatoolkit-dev=11.3 # Only if you use NVIDIA GPU
-  - pytorch
-  - torchvision
-  - pytorch-lightning
-  - pyg
+  - conda-forge::pyspark=3.2.0
+  - pytorch::cudatoolkit=11.3
+  - pytorch::pytorch=1.11.0
+  - pytorch::torchvision=0.12.0
+  - conda-forge::faiss-gpu=1.7.2
+  - conda-forge::pytorch-lightning
+  - pyg::pyg=2.0.4
+  - conda-forge::python-igraph=0.9.9
+  - conda-forge::umap-learn=0.5.3
+  - conda-forge::torchinfo=1.6.6
+  - egordm::tch_geometric=0.1.0=py39_torch_1.11.0_cu113
   - numpy
   - scipy
   - pandas
   - jupyter
-  - python-igraph
-  - pyspark=3.2.0
-  - future
-  - fsspec
+  - matplotlib
+  - datashader
+  - bokeh
+  - holoviews
+  - colorcet
+  - scikit-image
   - pip:
-      - -r shared/requirements.txt
       - -r datasets/requirements.txt
-      - -r benchmarks/requirements.txt
-      - faiss-cpu
-      - torchsummary
+      - -r ml/requirements.txt
+      - wandb
+

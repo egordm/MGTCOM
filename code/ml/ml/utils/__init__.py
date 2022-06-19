@@ -1,3 +1,5 @@
-from .collections import *
 from .tensor import *
-from .cli import *
+from .config import *
+from .dict import *
+from .distance import *
+from .statistics import *

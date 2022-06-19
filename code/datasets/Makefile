@@ -115,6 +115,13 @@ DATASETS_DIR := ../storage/datasets/raw
 		&& unzip -d house-of-representatives-congress-116 house-of-representatives-congress-116.zip \
 		&& rm house-of-representatives-congress-116.zip
 
+../storage/datasets/raw/icews05-15:
+	cd ${DATASETS_DIR} \
+		&& mkdir icews05-15 && cd icews05-15 \
+		&& wget https://github.com/mniepert/mmkb/raw/master/TemporalKGs/icews05-15/icews_2005-2015_train.txt \
+		&& wget https://github.com/mniepert/mmkb/raw/master/TemporalKGs/icews05-15/icews_2005-2015_test.txt \
+		&& wget https://github.com/mniepert/mmkb/raw/master/TemporalKGs/icews05-15/icews_2005-2015_valid.txt
+
 download: \
 	../storage/datasets/raw/ucidata-zachary \
 	../storage/datasets/raw/enron-mail-20150507 \
@@ -128,19 +135,5 @@ download: \
 	../storage/datasets/raw/email-Eu-core \
 	../storage/datasets/raw/com-youtube \
 	../storage/datasets/raw/star-wars \
-	../storage/datasets/raw/house-of-representatives-congress-116
-
-export_neo4j:
-	for target in $(CONFIG_DIR)/* ; do \
-  		$(PY) datasets/scripts/export_to_neo4j.py $$(basename -s .yaml $$target); \
-  	done
-
-export_graphml:
-	@for target in $(CONFIG_DIR)/* ; do \
-  		$(PY) datasets/scripts/export_to_graphml.py $$(basename -s .yaml $$target); \
-  	done
-
-version:
-	@for target in $(CONFIG_DIR)/* ; do \
-  		$(PY) datasets/scripts/export_to_version.py $$(basename -s .yaml $$target); \
-  	done
+	../storage/datasets/raw/house-of-representatives-congress-116 \
+	../storage/datasets/raw/icews05-15
