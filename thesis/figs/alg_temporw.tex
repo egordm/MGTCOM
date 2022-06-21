@@ -1,0 +1,41 @@
+\begin{algorithm}[!t]
+    \small
+    \caption{Temporal Random Walk}\label{alg:tempo_rw}
+    \SetKwFunction{algo}{BallroomWalk}
+    \SetKwFunction{proc}{TemporalRW}
+    \SetKw{KwGoTo}{go to}
+    
+    \setcounter{AlgoLine}{0}
+    \SetKwProg{myproc}{Procedure}{}{}
+    \myproc{\proc{}}{
+    \KwIn {
+        center node $v$,
+        temporal window $\omega^*$
+    }
+    \KwOut {
+        Temporal random walk $P_l$
+    }
+        Initialize $P_l$ = $[]$\; 
+        $(u, t_u) = (v, \varnothing)$\;
+        \For {$i = 1$ \KwTo $l$} {
+            $N(u) = \{w| 
+                w \in \mathcal{V}, 
+                (u, w) \in \mathcal{E},
+                \tau(w) \cap \omega^* \neq \emptyset
+            \}$\;\label{alg:trw:neighbors}
+        
+            \If (\tcc*[h]{Restart on dead end}){$N(u) = \emptyset$}{
+                $(u, t_u) = (v, t_v)$\; \label{alg:trw:restart}
+                \KwGoTo \ref{alg:trw:neighbors}\;
+            }
+
+            $w \sim N(u)$\; \label{alg:trw:sample}
+            $t_u = \max \left\{ t_u, \min{ \tau(w)} \right\}$\;
+            $u = w$\;
+
+            $P_{l}.append((u, u_t))$\;
+        }
+
+        \KwRet $P_l$
+    }
+\end{algorithm}

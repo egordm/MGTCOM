@@ -1,0 +1,36 @@
+\begin{table}[t]
+\centering
+\caption{
+    %Comparison with related work. (top: graph embedding methods; bottom: community detection methods)
+    A comparison of MGTCOM with state-of-the-art on embedding (node, meta-topology, content and temporal information) and ability to infer the number of communities $k$. (top: graph embedding methods; bottom: community detection methods).
+    \label{tab:comparison_related_work}
+}
+% \resizebox{\columnwidth}{!}{
+    \begin{tabular}{c|C{1.5cm}|C{1.5cm}|C{1.5cm}|C{1.5cm}|C{1.5cm}}
+        \hline
+        & topology & meta-topology    & content  & temporal   & infers $K$  \\ \hline
+        % Representation learning methods
+        GraphSAGE \cite{wuSageDyNovelSampling2021}
+        & $\bullet$   &                     & $\bullet$      &                  &           \\
+        SageDy \cite{wuSageDyNovelSampling2021}
+        & $\bullet$   &                     & $\bullet$      & $\bullet$        &           \\
+        CTDNE \cite{nguyenContinuousTimeDynamicNetwork2018}
+        & $\bullet$   &                     &                & $\bullet$        &           \\
+        HGT \cite{huHeterogeneousGraphTransformer2020}
+        & $\bullet$   & $\bullet$           & $\bullet$      &                  &           \\ \hline\hline
+        % Representation based - Community detection
+        ComE \cite{cavallariLearningCommunityEmbedding2017}
+        & $\bullet$   &                     &                &                  &           \\
+        GEMSEC \cite{rozemberczkiGEMSECGraphEmbedding2019}
+        & $\bullet$   &                     &                &                  &           \\
+        GRACE \cite{yangGraphClusteringDynamic2017}
+        & $\bullet$   &                     & $\bullet$      &                  &           \\
+        Fani et al. \cite{faniUserCommunityDetection2020}
+        & $\bullet$   &                     & $\bullet$      & $\bullet$        &           \\
+        CP-GNN \cite{luoDetectingCommunitiesHeterogeneous2021}
+        & $\bullet$   & $\bullet$           &                &                  &           \\
+        MGTCOM%\tnote{1}
+        & $\bullet$   & $\bullet$           & $\bullet$      & $\bullet$        & $\bullet$ \\\hline
+    \end{tabular}
+% }
+\end{table}

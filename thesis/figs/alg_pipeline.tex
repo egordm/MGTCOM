@@ -1,0 +1,24 @@
+\begin{algorithm}[t!]
+    \small
+    \caption{MGTCOM learning pipeline}\label{alg:pipeline}
+    \For {$subiter = 1$ \KwTo $I$}{
+        \For {$v \in \mathcal{V}$}{ \label{alg:pipeline:feat_optimization}
+            \tcc{Gather context samples}
+            $P^{\mathcal{E}} = \texttt{Node2VecRandomWalk}(G, l, v)$\;
+            $P^{\mathcal{T}} = \texttt{BallroomWalk}(G, \omega, l, v)$\; %\algo{$G$, $\omega$, $l$, $v$}$\;
+            % $\bar{P}_l = \{w \sim \mathcal{V}| \text{for} i \in [1..l] \}$ \tcc{Negative sampling}
+            $\overline{P} \stackrel l\sim \mathcal{V}$ Negative sampling\;
+            $\mathcal{B} = P_l^{\mathcal{E}} \cup P_l^{\mathcal{T}} \cup \bar{P}_l$\;
+            $\mathbf{Z} = \procPrimary{$G$, $\mathcal{B}$}$\;
+            Compute task embeddings $Z^{\mathcal{E}}$, $Z^{\mathcal{T}}$ using \cref{eq:task_transform}\;
+            Compute loss $\mathcal{L}^{\mathcal{E}}$, $\mathcal{L}^{\mathcal{T}}$, $\mathcal{L}^{\mathcal{C}}$, $\mathcal{L}$ using \cref{eq:loss_clus,eq:loss_topo,eq:loss_tempo,eq:combined_loss} given respective context $P^{\mathcal{E}}$, $P^{\mathcal{T}}$\;
+        }
+        \For {$iter = 1$ \KwTo $I_c$}{ \label{alg:pipeline:cluster_optimization}
+            \If {$i = 1$}{
+                Initialize $\theta$ using K-means
+            }
+            Update $\theta$ using EM given $Z$
+        }
+    }
+  % \Return {$\theta$}
+\end{algorithm}

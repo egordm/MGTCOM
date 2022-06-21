@@ -1,0 +1,142 @@
+
+\documentclass[10pt,a4paper,oneside,openright,%
+               parskip=half,%
+               BCOR=5mm,DIV=10,footinclude=false%
+               numbers=noenddot,cleardoublepage=empty]{scrbook}
+
+\usepackage[utf8]{inputenc} 
+\usepackage[sc]{mathpazo} %-- use Palatino font
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{natbib}
+\usepackage{xspace}
+\usepackage[breaklinks=true,
+            colorlinks=true,
+            linktocpage=true,
+            allcolors=colorforlinks]{hyperref} 
+\usepackage[capitalise]{cleveref}
+\usepackage[ruled,vlined,algochapter,linesnumbered]{algorithm2e}
+\usepackage{calc}
+\usepackage{ccicons} 
+\usepackage{xspace} 
+\usepackage{tabularx}
+\usepackage{booktabs} 
+\usepackage[english]{babel}  
+\usepackage{listings}
+\usepackage{scrhack} % ignore warnings about deprecated KOMA-Script
+\usepackage[printonlyused,smaller,withpage]{acronym}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{todonotes}
+\usepackage{footnote}
+\usepackage{enumitem}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{graphicx,subfigure}
+
+% \setlength{\abovecaptionskip}{15pt plus 3pt minus 2pt}
+\setlength\abovecaptionskip{\baselineskip}
+\setlength\belowcaptionskip{\baselineskip}
+
+\graphicspath{ {./resources/} }
+
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+
+\providecommand\algorithmname{algorithm}
+
+\crefname{line}{line}{lines}
+
+\newcommand{\mathbfcal}[1]{\pmb{\mathcal{#1}}}
+
+\theoremstyle{definition}
+\newtheorem{secDefinition}{Definition}[section]
+
+\input{settings}
+
+\setcapindent{1em} %-- for captions of Figures
+% \setcounter{tocdepth}{\sectiontocdepth}
+
+\subject{MSc thesis in Computing Science}
+\title{\myTitle}
+\author{\myName}
+\date{\myGraduationMonth\xspace\myGraduationYear}
+\publishers{
+    \noindent
+    \large
+    \textbf{Supervisors} \\
+    \vspace{1mm}
+    \begin{tabular}{lll}
+    \mySupervisorOne & m.w.chekol@uu.nl & Utrecht University \\
+    \mySupervisorTwo & s.wang2@uu.nl & Utrecht University \\
+    \end{tabular}
+    
+    \vspace{12mm}
+    A thesis submitted to the Utrecht University in partial fulfillment of the requirements for the degree of Master of Science in Computing Science
+    
+    \vspace{12mm}
+    \includegraphics[width=0.4\textwidth]{resources/uu.png}
+}
+
+\begin{document}
+
+
+%******************************************************************
+% Frontmatter
+%******************************************************************
+\frontmatter
+
+% \includepdf{cover/cover_front.pdf}
+% \cleardoublepage
+
+\maketitle[3]
+
+% \clearpage
+\cleardoublepage
+\include{front/abstract}
+\include{front/acknow}
+\clearpage
+\include{front/contents}
+\clearpage
+\include{front/acronyms}
+\cleardoublepage
+
+%******************************************************************
+% Mainmatter
+%******************************************************************
+\mainmatter
+
+\include{chapters/010_introduction}
+\include{chapters/030_related_work}
+\include{chapters/035_preliminaries}
+\include{chapters/040_approach.tex}
+\include{chapters/050_experiments.tex}
+\include{chapters/060_ablation.tex}
+\input{chapters/065_case_study.tex}
+\include{chapters/070_conclusions.tex}
+
+
+\appendix
+
+%%%
+\cleardoublepage
+\include{appendices/100_supplemental.tex}
+
+% *****************************************************************
+% Backmatter
+%******************************************************************
+\backmatter 
+
+%- bibliography
+\bibliographystyle{plain}
+\bibliography{refs}
+
+% \includepdf{cover/cover_back.pdf}
+
+\end{document}
+
+
+
+
+
