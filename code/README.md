@@ -63,6 +63,7 @@ The framework learns temporally and topologically aware embeddings and detects c
 * Activate the environment: `source activate.sh`
 * Extract preprocessed datasets:
   * Download the preprocessed datasets from [Drive](https://drive.google.com/file/d/1zNVf4-1_xT84dzTH86kMN0sw7Mj0iV-z/view?usp=sharing)
+  * `mkdir -p ./storage/cache/dataset`
   * `cp ./datasets.zip ./storage/cache/dataset/datasets.zip`
   * `cd ./storage/cache/dataset && unzip datasets.zip`
 
