@@ -56,6 +56,12 @@ The framework learns temporally and topologically aware embeddings and detects c
 
 
 ## Installation
+> **System Requirements:** 
+> 
+> Note that while conda installs most of the compiled dependencies, the system still needs to have an up-to-date `glibc` version (2.27 and up). 
+> 
+> Check your version using following command `ldd --version`
+
 * Install either [Anaconda](https://www.anaconda.com/), [Miniconda](https://conda.io/miniconda.html), or [Mamba](https://mamba.readthedocs.io/en/latest/) (recommended).
 * Set up the environment:
   * mamba env update --prefix=./env --f environment.yml --prune
