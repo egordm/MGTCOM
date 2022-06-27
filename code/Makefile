@@ -4,6 +4,6 @@ update:
 
 lock:
 	@echo 'Locking dependencies'
-	mamba env export --prefix=./env -f environment.lock.yml
+	mamba env export --prefix=./env --no-builds -f environment.lock.yml
 
 install: update lock

@@ -53,8 +53,8 @@ dependencies:
   - cudatoolkit=11.3.1=h2bc3f7f_2
   - cycler=0.11.0=pyhd3eb1b0_0
   - cytoolz=0.11.0=py39h27cfd23_0
-  - dask=2022.2.1=pyhd3eb1b0_0
-  - dask-core=2022.2.1=pyhd3eb1b0_0
+  - dask=2022.5.0=py39h06a4308_0
+  - dask-core=2022.5.0=py39h06a4308_0
   - dataclasses=0.8=pyh6d0b6a4_7
   - datashader=0.13.0=pyhd3eb1b0_1
   - datashape=0.5.4=py39h06a4308_1
@@ -62,7 +62,7 @@ dependencies:
   - debugpy=1.5.1=py39h295c915_0
   - decorator=5.1.1=pyhd3eb1b0_0
   - defusedxml=0.7.1=pyhd3eb1b0_0
-  - distributed=2022.2.1=pyhd3eb1b0_0
+  - distributed=2022.5.0=py39h06a4308_0
   - entrypoints=0.4=py39h06a4308_0
   - executing=0.8.3=pyhd3eb1b0_0
   - expat=2.4.4=h295c915_0
@@ -80,7 +80,7 @@ dependencies:
   - glib=2.69.1=h4ff587b_1
   - glog=0.5.0=h2531618_0
   - glpk=4.65=h3ceedfd_2
-  - gmp=6.2.1=h2531618_2
+  - gmp=6.2.1=h295c915_3
   - gnutls=3.6.15=he1e5248_0
   - google-auth=2.6.0=pyhd3eb1b0_0
   - google-auth-oauthlib=0.4.1=py_2
@@ -113,7 +113,7 @@ dependencies:
   - jupyterlab_pygments=0.1.2=py_0
   - jupyterlab_widgets=1.0.0=pyhd3eb1b0_1
   - jxrlib=1.1=h7b6447c_2
-  - kiwisolver=1.3.2=py39h295c915_0
+  - kiwisolver=1.4.2=py39h295c915_0
   - krb5=1.19.2=hac12032_0
   - lame=3.100=h7b6447c_0
   - lcms2=2.12=h3be6417_0
@@ -133,10 +133,10 @@ dependencies:
   - libfaiss=1.7.2=cuda112hc9ed507_0_cuda
   - libfaiss-avx2=1.7.2=cuda112h1234567_0_cuda
   - libffi=3.3=he6710b0_2
-  - libgcc-ng=11.2.0=h1234567_0
+  - libgcc-ng=11.2.0=h1234567_1
   - libgfortran-ng=7.5.0=ha8ba4b0_17
   - libgfortran4=7.5.0=ha8ba4b0_17
-  - libgomp=11.2.0=h1234567_0
+  - libgomp=11.2.0=h1234567_1
   - libidn2=2.3.2=h7f8727e_0
   - liblapack=3.9.0=12_linux64_mkl
   - libllvm10=10.0.1=hbcb73fb_5
@@ -146,7 +146,7 @@ dependencies:
   - libprotobuf=3.18.0=h780b84a_1
   - libsodium=1.0.18=h7b6447c_0
   - libssh2=1.10.0=h8f2d780_0
-  - libstdcxx-ng=11.2.0=h1234567_0
+  - libstdcxx-ng=11.2.0=h1234567_1
   - libtasn1=4.16.0=h27cfd23_0
   - libthrift=0.15.0=hcc01f38_0
   - libtiff=4.3.0=hf544144_1
@@ -158,13 +158,14 @@ dependencies:
   - libwebp=1.2.2=h55f646e_0
   - libwebp-base=1.2.2=h7f8727e_0
   - libxcb=1.15=h7f8727e_0
-  - libxml2=2.9.12=h74e7548_2
+  - libxml2=2.9.14=h74e7548_0
   - libzopfli=1.0.3=he6710b0_0
   - llvmlite=0.36.0=py39h612dafd_4
   - locket=1.0.0=py39h06a4308_0
+  - lz4=3.1.3=py39h27cfd23_0
   - lz4-c=1.9.3=h295c915_1
   - markdown=3.3.4=py39h06a4308_0
-  - markupsafe=2.0.1=py39h27cfd23_0
+  - markupsafe=2.1.1=py39h7f8727e_0
   - matplotlib=3.5.1=py39h06a4308_1
   - matplotlib-base=3.5.1=py39ha18d171_1
   - matplotlib-inline=0.1.2=pyhd3eb1b0_2
@@ -212,6 +213,7 @@ dependencies:
   - prompt-toolkit=3.0.20=pyhd3eb1b0_0
   - prompt_toolkit=3.0.20=hd3eb1b0_0
   - protobuf=3.18.0=py39he80948d_0
+  - psutil=5.8.0=py39h27cfd23_1
   - ptyprocess=0.7.0=pyhd3eb1b0_2
   - pure_eval=0.2.2=pyhd3eb1b0_0
   - py4j=0.10.9.2=pyhd3eb1b0_0
@@ -231,7 +233,7 @@ dependencies:
   - pyrsistent=0.18.0=py39heee7806_0
   - pysocks=1.7.1=py39h06a4308_0
   - pyspark=3.2.0=pyh6c4a22f_0
-  - python=3.9.12=h12debd9_0
+  - python=3.9.12=h12debd9_1
   - python-dateutil=2.8.2=pyhd3eb1b0_0
   - python-fastjsonschema=2.15.1=pyhd3eb1b0_0
   - python-igraph=0.9.9=py39hfef886c_0
@@ -239,12 +241,12 @@ dependencies:
   - python_abi=3.9=2_cp39
   - pytorch=1.11.0=py3.9_cuda11.3_cudnn8.2.0_0
   - pytorch-cluster=1.6.0=py39_torch_1.11.0_cu113
-  - pytorch-lightning=1.6.3=pyhd8ed1ab_0
+  - pytorch-lightning=1.6.4=pyhd8ed1ab_0
   - pytorch-mutex=1.0=cuda
   - pytorch-scatter=2.0.9=py39_torch_1.11.0_cu113
   - pytorch-sparse=0.6.13=py39_torch_1.11.0_cu113
   - pytorch-spline-conv=1.2.1=py39_torch_1.11.0_cu113
-  - pytz=2021.3=pyhd3eb1b0_0
+  - pytz=2022.1=py39h06a4308_0
   - pyviz_comms=2.0.2=pyhd3eb1b0_0
   - pywavelets=1.3.0=py39h7f8727e_0
   - pyyaml=6.0=py39h7f8727e_1
@@ -262,6 +264,7 @@ dependencies:
   - scikit-learn=1.0.2=py39h51133e4_1
   - scipy=1.7.3=py39hc147768_0
   - send2trash=1.8.0=pyhd3eb1b0_1
+  - setuptools=58.0.4=py39h06a4308_0
   - sip=4.19.13=py39h295c915_0
   - six=1.16.0=pyhd3eb1b0_1
   - snappy=1.1.9=h295c915_0
@@ -281,10 +284,10 @@ dependencies:
   - texttable=1.6.4=pyhd3eb1b0_0
   - threadpoolctl=2.2.0=pyh0d69192_0
   - tifffile=2021.7.2=pyhd3eb1b0_2
-  - tk=8.6.11=h1ccaba5_1
+  - tk=8.6.12=h1ccaba5_0
   - toolz=0.11.2=pyhd3eb1b0_0
   - torchinfo=1.6.6=pyhd8ed1ab_0
-  - torchmetrics=0.8.2=pyhd8ed1ab_0
+  - torchmetrics=0.9.1=pyhd8ed1ab_0
   - torchvision=0.12.0=py39_cu113
   - tornado=6.1=py39h27cfd23_0
   - tqdm=4.64.0=py39h06a4308_0
@@ -312,54 +315,33 @@ dependencies:
   - zlib=1.2.12=h7f8727e_2
   - zstd=1.5.2=ha4553b6_0
   - pip:
-    - auditwheel==5.1.2
-    - commonmark==0.9.1
     - docker-pycreds==0.4.0
-    - docstring-parser==0.13
-    - docutils==0.18.1
     - feature-engine==1.2.0
-    - filelock==3.6.0
+    - filelock==3.7.1
     - gitdb==4.0.9
     - gitpython==3.1.27
-    - huggingface-hub==0.5.0
-    - jeepney==0.8.0
-    - jsonargparse==4.5.0
-    - keyring==23.5.0
+    - huggingface-hub==0.7.0
     - lxml==4.8.0
     - nltk==3.7
-    - patchelf==0.14.5.0
     - pathtools==0.1.2
     - patsy==0.5.2
-    - pkginfo==1.8.2
-    - plotly==5.8.0
+    - plotly==5.8.2
     - promise==2.3
-    - psutil==5.9.0
-    - pyelftools==0.28
     - python-levenshtein==0.12.2
-    - readme-renderer==35.0
-    - regex==2022.3.15
-    - requests-toolbelt==0.9.1
-    - rfc3986==2.0.0
-    - rich==12.4.1
-    - sacremoses==0.0.49
-    - secretstorage==3.3.2
-    - semantic-version==2.9.0
+    - regex==2022.6.2
+    - seaborn==0.11.2
     - sentence-transformers==2.2.0
     - sentencepiece==0.1.96
-    - sentry-sdk==1.5.8
-    - setproctitle==1.2.2
-    - setuptools==62.3.2
-    - setuptools-rust==1.0.0
-    - shortuuid==1.0.8
-    - simple-parsing==0.0.19.post0
+    - sentry-sdk==1.5.12
+    - setproctitle==1.2.3
+    - shortuuid==1.0.9
+    - simple-parsing==0.0.20
     - smmap==5.0.0
     - statsmodels==0.13.2
     - tenacity==8.0.1
-    - tokenizers==0.11.6
-    - toml==0.10.2
-    - tomli==2.0.1
-    - transformers==4.17.0
-    - twine==4.0.0
-    - wandb==0.12.16
-    - wikitextparser==0.48.2
-prefix: /data/pella/projects/University/Thesis/Thesis/source/env
+    - tokenizers==0.12.1
+    - transformers==4.20.0
+    - wandb==0.12.18
+    - wikitextparser==0.48.0
+    - wordcloud==1.8.1
+prefix: /data/pella/projects/University/Thesis/Thesis/code/env

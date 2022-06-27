@@ -7,11 +7,14 @@ dependencies:
   - pip
   - conda-forge::pyspark=3.2.0
   - pytorch::cudatoolkit=11.3
+#  - pytorch::cpuonly
   - pytorch::pytorch=1.11.0
   - pytorch::torchvision=0.12.0
   - conda-forge::faiss-gpu=1.7.2
+#  - conda-forge::faiss=1.7.2
   - conda-forge::pytorch-lightning
   - pyg::pyg=2.0.4
+#  - pyg::pyg=2.0.4=py39_torch_1.11.0_cpu
   - conda-forge::python-igraph=0.9.9
   - conda-forge::umap-learn=0.5.3
   - conda-forge::torchinfo=1.6.6
@@ -30,4 +33,5 @@ dependencies:
       - -r datasets/requirements.txt
       - -r ml/requirements.txt
       - wandb
+#      - tch_geometric
 

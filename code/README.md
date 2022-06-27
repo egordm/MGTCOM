@@ -56,6 +56,14 @@ The framework learns temporally and topologically aware embeddings and detects c
 
 
 ## Installation
+You can use MGTCOM models by either setting it up using Docker or by installing it manually.
+
+### Docker Installation
+* Install [Docker](https://www.docker.com/community-edition) and [Docker Compose](https://docs.docker.com/compose/install/)
+* Build the Docker image: `docker-compose build`
+* Run scripts as `docker-compose run mgtcom <script name>`
+
+### Manual Installation
 > **System Requirements:** 
 > 
 > Note that while conda installs most of the compiled dependencies, the system still needs to have an up-to-date `glibc` version (2.27 and up). 
@@ -67,6 +75,8 @@ The framework learns temporally and topologically aware embeddings and detects c
   * mamba env update --prefix=./env --f environment.yml --prune
   * For cpu only usage replace `pytorch::cudatoolkit=11.3` with `pytorch::cpuonly` in the environment.yml file.
 * Activate the environment: `source activate.sh`
+
+### Loading dataset
 * Extract preprocessed datasets:
   * Download the preprocessed datasets from [Drive](https://drive.google.com/file/d/1zNVf4-1_xT84dzTH86kMN0sw7Mj0iV-z/view?usp=sharing)
   * `mkdir -p ./storage/cache/dataset`
@@ -79,9 +89,15 @@ The executors are found in `ml/ml/executors` directory.
 ### Viewing parameters of an axecutor:
 ```shell
 python ml/ml/executors/mgcom_combi_executor.py -h
+
+# For docker users
+docker-compose run mgtcom ml/ml/executors/mgcom_combi_executor.py -h
 ```
 
 ### Running an axecutor:
 ```shell
 python ml/ml/executors/mgcom_combi_executor.py --repr_dim=64
+
+# For docker users
+docker-compose run mgtcom ml/ml/executors/mgcom_combi_executor.py --repr_dim=64
 ```

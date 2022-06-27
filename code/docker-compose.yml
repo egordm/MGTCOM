@@ -1,0 +1,8 @@
+
+services:
+  mgtcom:
+    build: .
+    container_name: mgtcom
+    userns_mode: host
+    volumes:
+      - ./storage:/app/storage
