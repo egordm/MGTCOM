@@ -1,5 +1,0 @@
-notionsci==0.4.0
-pympress
-pycairo
-gobject
-pygobject

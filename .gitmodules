@@ -1,3 +1,0 @@
-[submodule "scripts/pandoc"]
-	path = scripts/pandoc
-	url = https://github.com/EgorDm/Academic-Pandoc
