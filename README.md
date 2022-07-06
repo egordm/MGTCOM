@@ -26,6 +26,7 @@ The framework learns temporally and topologically aware embeddings and detects c
 * GEMSEC[^4]
 * CP-GNN[^5]
 * CTDNE[^6]
+* Metapath2Vec[^12]
 
 [^1]: W. L. Hamilton, R. Ying, and J. Leskovec, “Inductive representation learning on large graphs,” in Proceedings of the 31st International Conference on Neural Information Processing Systems, Red Hook, NY, USA, Dec. 2017, pp. 1025–1035.
 [^2]: A. Grover and J. Leskovec, “node2vec: Scalable Feature Learning for Networks,” in Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, New York, NY, USA, Aug. 2016, pp. 855–864. doi: 10.1145/2939672.2939754.
@@ -33,6 +34,7 @@ The framework learns temporally and topologically aware embeddings and detects c
 [^4]: B. Rozemberczki, R. Davies, R. Sarkar, and C. Sutton, “GEMSEC: graph embedding with self clustering,” in Proceedings of the 2019 IEEE/ACM International Conference on Advances in Social Networks Analysis and Mining, New York, NY, USA, Aug. 2019, pp. 65–72. doi: 10.1145/3341161.3342890.
 [^5]: L. Luo, Y. Fang, X. Cao, X. Zhang, and W. Zhang, “Detecting Communities from Heterogeneous Graphs: A Context Path-based Graph Neural Network Model,” in Proceedings of the 30th ACM International Conference on Information & Knowledge Management, New York, NY, USA: Association for Computing Machinery, 2021, pp. 1170–1180. Accessed: Jan. 08, 2022. [Online]. Available: https://doi.org/10.1145/3459637.3482250
 [^6]: G. H. Nguyen, J. B. Lee, R. A. Rossi, N. K. Ahmed, E. Koh, and S. Kim, “Continuous-Time Dynamic Network Embeddings,” in Companion of the The Web Conference 2018 on The Web Conference 2018 - WWW ’18, Lyon, France, 2018, pp. 969–976. doi: 10.1145/3184558.3191526.
+[^12]: Y. Dong, N. V. Chawla, and A. Swami, “metapath2vec: Scalable Representation Learning for Heterogeneous Networks,” in Proceedings of the 23rd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, New York, NY, USA, Aug. 2017, pp. 135–144. doi: 10.1145/3097983.3098036.
 
 
 ### Model Variants
